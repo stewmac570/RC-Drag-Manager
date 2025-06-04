@@ -1,0 +1,17 @@
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManagerCleanDemo.csproj.AssemblyReference.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.exe.config
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.Properties.Resources.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManagerCleanDemo.csproj.GenerateResource.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManagerCleanDemo.csproj.CoreCompileInputs.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.pdb
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.exe.config
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.pdb
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManager.Form1.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\System.Data.SQLite.dll
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\System.Data.SQLite.xml
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragMa.E3159723.Up2Date
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManager.LandingForm.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManager.DriverManagerForm.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCDragManager.SessionSetupForm.resources

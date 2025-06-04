@@ -1,0 +1,19 @@
+﻿using System.Collections.Generic;
+
+namespace RCDragManager
+{
+    public class Driver
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public double? QualTime { get; set; }
+        public string Notes { get; set; }
+        public int TotalWins { get; set; }
+        public int TotalLosses { get; set; }
+        public int EventsEntered { get; set; }
+        public int EventsWon { get; set; }
+        public int? Seed { get; set; }   // ✅ Needed for MatchEngine
+        public List<Car> Cars { get; set; } = new List<Car>();
+    }
+}
+

@@ -1,0 +1,9 @@
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.exe.config
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Debug\RCRaceProgramTest.pdb
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.csproj.AssemblyReference.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.Properties.Resources.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.csproj.GenerateResource.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.csproj.CoreCompileInputs.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Debug\RCRaceProgramTest.pdb

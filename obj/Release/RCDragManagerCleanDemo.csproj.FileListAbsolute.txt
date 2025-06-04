@@ -1,0 +1,11 @@
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Release\RCRaceProgramTest.exe.config
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Release\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\bin\Release\RCRaceProgramTest.pdb
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCDragManagerCleanDemo.csproj.AssemblyReference.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCDragManagerCleanDemo.Form1.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCRaceProgramTest.Properties.Resources.resources
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCDragManagerCleanDemo.csproj.GenerateResource.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCDragManagerCleanDemo.csproj.CoreCompileInputs.cache
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCRaceProgramTest.exe
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCRaceProgramTest.pdb
+C:\Users\Stewart McMillan\source\repos\RCRaceProgramTest\RCRaceProgramTest\obj\Release\RCRaceProgramTest.exe.config
