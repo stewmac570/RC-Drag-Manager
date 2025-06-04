@@ -179,5 +179,7 @@ namespace RCDragManager
             lstFullPairings.Items.Clear();
             lblNext.Text = "";
         }
+        this.Text = "RC Drag Manager - Randomizer Test Branch";
+
     }
 }
