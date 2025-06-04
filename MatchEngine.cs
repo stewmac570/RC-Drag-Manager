@@ -27,8 +27,8 @@ namespace RCDragManager
             bracketMatches = ProLadder.GetLadder(allDrivers.Count);
             matchMap = bracketMatches.ToDictionary(m => m.MatchId);
             seedMap = allDrivers
-    .Where(d => d.Seed.HasValue)
-    .ToDictionary(d => d.Seed.Value, d => d);
+                .Where(d => d.Seed.HasValue)
+                .ToDictionary(d => d.Seed.Value, d => d);
 
             matchWinners = new Dictionary<int, Driver>();
 
@@ -70,7 +70,7 @@ namespace RCDragManager
 
         public IReadOnlyList<ProLadder.LadderMatch> GetCurrentRoundMatches()
         {
-            string currentRound = GetNextUnfinishedRound();
+            string currentRound = GetNextPlayableRound();
             return bracketMatches.Where(m => m.RoundLabel == currentRound).ToList();
         }
 
@@ -90,13 +90,27 @@ namespace RCDragManager
             RefreshBracketState();
         }
 
-        public string GetNextUnfinishedRound()
+        public string GetNextPlayableRound()
         {
-            foreach (var round in new[] { "R1", "QF", "SF", "F" })
+            var roundOrder = new[] { "R1", "QF", "SF", "F" };
+
+            foreach (var round in roundOrder)
             {
-                if (bracketMatches.Any(m => m.RoundLabel == round && !Results.IsMatchResolved(m.MatchId)))
-                    return round;
+                var matchesInRound = bracketMatches.Where(m => m.RoundLabel == round).ToList();
+
+                bool priorRoundsComplete = roundOrder
+                    .TakeWhile(r => r != round)
+                    .All(prior => bracketMatches
+                        .Where(m => m.RoundLabel == prior)
+                        .All(m => Results.IsMatchResolved(m.MatchId)));
+
+                if (priorRoundsComplete)
+                {
+                    if (matchesInRound.Any(m => !Results.IsMatchResolved(m.MatchId)))
+                        return round;
+                }
             }
+
             return "COMPLETE";
         }
 

@@ -28,7 +28,6 @@ namespace RCDragManager
         private Button btnAddDriverFromList;
         private ListView lvEventRoster;
 
-        private Button btnConfirmSeeds;
         private Button btnStartRace;
         private Button btnCancel;
 
@@ -42,31 +41,31 @@ namespace RCDragManager
         private void InitializeComponent()
         {
             this.Text = "Session Setup";
-            this.ClientSize = new System.Drawing.Size(1000, 750);
+            this.ClientSize = new System.Drawing.Size(900, 600);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.MaximizeBox = false;
 
             lblTitle = new Label();
             lblTitle.Text = "Create New Race Session";
-            lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitle.TextAlign = ContentAlignment.MiddleCenter;
-            lblTitle.Size = new Size(1000, 50);
+            lblTitle.Size = new Size(900, 40);
             lblTitle.Location = new Point(0, 10);
             Controls.Add(lblTitle);
 
             grpEventDetails = new GroupBox();
             grpEventDetails.Text = "Event Details";
-            grpEventDetails.Size = new Size(940, 120);
-            grpEventDetails.Location = new Point(30, 70);
+            grpEventDetails.Size = new Size(860, 100);
+            grpEventDetails.Location = new Point(20, 60);
             Controls.Add(grpEventDetails);
 
             lblEventName = new Label() { Text = "Event Name:", AutoSize = true, Location = new Point(20, 35) };
-            txtEventName = new TextBox() { Location = new Point(120, 30), Width = 300 };
-            lblRaceDate = new Label() { Text = "Race Date:", AutoSize = true, Location = new Point(450, 35) };
-            dateRaceDate = new DateTimePicker() { Location = new Point(540, 30), Width = 200 };
-            lblRaceType = new Label() { Text = "Race Type:", AutoSize = true, Location = new Point(20, 80) };
-            cmbRaceType = new ComboBox() { Location = new Point(120, 75), Width = 200 };
+            txtEventName = new TextBox() { Location = new Point(120, 30), Width = 280 };
+            lblRaceDate = new Label() { Text = "Race Date:", AutoSize = true, Location = new Point(420, 35) };
+            dateRaceDate = new DateTimePicker() { Location = new Point(500, 30), Width = 200 };
+            lblRaceType = new Label() { Text = "Race Type:", AutoSize = true, Location = new Point(20, 70) };
+            cmbRaceType = new ComboBox() { Location = new Point(120, 65), Width = 200 };
             cmbRaceType.Items.AddRange(new string[] { "Pro Ladder", "Random Draw", "Round Robin" });
             cmbRaceType.SelectedIndex = 0;
 
@@ -78,8 +77,8 @@ namespace RCDragManager
 
             grpClassSelection = new GroupBox();
             grpClassSelection.Text = "Class Selection";
-            grpClassSelection.Size = new Size(940, 90);
-            grpClassSelection.Location = new Point(30, 200);
+            grpClassSelection.Size = new Size(860, 80);
+            grpClassSelection.Location = new Point(20, 170);
             Controls.Add(grpClassSelection);
 
             rbHeadsUp = new RadioButton() { Text = "Heads Up", Location = new Point(30, 35), AutoSize = true, Checked = true };
@@ -92,8 +91,8 @@ namespace RCDragManager
 
             grpDriverSelection = new GroupBox();
             grpDriverSelection.Text = "Driver Selection";
-            grpDriverSelection.Size = new Size(940, 350);
-            grpDriverSelection.Location = new Point(30, 310);
+            grpDriverSelection.Size = new Size(860, 270);
+            grpDriverSelection.Location = new Point(20, 260);
             Controls.Add(grpDriverSelection);
 
             btnAddNewDriver = new Button() { Text = "Add New Driver", Location = new Point(30, 30), Size = new Size(180, 40) };
@@ -101,23 +100,23 @@ namespace RCDragManager
 
             lvEventRoster = new ListView()
             {
-                Location = new Point(30, 90),
-                Size = new Size(880, 230),
+                Location = new Point(30, 80),
+                Size = new Size(800, 170),
                 View = View.Details,
-                FullRowSelect = true
+                FullRowSelect = true,
+                CheckBoxes = true
             };
-            lvEventRoster.Columns.Add("Driver", 220);
-            lvEventRoster.Columns.Add("Car", 220);
+            lvEventRoster.Columns.Add("Driver", 200);
+            lvEventRoster.Columns.Add("Car", 200);
             lvEventRoster.Columns.Add("Class Type", 150);
-            lvEventRoster.Columns.Add("Dial-In", 150);
+            lvEventRoster.Columns.Add("Dial-In", 100);
 
             grpDriverSelection.Controls.AddRange(new Control[] { btnAddNewDriver, btnAddDriverFromList, lvEventRoster });
 
-            btnConfirmSeeds = new Button() { Text = "Confirm Seeds", Location = new Point(220, 680), Size = new Size(180, 50) };
-            btnStartRace = new Button() { Text = "Start Race", Location = new Point(420, 680), Size = new Size(180, 50) };
-            btnCancel = new Button() { Text = "Cancel", Location = new Point(620, 680), Size = new Size(180, 50) };
+            btnStartRace = new Button() { Text = "Start Race", Location = new Point(300, 540), Size = new Size(140, 40) };
+            btnCancel = new Button() { Text = "Cancel", Location = new Point(460, 540), Size = new Size(140, 40) };
 
-            Controls.AddRange(new Control[] { btnConfirmSeeds, btnStartRace, btnCancel });
+            Controls.AddRange(new Control[] { btnStartRace, btnCancel });
         }
     }
 }

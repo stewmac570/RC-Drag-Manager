@@ -1,3 +1,11 @@
 bin/
 obj/
 .vs/
+bin/
+obj/
+.vs/
+*.db
+*.pdb
+*.exe
+*.user
+*.suo
