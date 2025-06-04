@@ -115,15 +115,17 @@ namespace RCDragManager
             using (var connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
+
+                // Update driver core fields
                 string sql = @"UPDATE Drivers SET 
-                                Name = @Name, 
-                                QualTime = @QualTime, 
-                                Notes = @Notes, 
-                                TotalWins = @TotalWins, 
-                                TotalLosses = @TotalLosses, 
-                                EventsEntered = @EventsEntered, 
-                                EventsWon = @EventsWon 
-                                WHERE Id = @Id";
+                        Name = @Name, 
+                        QualTime = @QualTime, 
+                        Notes = @Notes, 
+                        TotalWins = @TotalWins, 
+                        TotalLosses = @TotalLosses, 
+                        EventsEntered = @EventsEntered, 
+                        EventsWon = @EventsWon 
+                        WHERE Id = @Id";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
@@ -137,8 +139,26 @@ namespace RCDragManager
                     cmd.Parameters.AddWithValue("@Id", driver.Id);
                     cmd.ExecuteNonQuery();
                 }
+
+                // --- ✅ Now handle car updates ---
+
+                // Delete all existing cars for this driver
+                string deleteCars = "DELETE FROM Cars WHERE DriverId = @DriverId";
+                using (var delCmd = new SQLiteCommand(deleteCars, connection))
+                {
+                    delCmd.Parameters.AddWithValue("@DriverId", driver.Id);
+                    delCmd.ExecuteNonQuery();
+                }
+
+                // Insert current cars list
+                foreach (var car in driver.Cars)
+                {
+                    AddCar(car, driver.Id, connection);
+                }
             }
         }
+
+
 
         public void DeleteDriver(int id)
         {

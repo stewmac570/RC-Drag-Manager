@@ -19,6 +19,14 @@ namespace RCDragManager
             SetupDriverDetailsGrid();
             LoadDrivers();
         }
+        public DriverManagerForm(DriverRepository repo)
+        {
+            InitializeComponent();
+            repository = repo;
+
+            SetupDriverDetailsGrid();
+            LoadDrivers();
+        }
 
         private void SetupDriverDetailsGrid()
         {

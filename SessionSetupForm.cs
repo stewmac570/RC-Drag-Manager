@@ -8,6 +8,7 @@ namespace RCDragManager
     public partial class SessionSetupForm : Form
     {
         private DriverRepository repository;
+        private List<(Driver driver, Car car)> allEligibleDrivers;
         private List<(Driver driver, Car car)> eventRoster;
 
         public RaceSession RaceSessionResult { get; private set; }
@@ -18,83 +19,145 @@ namespace RCDragManager
 
             repository = repo;
             eventRoster = new List<(Driver, Car)>();
+            allEligibleDrivers = new List<(Driver, Car)>();
 
-            rbHeadsUp.CheckedChanged += RbHeadsUp_CheckedChanged;
-            rbBracket.CheckedChanged += RbBracket_CheckedChanged;
-            rbDialIn.CheckedChanged += RbDialIn_CheckedChanged;
+            rbHeadsUp.CheckedChanged += ClassSelectionChanged;
+            rbBracket.CheckedChanged += ClassSelectionChanged;
+            rbDialIn.CheckedChanged += ClassSelectionChanged;
 
             btnAddNewDriver.Click += BtnAddNewDriver_Click;
-            btnAddDriverFromList.Click += BtnAddDriverFromList_Click;
-            btnConfirmSeeds.Click += BtnConfirmSeeds_Click;
             btnStartRace.Click += BtnStartRace_Click;
             btnCancel.Click += BtnCancel_Click;
+
+            lvEventRoster.CheckBoxes = true;
+            lvEventRoster.ItemChecked += LvEventRoster_ItemChecked;
+
+
+            // ✅ ADD THIS LINE:
+            RefreshDriverList();
         }
 
-        private void RbHeadsUp_CheckedChanged(object sender, EventArgs e)
+        private void LvEventRoster_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            var tuple = (ValueTuple<Driver, Car>)e.Item.Tag;
+
+            if (e.Item.Checked)
+            {
+                if (!eventRoster.Any(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID))
+                {
+                    eventRoster.Add(tuple);
+                }
+            }
+            else
+            {
+                eventRoster.RemoveAll(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID);
+            }
+        }
+
+
+        private void ClassSelectionChanged(object sender, EventArgs e)
         {
             if (rbHeadsUp.Checked)
             {
                 lblFixedDial.Visible = false;
                 txtFixedDial.Visible = false;
             }
-        }
-
-        private void RbBracket_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rbBracket.Checked)
+            else if (rbBracket.Checked)
             {
                 lblFixedDial.Visible = true;
                 txtFixedDial.Visible = true;
             }
-        }
-
-        private void RbDialIn_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rbDialIn.Checked)
+            else if (rbDialIn.Checked)
             {
                 lblFixedDial.Visible = false;
                 txtFixedDial.Visible = false;
             }
+
+            RefreshDriverList();
         }
 
-        private void BtnAddNewDriver_Click(object sender, EventArgs e)
+        private void RefreshDriverList()
         {
-            // Placeholder for future add-new-driver UI
-            MessageBox.Show("Add New Driver not implemented.");
-        }
+            lvEventRoster.Items.Clear();
+            allEligibleDrivers.Clear();
+            eventRoster.Clear();
 
-        private void BtnAddDriverFromList_Click(object sender, EventArgs e)
-        {
             var drivers = repository.GetAllDrivers();
 
             foreach (var driver in drivers)
             {
                 foreach (var car in driver.Cars)
                 {
-                    if (!eventRoster.Any(x => x.driver.Id == driver.Id && x.car.CarID == car.CarID))
+                    bool eligible = false;
+
+                    if (rbHeadsUp.Checked && car.ClassType == "Heads Up")
+                        eligible = true;
+                    else if (rbBracket.Checked && car.ClassType == "Index")
+                        eligible = true;
+                    else if (rbDialIn.Checked && car.ClassType == "Dial")
+                        eligible = true;
+
+                    if (eligible)
                     {
-                        eventRoster.Add((driver, car));
+                        allEligibleDrivers.Add((driver, car));
 
                         var item = new ListViewItem(new string[]
                         {
-                            driver.Name,
-                            car.CarName,
-                            car.ClassType,
-                            car.DefaultDialIn?.ToString("0.000") ?? "-"
+                    driver.Name,
+                    car.CarName,
+                    car.ClassType,
+                    car.DefaultDialIn?.ToString("0.000") ?? "-"
                         });
+
+                        item.Tag = (driver, car);
                         lvEventRoster.Items.Add(item);
                     }
                 }
             }
         }
 
-        private void BtnConfirmSeeds_Click(object sender, EventArgs e)
+
+        private void LvEventRoster_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            MessageBox.Show("Seed confirmation not implemented yet.");
+            var tuple = ((Driver, Car))e.Item.Tag;
+
+            if (e.IsSelected)
+            {
+                // Add to event roster if not already there
+                if (!eventRoster.Any(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID))
+
+                {
+                    eventRoster.Add(tuple);
+                    e.Item.BackColor = System.Drawing.Color.LightGreen;
+                }
+            }
+            else
+            {
+                // Remove from event roster if deselected
+                eventRoster.RemoveAll(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID);
+                e.Item.BackColor = System.Drawing.Color.White;
+            }
         }
+
+        private void BtnAddNewDriver_Click(object sender, EventArgs e)
+        {
+            var managerForm = new DriverManagerForm(repository);
+            managerForm.ShowDialog();
+
+            RefreshDriverList();
+        }
+
+
+       
 
         private void BtnStartRace_Click(object sender, EventArgs e)
         {
+            if (eventRoster.Count < 2)
+            {
+                MessageBox.Show("Please select at least 2 drivers.");
+                return;
+            }
+
             string classType = rbHeadsUp.Checked ? "Heads Up" :
                                rbBracket.Checked ? "Bracket Class" : "Dial-In";
 
