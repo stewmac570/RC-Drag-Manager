@@ -10,15 +10,23 @@ namespace RCDragManager
         private List<Driver> drivers = new List<Driver>();
         private MatchEngine engine = new MatchEngine();
         private RaceSession currentSession;
+        private string currentRound = "R1";
 
-        public Form1(RaceSession session)
+        public Form1(RaceSession session = null)
         {
             InitializeComponent();
             currentSession = session;
 
-            lblEventTitle.Text = $"Event: {currentSession.EventName}";
+            if (currentSession != null)
+            {
+                lblEventTitle.Text = $"Event: {currentSession.EventName}";
+                InitializeDriversFromSession();
+            }
+            else
+            {
+                lblEventTitle.Text = "Quick Session";
+            }
 
-            InitializeDriversFromSession();
             UpdateDriverList();
             UpdateButtonStates();
         }
@@ -26,6 +34,7 @@ namespace RCDragManager
         private void InitializeDriversFromSession()
         {
             drivers.Clear();
+
             foreach (var entry in currentSession.DriverEntries)
             {
                 Driver driver = new Driver
@@ -35,17 +44,6 @@ namespace RCDragManager
                     QualTime = entry.QualifyingTime ?? 0.0
                 };
                 drivers.Add(driver);
-            }
-        }
-
-        private void UpdateDriverList()
-        {
-            lvDrivers.Items.Clear();
-            foreach (var d in drivers.OrderBy(d => d.QualTime))
-            {
-                var item = new ListViewItem(d.Name);
-                item.SubItems.Add((d.QualTime ?? 0.0).ToString("0.000"));
-                lvDrivers.Items.Add(item);
             }
         }
 
@@ -88,6 +86,17 @@ namespace RCDragManager
             }
         }
 
+        private void UpdateDriverList()
+        {
+            lvDrivers.Items.Clear();
+            foreach (var d in drivers.OrderBy(d => d.QualTime))
+            {
+                var item = new ListViewItem(d.Name);
+                item.SubItems.Add((d.QualTime ?? 0.0).ToString("0.000"));
+                lvDrivers.Items.Add(item);
+            }
+        }
+
         private void btnGenerateBracket_Click(object sender, EventArgs e)
         {
             if (drivers.Count < 2)
@@ -103,6 +112,7 @@ namespace RCDragManager
             }
 
             engine.Initialize(drivers);
+            currentRound = "R1";
             UpdateFullPairingList();
             UpdateNextUp();
             UpdateWinnersList();
@@ -123,15 +133,15 @@ namespace RCDragManager
 
         private void ProcessMatchWinner(bool winner1)
         {
-            var match = engine.GetCurrentRoundMatches().FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
+            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+
             if (match != null)
             {
                 var (driver1, driver2) = engine.ResolveDriversForMatch(match);
                 engine.SetWinner(match.MatchId, winner1 ? driver1 : driver2);
 
-                Console.WriteLine($"Winner set for MatchId: {match.MatchId}");
-                Console.WriteLine($"IsCurrentRoundComplete: {engine.IsCurrentRoundComplete()}");
-
+                UpdateFullPairingList();
                 UpdateNextUp();
                 UpdateWinnersList();
                 UpdateNextRoundButtonState();
@@ -140,67 +150,60 @@ namespace RCDragManager
 
         private void btnNextRound_Click(object sender, EventArgs e)
         {
-            if (!engine.IsCurrentRoundComplete())
+            if (!IsCurrentRoundComplete())
             {
                 MessageBox.Show("Current round not complete yet.");
                 return;
             }
 
-            engine.AdvanceToNextRound();
+            currentRound = GetNextRoundLabel(currentRound);
             UpdateFullPairingList();
             UpdateNextUp();
             UpdateWinnersList();
             UpdateNextRoundButtonState();
         }
 
+        private string GetNextRoundLabel(string round)
+        {
+            switch (round)
+            {
+                case "R1": return "SF";
+                case "SF": return "F";
+                default: return "COMPLETE";
+            }
+        }
+
         private void UpdateFullPairingList()
         {
             lstFullPairings.Items.Clear();
 
-            var matches = engine.GetCurrentRoundMatches();
+            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
             foreach (var match in matches)
             {
                 var (driver1, driver2) = engine.ResolveDriversForMatch(match);
-
-                if (driver1.Name != "TBD" && driver2.Name != "TBD")
-                {
-                    lstFullPairings.Items.Add($"{match.RoundLabel}: {driver1.Name} vs {driver2.Name}");
-                }
+                lstFullPairings.Items.Add($"{match.RoundLabel}: {driver1.Name} vs {driver2.Name}");
             }
         }
 
         private void UpdateNextUp()
         {
-            var match = engine.GetCurrentRoundMatches().FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
+            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
 
             if (match != null)
             {
-                Console.WriteLine($"Next unresolved match found: {match.RoundLabel}");
-
                 var (driver1, driver2) = engine.ResolveDriversForMatch(match);
 
-                if (driver1.Name != "TBD" && driver2.Name != "TBD")
-                {
-                    lblNext.Text = $"{driver1.Name} vs {driver2.Name}";
+                lblNext.Text = $"{driver1.Name} vs {driver2.Name}";
 
-                    btnWinner1.Text = driver1.Name;
-                    btnWinner2.Text = driver2.Name;
+                btnWinner1.Text = driver1.Name;
+                btnWinner2.Text = driver2.Name;
 
-                    btnWinner1.Enabled = true;
-                    btnWinner2.Enabled = true;
-                }
-                else
-                {
-                    lblNext.Text = "Waiting for full match.";
-                    btnWinner1.Text = "";
-                    btnWinner2.Text = "";
-                    btnWinner1.Enabled = false;
-                    btnWinner2.Enabled = false;
-                }
+                btnWinner1.Enabled = (driver1.Name != "BYE" && driver1.Name != "TBD");
+                btnWinner2.Enabled = (driver2.Name != "BYE" && driver2.Name != "TBD");
             }
             else
             {
-                Console.WriteLine("No unresolved matches remaining.");
                 lblNext.Text = "Waiting...";
                 btnWinner1.Text = "";
                 btnWinner2.Text = "";
@@ -211,9 +214,13 @@ namespace RCDragManager
 
         private void UpdateNextRoundButtonState()
         {
-            bool canAdvance = engine.IsCurrentRoundComplete();
-            Console.WriteLine($"[Button State] IsCurrentRoundComplete = {canAdvance}");
-            btnNextRound.Enabled = canAdvance;
+            btnNextRound.Enabled = IsCurrentRoundComplete();
+        }
+
+        private bool IsCurrentRoundComplete()
+        {
+            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
+            return matches.All(m => engine.Results.IsMatchResolved(m.MatchId));
         }
 
         private void UpdateWinnersList()
@@ -233,7 +240,9 @@ namespace RCDragManager
 
         private void btnEditResult_Click(object sender, EventArgs e)
         {
-            var match = engine.GetCurrentRoundMatches().FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
+            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+
             if (match != null)
             {
                 var (driver1, driver2) = engine.ResolveDriversForMatch(match);
@@ -241,6 +250,7 @@ namespace RCDragManager
                 if (editDialog.ShowDialog() == DialogResult.OK)
                 {
                     engine.SetWinner(match.MatchId, editDialog.SelectedWinner);
+                    UpdateFullPairingList();
                     UpdateNextUp();
                     UpdateWinnersList();
                     UpdateNextRoundButtonState();
@@ -251,6 +261,7 @@ namespace RCDragManager
         private void btnReset_Click(object sender, EventArgs e)
         {
             engine = new MatchEngine();
+            currentRound = "R1";
             lstFullPairings.Items.Clear();
             lstWinners.Items.Clear();
             lblNext.Text = "";
