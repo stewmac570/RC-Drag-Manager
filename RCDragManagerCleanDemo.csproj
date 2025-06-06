@@ -60,6 +60,12 @@
     <Compile Include="AddCarDialog.Designer.cs">
       <DependentUpon>AddCarDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddDriverAndCarDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDriverAndCarDialog.Designer.cs">
+      <DependentUpon>AddDriverAndCarDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
