@@ -32,8 +32,6 @@ namespace RCDragManager
             lvEventRoster.CheckBoxes = true;
             lvEventRoster.ItemChecked += LvEventRoster_ItemChecked;
 
-
-            // ✅ ADD THIS LINE:
             RefreshDriverList();
         }
 
@@ -53,7 +51,6 @@ namespace RCDragManager
                 eventRoster.RemoveAll(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID);
             }
         }
-
 
         private void ClassSelectionChanged(object sender, EventArgs e)
         {
@@ -103,10 +100,10 @@ namespace RCDragManager
 
                         var item = new ListViewItem(new string[]
                         {
-                    driver.Name,
-                    car.CarName,
-                    car.ClassType,
-                    car.DefaultDialIn?.ToString("0.000") ?? "-"
+                            driver.Name,
+                            car.CarName,
+                            car.ClassType,
+                            car.DefaultDialIn?.ToString("0.000") ?? "-"
                         });
 
                         item.Tag = (driver, car);
@@ -116,39 +113,34 @@ namespace RCDragManager
             }
         }
 
-
-        private void LvEventRoster_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
-        {
-            var tuple = ((Driver, Car))e.Item.Tag;
-
-            if (e.IsSelected)
-            {
-                // Add to event roster if not already there
-                if (!eventRoster.Any(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID))
-
-                {
-                    eventRoster.Add(tuple);
-                    e.Item.BackColor = System.Drawing.Color.LightGreen;
-                }
-            }
-            else
-            {
-                // Remove from event roster if deselected
-                eventRoster.RemoveAll(x => x.driver.Id == tuple.Item1.Id && x.car.CarID == tuple.Item2.CarID);
-                e.Item.BackColor = System.Drawing.Color.White;
-            }
-        }
-
         private void BtnAddNewDriver_Click(object sender, EventArgs e)
         {
-            var managerForm = new DriverManagerForm(repository);
-            managerForm.ShowDialog();
+            var addDialog = new AddDriverAndCarDialog();
+            if (addDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Create new Driver
+                var newDriver = new Driver
+                {
+                    Name = addDialog.DriverName,
+                    Cars = new List<Car>()
+                };
+                repository.AddDriver(newDriver);
 
-            RefreshDriverList();
+                // Reload to get DriverID assigned
+                var insertedDriver = repository.GetAllDrivers().First(d => d.Name == newDriver.Name);
+
+                // Create new Car
+                var newCar = new Car
+                {
+                    CarName = addDialog.CarName,
+                    ClassType = addDialog.ClassType,
+                    DefaultDialIn = addDialog.DialIn
+                };
+                repository.AddCar(insertedDriver.Id, newCar);
+
+                RefreshDriverList();
+            }
         }
-
-
-       
 
         private void BtnStartRace_Click(object sender, EventArgs e)
         {

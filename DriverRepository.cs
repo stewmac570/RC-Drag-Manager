@@ -181,8 +181,17 @@ namespace RCDragManager
                 }
             }
         }
+        public void AddCar(int driverId, Car car)
+        {
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+                AddCar(car, driverId, conn);
+            }
+        }
 
-        private void AddCar(Car car, int driverId, SQLiteConnection connection)
+
+        public void AddCar(Car car, int driverId, SQLiteConnection connection)
         {
             string sql = @"INSERT INTO Cars (DriverId, CarName, ClassType, DefaultDialIn)
                            VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";

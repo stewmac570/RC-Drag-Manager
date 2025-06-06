@@ -41,7 +41,7 @@ namespace RCDragManager
         private void InitializeComponent()
         {
             this.Text = "Session Setup";
-            this.ClientSize = new System.Drawing.Size(900, 600);
+            this.ClientSize = new Size(900, 600);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.MaximizeBox = false;
