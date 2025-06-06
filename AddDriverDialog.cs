@@ -3,35 +3,41 @@ using System.Windows.Forms;
 
 namespace RCDragManager
 {
-    public partial class AddDriverDialog : Form
+    partial class AddDriverDialog
     {
-        public string DriverName { get; set; }
-        public double QualTime { get; set; }
+        private System.ComponentModel.IContainer components = null;
+        private Label lblName, lblQualTime;
+        private TextBox txtName, txtQualTime;
+        private Button btnOK, btnCancel;
 
-        public AddDriverDialog()
+        protected override void Dispose(bool disposing)
         {
-            InitializeComponent();
+            if (disposing && (components != null)) components.Dispose();
+            base.Dispose(disposing);
         }
 
-        private void btnOK_Click(object sender, EventArgs e)
+        private void InitializeComponent()
         {
-            string name = txtName.Text.Trim();
+            this.Text = "Add Driver";
+            this.ClientSize = new System.Drawing.Size(400, 180);
+            this.StartPosition = FormStartPosition.CenterParent;
 
-            if (string.IsNullOrEmpty(name))
-            {
-                MessageBox.Show("Please enter a driver name.");
-                return;
-            }
+            lblName = new Label() { Text = "Driver Name:", Location = new System.Drawing.Point(30, 30) };
+            txtName = new TextBox() { Location = new System.Drawing.Point(150, 30), Width = 200 };
 
-            if (!double.TryParse(txtQualTime.Text.Trim(), out double qualTime))
-            {
-                MessageBox.Show("Please enter a valid qualifying time.");
-                return;
-            }
+            lblQualTime = new Label() { Text = "Qualifying Time:", Location = new System.Drawing.Point(30, 70) };
+            txtQualTime = new TextBox() { Location = new System.Drawing.Point(150, 70), Width = 200 };
 
-            DriverName = name;
-            QualTime = qualTime;
-            DialogResult = DialogResult.OK;
+            btnOK = new Button() { Text = "Save and Close", Location = new System.Drawing.Point(80, 120) };
+            btnCancel = new Button() { Text = "Cancel", Location = new System.Drawing.Point(220, 120), DialogResult = DialogResult.Cancel };
+
+            btnOK.Click += new EventHandler(this.btnOK_Click);
+
+            this.Controls.AddRange(new Control[] {
+                lblName, txtName,
+                lblQualTime, txtQualTime,
+                btnOK, btnCancel
+            });
         }
     }
 }

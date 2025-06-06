@@ -112,7 +112,7 @@ namespace RCDragManager
             // btnSaveChanges
             this.btnSaveChanges.Location = new Point(722, 530);
             this.btnSaveChanges.Size = new Size(150, 40);
-            this.btnSaveChanges.Text = "Save Changes";
+            this.btnSaveChanges.Text = "Save and Close";
             this.btnSaveChanges.Click += new System.EventHandler(this.btnSaveChanges_Click);
             this.Controls.Add(this.btnSaveChanges);
 

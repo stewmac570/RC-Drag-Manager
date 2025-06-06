@@ -218,7 +218,12 @@ namespace RCDragManager
 
         private void btnSaveChanges_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Save logic placeholder.");
+            if (selectedDriver != null)
+            {
+                repository.UpdateDriver(selectedDriver);
+            }
+            this.Close();
         }
+
     }
 }
