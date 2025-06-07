@@ -154,6 +154,17 @@ namespace RCDragManagerProd
             if (rbBracket.Checked && double.TryParse(txtFixedDial.Text, out double fd))
                 fixedDial = fd;
 
+            // ✅ NEW: Update EventsEntered count for each participating driver:
+            foreach (var (driver, car) in eventRoster)
+            {
+                var dbDriver = repository.GetDriverById(driver.Id);
+                if (dbDriver != null)
+                {
+                    dbDriver.EventsEntered += 1;
+                    repository.UpdateDriver(dbDriver);
+                }
+            }
+
             RaceSessionResult = new RaceSession
             {
                 EventName = txtEventName.Text.Trim(),
