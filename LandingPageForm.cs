@@ -6,20 +6,22 @@ namespace RCDragManagerProd
     public partial class LandingForm : Form
     {
         private DriverRepository repository;
+        private RaceSessionRepository sessionRepository;
+        private string dbPath = "race_data.db";
 
         public LandingForm()
         {
             InitializeComponent();
 
-            // Initialize repository ONCE here for entire app
-            string dbPath = "race_data.db";
+            // Initialize repositories ONCE for entire app
             repository = new DriverRepository(dbPath);
+            sessionRepository = new RaceSessionRepository(dbPath);
         }
 
         private void btnNewEvent_Click(object sender, EventArgs e)
         {
             // Quick mode (legacy, direct to empty Form1)
-            Form1 mainForm = new Form1(null);  // Pass null for legacy mode
+            Form1 mainForm = new Form1(null);
             mainForm.Show();
         }
 
@@ -28,7 +30,6 @@ namespace RCDragManagerProd
             SessionSetupForm sessionForm = new SessionSetupForm(repository);
             if (sessionForm.ShowDialog() == DialogResult.OK)
             {
-                // Session built — pass RaceSession directly into Form1
                 Form1 mainForm = new Form1(sessionForm.RaceSessionResult);
                 mainForm.Show();
             }
@@ -36,8 +37,15 @@ namespace RCDragManagerProd
 
         private void btnLoadEvent_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Load Event feature not implemented yet.");
+            LoadSessionForm loadForm = new LoadSessionForm("race_data.db");
+            if (loadForm.ShowDialog() == DialogResult.OK)
+            {
+                RaceSession loaded = loadForm.LoadedSession;
+                Form1 mainForm = new Form1(loaded);
+                mainForm.Show();
+            }
         }
+
 
         private void btnDriverLists_Click(object sender, EventArgs e)
         {

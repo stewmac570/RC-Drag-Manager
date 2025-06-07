@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,6 +11,7 @@ namespace RCDragManagerProd
         private MatchEngine engine = new MatchEngine();
         private RaceSession currentSession;
         private List<string> revealedRounds = new List<string>();
+        private RaceSessionRepository sessionRepository = new RaceSessionRepository("race_data.db");
 
         public Form1(RaceSession session = null)
         {
@@ -22,6 +22,7 @@ namespace RCDragManagerProd
             {
                 lblEventTitle.Text = $"Event: {currentSession.EventName}";
                 InitializeDriversFromSession();
+                RestoreBracketState();
             }
             else
             {
@@ -53,6 +54,37 @@ namespace RCDragManagerProd
                 };
                 drivers.Add(driver);
             }
+        }
+
+        private void RestoreBracketState()
+        {
+            drivers = drivers.OrderBy(d => d.QualTime).ToList();
+            for (int i = 0; i < drivers.Count; i++)
+            {
+                drivers[i].Seed = i + 1;
+            }
+
+            engine.Initialize(drivers);
+
+            revealedRounds = currentSession.SavedRevealedRounds ?? new List<string>();
+            if (revealedRounds.Count == 0)
+            {
+                revealedRounds.Add("R1");
+            }
+
+            foreach (var result in currentSession.SavedResults)
+            {
+                var winner = drivers.FirstOrDefault(d => d.Id == result.WinnerDriverId);
+                if (winner != null)
+                {
+                    engine.SetWinner(result.MatchId, winner);
+                }
+            }
+
+            RedrawFullBracket();
+            UpdateNextUp();
+            UpdateWinnersList();
+            UpdateButtonStates();
         }
 
         private void btnAddDriver_Click(object sender, EventArgs e)
@@ -307,7 +339,44 @@ namespace RCDragManagerProd
 
         private void btnSaveAndClose_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Save and Close logic not implemented yet.");
+            if (currentSession == null)
+            {
+                MessageBox.Show("No session data available to save.");
+                return;
+            }
+
+            currentSession.DriverEntries.Clear();
+
+            foreach (var d in drivers)
+            {
+                var entry = new RaceSessionDriverEntry
+                {
+                    DriverID = d.Id,
+                    DriverName = d.Name,
+                    QualifyingTime = d.QualTime
+                };
+                currentSession.DriverEntries.Add(entry);
+            }
+
+            currentSession.SavedResults.Clear();
+            foreach (var match in engine.GetBracketMatches())
+            {
+                if (engine.Results.IsMatchResolved(match.MatchId))
+                {
+                    var winner = engine.Results.GetWinner(match.MatchId);
+                    currentSession.SavedResults.Add(new MatchResultSave
+                    {
+                        MatchId = match.MatchId,
+                        WinnerDriverId = winner.Id
+                    });
+                }
+            }
+
+            currentSession.SavedRevealedRounds = new List<string>(revealedRounds);
+
+            sessionRepository.SaveSession(currentSession);
+
+            MessageBox.Show("Race session saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.Close();
         }
 
@@ -322,10 +391,8 @@ namespace RCDragManagerProd
 
                 engine.SetWinner(nextMatch.MatchId, winner);
 
-                // ✅ Update Wins/Losses
                 UpdateDriverStats(winner, loser);
 
-                // ✅ Check if tournament complete → update EventsWon
                 if (engine.IsTournamentComplete())
                 {
                     UpdateEventWinnerStats();
@@ -356,11 +423,5 @@ namespace RCDragManagerProd
                 }
             }
         }
-
     }
-
-
-
-
-
 }
