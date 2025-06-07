@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public partial class Form1 : Form
     {

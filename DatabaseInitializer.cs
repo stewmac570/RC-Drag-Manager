@@ -1,7 +1,7 @@
 ﻿using System.Data.SQLite;
 using System.Data;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public static class DatabaseInitializer
     {

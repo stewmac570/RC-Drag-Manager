@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using System.Drawing;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     partial class SessionSetupForm
     {

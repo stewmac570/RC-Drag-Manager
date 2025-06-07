@@ -1,4 +1,4 @@
-﻿namespace RCDragManager
+﻿namespace RCDragManagerProd
 {
     partial class EditWinnerDialog
     {

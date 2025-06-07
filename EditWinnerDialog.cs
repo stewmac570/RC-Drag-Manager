@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public partial class EditWinnerDialog : Form
     {

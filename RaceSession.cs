@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public class RaceSession
     {

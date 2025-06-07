@@ -1,7 +1,8 @@
 ﻿using System.Windows.Forms;
 using System.Drawing;
+using RCDragManagerProd.Properties;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     partial class LandingForm
     {
@@ -101,10 +102,13 @@ namespace RCDragManager
             this.Controls.Add(this.lblVersion);
 
             // logoBox
+            // logoBox
             this.logoBox.Location = new System.Drawing.Point(260, 80);
             this.logoBox.Size = new System.Drawing.Size(590, 396);
             this.logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            this.logoBox.Image = Properties.Resources.Reto_logo_trans_full;
             this.Controls.Add(this.logoBox);
+
 
             ((System.ComponentModel.ISupportInitialize)(this.logoBox)).EndInit();
             this.ResumeLayout(false);

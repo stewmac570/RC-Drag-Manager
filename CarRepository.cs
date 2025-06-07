@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public class CarRepository
     {

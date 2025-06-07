@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RCRaceProgramTest.Properties {
+namespace RCDragManagerProd.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace RCRaceProgramTest.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RCRaceProgramTest.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RCDragManagerProd.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -67,6 +67,66 @@ namespace RCRaceProgramTest.Properties {
             get {
                 object obj = ResourceManager.GetObject("rcdrag_logo_256", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Reto_logo_trans_full {
+            get {
+                object obj = ResourceManager.GetObject("Reto logo trans full", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Reto_logo_trans_full_256 {
+            get {
+                object obj = ResourceManager.GetObject("Reto logo trans full 256", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap retro_logo {
+            get {
+                object obj = ResourceManager.GetObject("retro logo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap retro_logo_256 {
+            get {
+                object obj = ResourceManager.GetObject("retro logo 256", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap retro_logo_full {
+            get {
+                object obj = ResourceManager.GetObject("retro logo full", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] retro_trans_icon {
+            get {
+                object obj = ResourceManager.GetObject("retro trans icon", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

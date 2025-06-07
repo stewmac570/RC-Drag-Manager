@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public partial class AddDriverAndCarDialog : Form
     {

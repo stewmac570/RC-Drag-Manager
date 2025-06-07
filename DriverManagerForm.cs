@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
 
-namespace RCDragManager
+namespace RCDragManagerProd
 {
     public partial class DriverManagerForm : Form
     {
