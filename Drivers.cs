@@ -12,8 +12,8 @@ namespace RCDragManager
         public int TotalLosses { get; set; }
         public int EventsEntered { get; set; }
         public int EventsWon { get; set; }
-        public int? Seed { get; set; }   // ✅ Needed for MatchEngine
+        public int? Seed { get; set; }
+        public string State { get; set; }  // ✅ NEW FIELD
         public List<Car> Cars { get; set; } = new List<Car>();
     }
 }
-

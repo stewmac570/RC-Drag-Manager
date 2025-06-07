@@ -37,6 +37,7 @@ namespace RCDragManager
                             TotalLosses = Convert.ToInt32(reader["TotalLosses"]),
                             EventsEntered = Convert.ToInt32(reader["EventsEntered"]),
                             EventsWon = Convert.ToInt32(reader["EventsWon"]),
+                            State = reader["State"] != DBNull.Value ? reader["State"].ToString() : "",
                             Cars = GetCarsByDriverId(Convert.ToInt32(reader["Id"]))
                         };
                         drivers.Add(driver);
@@ -71,6 +72,7 @@ namespace RCDragManager
                                 TotalLosses = Convert.ToInt32(reader["TotalLosses"]),
                                 EventsEntered = Convert.ToInt32(reader["EventsEntered"]),
                                 EventsWon = Convert.ToInt32(reader["EventsWon"]),
+                                State = reader["State"] != DBNull.Value ? reader["State"].ToString() : "",
                                 Cars = GetCarsByDriverId(id)
                             };
                         }
@@ -86,8 +88,8 @@ namespace RCDragManager
             using (var connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                string sql = @"INSERT INTO Drivers (Name, QualTime, Notes, TotalWins, TotalLosses, EventsEntered, EventsWon)
-                               VALUES (@Name, @QualTime, @Notes, @TotalWins, @TotalLosses, @EventsEntered, @EventsWon);
+                string sql = @"INSERT INTO Drivers (Name, QualTime, Notes, TotalWins, TotalLosses, EventsEntered, EventsWon, State)
+                               VALUES (@Name, @QualTime, @Notes, @TotalWins, @TotalLosses, @EventsEntered, @EventsWon, @State);
                                SELECT last_insert_rowid();";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
@@ -99,6 +101,7 @@ namespace RCDragManager
                     cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
                     cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
                     cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
+                    cmd.Parameters.AddWithValue("@State", driver.State);
 
                     driver.Id = Convert.ToInt32(cmd.ExecuteScalar());
                 }
@@ -116,7 +119,6 @@ namespace RCDragManager
             {
                 connection.Open();
 
-                // Update driver core fields
                 string sql = @"UPDATE Drivers SET 
                         Name = @Name, 
                         QualTime = @QualTime, 
@@ -124,7 +126,8 @@ namespace RCDragManager
                         TotalWins = @TotalWins, 
                         TotalLosses = @TotalLosses, 
                         EventsEntered = @EventsEntered, 
-                        EventsWon = @EventsWon 
+                        EventsWon = @EventsWon,
+                        State = @State
                         WHERE Id = @Id";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
@@ -136,13 +139,11 @@ namespace RCDragManager
                     cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
                     cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
                     cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
+                    cmd.Parameters.AddWithValue("@State", driver.State);
                     cmd.Parameters.AddWithValue("@Id", driver.Id);
                     cmd.ExecuteNonQuery();
                 }
 
-                // --- ✅ Now handle car updates ---
-
-                // Delete all existing cars for this driver
                 string deleteCars = "DELETE FROM Cars WHERE DriverId = @DriverId";
                 using (var delCmd = new SQLiteCommand(deleteCars, connection))
                 {
@@ -150,15 +151,12 @@ namespace RCDragManager
                     delCmd.ExecuteNonQuery();
                 }
 
-                // Insert current cars list
                 foreach (var car in driver.Cars)
                 {
                     AddCar(car, driver.Id, connection);
                 }
             }
         }
-
-
 
         public void DeleteDriver(int id)
         {
@@ -181,6 +179,7 @@ namespace RCDragManager
                 }
             }
         }
+
         public void AddCar(int driverId, Car car)
         {
             using (var conn = new SQLiteConnection(connectionString))
@@ -189,7 +188,6 @@ namespace RCDragManager
                 AddCar(car, driverId, conn);
             }
         }
-
 
         public void AddCar(Car car, int driverId, SQLiteConnection connection)
         {

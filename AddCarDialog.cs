@@ -10,43 +10,55 @@ namespace RCDragManager
         public AddCarDialog()
         {
             InitializeComponent();
-            rbHeadsUp.Checked = true;
-            UpdateDialInEnabled();
         }
 
-        public AddCarDialog(Car existingCar) : this()
+        public AddCarDialog(Car carToEdit)
         {
-            txtCarName.Text = existingCar.CarName;
-            switch (existingCar.ClassType)
+            InitializeComponent();
+
+            txtCarName.Text = carToEdit.CarName;
+
+            if (carToEdit.ClassType == "Heads Up")
+                rbHeadsUp.Checked = true;
+            else if (carToEdit.ClassType == "Dial")
+                rbDial.Checked = true;
+            else if (carToEdit.ClassType == "Index")
+                rbIndex.Checked = true;
+
+            if (carToEdit.DefaultDialIn.HasValue)
+                txtDialIn.Text = carToEdit.DefaultDialIn.Value.ToString("0.000");
+
+            if (rbHeadsUp.Checked)
             {
-                case "Heads Up": rbHeadsUp.Checked = true; break;
-                case "Dial": rbDial.Checked = true; break;
-                case "Index": rbIndex.Checked = true; break;
+                txtDialIn.Enabled = false;
+                txtDialIn.Text = "";
             }
-            txtDialIn.Text = existingCar.DefaultDialIn.HasValue ? existingCar.DefaultDialIn.Value.ToString("0.000") : "";
-            UpdateDialInEnabled();
+            else
+            {
+                txtDialIn.Enabled = true;
+            }
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
             string carName = txtCarName.Text.Trim();
-            string classType = rbHeadsUp.Checked ? "Heads Up" : (rbDial.Checked ? "Dial" : "Index");
-
-            double? dialIn = null;
-            if (classType != "Heads Up")
-            {
-                if (!double.TryParse(txtDialIn.Text, out double parsed))
-                {
-                    MessageBox.Show("Enter valid Dial-In.");
-                    return;
-                }
-                dialIn = parsed;
-            }
-
             if (string.IsNullOrEmpty(carName))
             {
-                MessageBox.Show("Car Name is required.");
+                MessageBox.Show("Please enter Car Name.");
                 return;
+            }
+
+            string classType = rbHeadsUp.Checked ? "Heads Up" : rbDial.Checked ? "Dial" : "Index";
+
+            double? dialIn = null;
+            if ((rbDial.Checked || rbIndex.Checked) && !string.IsNullOrEmpty(txtDialIn.Text))
+            {
+                if (!double.TryParse(txtDialIn.Text.Trim(), out double parsedDial))
+                {
+                    MessageBox.Show("Please enter valid Dial-In.");
+                    return;
+                }
+                dialIn = parsedDial;
             }
 
             NewCar = new Car
@@ -57,15 +69,20 @@ namespace RCDragManager
             };
 
             DialogResult = DialogResult.OK;
+            Close();
         }
 
-        private void UpdateDialInEnabled()
+        private void ClassTypeChanged(object sender, EventArgs e)
         {
-            txtDialIn.Enabled = !rbHeadsUp.Checked;
+            if (rbHeadsUp.Checked)
+            {
+                txtDialIn.Enabled = false;
+                txtDialIn.Text = "";
+            }
+            else
+            {
+                txtDialIn.Enabled = true;
+            }
         }
-
-        private void rbHeadsUp_CheckedChanged(object sender, EventArgs e) => UpdateDialInEnabled();
-        private void rbDial_CheckedChanged(object sender, EventArgs e) => UpdateDialInEnabled();
-        private void rbIndex_CheckedChanged(object sender, EventArgs e) => UpdateDialInEnabled();
     }
 }

@@ -83,6 +83,12 @@
     </Compile>
     <Compile Include="DriverRepository.cs" />
     <Compile Include="Drivers.cs" />
+    <Compile Include="EditDriverDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditDriverDialog.Designer.cs">
+      <DependentUpon>EditDriverDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditWinnerDialog.cs">
       <SubType>Form</SubType>
     </Compile>

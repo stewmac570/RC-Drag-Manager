@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Data;
 
 namespace RCDragManager
 {
@@ -38,6 +39,37 @@ namespace RCDragManager
                 }
 
                 using (var cmd = new SQLiteCommand(carTable, connection))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // ✅ Apply schema upgrade for State column automatically
+                AddStateColumnIfMissing(connection);
+            }
+        }
+
+        private static void AddStateColumnIfMissing(SQLiteConnection connection)
+        {
+            string pragma = "PRAGMA table_info(Drivers);";
+            bool stateExists = false;
+
+            using (var cmd = new SQLiteCommand(pragma, connection))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string columnName = reader["name"].ToString();
+                    if (columnName == "State")
+                    {
+                        stateExists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!stateExists)
+            {
+                using (var cmd = new SQLiteCommand("ALTER TABLE Drivers ADD COLUMN State TEXT;", connection))
                 {
                     cmd.ExecuteNonQuery();
                 }

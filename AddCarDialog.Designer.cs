@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace RCDragManager
 {
@@ -13,37 +14,37 @@ namespace RCDragManager
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null)) components.Dispose();
+            if (disposing && (components != null))
+                components.Dispose();
             base.Dispose(disposing);
         }
 
         private void InitializeComponent()
         {
-            this.Text = "Add Car";
-            this.ClientSize = new System.Drawing.Size(400, 250);
-            this.StartPosition = FormStartPosition.CenterParent;
+            this.Text = "Add / Edit Car";
+            this.ClientSize = new Size(450, 250);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.StartPosition = FormStartPosition.CenterParent;
 
-            lblCarName = new Label() { Text = "Car Name:", Location = new System.Drawing.Point(20, 20) };
-            txtCarName = new TextBox() { Location = new System.Drawing.Point(120, 20), Width = 240 };
+            lblCarName = new Label() { Text = "Car Name:", Location = new Point(20, 20), AutoSize = true };
+            txtCarName = new TextBox() { Location = new Point(140, 20), Width = 250 };
 
-            lblClassType = new Label() { Text = "Class Type:", Location = new System.Drawing.Point(20, 60) };
-            rbHeadsUp = new RadioButton() { Text = "Heads Up", Location = new System.Drawing.Point(120, 60) };
-            rbDial = new RadioButton() { Text = "Dial", Location = new System.Drawing.Point(220, 60) };
-            rbIndex = new RadioButton() { Text = "Index", Location = new System.Drawing.Point(300, 60) };
+            lblClassType = new Label() { Text = "Class Type:", Location = new Point(20, 60), AutoSize = true };
+            rbHeadsUp = new RadioButton() { Text = "Heads Up", Location = new Point(140, 60), AutoSize = true, Checked = true };
+            rbDial = new RadioButton() { Text = "Dial", Location = new Point(240, 60), AutoSize = true };
+            rbIndex = new RadioButton() { Text = "Index", Location = new Point(320, 60), AutoSize = true };
 
-            lblDialIn = new Label() { Text = "Dial-In:", Location = new System.Drawing.Point(20, 100) };
-            txtDialIn = new TextBox() { Location = new System.Drawing.Point(120, 100), Width = 100 };
+            lblDialIn = new Label() { Text = "Dial-In:", Location = new Point(20, 100), AutoSize = true };
+            txtDialIn = new TextBox() { Location = new Point(140, 100), Width = 100, Enabled = false };
 
-            btnOK = new Button() { Text = "OK", Location = new System.Drawing.Point(80, 160) };
-            btnCancel = new Button() { Text = "Cancel", Location = new System.Drawing.Point(220, 160), DialogResult = DialogResult.Cancel };
+            btnOK = new Button() { Text = "OK", Location = new Point(100, 160), Size = new Size(100, 40) };
+            btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 160), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
 
             btnOK.Click += new EventHandler(this.btnOK_Click);
-            rbHeadsUp.CheckedChanged += new EventHandler(this.rbHeadsUp_CheckedChanged);
-            rbDial.CheckedChanged += new EventHandler(this.rbDial_CheckedChanged);
-            rbIndex.CheckedChanged += new EventHandler(this.rbIndex_CheckedChanged);
+            rbHeadsUp.CheckedChanged += new EventHandler(this.ClassTypeChanged);
+            rbDial.CheckedChanged += new EventHandler(this.ClassTypeChanged);
+            rbIndex.CheckedChanged += new EventHandler(this.ClassTypeChanged);
 
             this.Controls.AddRange(new Control[] {
                 lblCarName, txtCarName,

@@ -22,7 +22,7 @@ namespace RCDragManager
         private void InitializeComponent()
         {
             this.Text = "Add Driver and Car";
-            this.ClientSize = new Size(450, 320);
+            this.ClientSize = new Size(450, 250);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterParent;
@@ -41,8 +41,8 @@ namespace RCDragManager
             lblDialIn = new Label() { Text = "Dial-In:", Location = new Point(20, 140), AutoSize = true };
             txtDialIn = new TextBox() { Location = new Point(140, 140), Width = 100, Enabled = false };
 
-            btnOK = new Button() { Text = "OK", Location = new Point(100, 220), Size = new Size(100, 40) };
-            btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 220), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
+            btnOK = new Button() { Text = "OK", Location = new Point(100, 190), Size = new Size(100, 40) };
+            btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 190), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
 
             btnOK.Click += new EventHandler(this.btnOK_Click);
             rbHeadsUp.CheckedChanged += new EventHandler(this.ClassTypeChanged);

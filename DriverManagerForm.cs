@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace RCDragManager
 {
@@ -15,10 +16,10 @@ namespace RCDragManager
             string dbPath = "race_data.db";
             repository = new DriverRepository(dbPath);
 
-
             SetupDriverDetailsGrid();
             LoadDrivers();
         }
+
         public DriverManagerForm(DriverRepository repo)
         {
             InitializeComponent();
@@ -68,10 +69,11 @@ namespace RCDragManager
 
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Name", selectedDriver.Name }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] {
-    "Qual Time",
-    selectedDriver.QualTime.HasValue ? selectedDriver.QualTime.Value.ToString("0.000") : ""
-}));
+                "Qual Time",
+                selectedDriver.QualTime.HasValue ? selectedDriver.QualTime.Value.ToString("0.000") : ""
+            }));
 
+            lvDriverDetails.Items.Add(new ListViewItem(new[] { "State", selectedDriver.State ?? "" }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Notes", selectedDriver.Notes ?? "" }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Wins", selectedDriver.TotalWins.ToString() }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Losses", selectedDriver.TotalLosses.ToString() }));
@@ -87,26 +89,41 @@ namespace RCDragManager
             }
         }
 
-        // ================= ADD DRIVER =================
+        // ADD DRIVER — now uses AddDriverAndCarDialog
 
         private void btnAddDriver_Click(object sender, EventArgs e)
         {
-            var dlg = new AddDriverDialog();
-            if (dlg.ShowDialog() == DialogResult.OK)
+            using (var dlg = new AddDriverAndCarDialog())
             {
-                var newDriver = new Driver
+                if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    Name = dlg.DriverName,
-                    QualTime = dlg.QualTime,
-                    Notes = ""
-                };
+                    var newDriver = new Driver
+                    {
+                        Name = dlg.DriverName,
+                        Notes = "",
+                        TotalWins = 0,
+                        TotalLosses = 0,
+                        EventsEntered = 0,
+                        EventsWon = 0,
+                        State = "", // no state on initial add
+                        Cars = new List<Car>()
+                    };
 
-                repository.AddDriver(newDriver);
-                LoadDrivers();
+                    var newCar = new Car
+                    {
+                        CarName = dlg.CarName,
+                        ClassType = dlg.ClassType,
+                        DefaultDialIn = dlg.DialIn
+                    };
+
+                    newDriver.Cars.Add(newCar);
+                    repository.AddDriver(newDriver);
+                    LoadDrivers();
+                }
             }
         }
 
-        // ================= EDIT DRIVER =================
+        // EDIT DRIVER — now uses EditDriverDialog
 
         private void btnEditDriver_Click(object sender, EventArgs e)
         {
@@ -116,20 +133,18 @@ namespace RCDragManager
                 return;
             }
 
-            var dlg = new AddDriverDialog();
-            dlg.DriverName = selectedDriver.Name;
-            dlg.QualTime = selectedDriver.QualTime ?? 0.0;
-
+            var dlg = new EditDriverDialog(selectedDriver.Name, selectedDriver.State);
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 selectedDriver.Name = dlg.DriverName;
-                selectedDriver.QualTime = dlg.QualTime;
+                selectedDriver.State = dlg.State;
                 repository.UpdateDriver(selectedDriver);
                 LoadDrivers();
+                LoadDriverDetails();
             }
         }
 
-        // ================= DELETE DRIVER =================
+        // DELETE DRIVER
 
         private void btnDeleteDriver_Click(object sender, EventArgs e)
         {
@@ -149,7 +164,7 @@ namespace RCDragManager
             }
         }
 
-        // ================= ADD CAR =================
+        // ADD CAR
 
         private void btnAddCar_Click(object sender, EventArgs e)
         {
@@ -168,7 +183,7 @@ namespace RCDragManager
             }
         }
 
-        // ================= EDIT CAR =================
+        // EDIT CAR
 
         private void btnEditCar_Click(object sender, EventArgs e)
         {
@@ -178,23 +193,55 @@ namespace RCDragManager
                 return;
             }
 
-            var dlg = new SelectCarDialog(selectedDriver.Cars);
-            if (dlg.ShowDialog() == DialogResult.OK)
+            if (lvDriverDetails.SelectedItems.Count == 0)
             {
-                var car = dlg.SelectedCar;
-                var editDlg = new AddCarDialog(car);
-                if (editDlg.ShowDialog() == DialogResult.OK)
+                MessageBox.Show("Select a car from the list below to edit.");
+                return;
+            }
+
+            var selectedItem = lvDriverDetails.SelectedItems[0];
+
+            // Skip non-car rows
+            if (selectedItem.Text != "Car")
+            {
+                MessageBox.Show("Please select a Car row to edit.");
+                return;
+            }
+
+            // Determine which car row this is (since we add "--- Cars ---" first)
+            int carListIndex = 0;
+            int rowIndex = lvDriverDetails.Items.IndexOf(selectedItem);
+
+            // Find first Car row in list to calculate offset
+            for (int i = 0; i < lvDriverDetails.Items.Count; i++)
+            {
+                if (lvDriverDetails.Items[i].Text == "--- Cars ---")
                 {
-                    car.CarName = editDlg.NewCar.CarName;
-                    car.ClassType = editDlg.NewCar.ClassType;
-                    car.DefaultDialIn = editDlg.NewCar.DefaultDialIn;
-                    repository.UpdateDriver(selectedDriver);
-                    LoadDriverDetails();
+                    carListIndex = rowIndex - i - 1;
+                    break;
                 }
+            }
+
+            if (carListIndex < 0 || carListIndex >= selectedDriver.Cars.Count)
+            {
+                MessageBox.Show("Could not match selected car.");
+                return;
+            }
+
+            var car = selectedDriver.Cars[carListIndex];
+            var editDlg = new AddCarDialog(car);
+            if (editDlg.ShowDialog() == DialogResult.OK)
+            {
+                car.CarName = editDlg.NewCar.CarName;
+                car.ClassType = editDlg.NewCar.ClassType;
+                car.DefaultDialIn = editDlg.NewCar.DefaultDialIn;
+                repository.UpdateDriver(selectedDriver);
+                LoadDriverDetails();
             }
         }
 
-        // ================= DELETE CAR =================
+
+        // DELETE CAR
 
         private void btnDeleteCar_Click(object sender, EventArgs e)
         {
@@ -204,17 +251,51 @@ namespace RCDragManager
                 return;
             }
 
-            var dlg = new SelectCarDialog(selectedDriver.Cars);
-            if (dlg.ShowDialog() == DialogResult.OK)
+            if (lvDriverDetails.SelectedItems.Count == 0)
             {
-                var car = dlg.SelectedCar;
-                selectedDriver.Cars.Remove(car);
+                MessageBox.Show("Select a car from the list below to delete.");
+                return;
+            }
+
+            var selectedItem = lvDriverDetails.SelectedItems[0];
+
+            if (selectedItem.Text != "Car")
+            {
+                MessageBox.Show("Please select a Car row to delete.");
+                return;
+            }
+
+            int carListIndex = 0;
+            int rowIndex = lvDriverDetails.Items.IndexOf(selectedItem);
+
+            for (int i = 0; i < lvDriverDetails.Items.Count; i++)
+            {
+                if (lvDriverDetails.Items[i].Text == "--- Cars ---")
+                {
+                    carListIndex = rowIndex - i - 1;
+                    break;
+                }
+            }
+
+            if (carListIndex < 0 || carListIndex >= selectedDriver.Cars.Count)
+            {
+                MessageBox.Show("Could not match selected car.");
+                return;
+            }
+
+            var car = selectedDriver.Cars[carListIndex];
+
+            var confirm = MessageBox.Show($"Delete car '{car.CarName}'?", "Confirm Delete", MessageBoxButtons.YesNo);
+            if (confirm == DialogResult.Yes)
+            {
+                selectedDriver.Cars.RemoveAt(carListIndex);
                 repository.UpdateDriver(selectedDriver);
                 LoadDriverDetails();
             }
         }
 
-        // ================= SAVE CHANGES (not yet used) =================
+
+        // SAVE & CLOSE
 
         private void btnSaveChanges_Click(object sender, EventArgs e)
         {
@@ -224,6 +305,5 @@ namespace RCDragManager
             }
             this.Close();
         }
-
     }
 }
