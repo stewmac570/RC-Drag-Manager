@@ -233,5 +233,21 @@ namespace RCDragManagerProd
             }
             return cars;
         }
+
+        public void UpdateQualifyingTime(int driverId, double qualTime)
+        {
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "UPDATE Drivers SET QualTime = @QualTime WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@QualTime", qualTime);
+                    command.Parameters.AddWithValue("@Id", driverId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }

@@ -17,6 +17,8 @@ namespace RCDragManagerProd
         private Button btnEditCar;
         private Button btnDeleteCar;
         private Button btnSaveChanges;
+        private Button btnSetQualTime;
+
 
         protected override void Dispose(bool disposing)
         {
@@ -108,6 +110,15 @@ namespace RCDragManagerProd
             this.btnDeleteCar.Text = "Delete Car";
             this.btnDeleteCar.Click += new System.EventHandler(this.btnDeleteCar_Click);
             this.Controls.Add(this.btnDeleteCar);
+
+            // btnSetQualTime
+            this.btnSetQualTime = new Button();
+            this.btnSetQualTime.Location = new Point(722, 260);
+            this.btnSetQualTime.Size = new Size(150, 40);
+            this.btnSetQualTime.Text = "Set Qual Time";
+            this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
+            this.Controls.Add(this.btnSetQualTime);
+
 
             // btnSaveChanges
             this.btnSaveChanges.Location = new Point(722, 530);
