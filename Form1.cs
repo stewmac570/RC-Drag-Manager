@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -140,18 +141,23 @@ namespace RCDragManagerProd
             ProcessMatchWinner(false);
         }
 
-        private void ProcessMatchWinner(bool winner1)
+        private void UpdateDriverStats(Driver winner, Driver loser)
         {
-            var nextMatch = GetNextUnresolvedMatch();
-            if (nextMatch != null)
-            {
-                var (driver1, driver2) = engine.ResolveDriversForMatch(nextMatch);
-                engine.SetWinner(nextMatch.MatchId, winner1 ? driver1 : driver2);
+            var repo = new DriverRepository("race_data.db");
 
-                RedrawFullBracket();
-                UpdateNextUp();
-                UpdateWinnersList();
-                UpdateButtonStates();
+            var winnerInDb = repo.GetDriverById(winner.Id);
+            var loserInDb = repo.GetDriverById(loser.Id);
+
+            if (winnerInDb != null)
+            {
+                winnerInDb.TotalWins += 1;
+                repo.UpdateDriver(winnerInDb);
+            }
+
+            if (loserInDb != null)
+            {
+                loserInDb.TotalLosses += 1;
+                repo.UpdateDriver(loserInDb);
             }
         }
 
@@ -304,5 +310,57 @@ namespace RCDragManagerProd
             MessageBox.Show("Save and Close logic not implemented yet.");
             this.Close();
         }
+
+        private void ProcessMatchWinner(bool winner1)
+        {
+            var nextMatch = GetNextUnresolvedMatch();
+            if (nextMatch != null)
+            {
+                var (driver1, driver2) = engine.ResolveDriversForMatch(nextMatch);
+                var winner = winner1 ? driver1 : driver2;
+                var loser = winner1 ? driver2 : driver1;
+
+                engine.SetWinner(nextMatch.MatchId, winner);
+
+                // ✅ Update Wins/Losses
+                UpdateDriverStats(winner, loser);
+
+                // ✅ Check if tournament complete → update EventsWon
+                if (engine.IsTournamentComplete())
+                {
+                    UpdateEventWinnerStats();
+                }
+
+                RedrawFullBracket();
+                UpdateNextUp();
+                UpdateWinnersList();
+                UpdateButtonStates();
+            }
+        }
+
+        private void UpdateEventWinnerStats()
+        {
+            var finalMatch = engine.GetBracketMatches().FirstOrDefault(m => m.RoundLabel == "F");
+            if (finalMatch != null)
+            {
+                var tournamentWinner = engine.Results.GetWinner(finalMatch.MatchId);
+                if (tournamentWinner != null)
+                {
+                    var repo = new DriverRepository("race_data.db");
+                    var winnerInDb = repo.GetDriverById(tournamentWinner.Id);
+                    if (winnerInDb != null)
+                    {
+                        winnerInDb.EventsWon += 1;
+                        repo.UpdateDriver(winnerInDb);
+                    }
+                }
+            }
+        }
+
     }
+
+
+
+
+
 }
