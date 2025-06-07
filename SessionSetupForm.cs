@@ -118,7 +118,6 @@ namespace RCDragManagerProd
             var addDialog = new AddDriverAndCarDialog();
             if (addDialog.ShowDialog() == DialogResult.OK)
             {
-                // Create new Driver
                 var newDriver = new Driver
                 {
                     Name = addDialog.DriverName,
@@ -126,10 +125,8 @@ namespace RCDragManagerProd
                 };
                 repository.AddDriver(newDriver);
 
-                // Reload to get DriverID assigned
                 var insertedDriver = repository.GetAllDrivers().First(d => d.Name == newDriver.Name);
 
-                // Create new Car
                 var newCar = new Car
                 {
                     CarName = addDialog.CarName,
@@ -164,16 +161,35 @@ namespace RCDragManagerProd
                 RaceType = cmbRaceType.SelectedItem.ToString(),
                 ClassType = classType,
                 FixedDialIn = fixedDial,
-                DriverEntries = eventRoster.Select(er => new RaceSessionDriverEntry
+                DriverEntries = eventRoster.Select(er =>
                 {
-                    DriverID = er.driver.Id,
-                    DriverName = er.driver.Name,
-                    CarID = er.car.CarID,
-                    CarName = er.car.CarName,
-                    ClassType = er.car.ClassType,
-                    DialIn = er.car.DefaultDialIn,
-                    QualifyingTime = null,
-                    Seed = null
+                    double? dialIn = null;
+                    double? qualTime = null;
+
+                    if (classType == "Heads Up")
+                    {
+                        qualTime = er.driver.QualTime;
+                    }
+                    else if (classType == "Dial-In")
+                    {
+                        dialIn = er.car.DefaultDialIn;
+                    }
+                    else if (classType == "Bracket Class")
+                    {
+                        dialIn = fixedDial;
+                    }
+
+                    return new RaceSessionDriverEntry
+                    {
+                        DriverID = er.driver.Id,
+                        DriverName = er.driver.Name,
+                        CarID = er.car.CarID,
+                        CarName = er.car.CarName,
+                        ClassType = er.car.ClassType,
+                        DialIn = dialIn,
+                        QualifyingTime = qualTime,
+                        Seed = null
+                    };
                 }).ToList()
             };
 

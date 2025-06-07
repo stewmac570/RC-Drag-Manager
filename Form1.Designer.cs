@@ -26,6 +26,7 @@ namespace RCDragManagerProd
         private Label lblWinnersHeader;
         private Button btnReset;
         private Button btnEditResult;
+        private Button btnSaveAndClose;
 
         protected override void Dispose(bool disposing)
         {
@@ -54,6 +55,7 @@ namespace RCDragManagerProd
             this.lblWinnersHeader = new Label();
             this.btnReset = new Button();
             this.btnEditResult = new Button();
+            this.btnSaveAndClose = new Button();
             this.lblEventTitle = new Label();
 
             this.SuspendLayout();
@@ -157,6 +159,12 @@ namespace RCDragManagerProd
             this.btnEditResult.Text = "Edit Match Result";
             this.btnEditResult.Click += new System.EventHandler(this.btnEditResult_Click);
 
+            // btnSaveAndClose
+            this.btnSaveAndClose.Location = new Point(678, 560);
+            this.btnSaveAndClose.Size = new Size(200, 40);
+            this.btnSaveAndClose.Text = "Save and Close";
+            this.btnSaveAndClose.Click += new System.EventHandler(this.btnSaveAndClose_Click);
+
             // lblEventTitle
             this.lblEventTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             this.lblEventTitle.Location = new Point(20, 10);
@@ -165,7 +173,7 @@ namespace RCDragManagerProd
             this.lblEventTitle.TextAlign = ContentAlignment.MiddleCenter;
 
             // Form1
-            this.ClientSize = new Size(900, 600);
+            this.ClientSize = new Size(900, 630);
             this.Controls.Add(this.lblEventTitle);
             this.Controls.Add(this.lblPairingsHeader);
             this.Controls.Add(this.lblDriversHeader);
@@ -183,6 +191,7 @@ namespace RCDragManagerProd
             this.Controls.Add(this.btnEditDriver);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnEditResult);
+            this.Controls.Add(this.btnSaveAndClose);
             this.Controls.Add(this.lblNext);
             this.Name = "Form1";
             this.Text = "RC Drag Manager Stable Build";

@@ -10,7 +10,7 @@ namespace RCDragManagerProd
         private List<Driver> drivers = new List<Driver>();
         private MatchEngine engine = new MatchEngine();
         private RaceSession currentSession;
-        private string currentRound = "R1";
+        private List<string> revealedRounds = new List<string>();
 
         public Form1(RaceSession session = null)
         {
@@ -37,11 +37,18 @@ namespace RCDragManagerProd
 
             foreach (var entry in currentSession.DriverEntries)
             {
+                double timeToUse = 0.0;
+
+                if (currentSession.ClassType == "Heads Up")
+                    timeToUse = entry.QualifyingTime ?? 0.0;
+                else
+                    timeToUse = entry.DialIn ?? 0.0;
+
                 Driver driver = new Driver
                 {
                     Id = entry.DriverID,
                     Name = entry.DriverName,
-                    QualTime = entry.QualifyingTime ?? 0.0
+                    QualTime = timeToUse
                 };
                 drivers.Add(driver);
             }
@@ -112,11 +119,13 @@ namespace RCDragManagerProd
             }
 
             engine.Initialize(drivers);
-            currentRound = "R1";
-            UpdateFullPairingList();
+            revealedRounds.Clear();
+            revealedRounds.Add("R1");
+
+            RedrawFullBracket();
             UpdateNextUp();
             UpdateWinnersList();
-            UpdateNextRoundButtonState();
+            UpdateButtonStates();
 
             btnGenerateBracket.Enabled = false;
         }
@@ -133,62 +142,73 @@ namespace RCDragManagerProd
 
         private void ProcessMatchWinner(bool winner1)
         {
-            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
-            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
-
-            if (match != null)
+            var nextMatch = GetNextUnresolvedMatch();
+            if (nextMatch != null)
             {
-                var (driver1, driver2) = engine.ResolveDriversForMatch(match);
-                engine.SetWinner(match.MatchId, winner1 ? driver1 : driver2);
+                var (driver1, driver2) = engine.ResolveDriversForMatch(nextMatch);
+                engine.SetWinner(nextMatch.MatchId, winner1 ? driver1 : driver2);
 
-                UpdateFullPairingList();
+                RedrawFullBracket();
                 UpdateNextUp();
                 UpdateWinnersList();
-                UpdateNextRoundButtonState();
+                UpdateButtonStates();
             }
+        }
+
+        private ProLadder.LadderMatch GetNextUnresolvedMatch()
+        {
+            return engine.GetBracketMatches()
+                .Where(m => revealedRounds.Contains(m.RoundLabel))
+                .FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
         }
 
         private void btnNextRound_Click(object sender, EventArgs e)
         {
-            if (!IsCurrentRoundComplete())
+            var nextRound = GetNextHiddenRound();
+            if (nextRound != null)
             {
-                MessageBox.Show("Current round not complete yet.");
-                return;
+                revealedRounds.Add(nextRound);
+                RedrawFullBracket();
+                UpdateNextUp();
+                UpdateWinnersList();
+                UpdateButtonStates();
             }
-
-            currentRound = GetNextRoundLabel(currentRound);
-            UpdateFullPairingList();
-            UpdateNextUp();
-            UpdateWinnersList();
-            UpdateNextRoundButtonState();
         }
 
-        private string GetNextRoundLabel(string round)
+        private string GetNextHiddenRound()
         {
-            switch (round)
+            var allRounds = engine.GetBracketMatches().Select(m => m.RoundLabel).Distinct().OrderBy(r => GetRoundOrder(r)).ToList();
+            foreach (var round in allRounds)
             {
-                case "R1": return "SF";
-                case "SF": return "F";
-                default: return "COMPLETE";
+                if (!revealedRounds.Contains(round))
+                    return round;
             }
+            return null;
         }
 
-        private void UpdateFullPairingList()
+        private void RedrawFullBracket()
         {
             lstFullPairings.Items.Clear();
 
-            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
-            foreach (var match in matches)
+            var matchesGrouped = engine.GetBracketMatches().GroupBy(m => m.RoundLabel);
+            foreach (var group in matchesGrouped.OrderBy(g => GetRoundOrder(g.Key)))
             {
-                var (driver1, driver2) = engine.ResolveDriversForMatch(match);
-                lstFullPairings.Items.Add($"{match.RoundLabel}: {driver1.Name} vs {driver2.Name}");
+                if (!revealedRounds.Contains(group.Key))
+                    continue;
+
+                lstFullPairings.Items.Add($"---- {group.Key} ----");
+
+                foreach (var match in group)
+                {
+                    var (driver1, driver2) = engine.ResolveDriversForMatch(match);
+                    lstFullPairings.Items.Add($"{driver1.Name} vs {driver2.Name}");
+                }
             }
         }
 
         private void UpdateNextUp()
         {
-            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
-            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+            var match = GetNextUnresolvedMatch();
 
             if (match != null)
             {
@@ -212,36 +232,46 @@ namespace RCDragManagerProd
             }
         }
 
-        private void UpdateNextRoundButtonState()
+        private void UpdateButtonStates()
         {
-            btnNextRound.Enabled = IsCurrentRoundComplete();
-        }
-
-        private bool IsCurrentRoundComplete()
-        {
-            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
-            return matches.All(m => engine.Results.IsMatchResolved(m.MatchId));
+            btnNextRound.Enabled = (GetNextHiddenRound() != null);
         }
 
         private void UpdateWinnersList()
         {
             lstWinners.Items.Clear();
 
-            var allMatches = engine.GetBracketMatches();
-            foreach (var match in allMatches)
+            var matchesGrouped = engine.GetBracketMatches()
+                .Where(m => engine.Results.IsMatchResolved(m.MatchId))
+                .GroupBy(m => m.RoundLabel);
+
+            foreach (var group in matchesGrouped.OrderBy(g => GetRoundOrder(g.Key)))
             {
-                if (engine.Results.IsMatchResolved(match.MatchId))
+                lstWinners.Items.Add($"---- {group.Key} ----");
+                foreach (var match in group)
                 {
                     var winner = engine.Results.GetWinner(match.MatchId);
-                    lstWinners.Items.Add($"{match.RoundLabel}: {winner.Name}");
+                    lstWinners.Items.Add($"{winner.Name}");
                 }
+            }
+        }
+
+        private int GetRoundOrder(string roundLabel)
+        {
+            switch (roundLabel)
+            {
+                case "R1": return 1;
+                case "R2": return 2;
+                case "QF": return 3;
+                case "SF": return 4;
+                case "F": return 5;
+                default: return 99;
             }
         }
 
         private void btnEditResult_Click(object sender, EventArgs e)
         {
-            var matches = engine.GetBracketMatches().Where(m => m.RoundLabel == currentRound).ToList();
-            var match = matches.FirstOrDefault(m => !engine.Results.IsMatchResolved(m.MatchId));
+            var match = GetNextUnresolvedMatch();
 
             if (match != null)
             {
@@ -250,10 +280,10 @@ namespace RCDragManagerProd
                 if (editDialog.ShowDialog() == DialogResult.OK)
                 {
                     engine.SetWinner(match.MatchId, editDialog.SelectedWinner);
-                    UpdateFullPairingList();
+                    RedrawFullBracket();
                     UpdateNextUp();
                     UpdateWinnersList();
-                    UpdateNextRoundButtonState();
+                    UpdateButtonStates();
                 }
             }
         }
@@ -261,23 +291,18 @@ namespace RCDragManagerProd
         private void btnReset_Click(object sender, EventArgs e)
         {
             engine = new MatchEngine();
-            currentRound = "R1";
+            revealedRounds.Clear();
             lstFullPairings.Items.Clear();
             lstWinners.Items.Clear();
             lblNext.Text = "";
-
             btnGenerateBracket.Enabled = true;
-            btnNextRound.Enabled = false;
-            btnWinner1.Enabled = false;
-            btnWinner2.Enabled = false;
+            UpdateButtonStates();
         }
 
-        private void UpdateButtonStates()
+        private void btnSaveAndClose_Click(object sender, EventArgs e)
         {
-            btnGenerateBracket.Enabled = true;
-            btnNextRound.Enabled = false;
-            btnWinner1.Enabled = false;
-            btnWinner2.Enabled = false;
+            MessageBox.Show("Save and Close logic not implemented yet.");
+            this.Close();
         }
     }
 }
