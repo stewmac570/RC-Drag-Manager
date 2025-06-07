@@ -295,6 +295,35 @@ namespace RCDragManagerProd
         }
 
 
+        private void btnSetQualTime_Click(object sender, EventArgs e)
+        {
+            if (lstDrivers.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a driver first.");
+                return;
+            }
+
+            string selectedText = lstDrivers.SelectedItem.ToString();
+            int driverId = int.Parse(selectedText.Split(':')[0]);
+
+            var driver = repository.GetDriverById(driverId);
+            var dialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime);
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                if (dialog.QualifyingTime.HasValue)
+                {
+                    repository.UpdateQualifyingTime(driverId, dialog.QualifyingTime.Value);
+                    LoadDrivers();
+                    lstDrivers.SelectedIndex = lstDrivers.Items
+                        .Cast<string>()
+                        .ToList()
+                        .FindIndex(item => item.StartsWith(driverId.ToString() + ":"));
+                }
+            }
+        }
+
+
         // SAVE & CLOSE
 
         private void btnSaveChanges_Click(object sender, EventArgs e)

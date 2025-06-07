@@ -72,6 +72,12 @@
     <Compile Include="AddDriverDialog.Designer.cs">
       <DependentUpon>AddDriverDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddEditQualTimeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddEditQualTimeDialog.Designer.cs">
+      <DependentUpon>AddEditQualTimeDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Car.cs" />
     <Compile Include="CarRepository.cs" />
     <Compile Include="DatabaseInitializer.cs" />
