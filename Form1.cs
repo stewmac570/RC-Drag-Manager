@@ -120,9 +120,37 @@ namespace RCDragManagerProd
                 var driver = drivers.FirstOrDefault(d => d.Name == selectedName);
                 if (driver != null)
                 {
-                    txtName.Text = driver.Name;
-                    txtTime.Text = (driver.QualTime ?? 0.0).ToString("0.000");
+                    // ✅ Final safe constructor call with 2 string parameters
+                    var editDialog = new EditDriverDialog(driver.Name, "");
+                    if (editDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        driver.Name = editDialog.DriverName;
+                        UpdateDriverList();
+                    }
                 }
+            }
+        }
+
+
+        private void btnSetQualTime_Click(object sender, EventArgs e)
+        {
+            if (lvDrivers.SelectedItems.Count > 0)
+            {
+                string selectedName = lvDrivers.SelectedItems[0].Text;
+                var driver = drivers.FirstOrDefault(d => d.Name == selectedName);
+                if (driver != null)
+                {
+                    var qualDialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime);
+                    if (qualDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        driver.QualTime = qualDialog.QualifyingTime;
+                        UpdateDriverList();
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Select a driver to edit qualifying time.");
             }
         }
 
@@ -272,8 +300,13 @@ namespace RCDragManagerProd
 
         private void UpdateButtonStates()
         {
-            btnNextRound.Enabled = (GetNextHiddenRound() != null);
+            bool anyUnresolved = engine.GetBracketMatches()
+                .Where(m => revealedRounds.Contains(m.RoundLabel))
+                .Any(m => !engine.Results.IsMatchResolved(m.MatchId));
+
+            btnNextRound.Enabled = (!anyUnresolved && GetNextHiddenRound() != null);
         }
+
 
         private void UpdateWinnersList()
         {
@@ -341,7 +374,8 @@ namespace RCDragManagerProd
         {
             if (currentSession == null)
             {
-                MessageBox.Show("No session data available to save.");
+                MessageBox.Show("Quick Session completed. No session file saved.");
+                this.Close();
                 return;
             }
 
@@ -379,6 +413,7 @@ namespace RCDragManagerProd
             MessageBox.Show("Race session saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.Close();
         }
+
 
         private void ProcessMatchWinner(bool winner1)
         {
