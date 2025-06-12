@@ -157,6 +157,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaceSession.cs" />
     <Compile Include="RaceSessionRepository.cs" />
+    <Compile Include="RandomBracket.cs" />
+    <Compile Include="RandomMatch.cs" />
+    <Compile Include="RandomMatchEngine.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
