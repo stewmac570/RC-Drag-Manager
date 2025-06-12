@@ -51,7 +51,7 @@ namespace RCDragManagerProd
         {
             var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
             var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
-            return (d1 ?? new Driver { Name = "TBD" }, d2 ?? new Driver { Name = "TBD" });
+            return (d1 ?? new Driver { Name = "Bye" }, d2 ?? new Driver { Name = "Bye" });
         }
 
         private Driver ResolveDriver(int? seed, int? fromMatch)
