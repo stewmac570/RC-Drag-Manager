@@ -333,7 +333,8 @@ namespace RCDragManagerProd
             {
                 case "R1": return 1;
                 case "R2": return 2;
-                case "QF": return 3;
+                case "R3": return 3;
+                //case "QF": return 3; // Optional, if used for 8-car stage
                 case "SF": return 4;
                 case "F": return 5;
                 default: return 99;
