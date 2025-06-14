@@ -5,34 +5,39 @@ namespace RCDragManagerProd
 {
     public class MatchResult
     {
-        private Dictionary<int, Driver> winners = new Dictionary<int, Driver>();
+        private Dictionary<int, (Driver Winner, Driver Loser)> results = new Dictionary<int, (Driver, Driver)>();
 
-        public void SetWinner(int matchId, Driver winner)
+
+        public void SetWinner(int matchId, Driver winner, Driver loser)
         {
-            winners[matchId] = winner;
+            results[matchId] = (winner, loser);
         }
+
 
         public Driver GetWinner(int matchId)
         {
-            return winners.ContainsKey(matchId) ? winners[matchId] : null;
+            return results.ContainsKey(matchId) ? results[matchId].Winner : null;
         }
+
 
         public bool HasResult(int matchId)
         {
-            return winners.ContainsKey(matchId);
+            return results.ContainsKey(matchId);
+
         }
 
         public bool IsMatchResolved(int matchId)
         {
-            return winners.ContainsKey(matchId);
+            return results.ContainsKey(matchId);
+
         }
 
         public void ClearFromMatch(int matchId)
         {
-            var keysToRemove = winners.Keys.Where(k => k >= matchId).ToList();
+            var keysToRemove = results.Keys.Where(k => k >= matchId).ToList();
             foreach (var key in keysToRemove)
             {
-                winners.Remove(key);
+                results.Remove(key);
             }
         }
 
@@ -41,9 +46,15 @@ namespace RCDragManagerProd
             var finalMatch = bracketMatches.FirstOrDefault(m => m.RoundLabel == "F");
             if (finalMatch != null)
             {
-                return winners.ContainsKey(finalMatch.MatchId);
+                return results.ContainsKey(finalMatch.MatchId);
+
             }
             return false;
         }
+        public Driver GetLoser(int matchId)
+        {
+            return results.ContainsKey(matchId) ? results[matchId].Loser : null;
+        }
+
     }
 }

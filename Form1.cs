@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,11 +13,15 @@ namespace RCDragManagerProd
         private RaceSession currentSession;
         private List<string> revealedRounds = new List<string>();
         private RaceSessionRepository sessionRepository = new RaceSessionRepository("race_data.db");
+        private ComboBox cmbRaceType;
+        private Label lblRaceType;
+
 
         public Form1(RaceSession session = null)
         {
             InitializeComponent();
             currentSession = session;
+            
 
             if (currentSession != null)
             {
@@ -27,6 +32,18 @@ namespace RCDragManagerProd
             else
             {
                 lblEventTitle.Text = "Quick Session";
+            }
+            cmbRaceType.Visible = (currentSession == null);
+            lblRaceType.Visible = (currentSession == null);
+
+            if (currentSession == null)
+            {
+                cmbRaceType.SelectedIndex = 0; // Default to Pro Ladder
+            }
+            else
+            {
+                // Set the combo to match the session's race type, if you want to display it anyway
+                cmbRaceType.SelectedItem = currentSession.RaceType;
             }
 
             UpdateDriverList();
@@ -64,27 +81,28 @@ namespace RCDragManagerProd
                 drivers[i].Seed = i + 1;
             }
 
-            engine.Initialize(drivers);
+            engine = new MatchEngine(); // don’t auto-initialize bracket
 
             revealedRounds = currentSession.SavedRevealedRounds ?? new List<string>();
-            if (revealedRounds.Count == 0)
-            {
-                revealedRounds.Add("R1");
-            }
 
-            foreach (var result in currentSession.SavedResults)
+            // Don’t auto-add R1 unless session was in progress
+            if (revealedRounds.Count > 0)
             {
-                var winner = drivers.FirstOrDefault(d => d.Id == result.WinnerDriverId);
-                if (winner != null)
+                engine.Initialize(drivers);
+                foreach (var result in currentSession.SavedResults)
                 {
-                    engine.SetWinner(result.MatchId, winner);
+                    var winner = drivers.FirstOrDefault(d => d.Id == result.WinnerDriverId);
+                    if (winner != null)
+                    {
+                        engine.SetWinner(result.MatchId, winner);
+                    }
                 }
+
+                RedrawFullBracket();
+                UpdateNextUp();
+                UpdateWinnersList();
             }
 
-            RedrawFullBracket();
-            UpdateNextUp();
-            UpdateWinnersList();
-            UpdateButtonStates();
         }
 
         private void btnAddDriver_Click(object sender, EventArgs e)
@@ -254,7 +272,7 @@ namespace RCDragManagerProd
 
         private void RedrawFullBracket()
         {
-            lstFullPairings.Items.Clear();
+            lvPairings.Items.Clear();
 
             var matchesGrouped = engine.GetBracketMatches().GroupBy(m => m.RoundLabel);
             foreach (var group in matchesGrouped.OrderBy(g => GetRoundOrder(g.Key)))
@@ -262,12 +280,32 @@ namespace RCDragManagerProd
                 if (!revealedRounds.Contains(group.Key))
                     continue;
 
-                lstFullPairings.Items.Add($"---- {group.Key} ----");
+                // Round label
+                var roundHeader = new ListViewItem(""); // M# column empty
+                roundHeader.SubItems.Add($"Round {group.Key.Replace("R", "")}");
+                roundHeader.SubItems.Add(""); // Driver 2 column
+                roundHeader.BackColor = Color.LightGray;
+                roundHeader.Font = new Font("Segoe UI", 9F, FontStyle.Italic); // or roundHeader.Font
+               
+
+
+
+                roundHeader.BackColor = Color.LightGray;
+                lvPairings.Items.Add(roundHeader);
 
                 foreach (var match in group)
                 {
                     var (driver1, driver2) = engine.ResolveDriversForMatch(match);
-                    lstFullPairings.Items.Add($"{driver1.Name} vs {driver2.Name}");
+                    string name1 = driver1.Name == "TBD" ? "BYE" : driver1.Name;
+                    string name2 = driver2.Name == "TBD" ? "BYE" : driver2.Name;
+
+                    var item = new ListViewItem($"M{match.MatchId}");
+                    item.SubItems.Add(name1);
+                    item.SubItems.Add(name2);
+
+                    item.SubItems.Add(driver1.Name);
+                    item.SubItems.Add(driver2.Name);
+                    lvPairings.Items.Add(item);
                 }
             }
         }
@@ -280,13 +318,20 @@ namespace RCDragManagerProd
             {
                 var (driver1, driver2) = engine.ResolveDriversForMatch(match);
 
-                lblNext.Text = $"{driver1.Name} vs {driver2.Name}";
+                string name1 = driver1.Name == "TBD" ? "BYE" : driver1.Name;
+                string name2 = driver2.Name == "TBD" ? "BYE" : driver2.Name;
+
+                lblNext.Text = $"{name1} vs {name2}";
+
+                btnWinner1.Text = name1;
+                btnWinner2.Text = name2;
+
 
                 btnWinner1.Text = driver1.Name;
                 btnWinner2.Text = driver2.Name;
 
-                btnWinner1.Enabled = (driver1.Name != "BYE" && driver1.Name != "TBD");
-                btnWinner2.Enabled = (driver2.Name != "BYE" && driver2.Name != "TBD");
+                btnWinner1.Enabled = (name1 != "BYE");
+                btnWinner2.Enabled = (name2 != "BYE");
             }
             else
             {
@@ -310,7 +355,7 @@ namespace RCDragManagerProd
 
         private void UpdateWinnersList()
         {
-            lstWinners.Items.Clear();
+            lvWinners.Items.Clear();
 
             var matchesGrouped = engine.GetBracketMatches()
                 .Where(m => engine.Results.IsMatchResolved(m.MatchId))
@@ -318,14 +363,27 @@ namespace RCDragManagerProd
 
             foreach (var group in matchesGrouped.OrderBy(g => GetRoundOrder(g.Key)))
             {
-                lstWinners.Items.Add($"---- {group.Key} ----");
+                var roundHeader = new ListViewItem("");
+                roundHeader.SubItems.Add($"Round {GetRoundName(group.Key)}");
+                roundHeader.SubItems.Add("");
+                roundHeader.BackColor = Color.LightGray;
+                roundHeader.Font = new Font(roundHeader.Font, FontStyle.Italic);
+                lvWinners.Items.Add(roundHeader);
+
                 foreach (var match in group)
                 {
                     var winner = engine.Results.GetWinner(match.MatchId);
-                    lstWinners.Items.Add($"{winner.Name}");
+                    var (driver1, driver2) = engine.ResolveDriversForMatch(match);
+                    var loser = (winner.Id == driver1.Id) ? driver2 : driver1;
+
+                    var item = new ListViewItem($"M{match.MatchId}");
+                    item.SubItems.Add(loser.Name);
+                    item.SubItems.Add(winner.Name);
+                    lvWinners.Items.Add(item);
                 }
             }
         }
+
 
         private int GetRoundOrder(string roundLabel)
         {
@@ -364,8 +422,8 @@ namespace RCDragManagerProd
         {
             engine = new MatchEngine();
             revealedRounds.Clear();
-            lstFullPairings.Items.Clear();
-            lstWinners.Items.Clear();
+            lvPairings.Items.Clear();
+            lvWinners.Items.Clear();
             lblNext.Text = "";
             btnGenerateBracket.Enabled = true;
             UpdateButtonStates();
@@ -399,10 +457,13 @@ namespace RCDragManagerProd
                 if (engine.Results.IsMatchResolved(match.MatchId))
                 {
                     var winner = engine.Results.GetWinner(match.MatchId);
+                    var loser = engine.Results.GetLoser(match.MatchId);
+
                     currentSession.SavedResults.Add(new MatchResultSave
                     {
                         MatchId = match.MatchId,
-                        WinnerDriverId = winner.Id
+                        WinnerDriverId = winner.Id,
+                        LoserDriverId = loser?.Id ?? 0
                     });
                 }
             }
@@ -416,6 +477,7 @@ namespace RCDragManagerProd
         }
 
 
+
         private void ProcessMatchWinner(bool winner1)
         {
             var nextMatch = GetNextUnresolvedMatch();
@@ -425,7 +487,8 @@ namespace RCDragManagerProd
                 var winner = winner1 ? driver1 : driver2;
                 var loser = winner1 ? driver2 : driver1;
 
-                engine.SetWinner(nextMatch.MatchId, winner);
+                engine.SetWinner(nextMatch.MatchId, winner, loser);
+
 
                 UpdateDriverStats(winner, loser);
 
@@ -459,5 +522,19 @@ namespace RCDragManagerProd
                 }
             }
         }
+        private string GetRoundName(string code)
+        {
+            switch (code)
+            {
+                case "R1": return "1";
+                case "R2": return "2";
+                case "R3": return "3";
+                case "SF": return "SF";
+                case "F": return "F";
+                default: return code;
+            }
+        }
+
+
     }
 }

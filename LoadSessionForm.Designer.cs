@@ -37,17 +37,9 @@
             this.lvSessions.TabIndex = 0;
             this.lvSessions.UseCompatibleStateImageBehavior = false;
             this.lvSessions.View = System.Windows.Forms.View.Details;
-
-            // btnDelete
-            this.btnDelete.Location = new System.Drawing.Point(486, 510);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(90, 40);
-            this.btnDelete.TabIndex = 2;
-            this.btnDelete.Text = "Delete";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-
+            // 
             // btnLoad
+            // 
             this.btnLoad.Location = new System.Drawing.Point(644, 510);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(90, 40);
@@ -55,8 +47,19 @@
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
-
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.Location = new System.Drawing.Point(50, 510);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(90, 40);
+            this.btnDelete.TabIndex = 2;
+            this.btnDelete.Text = "Delete";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
             // btnCancel
+            // 
             this.btnCancel.Location = new System.Drawing.Point(762, 510);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(90, 40);
@@ -64,7 +67,6 @@
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-
             // 
             // LoadSessionForm
             // 
