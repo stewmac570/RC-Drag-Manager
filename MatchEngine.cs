@@ -51,11 +51,12 @@ namespace RCDragManagerProd
             // Nothing needed here anymore.
         }
 
-        public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
-        {
-            var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
-            var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
-            return (d1 ?? new Driver { Name = "BYE" }, d2 ?? new Driver { Name = "BYE" });
+public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
+{
+    var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
+    var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
+    return (d1 ?? new Driver { Name = "BYE" }, d2 ?? new Driver { Name = "BYE" });
+}
 
         }
 
