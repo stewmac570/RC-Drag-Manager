@@ -15,8 +15,14 @@ namespace RCDragManagerProd
         private ListView lvDrivers;
         private ColumnHeader colName;
         private ColumnHeader colTime;
-        private ListBox lstWinners;
-        private ListBox lstFullPairings;
+        private ListView lvWinners;
+        private ColumnHeader colMatchWin;
+        private ColumnHeader colLoser;
+        private ColumnHeader colWinner;
+        private ListView lvPairings;
+        private ColumnHeader colMatch;
+        private ColumnHeader colDriver1;
+        private ColumnHeader colDriver2;
         private Button btnWinner1;
         private Button btnWinner2;
         private Button btnEditDriver;
@@ -45,8 +51,10 @@ namespace RCDragManagerProd
             this.lvDrivers = new System.Windows.Forms.ListView();
             this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.lstWinners = new System.Windows.Forms.ListBox();
-            this.lstFullPairings = new System.Windows.Forms.ListBox();
+            this.lvPairings = new System.Windows.Forms.ListView();
+            this.colMatch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDriver1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDriver2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnWinner1 = new System.Windows.Forms.Button();
             this.btnWinner2 = new System.Windows.Forms.Button();
             this.btnEditDriver = new System.Windows.Forms.Button();
@@ -59,20 +67,26 @@ namespace RCDragManagerProd
             this.btnEditResult = new System.Windows.Forms.Button();
             this.btnSaveAndClose = new System.Windows.Forms.Button();
             this.lblEventTitle = new System.Windows.Forms.Label();
+            this.lvWinners = new System.Windows.Forms.ListView();
+            this.colMatchWin = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colLoser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colWinner = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.lblRaceType = new System.Windows.Forms.Label();
+            this.cmbRaceType = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // txtName
             // 
             this.txtName.Location = new System.Drawing.Point(250, 80);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(185, 20);
+            this.txtName.Size = new System.Drawing.Size(185, 26);
             this.txtName.TabIndex = 7;
             // 
             // txtTime
             // 
             this.txtTime.Location = new System.Drawing.Point(455, 80);
             this.txtTime.Name = "txtTime";
-            this.txtTime.Size = new System.Drawing.Size(80, 20);
+            this.txtTime.Size = new System.Drawing.Size(80, 26);
             this.txtTime.TabIndex = 8;
             // 
             // btnAddDriver
@@ -127,19 +141,35 @@ namespace RCDragManagerProd
             this.colTime.Text = "Qual Time";
             this.colTime.Width = 100;
             // 
-            // lstWinners
+            // lvPairings
             // 
-            this.lstWinners.Location = new System.Drawing.Point(678, 80);
-            this.lstWinners.Name = "lstWinners";
-            this.lstWinners.Size = new System.Drawing.Size(200, 355);
-            this.lstWinners.TabIndex = 6;
+            this.lvPairings.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colMatch,
+            this.colDriver1,
+            this.colDriver2});
+            this.lvPairings.HideSelection = false;
+            this.lvPairings.Location = new System.Drawing.Point(20, 80);
+            this.lvPairings.MultiSelect = false;
+            this.lvPairings.Name = "lvPairings";
+            this.lvPairings.Size = new System.Drawing.Size(200, 355);
+            this.lvPairings.TabIndex = 4;
+            this.lvPairings.UseCompatibleStateImageBehavior = false;
+            this.lvPairings.View = System.Windows.Forms.View.Details;
             // 
-            // lstFullPairings
+            // colMatch
             // 
-            this.lstFullPairings.Location = new System.Drawing.Point(20, 80);
-            this.lstFullPairings.Name = "lstFullPairings";
-            this.lstFullPairings.Size = new System.Drawing.Size(200, 355);
-            this.lstFullPairings.TabIndex = 4;
+            this.colMatch.Text = "M#";
+            this.colMatch.Width = 40;
+            // 
+            // colDriver1
+            // 
+            this.colDriver1.Text = "Driver 1";
+            this.colDriver1.Width = 75;
+            // 
+            // colDriver2
+            // 
+            this.colDriver2.Text = "Driver 2";
+            this.colDriver2.Width = 75;
             // 
             // btnWinner1
             // 
@@ -244,16 +274,67 @@ namespace RCDragManagerProd
             this.lblEventTitle.Text = "Event:";
             this.lblEventTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // lvWinners
+            // 
+            this.lvWinners.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colMatchWin,
+            this.colLoser,
+            this.colWinner});
+            this.lvWinners.HideSelection = false;
+            this.lvWinners.Location = new System.Drawing.Point(678, 80);
+            this.lvWinners.MultiSelect = false;
+            this.lvWinners.Name = "lvWinners";
+            this.lvWinners.Size = new System.Drawing.Size(200, 355);
+            this.lvWinners.TabIndex = 6;
+            this.lvWinners.UseCompatibleStateImageBehavior = false;
+            this.lvWinners.View = System.Windows.Forms.View.Details;
+            // 
+            // colMatchWin
+            // 
+            this.colMatchWin.Text = "M#";
+            this.colMatchWin.Width = 40;
+            // 
+            // colLoser
+            // 
+            this.colLoser.Text = "Loser";
+            this.colLoser.Width = 75;
+            // 
+            // colWinner
+            // 
+            this.colWinner.Text = "Winner";
+            this.colWinner.Width = 75;
+            // 
+            // lblRaceType
+            // 
+            this.lblRaceType.Location = new System.Drawing.Point(12, 9);
+            this.lblRaceType.Name = "lblRaceType";
+            this.lblRaceType.Size = new System.Drawing.Size(100, 20);
+            this.lblRaceType.TabIndex = 0;
+            this.lblRaceType.Text = "Race Type:";
+            // 
+            // cmbRaceType
+            // 
+            this.cmbRaceType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRaceType.Items.AddRange(new object[] {
+            "Pro Ladder",
+            "Randomized",
+            "Round Robin"});
+            this.cmbRaceType.Location = new System.Drawing.Point(118, 6);
+            this.cmbRaceType.Name = "cmbRaceType";
+            this.cmbRaceType.Size = new System.Drawing.Size(150, 28);
+            this.cmbRaceType.TabIndex = 50;
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(900, 600);
+            this.Controls.Add(this.lblRaceType);
+            this.Controls.Add(this.cmbRaceType);
             this.Controls.Add(this.lblEventTitle);
             this.Controls.Add(this.lblPairingsHeader);
             this.Controls.Add(this.lblDriversHeader);
             this.Controls.Add(this.lblWinnersHeader);
-            this.Controls.Add(this.lstFullPairings);
+            this.Controls.Add(this.lvPairings);
             this.Controls.Add(this.lvDrivers);
-            this.Controls.Add(this.lstWinners);
             this.Controls.Add(this.txtName);
             this.Controls.Add(this.txtTime);
             this.Controls.Add(this.btnAddDriver);
@@ -267,11 +348,13 @@ namespace RCDragManagerProd
             this.Controls.Add(this.btnEditResult);
             this.Controls.Add(this.btnSaveAndClose);
             this.Controls.Add(this.lblNext);
+            this.Controls.Add(this.lvWinners);
             this.Name = "Form1";
             this.Text = "RC Drag Manager Stable Build";
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
+
     }
 }

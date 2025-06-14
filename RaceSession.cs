@@ -34,5 +34,7 @@ namespace RCDragManagerProd
     {
         public int MatchId { get; set; }
         public int WinnerDriverId { get; set; }
+        public int LoserDriverId { get; set; }  // ✅ NEW
     }
+
 }

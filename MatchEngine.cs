@@ -27,9 +27,13 @@ namespace RCDragManagerProd
                 .ToDictionary(d => d.Seed.Value, d => d);
         }
 
+        public void SetWinner(int matchId, Driver winner, Driver loser)
+        {
+            Results.SetWinner(matchId, winner, loser);
+        }
         public void SetWinner(int matchId, Driver winner)
         {
-            Results.SetWinner(matchId, winner);
+            Results.SetWinner(matchId, winner, null);
         }
 
         public IReadOnlyList<ProLadder.LadderMatch> GetBracketMatches()
@@ -51,7 +55,8 @@ namespace RCDragManagerProd
         {
             var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
             var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
-            return (d1 ?? new Driver { Name = "TBD" }, d2 ?? new Driver { Name = "TBD" });
+            return (d1 ?? new Driver { Name = "BYE" }, d2 ?? new Driver { Name = "BYE" });
+
         }
 
         private Driver ResolveDriver(int? seed, int? fromMatch)
