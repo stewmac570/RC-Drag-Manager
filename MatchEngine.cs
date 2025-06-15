@@ -58,7 +58,7 @@ public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
     return (d1 ?? new Driver { Name = "BYE" }, d2 ?? new Driver { Name = "BYE" });
 }
 
-        }
+        
 
         private Driver ResolveDriver(int? seed, int? fromMatch)
         {
