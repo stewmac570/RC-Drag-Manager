@@ -89,7 +89,7 @@ namespace RCDragManagerProd
             }
         }
 
-        // ADD DRIVER — now uses AddDriverAndCarDialog
+        // ADD DRIVER
 
         private void btnAddDriver_Click(object sender, EventArgs e)
         {
@@ -105,7 +105,7 @@ namespace RCDragManagerProd
                         TotalLosses = 0,
                         EventsEntered = 0,
                         EventsWon = 0,
-                        State = "", // no state on initial add
+                        State = "",
                         Cars = new List<Car>()
                     };
 
@@ -123,7 +123,7 @@ namespace RCDragManagerProd
             }
         }
 
-        // EDIT DRIVER — now uses EditDriverDialog
+        // EDIT DRIVER
 
         private void btnEditDriver_Click(object sender, EventArgs e)
         {
@@ -174,14 +174,16 @@ namespace RCDragManagerProd
                 return;
             }
 
-            var dlg = new AddCarDialog();
+            var dlg = new AddCarDialog(); // ✅ NO PARAMS — you're ADDING a new car
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                selectedDriver.Cars.Add(dlg.NewCar);
+                selectedDriver.Cars.Add(dlg.NewCar); // ✅ NewCar is correct
                 repository.UpdateDriver(selectedDriver);
                 LoadDriverDetails();
             }
         }
+
+
 
         // EDIT CAR
 
@@ -201,18 +203,15 @@ namespace RCDragManagerProd
 
             var selectedItem = lvDriverDetails.SelectedItems[0];
 
-            // Skip non-car rows
             if (selectedItem.Text != "Car")
             {
                 MessageBox.Show("Please select a Car row to edit.");
                 return;
             }
 
-            // Determine which car row this is (since we add "--- Cars ---" first)
             int carListIndex = 0;
             int rowIndex = lvDriverDetails.Items.IndexOf(selectedItem);
 
-            // Find first Car row in list to calculate offset
             for (int i = 0; i < lvDriverDetails.Items.Count; i++)
             {
                 if (lvDriverDetails.Items[i].Text == "--- Cars ---")
@@ -228,18 +227,19 @@ namespace RCDragManagerProd
                 return;
             }
 
-            var car = selectedDriver.Cars[carListIndex];
-            var editDlg = new AddCarDialog(car);
-            if (editDlg.ShowDialog() == DialogResult.OK)
+            Car car = selectedDriver.Cars[carListIndex];
+            AddCarDialog dlg = new AddCarDialog(car);
+
+            if (dlg.ShowDialog() == DialogResult.OK)
             {
-                car.CarName = editDlg.NewCar.CarName;
-                car.ClassType = editDlg.NewCar.ClassType;
-                car.DefaultDialIn = editDlg.NewCar.DefaultDialIn;
+                car.CarName = dlg.NewCar.CarName;
+                car.ClassType = dlg.NewCar.ClassType;
+                car.DefaultDialIn = dlg.NewCar.DefaultDialIn;
+
                 repository.UpdateDriver(selectedDriver);
                 LoadDriverDetails();
             }
         }
-
 
         // DELETE CAR
 
@@ -294,6 +294,7 @@ namespace RCDragManagerProd
             }
         }
 
+        // SET QUAL TIME
 
         private void btnSetQualTime_Click(object sender, EventArgs e)
         {
@@ -322,7 +323,6 @@ namespace RCDragManagerProd
                 }
             }
         }
-
 
         // SAVE & CLOSE
 
