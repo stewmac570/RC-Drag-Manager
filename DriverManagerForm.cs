@@ -53,6 +53,7 @@ namespace RCDragManagerProd
             {
                 selectedDriver = null;
                 lvDriverDetails.Items.Clear();
+                btnDriverStats.Enabled = false; // Disable button if no driver selected
                 return;
             }
 
@@ -60,7 +61,10 @@ namespace RCDragManagerProd
             int driverId = int.Parse(selected.Split(':')[0]);
             selectedDriver = repository.GetDriverById(driverId);
             LoadDriverDetails();
+
+            btnDriverStats.Enabled = true; // Enable button when driver selected
         }
+
 
         private void LoadDriverDetails()
         {
@@ -334,5 +338,22 @@ namespace RCDragManagerProd
             }
             this.Close();
         }
+
+
+        // BUTTON CLICK EVENT: Show Driver Stats
+        private void btnDriverStats_Click(object sender, EventArgs e)
+        {
+            if (selectedDriver == null)
+            {
+                MessageBox.Show("Select a driver first.");
+                return;
+            }
+
+            using (var statsForm = new DriverStatsForm(selectedDriver, "race_data.db"))
+            {
+                statsForm.ShowDialog();
+            }
+        }
+
     }
 }

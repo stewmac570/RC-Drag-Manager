@@ -120,6 +120,12 @@
     </Compile>
     <Compile Include="DriverRepository.cs" />
     <Compile Include="Drivers.cs" />
+    <Compile Include="DriverStatsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DriverStatsForm.Designer.cs">
+      <DependentUpon>DriverStatsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,6 +157,7 @@
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MatchEngine.cs" />
+    <Compile Include="MatchLookupHelper.cs" />
     <Compile Include="MatchResult.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProLadder.cs" />
