@@ -113,8 +113,8 @@ namespace RCDragManagerProd
 
             grpDriverSelection.Controls.AddRange(new Control[] { btnAddNewDriver, btnAddDriverFromList, lvEventRoster });
 
-            btnStartRace = new Button() { Text = "Start Race", Location = new Point(300, 540), Size = new Size(140, 40) };
-            btnCancel = new Button() { Text = "Cancel", Location = new Point(460, 540), Size = new Size(140, 40) };
+            btnStartRace = new Button() { Text = "Start Race", Location = new Point(570, 540), Size = new Size(140, 40) };
+            btnCancel = new Button() { Text = "Cancel", Location = new Point(720, 540), Size = new Size(140, 40) };
 
             Controls.AddRange(new Control[] { btnStartRace, btnCancel });
         }
