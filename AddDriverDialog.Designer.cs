@@ -1,37 +1,44 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace RCDragManagerProd
 {
-    public partial class AddDriverDialog : Form
+    partial class AddDriverDialog
     {
-        public string DriverName { get; set; }
-        public double QualTime { get; set; }
+        private Label lblName;
+        private Label lblQualTime;
+        private TextBox txtName;
+        private TextBox txtQualTime;
+        private Button btnOK;
+        private Button btnCancel;
 
-        public AddDriverDialog()
+        private void InitializeComponent()
         {
-            InitializeComponent();
-        }
+            this.Text = "Add Driver";
+            this.ClientSize = new Size(400, 200);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.StartPosition = FormStartPosition.CenterParent;
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            string name = txtName.Text.Trim();
+            lblName = new Label { Text = "Driver Name:", Location = new Point(20, 20), AutoSize = true };
+            txtName = new TextBox { Location = new Point(140, 20), Width = 200 };
 
-            if (string.IsNullOrEmpty(name))
+            lblQualTime = new Label { Text = "Qualifying Time:", Location = new Point(20, 60), AutoSize = true };
+            txtQualTime = new TextBox { Location = new Point(140, 60), Width = 100 };
+
+            btnOK = new Button { Text = "OK", Location = new Point(80, 120), Size = new Size(100, 35) };
+            btnCancel = new Button { Text = "Cancel", Location = new Point(200, 120), Size = new Size(100, 35), DialogResult = DialogResult.Cancel };
+
+            btnOK.Click += new EventHandler(this.btnOK_Click);
+
+            this.Controls.AddRange(new Control[]
             {
-                MessageBox.Show("Please enter a driver name.");
-                return;
-            }
-
-            if (!double.TryParse(txtQualTime.Text.Trim(), out double qualTime))
-            {
-                MessageBox.Show("Please enter a valid qualifying time.");
-                return;
-            }
-
-            DriverName = name;
-            QualTime = qualTime;
-            DialogResult = DialogResult.OK;
+                lblName, txtName,
+                lblQualTime, txtQualTime,
+                btnOK, btnCancel
+            });
         }
     }
 }

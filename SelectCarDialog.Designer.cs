@@ -18,6 +18,9 @@
             this.lstCars = new System.Windows.Forms.ListBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.Size = new System.Drawing.Size(80, 30);
+
 
             this.SuspendLayout();
 
