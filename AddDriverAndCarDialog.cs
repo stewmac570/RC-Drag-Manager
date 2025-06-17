@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace RCDragManagerProd
@@ -49,16 +48,9 @@ namespace RCDragManagerProd
 
         private void ClassTypeChanged(object sender, EventArgs e)
         {
+            txtDialIn.Enabled = !rbHeadsUp.Checked;
             if (rbHeadsUp.Checked)
-            {
-                txtDialIn.Enabled = false;
                 txtDialIn.Text = "";
-            }
-            else
-            {
-                txtDialIn.Enabled = true;
-            }
         }
-
     }
 }
