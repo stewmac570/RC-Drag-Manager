@@ -156,6 +156,7 @@
     <Compile Include="LoadSessionForm.Designer.cs">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LosersBracketEngine.cs" />
     <Compile Include="MatchEngine.cs" />
     <Compile Include="MatchLookupHelper.cs" />
     <Compile Include="MatchResult.cs" />
@@ -167,6 +168,8 @@
     <Compile Include="RandomBracket.cs" />
     <Compile Include="RandomMatch.cs" />
     <Compile Include="RandomMatchEngine.cs" />
+    <Compile Include="RoundRobinEngine.cs" />
+    <Compile Include="RoundRobinRanker.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
