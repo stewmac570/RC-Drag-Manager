@@ -50,14 +50,26 @@ namespace RCDragManagerProd
 
         public (Driver, Driver) ResolveDrivers(RandomMatch match)
         {
+            // ✅ Return real drivers if already resolved
+            if (results.HasResult(match.MatchId))
+            {
+                var winner = results.GetWinner(match.MatchId);
+                var loser = results.GetLoser(match.MatchId);
+                return (winner, loser);
+            }
+
+            // ✅ Resolve from seeding or upstream match results
             Driver d1 = match.Seed1 ?? ResolveFrom(match.FromMatch1);
             Driver d2 = match.Seed2 ?? ResolveFrom(match.FromMatch2);
 
-            if (d1 == null) d1 = new Driver { Name = "TBD" };
-            if (d2 == null) d2 = new Driver { Name = "TBD" };
+            // ✅ Inject BYE only if one side is real
+            if (d1 != null && d2 == null) return (d1, new Driver { Name = "BYE" });
+            if (d2 != null && d1 == null) return (new Driver { Name = "BYE" }, d2);
 
+            // ✅ If both are null, upstreams aren’t resolved yet
             return (d1, d2);
         }
+
 
         private Driver ResolveFrom(int? fromMatchId)
         {
@@ -79,5 +91,19 @@ namespace RCDragManagerProd
         {
             results.ClearFromMatch(matchId);
         }
+        public Driver GetLoser(int matchId)
+        {
+            var match = bracketMatches.FirstOrDefault(m => m.MatchId == matchId);
+            if (match == null) return null;
+
+            var winner = results.GetWinner(matchId);
+            if (winner == null) return null;
+
+            if (match.Seed1 == winner) return match.Seed2;
+            if (match.Seed2 == winner) return match.Seed1;
+
+            return null;
+        }
+
     }
 }
