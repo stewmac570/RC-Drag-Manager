@@ -11,9 +11,13 @@ namespace RCDragManagerProd
         public string RaceType { get; set; }
         public string ClassType { get; set; }
         public double? FixedDialIn { get; set; }
+
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
 
-        // 🔥 NEW: Save Results & Rounds
+        // 🆕 persistent pairing-history for random draw mode
+        public HashSet<(int, int)> PairingHistory { get; set; } = new HashSet<(int, int)>();
+
+        // existing save-state fields
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
         public List<string> SavedRevealedRounds { get; set; } = new List<string>();
     }
@@ -34,7 +38,6 @@ namespace RCDragManagerProd
     {
         public int MatchId { get; set; }
         public int WinnerDriverId { get; set; }
-        public int LoserDriverId { get; set; }  // ✅ NEW
+        public int LoserDriverId { get; set; }
     }
-
 }

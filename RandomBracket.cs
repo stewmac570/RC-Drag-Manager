@@ -10,42 +10,36 @@ namespace RCDragManagerProd
 
         public static List<RandomMatch> GenerateFirstRound(List<Driver> drivers)
         {
-            int count = drivers.Count;
-            int rounds = (int)Math.Ceiling(Math.Log(count) / Math.Log(2));
-            int bracketSize = (int)Math.Pow(2, rounds);
-            int byes = bracketSize - count;
-
+            // 1️⃣ shuffle the entrants
             List<Driver> shuffled = drivers.OrderBy(d => rng.Next()).ToList();
-            List<RandomMatch> matches = new List<RandomMatch>();
-            List<Driver> active = new List<Driver>();
-            int matchId = 1;
 
-            for (int i = 0; i < byes; i++)
+            List<RandomMatch> matches = new List<RandomMatch>();
+            int matchId = 1;
+            int i = 0;
+
+            // 2️⃣ pair straight down the list
+            while (i + 1 < shuffled.Count)
             {
-                var byeDriver = shuffled[i];
                 matches.Add(new RandomMatch
                 {
                     MatchId = matchId++,
-                    Seed1 = byeDriver,
-                    Seed2 = null,
+                    Seed1 = shuffled[i],
+                    Seed2 = shuffled[i + 1],
                     FromMatch1 = null,
                     FromMatch2 = null,
                     RoundLabel = "R1"
                 });
+                i += 2;
             }
 
-            for (int i = byes; i < shuffled.Count; i++)
-            {
-                active.Add(shuffled[i]);
-            }
-
-            for (int i = 0; i < active.Count; i += 2)
+            // 3️⃣ if odd driver-count, give the last driver a single BYE
+            if (i < shuffled.Count)
             {
                 matches.Add(new RandomMatch
                 {
                     MatchId = matchId++,
-                    Seed1 = active[i],
-                    Seed2 = active[i + 1],
+                    Seed1 = shuffled[i],
+                    Seed2 = null,          // BYE slot
                     FromMatch1 = null,
                     FromMatch2 = null,
                     RoundLabel = "R1"
@@ -54,6 +48,9 @@ namespace RCDragManagerProd
 
             return matches;
         }
+
+
+
 
         public static List<RandomMatch> GenerateNextRound(List<Driver> remainingDrivers, HashSet<(int, int)> pairingHistory)
         {
