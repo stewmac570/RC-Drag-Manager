@@ -305,6 +305,8 @@ namespace RCDragManagerProd
 
         private void btnNextRound_Click(object sender, EventArgs e)
         {
+            var history = currentSession.PairingHistory ?? new HashSet<(int, int)>();
+
             string raceType = currentSession?.RaceType ?? cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
 
             // ──────────────────────────────────────────────────────────────
@@ -343,7 +345,7 @@ namespace RCDragManagerProd
             if (advancingDrivers.Count < 2) return;
 
             // 2️⃣ Build complete pairing history (avoid rematches)
-            var history = new HashSet<(int, int)>();
+            
             foreach (var m in randomEngine.GetMatches().Where(m => randomEngine.HasWinner(m.MatchId)))
             {
                 var w = randomEngine.GetWinner(m.MatchId);
@@ -790,6 +792,23 @@ namespace RCDragManagerProd
             }
 
             currentSession.SavedRevealedRounds = new List<string>(revealedRounds);
+
+            // build and store pairing-history if this session used random draw
+            if (IsRandomMode(currentSession.RaceType) && randomEngine != null)
+            {
+                var hist = new HashSet<(int, int)>();
+                foreach (var m in randomEngine.GetMatches().Where(m => randomEngine.HasWinner(m.MatchId)))
+                {
+                    var w = randomEngine.GetWinner(m.MatchId);
+                    var l = randomEngine.GetLoser(m.MatchId);
+                    if (w != null && l != null)
+                        hist.Add(w.Id < l.Id ? (w.Id, l.Id) : (l.Id, w.Id));
+                }
+                currentSession.PairingHistory = hist;
+            }
+
+            // existing line — leave as-is
+            sessionRepository.SaveSession(currentSession);
 
             sessionRepository.SaveSession(currentSession);
 
