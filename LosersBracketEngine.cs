@@ -28,7 +28,8 @@ namespace RCDragManagerProd
             var pool = driverIds.OrderBy(_ => _rng.Next()).ToList();
 
             // bump to next power-of-two
-            int rounds = (int)Math.Ceiling(Math.Log2(pool.Count));
+            int rounds =
+            (int)Math.Ceiling(Math.Log(pool.Count, 2));
             int size = 1 << rounds;
             int byes = size - pool.Count;
 
