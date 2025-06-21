@@ -9,6 +9,7 @@ namespace RCDragManagerProd
         private List<Driver> allDrivers = new List<Driver>();
         private List<ProLadder.LadderMatch> bracketMatches = new List<ProLadder.LadderMatch>();
         private Dictionary<int, Driver> seedMap = new Dictionary<int, Driver>();
+        private readonly HashSet<int> _byeGiven = new HashSet<int>();
 
         public MatchResult Results { get; private set; } = new MatchResult();
 

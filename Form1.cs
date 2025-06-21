@@ -21,6 +21,8 @@ namespace RCDragManagerProd
         private int currentMatchIndex = 0;
 
 
+
+
         private bool IsRandomMode(string raceType)
         {
             return raceType?.IndexOf("random", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -594,11 +596,6 @@ namespace RCDragManagerProd
             }
         }
 
-
-
-
-
-
         private void UpdateNextUp()
         {
             string raceType = currentSession?.RaceType ?? cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
@@ -614,16 +611,17 @@ namespace RCDragManagerProd
                 var nextMatch = roundRobinEngine.GetMatches()
                                                 .Where(m => revealedRounds.Contains(m.RoundLabel))
                                                 .FirstOrDefault(m => !roundRobinEngine.HasWinner(m.MatchId));
+
                 if (nextMatch.MatchId == 0) goto AllResolved;
 
-                var (matchId, d1, d2, round) = nextMatch;
+                var (id, d1, d2, lbl) = nextMatch;
 
                 btnWinner1.Text = d1?.Name ?? "BYE";
                 btnWinner2.Text = d2?.Name ?? "BYE";
-                btnWinner1.Enabled = d1?.Name != "BYE";
-                btnWinner2.Enabled = d2?.Name != "BYE";
+                btnWinner1.Enabled = d1 != null && d1.Name != "BYE";
+                btnWinner2.Enabled = d2 != null && d2.Name != "BYE";
 
-                lblNext.Text = $"Next: {d1?.Name ?? "BYE"} vs {d2?.Name ?? "BYE"}";
+                lblNext.Text = $"Next: {btnWinner1.Text} vs {btnWinner2.Text}";
                 return;
             }
 
@@ -639,13 +637,12 @@ namespace RCDragManagerProd
 
                     btnWinner1.Text = d1?.Name ?? "BYE";
                     btnWinner2.Text = d2?.Name ?? "BYE";
-                    btnWinner1.Enabled = d1?.Name != "BYE";
-                    btnWinner2.Enabled = d2?.Name != "BYE";
+                    btnWinner1.Enabled = d1 != null && d1.Name != "BYE";
+                    btnWinner2.Enabled = d2 != null && d2.Name != "BYE";
 
-                    lblNext.Text = $"Next: {d1?.Name ?? "BYE"} vs {d2?.Name ?? "BYE"}";
+                    lblNext.Text = $"Next: {btnWinner1.Text} vs {btnWinner2.Text}";
                     return;
                 }
-
                 goto AllResolved;
             }
 
@@ -669,10 +666,10 @@ namespace RCDragManagerProd
 
                 btnWinner1.Text = d1?.Name ?? "BYE";
                 btnWinner2.Text = d2?.Name ?? "BYE";
-                btnWinner1.Enabled = d1?.Name != "BYE";
-                btnWinner2.Enabled = d2?.Name != "BYE";
+                btnWinner1.Enabled = d1 != null && d1.Name != "BYE";
+                btnWinner2.Enabled = d2 != null && d2.Name != "BYE";
 
-                lblNext.Text = $"Next: {d1?.Name ?? "BYE"} vs {d2?.Name ?? "BYE"}";
+                lblNext.Text = $"Next: {btnWinner1.Text} vs {btnWinner2.Text}";
                 return;
             }
 
@@ -680,9 +677,6 @@ namespace RCDragManagerProd
             lblNext.Text = "All matches resolved.";
             btnWinner1.Enabled = btnWinner2.Enabled = false;
         }
-
-
-
 
 
 
@@ -717,13 +711,26 @@ namespace RCDragManagerProd
             {
                 if (randomEngine != null && revealedRounds.Count > 0)
                 {
+                    // 1️⃣ Still-open matches?
                     anyUnresolved = randomEngine.GetMatches()
                                                 .Where(m => revealedRounds.Contains(m.RoundLabel))
                                                 .Any(m => !randomEngine.HasWinner(m.MatchId));
 
-                    moreRounds = GetNextHiddenRound() != null;
+                    // 2️⃣ Are there enough resolved winners in the **current** round
+                    //     to create another round?  (≥2 advancing drivers)
+                    string currentRound = revealedRounds.Last();
+                    int resolvedWinners = randomEngine.GetMatches()
+                                        .Where(m => m.RoundLabel == currentRound &&
+                                                    randomEngine.HasWinner(m.MatchId))
+                                        .Select(m => randomEngine.GetWinner(m.MatchId))
+                                        .Where(d => d != null)
+                                        .Distinct()
+                                        .Count();
+
+                    moreRounds = resolvedWinners > 1;
                 }
             }
+
             // ───────────────────────────────────────────
             // ROUND ROBIN
             // ───────────────────────────────────────────
