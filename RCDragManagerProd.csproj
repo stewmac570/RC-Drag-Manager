@@ -169,6 +169,7 @@
     <Compile Include="RandomBracket.cs" />
     <Compile Include="RandomMatch.cs" />
     <Compile Include="RandomMatchEngine.cs" />
+    <Compile Include="RoundRobinEngine.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -75,5 +75,11 @@ public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
         {
             Results.ClearFromMatch(matchId);
         }
+
+        public List<Driver> GetAllDrivers()
+        {
+            return allDrivers;
+        }
+
     }
 }
