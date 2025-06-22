@@ -18,49 +18,80 @@ namespace RCDragManagerProd
         public int Wins { get; set; }
         public int Losses { get; set; }
         public int[] DefeatedIds { get; set; } = Array.Empty<int>();
+        public double OpponentStrength { get; set; }
     }
 
     public sealed class RoundRobinRanker
     {
-        private static readonly Random _rng = new();
-
-        // winner lookup for each driver pair
         private readonly Dictionary<(int, int), int> _h2h = new();
 
         public List<DriverRankResult> Rank(
             List<RoundRobinMatchResult> results,
             List<Driver> drivers)
         {
-            // aggregate
             var stats = drivers.ToDictionary(d => d.Id, _ => new Aggregate());
 
-            foreach (var m in results.Where(r => r.WinnerId != 0))
+            foreach (var m in results)
             {
-                int loserId = (m.WinnerId == m.Driver1Id) ? m.Driver2Id : m.Driver1Id;
-                if (!stats.ContainsKey(m.WinnerId) || !stats.ContainsKey(loserId))
+                var pts = GetPoints(m.RoundLabel);
+
+                bool isBye = m.Driver2Id == 0 || m.Driver1Id == 0;
+                int? winnerId = m.WinnerId == 0 ? null : m.WinnerId;
+                int loserId = (m.Driver1Id != 0 && m.Driver2Id != 0 && m.WinnerId != 0)
+                    ? (m.WinnerId == m.Driver1Id ? m.Driver2Id : m.Driver1Id)
+                    : 0;
+
+                if (isBye && winnerId != null)
+                {
+                    stats[winnerId.Value].Points += pts.Bye;
                     continue;
+                }
 
-                double pts = PointsForRound(m.RoundLabel);
+                if (winnerId != null && loserId != 0)
+                {
+                    var w = stats[winnerId.Value];
+                    var l = stats[loserId];
 
-                var w = stats[m.WinnerId];
-                w.Points += pts;
-                w.Wins += 1;
-                w.Defeated.Add(loserId);
+                    w.Points += pts.Win;
+                    w.Wins += 1;
+                    w.Defeated.Add(loserId);
 
-                stats[loserId].Losses += 1;
+                    l.Points += pts.Loss;
+                    l.Losses += 1;
 
-                _h2h[PairKey(m.WinnerId, loserId)] = m.WinnerId;
+                    _h2h[PairKey(winnerId.Value, loserId)] = winnerId.Value;
+                }
             }
 
+            // Convert to list
             var table = stats.Select(kvp => new DriverRankResult
             {
                 DriverId = kvp.Key,
                 Points = kvp.Value.Points,
                 Wins = kvp.Value.Wins,
                 Losses = kvp.Value.Losses,
-                DefeatedIds = kvp.Value.Defeated.ToArray()
+                DefeatedIds = kvp.Value.Defeated.ToArray(),
+                OpponentStrength = 0
             }).ToList();
 
+            // Compute OpponentStrength
+            var pointLookup = table.ToDictionary(x => x.DriverId, x => x.Points);
+            foreach (var r in table)
+            {
+                double total = 0;
+                foreach (var m in results)
+                {
+                    if (pointLookup.ContainsKey(m.Driver2Id))
+                        total += pointLookup[m.Driver2Id];
+
+                    if (pointLookup.ContainsKey(m.Driver1Id))
+                        total += pointLookup[m.Driver1Id];
+
+                }
+                r.OpponentStrength = total;
+            }
+
+            // Rank sort
             table.Sort((a, b) =>
             {
                 int cmp = b.Points.CompareTo(a.Points); if (cmp != 0) return cmp;
@@ -72,25 +103,25 @@ namespace RCDragManagerProd
                     if (winner == b.DriverId) return 1;
                 }
 
-                // TODO opponent-strength tie-break
+                cmp = b.OpponentStrength.CompareTo(a.OpponentStrength); if (cmp != 0) return cmp;
 
-                return _rng.Next(-1, 2);
+                return a.DriverId.CompareTo(b.DriverId);
             });
 
             for (int i = 0; i < table.Count; i++) table[i].Rank = i + 1;
             return table;
         }
 
-        // helpers
         private static (int, int) PairKey(int a, int b) => (a < b) ? (a, b) : (b, a);
 
-        private static double PointsForRound(string lbl) => lbl?.ToUpperInvariant() switch
-        {
-            "R1" => 4.0,
-            "R2" => 3.5,
-            "R3" => 3.0,
-            _ => 0
-        };
+        private static (double Win, double Loss, double Bye) GetPoints(string lbl) =>
+            lbl?.ToUpperInvariant() switch
+            {
+                "R1" => (4.0, 1.0, 2.0),
+                "R2" => (3.5, 0.75, 1.5),
+                "R3" => (3.0, 0.5, 1.0),
+                _ => (0, 0, 0)
+            };
 
         private sealed class Aggregate
         {
