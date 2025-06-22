@@ -13,7 +13,9 @@ namespace RCDragManagerProd
         public int MatchId { get; set; }
         public int Driver1Id { get; set; }
         public int Driver2Id { get; set; }
-        public int WinnerId { get; set; }          // 0 = unresolved
+        public int WinnerId { get; set; }     // 0 = unresolved
+        public int LoserId { get; set; }      // 0 = unresolved or BYE
         public string RoundLabel { get; set; } = "";    // "R1","R2","R3"
     }
+
 }

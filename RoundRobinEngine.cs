@@ -100,5 +100,27 @@ namespace RCDragManagerProd
         {
             return matches.All(m => results.HasResult(m.MatchId));
         }
+        public List<RoundRobinMatchResult> GetResults()
+        {
+            return matches
+                .Where(m => results.HasResult(m.MatchId))
+                .Select(m =>
+                {
+                    var winner = results.GetWinner(m.MatchId);
+                    var loser = results.GetLoser(m.MatchId);
+
+                    return new RoundRobinMatchResult
+                    {
+                        MatchId = m.MatchId,
+                        RoundLabel = m.RoundLabel,
+                        Driver1Id = m.Driver1?.Id ?? 0,
+                        Driver2Id = m.Driver2?.Id ?? 0,
+                        WinnerId = winner?.Id ?? 0,
+                        LoserId = loser?.Id ?? 0
+                    };
+                })
+                .ToList();
+        }
+
     }
 }
