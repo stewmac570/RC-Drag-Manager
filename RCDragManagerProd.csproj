@@ -157,6 +157,7 @@
     <Compile Include="LoadSessionForm.Designer.cs">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LosersBracketBuilder.cs" />
     <Compile Include="LosersBracketEngine.cs" />
     <Compile Include="MatchEngine.cs" />
     <Compile Include="MatchLookupHelper.cs" />

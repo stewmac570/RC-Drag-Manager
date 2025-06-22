@@ -56,5 +56,23 @@ namespace RCDragManagerProd
             return results.ContainsKey(matchId) ? results[matchId].Loser : null;
         }
 
+        public HashSet<(int, int)> GetAllPairings()
+        {
+            var pairs = new HashSet<(int, int)>();
+
+            foreach (var kv in results.Values)
+            {
+                var w = kv.Winner;
+                var l = kv.Loser;
+                if (w == null || l == null) continue;
+
+                int a = w.Id;
+                int b = l.Id;
+                pairs.Add(a < b ? (a, b) : (b, a));
+            }
+
+            return pairs;
+        }
+
     }
 }
