@@ -749,17 +749,74 @@ namespace RCDragManagerProd
             btnNextRound.Enabled = !anyUnresolved && moreRounds;
         }
 
-
-
-
-
-
         private void UpdateWinnersList()
         {
             lvWinners.Items.Clear();
 
             string raceType = currentSession?.RaceType ?? cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
 
+            // ──────────────────────────────────────────────────────────────
+            // ROUND ROBIN
+            // ──────────────────────────────────────────────────────────────
+            if (raceType == "Round Robin")
+            {
+                if (roundRobinEngine == null) return;
+
+                // 🟩 Always show standings
+                var results = roundRobinEngine.GetResults();
+                var standings = new RoundRobinRanker().Rank(results, drivers);
+
+                var header = new ListViewItem("");
+                header.SubItems.Add("---- Round Robin Standings ----");
+                header.SubItems.Add("");
+                header.BackColor = Color.LightGray;
+                header.Font = new Font(header.Font, FontStyle.Italic);
+                lvWinners.Items.Add(header);
+
+                foreach (var rank in standings)
+                {
+                    var driver = drivers.FirstOrDefault(d => d.Id == rank.DriverId);
+                    if (driver != null)
+                    {
+                        var item = new ListViewItem($"{rank.Rank}");
+                        item.SubItems.Add(driver.Name);
+                        item.SubItems.Add($"{rank.Points:0.0} pts");
+                        lvWinners.Items.Add(item);
+                    }
+                }
+
+                // 🟦 Then show match results (after any round)
+                var completedMatches = roundRobinEngine.GetMatches()
+                                                       .Where(m => roundRobinEngine.HasWinner(m.MatchId))
+                                                       .GroupBy(m => m.RoundLabel);
+
+                foreach (var roundGroup in completedMatches.OrderBy(g => GetRoundOrder(g.Key)))
+                {
+                    var subheader = new ListViewItem("");
+                    subheader.SubItems.Add($"Round {roundGroup.Key.Replace("R", "")}");
+                    subheader.SubItems.Add("");
+                    subheader.BackColor = Color.LightGray;
+                    subheader.Font = new Font(subheader.Font, FontStyle.Italic);
+                    lvWinners.Items.Add(subheader);
+
+                    foreach (var match in roundGroup)
+                    {
+                        var winner = roundRobinEngine.GetWinner(match.MatchId);
+                        var loser = roundRobinEngine.GetLoser(match.MatchId);
+
+                        var item = new ListViewItem($"M{match.MatchId}");
+                        item.SubItems.Add(loser?.Name ?? "BYE");
+                        item.SubItems.Add(winner?.Name ?? "");
+                        lvWinners.Items.Add(item);
+                    }
+                }
+
+                return;
+            }
+
+            // ──────────────────────────────────────────────────────────────
+            // PRO LADDER
+            // ──────────────────────────────────────────────────────────────
             if (raceType == "Pro Ladder")
             {
                 var groups = engine.GetBracketMatches()
@@ -786,37 +843,43 @@ namespace RCDragManagerProd
                         lvWinners.Items.Add(item);
                     }
                 }
+
+                return;
             }
-            else   // ───────── RANDOMIZED ─────────
+
+            // ──────────────────────────────────────────────────────────────
+            // RANDOMIZED
+            // ──────────────────────────────────────────────────────────────
+            if (randomEngine == null) return;
+
+            var groupsRnd = randomEngine.GetMatches()
+                                        .Where(m => randomEngine.HasWinner(m.MatchId))
+                                        .GroupBy(m => m.RoundLabel);
+
+            foreach (var roundGroup in groupsRnd.OrderBy(g => GetRoundOrder(g.Key)))
             {
-                if (randomEngine == null) return;
+                var header = new ListViewItem("");
+                header.SubItems.Add($"Round {roundGroup.Key.Replace("R", "")}");
+                header.SubItems.Add("");
+                header.BackColor = Color.LightGray;
+                header.Font = new Font(header.Font, FontStyle.Italic);
+                lvWinners.Items.Add(header);
 
-                var groups = randomEngine.GetMatches()
-                                         .Where(m => randomEngine.HasWinner(m.MatchId))
-                                         .GroupBy(m => m.RoundLabel);
-
-                foreach (var roundGroup in groups.OrderBy(g => GetRoundOrder(g.Key)))
+                foreach (var match in roundGroup)
                 {
-                    var header = new ListViewItem("");
-                    header.SubItems.Add($"Round {roundGroup.Key.Replace("R", "")}");
-                    header.SubItems.Add("");
-                    header.BackColor = Color.LightGray;
-                    header.Font = new Font(header.Font, FontStyle.Italic);
-                    lvWinners.Items.Add(header);
+                    var winner = randomEngine.GetWinner(match.MatchId);
+                    var loser = randomEngine.GetLoser(match.MatchId);
 
-                    foreach (var match in roundGroup)
-                    {
-                        var winner = randomEngine.GetWinner(match.MatchId);
-                        var loser = randomEngine.GetLoser(match.MatchId);
-
-                        var item = new ListViewItem($"M{match.MatchId}");
-                        item.SubItems.Add(loser?.Name ?? "BYE");
-                        item.SubItems.Add(winner?.Name ?? "");
-                        lvWinners.Items.Add(item);
-                    }
+                    var item = new ListViewItem($"M{match.MatchId}");
+                    item.SubItems.Add(loser?.Name ?? "BYE");
+                    item.SubItems.Add(winner?.Name ?? "");
+                    lvWinners.Items.Add(item);
                 }
             }
         }
+
+
+
 
 
 
@@ -1086,11 +1149,6 @@ namespace RCDragManagerProd
             UpdateButtonStates();
         }
 
-
-
-
-
-
         private void UpdateEventWinnerStats()
         {
             if (currentSession == null) return;
@@ -1159,6 +1217,15 @@ namespace RCDragManagerProd
                 default: return code;
             }
         }
+
+        private List<DriverRankResult> GetRoundRobinStandings()
+        {
+            if (roundRobinEngine == null) return new List<DriverRankResult>();
+
+            var results = roundRobinEngine.GetResults();
+            return new RoundRobinRanker().Rank(results, drivers);
+        }
+
 
     }
 }
