@@ -73,20 +73,21 @@ namespace RCDragManagerProd
             this.colWinner = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lblRaceType = new System.Windows.Forms.Label();
             this.cmbRaceType = new System.Windows.Forms.ComboBox();
+            this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtName
             // 
             this.txtName.Location = new System.Drawing.Point(250, 80);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(185, 26);
+            this.txtName.Size = new System.Drawing.Size(185, 20);
             this.txtName.TabIndex = 7;
             // 
             // txtTime
             // 
             this.txtTime.Location = new System.Drawing.Point(455, 80);
             this.txtTime.Name = "txtTime";
-            this.txtTime.Size = new System.Drawing.Size(80, 26);
+            this.txtTime.Size = new System.Drawing.Size(80, 20);
             this.txtTime.TabIndex = 8;
             // 
             // btnAddDriver
@@ -257,7 +258,7 @@ namespace RCDragManagerProd
             // 
             // btnSaveAndClose
             // 
-            this.btnSaveAndClose.Location = new System.Drawing.Point(775, 531);
+            this.btnSaveAndClose.Location = new System.Drawing.Point(775, 548);
             this.btnSaveAndClose.Name = "btnSaveAndClose";
             this.btnSaveAndClose.Size = new System.Drawing.Size(100, 40);
             this.btnSaveAndClose.TabIndex = 18;
@@ -321,12 +322,26 @@ namespace RCDragManagerProd
             "Round Robin"});
             this.cmbRaceType.Location = new System.Drawing.Point(118, 6);
             this.cmbRaceType.Name = "cmbRaceType";
-            this.cmbRaceType.Size = new System.Drawing.Size(150, 28);
+            this.cmbRaceType.Size = new System.Drawing.Size(150, 21);
             this.cmbRaceType.TabIndex = 50;
+            // 
+            // btnGenerateLosersBracket
+            // 
+            this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
+            this.btnGenerateLosersBracket.Enabled = false;
+            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(675, 489);
+            this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
+            this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
+            this.btnGenerateLosersBracket.TabIndex = 0;
+            this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
+            this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
+            this.Controls.Add(this.btnGenerateLosersBracket);
+
             // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(900, 600);
+            this.Controls.Add(this.btnGenerateLosersBracket);
             this.Controls.Add(this.lblRaceType);
             this.Controls.Add(this.cmbRaceType);
             this.Controls.Add(this.lblEventTitle);
