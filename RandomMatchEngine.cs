@@ -27,7 +27,18 @@ namespace RCDragManagerProd
         {
             Driver loser = GetLoserFromMatch(matchId, winner);
             results.SetWinner(matchId, winner, loser);
+
+            // 🔧 Patch downstream matches to replace null seeds
+            foreach (var m in bracketMatches)
+            {
+                if (m.FromMatch1 == matchId && m.Seed1 == null)
+                    m.Seed1 = winner;
+
+                if (m.FromMatch2 == matchId && m.Seed2 == null)
+                    m.Seed2 = winner;
+            }
         }
+
 
         private Driver GetLoserFromMatch(int matchId, Driver winner)
         {

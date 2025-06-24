@@ -351,33 +351,60 @@ namespace RCDragManagerProd
             // ──────────────────────────────────────────────────────────────
             if (inLosersPhase)
             {
-                // if we've reset or never generated LB, bail out
                 if (randomEngine == null)
                     return;
 
-                // 1️⃣ Any LB matches still unresolved?
                 bool anyUnresolved = randomEngine.GetMatches()
                     .Where(m => revealedRounds.Contains(m.RoundLabel))
                     .Any(m => !randomEngine.HasWinner(m.MatchId));
                 if (anyUnresolved)
                     return;
 
-                // 2️⃣ Build the ordered list of LB round labels **dynamically**
                 var lbOrder = randomEngine.GetMatches()
                                  .Select(m => m.RoundLabel)
                                  .Distinct()
                                  .OrderBy(r => GetRoundOrder(r))
                                  .ToList();
 
-                // 3️⃣ How many LB rounds have we already revealed?
                 var lbRevealed = revealedRounds
                                   .Where(r => r.StartsWith("Losers Bracket"))
                                   .ToList();
 
-                // 4️⃣ Reveal exactly one more LB round (if any remain)
                 if (lbRevealed.Count < lbOrder.Count)
                 {
-                    revealedRounds.Add(lbOrder[lbRevealed.Count]);
+                    string lbNextRound = lbOrder[lbRevealed.Count];
+
+                    var lbNextMatches = randomEngine.GetMatches()
+                                          .Where(m => m.RoundLabel == lbNextRound)
+                                          .ToList();
+
+                    foreach (var m in lbNextMatches)
+                    {
+                        var (d1, d2) = randomEngine.ResolveDrivers(m);
+
+                        if (d1 != null && d2 == null)
+                        {
+                            currentSession.SavedResults.Add(new MatchResultSave
+                            {
+                                MatchId = m.MatchId,
+                                WinnerDriverId = d1.Id,
+                                LoserDriverId = -1
+                            });
+                            randomEngine.SetWinner(m.MatchId, d1);
+                        }
+                        else if (d2 != null && d1 == null)
+                        {
+                            currentSession.SavedResults.Add(new MatchResultSave
+                            {
+                                MatchId = m.MatchId,
+                                WinnerDriverId = d2.Id,
+                                LoserDriverId = -1
+                            });
+                            randomEngine.SetWinner(m.MatchId, d2);
+                        }
+                    }
+
+                    revealedRounds.Add(lbNextRound);
                     RedrawFullBracket();
                     UpdateNextUp();
                     UpdateWinnersList();
@@ -386,13 +413,10 @@ namespace RCDragManagerProd
                 }
 
                 // ── ALL LB ROUNDS COMPLETE: inject your 4-driver final ──
-
-                // pick the actual LB final match by label
                 var finalMatch = randomEngine.GetMatches()
                                   .Single(m => m.RoundLabel == lbOrder.Last());
                 var lbWinner = randomEngine.GetWinner(finalMatch.MatchId);
 
-                // get RR top-3
                 var rrResults = roundRobinEngine.GetResults();
                 var standings = new RoundRobinRanker().Rank(rrResults, drivers);
                 var top3 = standings
@@ -400,17 +424,21 @@ namespace RCDragManagerProd
                                   .Select(r => drivers.First(d => d.Id == r.DriverId))
                                   .ToList();
 
-                // build the Final-4 list
+                string msg = "Final 4 drivers advancing:\n\n";
+                for (int i = 0; i < top3.Count; i++)
+                    msg += $"{i + 1}. {top3[i].Name}\n";
+                msg += $"4. {lbWinner.Name} (Buyback Winner)\n";
+
+                MessageBox.Show(msg, "Buyback Complete");
+
                 var finalists = new List<Driver>(top3) { lbWinner };
 
-                // reseed & start a new Pro-Ladder
                 engine = new MatchEngine();
                 finalists = finalists.OrderBy(d => d.QualTime).ToList();
                 for (int i = 0; i < finalists.Count; i++)
                     finalists[i].Seed = i + 1;
                 engine.Initialize(finalists);
 
-                // reset revealed rounds to the first Pro-Ladder round
                 revealedRounds.Clear();
                 var firstRound = engine.GetBracketMatches()
                                        .Select(m => m.RoundLabel)
@@ -418,11 +446,9 @@ namespace RCDragManagerProd
                                        .First();
                 revealedRounds.Add(firstRound);
 
-                // 🚩 **Switch raceType** so subsequent clicks go into the Pro-Ladder branch
                 currentSession.RaceType = "Pro Ladder";
                 inLosersPhase = false;
 
-                // final redraw & state update
                 RedrawFullBracket();
                 UpdateNextUp();
                 UpdateWinnersList();
@@ -431,7 +457,7 @@ namespace RCDragManagerProd
             }
 
             // ──────────────────────────────────────────────────────────────
-            // PRO LADDER  (fixed bracket)
+            // PRO LADDER
             // ──────────────────────────────────────────────────────────────
             if (raceType == "Pro Ladder")
             {
@@ -447,7 +473,7 @@ namespace RCDragManagerProd
             }
 
             // ──────────────────────────────────────────────────────────────
-            // ROUND ROBIN (3 rounds, 1 BYE max/round, no rematches)
+            // ROUND ROBIN
             // ──────────────────────────────────────────────────────────────
             if (raceType == "Round Robin")
             {
@@ -456,7 +482,6 @@ namespace RCDragManagerProd
 
                 revealedRounds.Add(nextRound);
 
-                // only enable buybacks after R3 fully done
                 if (nextRound == "R3")
                 {
                     var r3Matches = roundRobinEngine.GetMatches()
@@ -465,6 +490,24 @@ namespace RCDragManagerProd
                                       .ToList();
                     bool allR3Done = r3Matches.All(id => roundRobinEngine.HasWinner(id));
                     btnGenerateLosersBracket.Enabled = allR3Done;
+
+                    if (allR3Done)
+                    {
+                        var rrResults = roundRobinEngine.GetResults();
+                        var ranked = new RoundRobinRanker().Rank(rrResults, drivers);
+                        var top3 = ranked
+                                    .Where(r => r.Rank <= 3)
+                                    .Select(r => drivers.First(d => d.Id == r.DriverId))
+                                    .ToList();
+
+                        string msg = "Top 3 drivers advancing to finals:\n\n";
+                        for (int i = 0; i < top3.Count; i++)
+                            msg += $"{i + 1}. {top3[i].Name}\n";
+
+                        msg += "\nSelect 'Generate Losers Bracket' to add buybacks.";
+
+                        MessageBox.Show(msg, "Round Robin Complete");
+                    }
                 }
 
                 RedrawFullBracket();
@@ -475,7 +518,7 @@ namespace RCDragManagerProd
             }
 
             // ──────────────────────────────────────────────────────────────
-            // RANDOMIZED  (blind-draw, round-by-round)
+            // RANDOMIZED
             // ──────────────────────────────────────────────────────────────
             if (randomEngine == null || revealedRounds.Count == 0) return;
 
@@ -516,7 +559,6 @@ namespace RCDragManagerProd
             randomEngine.LoadMatches(updated);
             revealedRounds.Add(nextRoundLabel);
 
-            // auto-resolve BYEs in this new Random round
             foreach (var m in nextMatches)
             {
                 var (d1, d2) = randomEngine.ResolveDrivers(m);
@@ -529,6 +571,9 @@ namespace RCDragManagerProd
             UpdateWinnersList();
             UpdateButtonStates();
         }
+
+
+
 
 
 
@@ -1158,7 +1203,7 @@ namespace RCDragManagerProd
             // 1️⃣ core engines back to scratch
             engine = new MatchEngine();
             randomEngine = null;           // drop any LB/random engine
-            inLosersPhase = false;          // clear losers-bracket flag
+            inLosersPhase = false;         // clear losers-bracket flag
 
             // 2️⃣ clear all round-tracking
             revealedRounds.Clear();
@@ -1173,7 +1218,14 @@ namespace RCDragManagerProd
             btnGenerateBracket.Enabled = true;
             btnGenerateLosersBracket.Enabled = false;
             UpdateButtonStates();
+
+            // 5️⃣ restore selected race type in dropdown (do not re-trigger bracket)
+            if (currentSession != null && !string.IsNullOrEmpty(currentSession.RaceType))
+            {
+                cmbRaceType.SelectedItem = currentSession.RaceType;
+            }
         }
+
 
 
 
@@ -1326,6 +1378,16 @@ namespace RCDragManagerProd
                 var winner = winner1 ? d1 : d2;
                 var loser = winner1 ? d2 : d1;
 
+                // 🔧 fix corrupted match that falsely reports loser as BYE/null
+                if (loser == null || loser.Name == "BYE")
+                {
+                    if (d1 != null && d1.Id != winner.Id)
+                        loser = d1;
+                    else if (d2 != null && d2.Id != winner.Id)
+                        loser = d2;
+                }
+
+
                 // record result
                 randomEngine.SetWinner(lbMatch.MatchId, winner);
 
@@ -1351,17 +1413,32 @@ namespace RCDragManagerProd
                 bool roundDone = !randomEngine.GetMatches()
                                            .Where(m => revealedRounds.Contains(m.RoundLabel))
                                            .Any(m => !randomEngine.HasWinner(m.MatchId));
-                       if (roundDone && lbRevealed.Count < lbOrder.Count)
-                           {
-                    revealedRounds.Add(lbOrder[lbRevealed.Count]);
-                           }
+                if (roundDone && lbRevealed.Count < lbOrder.Count)
+                {
+                    // User must trigger next LB round manually
+                    btnNextRound.Enabled = true;
+                    return;
+                }
 
-                // refresh UI
+
                 RedrawFullBracket();
                 UpdateNextUp();
                 UpdateWinnersList();
-                UpdateButtonStates();
+
+                // 🔒 Disable winner buttons until next round is manually triggered
+                if (roundDone && lbRevealed.Count < lbOrder.Count)
+                {
+                    btnWinner1.Enabled = false;
+                    btnWinner2.Enabled = false;
+                    btnNextRound.Enabled = true;
+                }
+                else
+                {
+                    UpdateButtonStates();
+                }
+
                 return;
+
             }
 
             string raceType = currentSession?.RaceType
@@ -1406,6 +1483,32 @@ namespace RCDragManagerProd
 
                 roundRobinEngine.SetWinner(matchId, winner, loser);
 
+                // 🏁 Check if all RR matches are now resolved
+                bool allDone = roundRobinEngine.GetMatches()
+                    .Where(m => revealedRounds.Contains(m.RoundLabel))
+                    .All(m => roundRobinEngine.HasWinner(m.MatchId));
+
+                bool hasR3 = revealedRounds.Contains("R3");
+
+                if (allDone && hasR3)
+                {
+                    var rrResults = roundRobinEngine.GetResults();
+                    var ranked = new RoundRobinRanker().Rank(rrResults, drivers);
+                    var top3 = ranked
+                        .Where(r => r.Rank <= 3)
+                        .Select(r => drivers.First(d => d.Id == r.DriverId))
+                        .ToList();
+
+                    string msg = "Top 3 drivers advancing to finals:\n\n";
+                    for (int i = 0; i < top3.Count; i++)
+                        msg += $"{i + 1}. {top3[i].Name}\n";
+
+                    msg += "\nSelect 'Generate Losers Bracket' to add buybacks.";
+
+                    MessageBox.Show(msg, "Round Robin Complete");
+                }
+
+
                 if (loser != null && loser.Name != "BYE")
                     UpdateDriverStats(winner, loser);
 
@@ -1435,6 +1538,32 @@ namespace RCDragManagerProd
                 // ← Removed UpdateEventWinnerStats() here
             }
 
+            // If all current LB matches resolved, force disable winner buttons
+            if (inLosersPhase)
+            {
+                var lbOrder = randomEngine.GetMatches()
+                                          .Select(m => m.RoundLabel)
+                                          .Distinct()
+                                          .OrderBy(r => GetRoundOrder(r))
+                                          .ToList();
+
+                var lbRevealed = revealedRounds
+                                 .Where(r => r.StartsWith("Losers Bracket"))
+                                 .ToList();
+
+                bool roundDone = !randomEngine.GetMatches()
+                                      .Where(m => revealedRounds.Contains(m.RoundLabel))
+                                      .Any(m => !randomEngine.HasWinner(m.MatchId));
+
+                if (roundDone && lbRevealed.Count < lbOrder.Count)
+                {
+                    btnWinner1.Enabled = false;
+                    btnWinner2.Enabled = false;
+                    btnNextRound.Enabled = true;
+                    return;
+                }
+            }
+
             // ───────────────────────────────────────────
             // UI refresh
             // ───────────────────────────────────────────
@@ -1442,6 +1571,7 @@ namespace RCDragManagerProd
             UpdateNextUp();
             UpdateWinnersList();
             UpdateButtonStates();
+
         }
 
 
@@ -1553,7 +1683,10 @@ namespace RCDragManagerProd
             randomEngine.LoadMatches(lbMatches);
 
             // mark the first LB round visible
-            revealedRounds.Add("Losers Bracket R1");
+            // do NOT reveal the first LB round yet — wait for user to click "Next Round"
+            // revealedRounds.Add("Losers Bracket R1");
+            btnNextRound.Enabled = true;
+
             currentSession.PairingHistory.UnionWith(allHistory);
 
             // ▶ ENTER LOSERS-BRACKET PHASE
