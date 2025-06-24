@@ -110,6 +110,12 @@
     <Compile Include="AddEditQualTimeDialog.Designer.cs">
       <DependentUpon>AddEditQualTimeDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="BuybackDriverSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BuybackDriverSelectionForm.Designer.cs">
+      <DependentUpon>BuybackDriverSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Car.cs" />
     <Compile Include="CarRepository.cs" />
     <Compile Include="DatabaseInitializer.cs" />
