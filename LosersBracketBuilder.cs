@@ -43,7 +43,10 @@ namespace RCDragManagerProd
                 pool.RemoveAt(0);
 
                 Driver p2 = FindOpponent(p1, pool, history);
-                pool.Remove(p2);          // safe even if p2 == null
+                pool.Remove(p2); // safe even if p2 == null
+
+                // ❌ Skip matches where both are null (BYE vs BYE)
+                if (p1 == null && p2 == null) continue;
 
                 allMatches.Add(new RandomMatch
                 {
@@ -54,6 +57,7 @@ namespace RCDragManagerProd
                     FromMatch2 = null,
                     RoundLabel = "Losers Bracket R1"
                 });
+
                 r1MatchIds.Add(id);
                 id++;
             }
@@ -67,6 +71,8 @@ namespace RCDragManagerProd
 
                 for (int i = 0; i < prevRound.Count; i += 2)
                 {
+                    if (i + 1 >= prevRound.Count) break;
+
                     int matchId = id++;
                     thisRound.Add(matchId);
 
@@ -82,6 +88,7 @@ namespace RCDragManagerProd
                                      : $"Losers Bracket R{roundIndex}"
                     });
                 }
+
 
                 prevRound = thisRound;
                 roundIndex++;
