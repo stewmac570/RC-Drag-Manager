@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Windows.Forms;
+using RCDragManagerProd.Controllers;
+
 
 namespace RCDragManagerProd
 {
@@ -21,6 +23,7 @@ namespace RCDragManagerProd
         private int currentMatchIndex = 0;
         private Button btnGenerateLosersBracket;
         private bool inLosersPhase = false;
+        private readonly RaceController _controller;
 
 
         private bool IsRandomMode(string raceType)
@@ -28,10 +31,11 @@ namespace RCDragManagerProd
             return raceType?.IndexOf("random", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        public Form1(RaceSession session = null)
+        public Form1(RaceController controller)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             InitializeComponent();
-            currentSession = session;
+            currentSession = _controller.Session;
 
 
             if (currentSession != null)

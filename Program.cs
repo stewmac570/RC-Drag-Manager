@@ -1,5 +1,8 @@
-﻿using System;
+﻿using RCDragManagerProd;               // for RaceSession
+using RCDragManagerProd.Controllers;   // for RaceController
+using System;
 using System.Windows.Forms;
+
 
 namespace RCDragManagerProd
 {
@@ -16,6 +19,9 @@ namespace RCDragManagerProd
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new LandingForm());
+            var session = new RaceSession();           // NEW
+            var controller = new RaceController(session); // NEW
+            Application.Run(new Form1(controller));       // NEW
         }
     }
 }

@@ -10,9 +10,11 @@ using RCDragManagerProd;                     // Driver, RaceSession
 using RCDragManagerProd.RaceEngines;        // IRaceEngine, EngineMatch, factory
 using RCDragManagerProd.ViewModels;         // PairingRow, WinnerRow
 
+
 namespace RCDragManagerProd.Controllers
 {
     public sealed class RaceController
+
     {
         // ────────────────────  STATE  ────────────────────
         private readonly RaceSession _session;
@@ -21,6 +23,7 @@ namespace RCDragManagerProd.Controllers
         private List<Driver> _drivers;
         private readonly HashSet<string> _revealedRounds = new HashSet<string>();
         private readonly List<WinnerRow> _winners = new List<WinnerRow>();
+        public RaceSession Session => _session;
 
         // ────────────────────  EVENTS  ────────────────────
         public event Action<IReadOnlyList<PairingRow>> BracketRedrawn;
