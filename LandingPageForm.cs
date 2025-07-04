@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
+using RCDragManagerProd.Controllers;
+
 
 namespace RCDragManagerProd
 {
@@ -21,8 +23,10 @@ namespace RCDragManagerProd
         private void btnNewEvent_Click(object sender, EventArgs e)
         {
             // Quick mode (legacy, direct to empty Form1)
-            Form1 mainForm = new Form1(null);
+            var controller = new RaceController(new RaceSession());   // empty quick session
+            Form1 mainForm = new Form1(controller);
             mainForm.Show();
+
         }
 
         private void btnCreateSession_Click(object sender, EventArgs e)
@@ -30,7 +34,9 @@ namespace RCDragManagerProd
             SessionSetupForm sessionForm = new SessionSetupForm(repository);
             if (sessionForm.ShowDialog() == DialogResult.OK)
             {
-                Form1 mainForm = new Form1(sessionForm.RaceSessionResult);
+                var controller = new RaceController(sessionForm.RaceSessionResult);   // or “loaded”
+                Form1 mainForm = new Form1(controller);
+
                 mainForm.Show();
             }
         }
@@ -41,7 +47,10 @@ namespace RCDragManagerProd
             if (loadForm.ShowDialog() == DialogResult.OK)
             {
                 RaceSession loaded = loadForm.LoadedSession;
-                Form1 mainForm = new Form1(loaded);
+                var controller = new RaceController(loaded);
+                Form1 mainForm = new Form1(controller);
+
+
                 mainForm.Show();
             }
         }

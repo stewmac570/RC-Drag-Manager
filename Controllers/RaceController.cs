@@ -10,9 +10,11 @@ using RCDragManagerProd;                     // Driver, RaceSession
 using RCDragManagerProd.RaceEngines;        // IRaceEngine, EngineMatch, factory
 using RCDragManagerProd.ViewModels;         // PairingRow, WinnerRow
 
+
 namespace RCDragManagerProd.Controllers
 {
     public sealed class RaceController
+
     {
         // ────────────────────  STATE  ────────────────────
         private readonly RaceSession _session;
@@ -21,6 +23,7 @@ namespace RCDragManagerProd.Controllers
         private List<Driver> _drivers;
         private readonly HashSet<string> _revealedRounds = new HashSet<string>();
         private readonly List<WinnerRow> _winners = new List<WinnerRow>();
+        public RaceSession Session => _session;
 
         // ────────────────────  EVENTS  ────────────────────
         public event Action<IReadOnlyList<PairingRow>> BracketRedrawn;
@@ -131,11 +134,16 @@ namespace RCDragManagerProd.Controllers
 
         private void PushNextMatch()
         {
-            EngineMatch next = _engine.GetMatches()
-                                      .Where(m => !m.HasResult &&
-                                                  _revealedRounds.Contains(m.RoundLabel))
-                                      .OrderBy(m => m.MatchId)
-                                      .FirstOrDefault();
+            EnsureReady();
+
+            // Only real head-to-head matches that still need a winner
+            var next = _engine.GetMatches()
+                              .Where(m => _revealedRounds.Contains(m.RoundLabel) &&
+                                          !m.HasResult &&
+                                          m.Driver1 != null &&
+                                          m.Driver2 != null)
+                              .OrderBy(m => m.MatchId)
+                              .FirstOrDefault();
 
             if (next == null)
             {
@@ -147,6 +155,8 @@ namespace RCDragManagerProd.Controllers
             NextMatchReady?.Invoke(ToPairingRow(next));
             CanPickWinnerChanged?.Invoke(true);
         }
+
+
 
         private void PushAdvanceState()
         {

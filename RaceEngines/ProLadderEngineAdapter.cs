@@ -47,11 +47,11 @@ namespace RCDragManagerProd.RaceEngines
         public IReadOnlyList<EngineMatch> GetMatches()
         {
             EnsureReady();
-
-            return _engine
-                   .GetBracketMatches()                  // flat list of LadderMatch objects :contentReference[oaicite:2]{index=2}
-                   .Select(MapToDto)
-                   .ToList();
+           
+                return _engine.GetBracketMatches()
+                              .Select(this.MapToDto)
+                              .Where(m => !(m.Driver1 == null && m.Driver2 == null)) // drop BYE-BYE
+                              .ToList();
         }
 
         public void SetWinner(int matchId, Driver winner)
@@ -91,11 +91,19 @@ namespace RCDragManagerProd.RaceEngines
                 throw new InvalidOperationException("Bracket not generated – call GenerateBracket() first.");
         }
 
-        private static EngineMatch MapToDto(ProLadder.LadderMatch src)
+
+
+        private EngineMatch MapToDto(ProLadder.LadderMatch src)
         {
-            // Resolve actual Driver objects (or BYE placeholders) for display
-            MatchEngine tempEngine = new MatchEngine();
-            var (d1, d2) = tempEngine.ResolveDriversForMatch(src);   // gives Driver or BYE stub
+           
+                // 0 ⇒ bye  • null ⇒ from previous match (may resolve to a driver later)
+            Driver d1 = src.Seed1 == 0 ? null
+                           : src.Seed1.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed1)
+                           : ResolveFromMatch(src.FromMatch1);
+            
+            Driver d2 = src.Seed2 == 0 ? null
+                           : src.Seed2.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed2)
+                           : ResolveFromMatch(src.FromMatch2);
 
             return new EngineMatch
             {
@@ -105,8 +113,17 @@ namespace RCDragManagerProd.RaceEngines
                 RoundLabel = src.RoundLabel,
                 FromMatch1 = src.FromMatch1,
                 FromMatch2 = src.FromMatch2,
-                HasResult = tempEngine.Results.HasResult(src.MatchId)
+                
+        HasResult = false  // controller marks real result later
             };
+        }
+
+        // helper – safe resolve from prior match if result already stored
+        private Driver ResolveFromMatch(int? fromId)
+        {
+            if (fromId == null) return null;
+            var prior = _engine.Results.GetWinner(fromId.Value);
+            return prior;
         }
 
         private static int LabelToIndex(string lbl) => lbl switch
