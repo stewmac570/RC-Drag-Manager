@@ -67,7 +67,8 @@ namespace RCDragManagerProd
             // ────────────────────  controller event hooks  ─────────────────────
 
             // 1) Full bracket redraw → rebuild ListView
-            _controller.BracketRedrawn += _ => RedrawFullBracket();
+            _controller.BracketRedrawn += rows => RedrawFullBracket(rows);
+
 
             // 2) Next match ready → update “Next” label & winner buttons
             _controller.NextMatchReady += row =>
@@ -117,6 +118,10 @@ namespace RCDragManagerProd
 
         private void InitializeDriversFromSession()
         {
+
+            if (currentSession?.DriverEntries == null)   // Quick Session => nothing to import
+                return;
+
             drivers.Clear();
 
             foreach (var entry in currentSession.DriverEntries)

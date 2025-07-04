@@ -134,11 +134,16 @@ namespace RCDragManagerProd.Controllers
 
         private void PushNextMatch()
         {
-            EngineMatch next = _engine.GetMatches()
-                                      .Where(m => !m.HasResult &&
-                                                  _revealedRounds.Contains(m.RoundLabel))
-                                      .OrderBy(m => m.MatchId)
-                                      .FirstOrDefault();
+            EnsureReady();
+
+            // Only real head-to-head matches that still need a winner
+            var next = _engine.GetMatches()
+                              .Where(m => _revealedRounds.Contains(m.RoundLabel) &&
+                                          !m.HasResult &&
+                                          m.Driver1 != null &&
+                                          m.Driver2 != null)
+                              .OrderBy(m => m.MatchId)
+                              .FirstOrDefault();
 
             if (next == null)
             {
@@ -150,6 +155,8 @@ namespace RCDragManagerProd.Controllers
             NextMatchReady?.Invoke(ToPairingRow(next));
             CanPickWinnerChanged?.Invoke(true);
         }
+
+
 
         private void PushAdvanceState()
         {
