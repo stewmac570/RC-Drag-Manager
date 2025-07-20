@@ -123,6 +123,7 @@ namespace RCDragManagerProd
                         };
                         sessions.Add(summary);
                     }
+
                 }
             }
 

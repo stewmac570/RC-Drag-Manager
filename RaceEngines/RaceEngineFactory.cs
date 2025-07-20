@@ -13,12 +13,9 @@ namespace RCDragManagerProd.RaceEngines
     /// implementation based on a human-friendly race-type string supplied by
     /// the UI or a config file.
     /// </summary>
+    // RaceEngineFactory.cs
     public static class RaceEngineFactory
     {
-        /// <param name="raceType">
-        /// For example: “Pro Ladder”, “Round Robin”, “Random”.
-        /// Case-insensitive; trimmed; null/empty not allowed.
-        /// </param>
         public static IRaceEngine Create(string raceType)
         {
             if (string.IsNullOrWhiteSpace(raceType))
@@ -30,19 +27,20 @@ namespace RCDragManagerProd.RaceEngines
                 case "nhra pro ladder":
                     return new ProLadderEngineAdapter();
 
-                // The other adapters will arrive in the next steps.
-                // For now we fall through to the default error.
-                // case "round robin":
-                //     return new RoundRobinEngineAdapter();
-                // case "random":
-                //     return new RandomEngineAdapter();
+                case "round robin":
+                    return new RoundRobinEngineAdapter();
+
+                case "random":
+                case "randomized":
+                case "random draw":
+                    return new RandomEngineAdapter();
 
                 default:
                     throw new ArgumentException(
-                        $"Unknown race type “{raceType}”. " +
-                        "Currently only “Pro Ladder” is implemented.",
+                        $"Unknown race type “{raceType}”.",
                         nameof(raceType));
             }
         }
     }
+
 }
