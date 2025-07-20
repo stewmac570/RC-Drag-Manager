@@ -1,10 +1,4 @@
-﻿// ──────────────────────────────────────────────────────────────────────────────
-// File: RoundRobinRanker.cs
-// Project: RCDragManagerProd
-// Purpose: Calculate standings for a 3-round Round-Robin event
-// ──────────────────────────────────────────────────────────────────────────────
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,20 +20,23 @@ namespace RCDragManagerProd
         private readonly Dictionary<(int, int), int> _h2h = new();
 
         public List<DriverRankResult> Rank(
-            List<RoundRobinMatchResult> results,
-            List<Driver> drivers)
+            List<RoundRobinMatch> matches,
+            List<Driver> drivers,
+            MatchResult results)
         {
             var stats = drivers.ToDictionary(d => d.Id, _ => new Aggregate());
 
-            foreach (var m in results)
+            foreach (var m in matches)
             {
                 var pts = GetPoints(m.RoundLabel);
 
-                bool isBye = m.Driver2Id == 0 || m.Driver1Id == 0;
-                int? winnerId = m.WinnerId == 0 ? null : m.WinnerId;
-                int loserId = (m.Driver1Id != 0 && m.Driver2Id != 0 && m.WinnerId != 0)
-                    ? (m.WinnerId == m.Driver1Id ? m.Driver2Id : m.Driver1Id)
-                    : 0;
+                bool isBye = m.Driver1 == null || m.Driver2 == null;
+
+                var winner = results.GetWinner(m.MatchId);
+                var loser = results.GetLoser(m.MatchId);
+
+                int? winnerId = winner?.Id;
+                int? loserId = loser?.Id ?? 0;
 
                 if (isBye && winnerId != null)
                 {
@@ -47,23 +44,25 @@ namespace RCDragManagerProd
                     continue;
                 }
 
+
                 if (winnerId != null && loserId != 0)
                 {
                     var w = stats[winnerId.Value];
-                    var l = stats[loserId];
+                    var l = stats[loserId.Value];
 
                     w.Points += pts.Win;
                     w.Wins += 1;
-                    w.Defeated.Add(loserId);
+                    w.Defeated.Add(loserId.Value);
 
                     l.Points += pts.Loss;
                     l.Losses += 1;
 
-                    _h2h[PairKey(winnerId.Value, loserId)] = winnerId.Value;
+                    _h2h[PairKey(winnerId.Value, loserId.Value)] = winnerId.Value;
                 }
+
+
             }
 
-            // Convert to list
             var table = stats.Select(kvp => new DriverRankResult
             {
                 DriverId = kvp.Key,
@@ -74,24 +73,20 @@ namespace RCDragManagerProd
                 OpponentStrength = 0
             }).ToList();
 
-            // Compute OpponentStrength
             var pointLookup = table.ToDictionary(x => x.DriverId, x => x.Points);
             foreach (var r in table)
             {
                 double total = 0;
-                foreach (var m in results)
+                foreach (var m in matches)
                 {
-                    if (pointLookup.ContainsKey(m.Driver2Id))
-                        total += pointLookup[m.Driver2Id];
-
-                    if (pointLookup.ContainsKey(m.Driver1Id))
-                        total += pointLookup[m.Driver1Id];
-
+                    if (m.Driver1 != null && pointLookup.ContainsKey(m.Driver1.Id))
+                        total += pointLookup[m.Driver1.Id];
+                    if (m.Driver2 != null && pointLookup.ContainsKey(m.Driver2.Id))
+                        total += pointLookup[m.Driver2.Id];
                 }
                 r.OpponentStrength = total;
             }
 
-            // Rank sort
             table.Sort((a, b) =>
             {
                 int cmp = b.Points.CompareTo(a.Points); if (cmp != 0) return cmp;

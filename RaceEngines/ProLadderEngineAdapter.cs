@@ -95,15 +95,20 @@ namespace RCDragManagerProd.RaceEngines
 
         private EngineMatch MapToDto(ProLadder.LadderMatch src)
         {
-           
-                // 0 ⇒ bye  • null ⇒ from previous match (may resolve to a driver later)
-            Driver d1 = src.Seed1 == 0 ? null
-                           : src.Seed1.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed1)
-                           : ResolveFromMatch(src.FromMatch1);
-            
-            Driver d2 = src.Seed2 == 0 ? null
-                           : src.Seed2.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed2)
-                           : ResolveFromMatch(src.FromMatch2);
+            // Seed 0 means BYE → resolve to null first
+            Driver d1 = src.Seed1 == 0
+                ? null
+                : src.Seed1.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed1)
+                                     : ResolveFromMatch(src.FromMatch1);
+
+            Driver d2 = src.Seed2 == 0
+                ? null
+                : src.Seed2.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed2)
+                                     : ResolveFromMatch(src.FromMatch2);
+
+            // ✅ Fallback — guarantee no null leaks
+            if (d1 == null) d1 = new Driver { Name = "BYE" };
+            if (d2 == null) d2 = new Driver { Name = "BYE" };
 
             return new EngineMatch
             {
@@ -113,10 +118,11 @@ namespace RCDragManagerProd.RaceEngines
                 RoundLabel = src.RoundLabel,
                 FromMatch1 = src.FromMatch1,
                 FromMatch2 = src.FromMatch2,
-                
-        HasResult = false  // controller marks real result later
+                HasResult = _engine.Results.HasResult(src.MatchId)
             };
         }
+
+
 
         // helper – safe resolve from prior match if result already stored
         private Driver ResolveFromMatch(int? fromId)

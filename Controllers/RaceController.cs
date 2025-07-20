@@ -45,7 +45,12 @@ namespace RCDragManagerProd.Controllers
                 throw new InvalidOperationException("At least two drivers are required.");
 
             _drivers = drivers;
+
             _engine = RaceEngineFactory.Create(raceType);
+
+            // ✅✅✅ Add this line: shows exactly what you get
+            Console.WriteLine($"[DEBUG] Bracket using: {_engine.GetType().Name} for race type \"{raceType}\"");
+
             _engine.LoadDrivers(_drivers);
             _engine.GenerateBracket();
 
@@ -56,37 +61,44 @@ namespace RCDragManagerProd.Controllers
             PushFullRefresh();
         }
 
+
         public void SubmitWinner(int matchId, bool firstOption)
         {
             EnsureReady();
 
             EngineMatch match = _engine.GetMatches()
-                                       .FirstOrDefault(m => m.MatchId == matchId);
+                .FirstOrDefault(m => m.MatchId == matchId);
 
             if (match == null)
                 throw new ArgumentException($"Match {matchId} not found.", nameof(matchId));
+
             if (_engine.HasWinner(matchId))
                 throw new InvalidOperationException("Winner already recorded.");
 
             Driver winner = firstOption ? match.Driver1 : match.Driver2;
             Driver loser = firstOption ? match.Driver2 : match.Driver1;
 
-            if (winner == null)
-                throw new InvalidOperationException("Cannot select a BYE as winner.");
+            // ✅ Universal block — no BYE as winner
+            if (winner == null || string.Equals(winner.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Cannot select BYE as winner.");
 
             _engine.SetWinner(matchId, winner);
 
             _winners.Add(new WinnerRow
             {
                 MatchId = matchId,
+                RoundLabel = match.RoundLabel,
                 Winner = winner.Name,
                 Loser = loser?.Name ?? "BYE"
             });
 
             WinnersUpdated?.Invoke(_winners);
+
             PushNextMatch();
             PushAdvanceState();
         }
+
+
 
         public void AdvanceRound()
         {
@@ -136,12 +148,10 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
-            // Only real head-to-head matches that still need a winner
+            // Look for the next unresolved match in revealed rounds, BYEs included
             var next = _engine.GetMatches()
                               .Where(m => _revealedRounds.Contains(m.RoundLabel) &&
-                                          !m.HasResult &&
-                                          m.Driver1 != null &&
-                                          m.Driver2 != null)
+                                          !m.HasResult)
                               .OrderBy(m => m.MatchId)
                               .FirstOrDefault();
 
@@ -153,13 +163,24 @@ namespace RCDragManagerProd.Controllers
             }
 
             NextMatchReady?.Invoke(ToPairingRow(next));
+
+            // If this match is a BYE pairing, disable the BYE button automatically in Form1.
+            // So here, you just say: "Picking winner is allowed"
             CanPickWinnerChanged?.Invoke(true);
         }
 
 
 
+
         private void PushAdvanceState()
         {
+            // ✅ If nothing has been revealed, you can't advance yet
+            if (_revealedRounds.Count == 0)
+            {
+                CanAdvanceChanged?.Invoke(false);
+                return;
+            }
+
             bool allVisibleResolved = _engine.GetMatches()
                                              .Where(m => _revealedRounds.Contains(m.RoundLabel))
                                              .All(m => m.HasResult);
@@ -167,8 +188,13 @@ namespace RCDragManagerProd.Controllers
             bool moreRoundsExist = _engine.GetRoundOrder()
                                           .Any(r => !_revealedRounds.Contains(r));
 
-            CanAdvanceChanged?.Invoke(allVisibleResolved && moreRoundsExist);
+            bool canAdvance = allVisibleResolved && moreRoundsExist;
+
+            Console.WriteLine($"[DEBUG] PushAdvanceState: allVisibleResolved={allVisibleResolved}, moreRoundsExist={moreRoundsExist}, canAdvance={canAdvance}");
+
+            CanAdvanceChanged?.Invoke(canAdvance);
         }
+
 
         private List<PairingRow> BuildPairingRows()
         {
@@ -201,6 +227,8 @@ namespace RCDragManagerProd.Controllers
             Driver2 = m.Driver2?.Name ?? "BYE",
             IsHeader = false
         };
+
+
 
         private void EnsureReady()
         {

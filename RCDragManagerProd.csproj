@@ -175,13 +175,15 @@
     <Compile Include="RaceEngines\IRaceEngine.cs" />
     <Compile Include="RaceEngines\ProLadderEngineAdapter.cs" />
     <Compile Include="RaceEngines\RaceEngineFactory.cs" />
+    <Compile Include="RaceEngines\RandomEngineAdapter.cs" />
+    <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
     <Compile Include="RaceSession.cs" />
     <Compile Include="RaceSessionRepository.cs" />
     <Compile Include="RandomBracket.cs" />
     <Compile Include="RandomMatch.cs" />
     <Compile Include="RandomMatchEngine.cs" />
     <Compile Include="RoundRobinEngine.cs" />
-    <Compile Include="RoundRobinMatchResult.cs" />
+    <Compile Include="RoundRobinMatch.cs" />
     <Compile Include="RoundRobinRanker.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>

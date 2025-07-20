@@ -74,5 +74,10 @@ namespace RCDragManagerProd
             return pairs;
         }
 
+        public void Clear()
+        {
+            results.Clear();
+        }
+
     }
 }

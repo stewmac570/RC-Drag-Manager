@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace RCDragManagerProd
 {
@@ -13,6 +14,9 @@ namespace RCDragManagerProd
         // ── internal state ────────────────────────────────────────────────────
         private List<RandomMatch> bracketMatches = new List<RandomMatch>();
         private readonly MatchResult results = new MatchResult();
+        private List<Driver> drivers = new List<Driver>();
+        
+
 
         // ── round-data I/O ────────────────────────────────────────────────────
         public void LoadMatches(List<RandomMatch> matches)
@@ -102,5 +106,33 @@ namespace RCDragManagerProd
         }
 
         public void RewindToMatch(int matchId) => results.ClearFromMatch(matchId);
+
+        public void LoadDrivers(List<Driver> newDrivers)
+        {
+            drivers = new List<Driver>(newDrivers ?? new List<Driver>());
+        }
+
+
+        public void GenerateBracket()
+        {
+            bracketMatches = RandomBracket.GenerateFirstRound(drivers);
+        }
+
+
+        public void Reset()
+        {
+            bracketMatches.Clear();
+            drivers.Clear();
+            results.Clear();  // ✅ Only works if MatchResult has Clear() defined
+        }
+
+
+        public IReadOnlyList<string> GetRoundOrder()
+        {
+            return bracketMatches.Select(m => m.RoundLabel).Distinct().ToList();
+        }
+
     }
+
+
 }

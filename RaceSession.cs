@@ -14,13 +14,17 @@ namespace RCDragManagerProd
 
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
 
-        // 🆕 persistent pairing-history for random draw mode
         public HashSet<(int, int)> PairingHistory { get; set; } = new HashSet<(int, int)>();
-
-        // existing save-state fields
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
         public List<string> SavedRevealedRounds { get; set; } = new List<string>();
+
+        // ✅ Add this constructor:
+        public RaceSession()
+        {
+            DriverEntries = new List<RaceSessionDriverEntry>();
+        }
     }
+
 
     public class RaceSessionDriverEntry
     {
@@ -40,4 +44,5 @@ namespace RCDragManagerProd
         public int WinnerDriverId { get; set; }
         public int LoserDriverId { get; set; }
     }
+
 }

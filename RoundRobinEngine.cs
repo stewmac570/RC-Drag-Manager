@@ -100,7 +100,7 @@ namespace RCDragManagerProd
         {
             return matches.All(m => results.HasResult(m.MatchId));
         }
-        public List<RoundRobinMatchResult> GetResults()
+        public List<RoundRobinMatch> GetResults()
         {
             return matches
                 .Where(m => results.HasResult(m.MatchId))
@@ -109,18 +109,34 @@ namespace RCDragManagerProd
                     var winner = results.GetWinner(m.MatchId);
                     var loser = results.GetLoser(m.MatchId);
 
-                    return new RoundRobinMatchResult
+                    return new RoundRobinMatch
                     {
                         MatchId = m.MatchId,
                         RoundLabel = m.RoundLabel,
-                        Driver1Id = m.Driver1?.Id ?? 0,
-                        Driver2Id = m.Driver2?.Id ?? 0,
-                        WinnerId = winner?.Id ?? 0,
-                        LoserId = loser?.Id ?? 0
+                        Driver1 = m.Driver1,
+                        Driver2 = m.Driver2
+                        // 🔑 Note: Do NOT put winner/loser here — keep that in results
                     };
                 })
                 .ToList();
         }
+
+        public void Reset()
+        {
+            matches.Clear();
+            results = new MatchResult();
+            matchIdCounter = 1;
+            drivers.Clear();
+        }
+
+        public IReadOnlyList<string> GetRoundLabels()
+        {
+            return matches.Select(m => m.RoundLabel)
+                          .Distinct()
+                          .ToList();
+        }
+
+
 
     }
 }

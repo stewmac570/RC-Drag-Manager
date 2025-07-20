@@ -73,7 +73,7 @@ namespace RCDragManagerProd
             this.colWinner = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lblRaceType = new System.Windows.Forms.Label();
             this.cmbRaceType = new System.Windows.Forms.ComboBox();
-            this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
+            //this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtName
@@ -254,7 +254,7 @@ namespace RCDragManagerProd
             this.btnEditResult.Size = new System.Drawing.Size(200, 45);
             this.btnEditResult.TabIndex = 17;
             this.btnEditResult.Text = "Edit Match Result";
-            this.btnEditResult.Click += new System.EventHandler(this.btnEditResult_Click);
+            //this.btnEditResult.Click += new System.EventHandler(this.btnEditResult_Click);
             // 
             // btnSaveAndClose
             // 
@@ -327,21 +327,21 @@ namespace RCDragManagerProd
             // 
             // btnGenerateLosersBracket
             // 
-            this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
-            this.btnGenerateLosersBracket.Enabled = false;
-            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(675, 489);
-            this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
-            this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
-            this.btnGenerateLosersBracket.TabIndex = 0;
-            this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
-            this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
-            this.Controls.Add(this.btnGenerateLosersBracket);
+            //this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
+            //this.btnGenerateLosersBracket.Enabled = false;
+          //  this.btnGenerateLosersBracket.Location = new System.Drawing.Point(675, 489);
+           // this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
+            //this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
+            //this.btnGenerateLosersBracket.TabIndex = 0;
+            //this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
+           // this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
+           // this.Controls.Add(this.btnGenerateLosersBracket);
 
             // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(900, 600);
-            this.Controls.Add(this.btnGenerateLosersBracket);
+            //this.Controls.Add(this.btnGenerateLosersBracket);
             this.Controls.Add(this.lblRaceType);
             this.Controls.Add(this.cmbRaceType);
             this.Controls.Add(this.lblEventTitle);
