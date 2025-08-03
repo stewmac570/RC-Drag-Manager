@@ -39,6 +39,7 @@
     <ApplicationIcon>retro trans icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.9.0.5\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -118,6 +119,7 @@
     </Compile>
     <Compile Include="Car.cs" />
     <Compile Include="CarRepository.cs" />
+    <Compile Include="Config\AppSettings.cs" />
     <Compile Include="DatabaseInitializer.cs" />
     <Compile Include="DriverManagerForm.cs">
       <SubType>Form</SubType>
@@ -163,6 +165,7 @@
     <Compile Include="LoadSessionForm.Designer.cs">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logging\Logger.cs" />
     <Compile Include="LosersBracketBuilder.cs" />
     <Compile Include="LosersBracketEngine.cs" />
     <Compile Include="MatchEngine.cs" />
@@ -197,6 +200,7 @@
     <Compile Include="SessionSetupForm.Designer.cs">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\MatchResultSave.cs" />
     <Compile Include="ViewModels\PairingRow.cs" />
     <Compile Include="ViewModels\WinnerRow.cs" />
     <EmbeddedResource Include="DriverManagerForm.resx">

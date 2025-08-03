@@ -97,7 +97,7 @@ namespace RCDragManagerProd
                 lvWinners.EndUpdate();
             };
 
-
+            Logger.Log("🔥 Logging system initialized");
 
             _controller.CanAdvanceChanged += canAdvance => btnNextRound.Enabled = canAdvance;
         }
