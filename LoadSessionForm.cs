@@ -77,5 +77,6 @@ namespace RCDragManagerProd
                 LoadSessions();
             }
         }
+
     }
 }

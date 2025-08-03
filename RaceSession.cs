@@ -13,17 +13,17 @@ namespace RCDragManagerProd
         public double? FixedDialIn { get; set; }
 
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
-
         public HashSet<(int, int)> PairingHistory { get; set; } = new HashSet<(int, int)>();
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
         public List<string> SavedRevealedRounds { get; set; } = new List<string>();
+        public List<RoundRobinMatch> RoundRobinMatches { get; set; } = new List<RoundRobinMatch>();
 
-        // ✅ Add this constructor:
         public RaceSession()
         {
             DriverEntries = new List<RaceSessionDriverEntry>();
         }
     }
+
 
 
     public class RaceSessionDriverEntry
@@ -41,8 +41,9 @@ namespace RCDragManagerProd
     public class MatchResultSave
     {
         public int MatchId { get; set; }
-        public int WinnerDriverId { get; set; }
-        public int LoserDriverId { get; set; }
+        public Guid WinnerDriverId { get; set; }
+        public Guid LoserDriverId { get; set; }
     }
-
 }
+
+
