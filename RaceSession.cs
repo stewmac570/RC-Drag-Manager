@@ -41,9 +41,10 @@ namespace RCDragManagerProd
     public class MatchResultSave
     {
         public int MatchId { get; set; }
-        public Guid WinnerDriverId { get; set; }
-        public Guid LoserDriverId { get; set; }
+        public int WinnerDriverId { get; set; }     // ✅ fixed
+        public int LoserDriverId { get; set; }      // ✅ fixed
     }
+
 }
 
 
