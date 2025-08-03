@@ -1,0 +1,408 @@
+// ===================================================================================
+// FILE         : ProLadder.cs
+// DESCRIPTION  : Provides hardcoded Pro Ladder match maps for 3–6 drivers.
+//                Each LadderMatch defines seed/start and upstream dependencies.
+// AUTHOR       : Stewart McMillan + ChatGPT
+// VERSION      : 1.00
+// DATE         : 2025-05-28
+// ===================================================================================
+
+using System.Collections.Generic;
+
+namespace RC_Drag_Manager
+{
+    public static class ProLadder
+    {
+        public static List<LadderMatch> GetLadder(int fieldSize)
+        {
+            switch (fieldSize)
+            {
+                case 3: return GetLadder3();
+                case 4: return GetLadder4();
+                case 5: return GetLadder5();
+                case 6: return GetLadder6();
+                default:
+                    return new List<LadderMatch>(); // Fallback: add 7–32 as needed
+            }
+        }
+
+        private static List<LadderMatch> GetLadder3()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 2, Seed2 = 3, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 1, Seed2 = 0, RoundLabel = "SF" }, // Seed 1 gets BYE
+        new LadderMatch { MatchId = 3, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "F" }
+    };
+        }
+
+
+        private static List<LadderMatch> GetLadder4()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 4, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 2, Seed1 = 2, Seed2 = 3, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 3, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder6()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 3, Seed2 = 6, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 4, Seed2 = 5, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 1, Seed2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 4, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 5, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder7()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 2, Seed2 = 7, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 3, Seed2 = 6, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 4, Seed2 = 5, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" }, // Seed 1 gets BYE
+        new LadderMatch { MatchId = 5, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 6, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 7, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder8()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 8, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 2, Seed1 = 4, Seed2 = 5, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 3, Seed1 = 2, Seed2 = 7, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 4, Seed1 = 3, Seed2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 5, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 6, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 7, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder9()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 2, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" }, // BYE
+        new LadderMatch { MatchId = 3, Seed1 = 4, Seed2 = 5, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 4, Seed1 = 2, Seed2 = 7, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 5, Seed1 = 3, FromMatch2 = 1, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 6, FromMatch1 = 2, FromMatch2 = 3, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 7, FromMatch1 = 4, FromMatch2 = 5, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 8, FromMatch1 = 6, FromMatch2 = 7, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder10()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 3, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" }, // BYE
+        new LadderMatch { MatchId = 4, Seed1 = 4, Seed2 = 5, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 5, Seed1 = 2, FromMatch2 = 1, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 6, Seed1 = 3, FromMatch2 = 2, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 7, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 8, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 9, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder11()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 4, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 5, Seed1 = 4, Seed2 = 5, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 6, Seed1 = 2, FromMatch2 = 1, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 7, Seed1 = 3, FromMatch2 = 2, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 8, FromMatch1 = 4, FromMatch2 = 5, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 9, FromMatch1 = 6, FromMatch2 = 7, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 10, FromMatch1 = 8, FromMatch2 = 9, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder12()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 5, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 6, Seed1 = 4, FromMatch2 = 1, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 7, Seed1 = 2, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 8, Seed1 = 3, FromMatch2 = 3, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 9, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 11, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder13()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 6, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 7, Seed1 = 2, FromMatch2 = 1, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 8, Seed1 = 3, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 9, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 10, FromMatch1 = 6, FromMatch2 = 7, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 8, FromMatch2 = 9, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 12, FromMatch1 = 10, FromMatch2 = 11, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder14()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1
+        new LadderMatch { MatchId = 1, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 7, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 8, Seed1 = 2, FromMatch2 = 1, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 9, FromMatch1 = 2, FromMatch2 = 3, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 4, FromMatch2 = 5, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 11, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 13, FromMatch1 = 11, FromMatch2 = 12, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder15()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1 (one BYE for Seed 1)
+        new LadderMatch { MatchId = 1, Seed1 = 2, Seed2 = 15, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 8, Seed1 = 1, Seed2 = 0, RoundLabel = "QF" }, // Seed 1 BYE
+        new LadderMatch { MatchId = 9, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 12, FromMatch1 = 8, FromMatch2 = 9, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 13, FromMatch1 = 10, FromMatch2 = 11, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 14, FromMatch1 = 12, FromMatch2 = 13, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder16()
+        {
+            return new List<LadderMatch>
+    {
+        // Round of 16 (no byes)
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 16, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 2, Seed2 = 15, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 8, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 9, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 13, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 14, FromMatch1 = 11, FromMatch2 = 12, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 15, FromMatch1 = 13, FromMatch2 = 14, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder17()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1 (match 1 is a BYE for Seed 1)
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 0, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 16, Seed2 = 17, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 2, Seed2 = 15, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 8, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 9, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+
+        // Round 2 (QFs)
+        new LadderMatch { MatchId = 10, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 13, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 14, FromMatch1 = 10, FromMatch2 = 11, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 15, FromMatch1 = 12, FromMatch2 = 13, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 16, FromMatch1 = 14, FromMatch2 = 15, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder18()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 18, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 2, Seed2 = 17, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 8, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+
+        new LadderMatch { MatchId = 9, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "QF" },
+
+        new LadderMatch { MatchId = 13, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 14, FromMatch1 = 11, FromMatch2 = 12, RoundLabel = "SF" },
+
+        new LadderMatch { MatchId = 15, FromMatch1 = 13, FromMatch2 = 14, RoundLabel = "F" }
+    };
+        }
+
+        private static List<LadderMatch> GetLadder19()
+        {
+            return new List<LadderMatch>
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 0, RoundLabel = "R1" }, // BYE
+        new LadderMatch { MatchId = 2, Seed1 = 2, Seed2 = 19, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 8, Seed2 = 9, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 4, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 3, Seed2 = 14, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 8, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+
+        new LadderMatch { MatchId = 9, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "QF" },
+
+        new LadderMatch { MatchId = 13, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 14, FromMatch1 = 11, FromMatch2 = 12, RoundLabel = "SF" },
+
+        new LadderMatch { MatchId = 15, FromMatch1 = 13, FromMatch2 = 14, RoundLabel = "F" }
+    };
+        }
+
+    }
+
+    private static List<LadderMatch> GetLadder20()
+        {
+            return new List<LadderMatch>
+    {
+        // Round 1 (Top 16 seeds matched, Seeds 17–20 fill last slots)
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 20, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 2, Seed1 = 8, Seed2 = 13, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 3, Seed1 = 4, Seed2 = 17, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 4, Seed1 = 5, Seed2 = 12, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 5, Seed1 = 2, Seed2 = 19, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 6, Seed1 = 7, Seed2 = 10, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 7, Seed1 = 3, Seed2 = 18, RoundLabel = "R1" },
+        new LadderMatch { MatchId = 8, Seed1 = 6, Seed2 = 11, RoundLabel = "R1" },
+
+        // Quarterfinals
+        new LadderMatch { MatchId = 9, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 10, FromMatch1 = 3, FromMatch2 = 4, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 11, FromMatch1 = 5, FromMatch2 = 6, RoundLabel = "QF" },
+        new LadderMatch { MatchId = 12, FromMatch1 = 7, FromMatch2 = 8, RoundLabel = "QF" },
+
+        // Semifinals
+        new LadderMatch { MatchId = 13, FromMatch1 = 9, FromMatch2 = 10, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 14, FromMatch1 = 11, FromMatch2 = 12, RoundLabel = "SF" },
+
+        // Final
+        new LadderMatch { MatchId = 15, FromMatch1 = 13, FromMatch2 = 14, RoundLabel = "F" }
+    };
+        }
+
+
+
+    }
+}

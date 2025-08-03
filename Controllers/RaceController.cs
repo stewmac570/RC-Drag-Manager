@@ -24,6 +24,8 @@ namespace RCDragManagerProd.Controllers
         private readonly HashSet<string> _revealedRounds = new HashSet<string>();
         private readonly List<WinnerRow> _winners = new List<WinnerRow>();
         public RaceSession Session => _session;
+        private readonly MatchResult _matchResult = new MatchResult();
+
 
         // ────────────────────  EVENTS  ────────────────────
         public event Action<IReadOnlyList<PairingRow>> BracketRedrawn;
@@ -84,6 +86,9 @@ namespace RCDragManagerProd.Controllers
 
             _engine.SetWinner(matchId, winner);
 
+            _matchResult.SetWinner(matchId, winner, loser);
+
+
             _winners.Add(new WinnerRow
             {
                 MatchId = matchId,
@@ -126,13 +131,24 @@ namespace RCDragManagerProd.Controllers
             CanPickWinnerChanged?.Invoke(false);
         }
 
-        /// <summary>
-        /// Placeholder – persistence layer not wired yet.
-        /// </summary>
         public void SaveSession()
         {
-            // Intentionally left blank until repository / DB layer is defined.
+            if (_session == null) return;
+
+            _session.SavedResults = _engine.GetMatches()
+                .Where(m => _matchResult.HasResult(m.MatchId))
+                .Select(m => new MatchResultSave
+                {
+                    MatchId = m.MatchId,
+                    WinnerDriverId = _matchResult.GetWinner(m.MatchId)?.Id ?? -1,
+                    LoserDriverId = _matchResult.GetLoser(m.MatchId)?.Id ?? -1
+                })
+                .ToList();
+
+            _session.SavedRevealedRounds = _revealedRounds.ToList();
         }
+
+
 
         // ────────────────  INTERNAL HELPERS  ────────────────
         private void PushFullRefresh()
@@ -235,5 +251,14 @@ namespace RCDragManagerProd.Controllers
             if (_engine == null)
                 throw new InvalidOperationException("GenerateBracket must be called first.");
         }
+
+        private int ResolveDriverIdByName(string name)
+        {
+            return _drivers.FirstOrDefault(d =>
+                string.Equals(d.Name?.Trim(), name?.Trim(), StringComparison.OrdinalIgnoreCase)
+            )?.Id ?? -1;
+        }
+
+
     }
 }
