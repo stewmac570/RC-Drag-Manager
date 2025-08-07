@@ -17,14 +17,16 @@ namespace RCDragManagerProd
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
         public List<string> SavedRevealedRounds { get; set; } = new List<string>();
         public List<RoundRobinMatch> RoundRobinMatches { get; set; } = new List<RoundRobinMatch>();
-
+        // RaceSession.cs  –  add near the other lists
+        public List<RandomMatch> Matches { get; set; } = new List<RandomMatch>();
+        // 🔧 LOGGING (optional – constructor)
         public RaceSession()
         {
             DriverEntries = new List<RaceSessionDriverEntry>();
+            Logger.Log("[DEBUG] RaceSession ctor – Lists initialised.");   // <-- keeps init noise in one spot
         }
+
     }
-
-
 
     public class RaceSessionDriverEntry
     {

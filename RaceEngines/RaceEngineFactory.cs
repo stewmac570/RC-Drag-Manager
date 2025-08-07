@@ -8,12 +8,6 @@ using System;
 
 namespace RCDragManagerProd.RaceEngines
 {
-    /// <summary>
-    /// Simple switchboard that chooses the correct <see cref="IRaceEngine"/>
-    /// implementation based on a human-friendly race-type string supplied by
-    /// the UI or a config file.
-    /// </summary>
-    // RaceEngineFactory.cs
     public static class RaceEngineFactory
     {
         public static IRaceEngine Create(string raceType)
@@ -21,26 +15,30 @@ namespace RCDragManagerProd.RaceEngines
             if (string.IsNullOrWhiteSpace(raceType))
                 throw new ArgumentException("Race type cannot be blank.", nameof(raceType));
 
-            switch (raceType.Trim().ToLowerInvariant())
+            string cleanType = raceType.Trim().ToLowerInvariant();
+            Logger.Log($"[ENGINE FACTORY] Requested race type: '{cleanType}'");
+
+            switch (cleanType)
             {
                 case "pro ladder":
                 case "nhra pro ladder":
+                    Logger.Log("[ENGINE FACTORY] Creating ProLadderEngineAdapter");
                     return new ProLadderEngineAdapter();
 
                 case "round robin":
+                    Logger.Log("[ENGINE FACTORY] Creating RoundRobinEngineAdapter");
                     return new RoundRobinEngineAdapter();
 
                 case "random":
                 case "randomized":
                 case "random draw":
+                    Logger.Log("[ENGINE FACTORY] Creating RandomEngineAdapter");
                     return new RandomEngineAdapter();
 
                 default:
-                    throw new ArgumentException(
-                        $"Unknown race type “{raceType}”.",
-                        nameof(raceType));
+                    Logger.Log($"[ENGINE FACTORY] Unknown race type '{cleanType}'");
+                    throw new ArgumentException($"Unknown race type “{raceType}”.", nameof(raceType));
             }
         }
     }
-
 }

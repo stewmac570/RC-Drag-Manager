@@ -20,8 +20,11 @@ namespace RCDragManagerProd
         private Label lblRaceType;                      // (optional)
         private readonly RaceController _controller;
 
+        private void UpdateNextUp() => _controller.PushNextMatch();
+        private void UpdateWinnersList() => lvWinners.Items.Clear(); // or full refresh logic if you have it
+        private void UpdateButtonStates() => btnNextRound.Enabled = false; // adjust to fit logic
 
-
+        private RandomMatchEngine _losersEngine;
 
         public Form1(RaceController controller)
         {
@@ -100,6 +103,14 @@ namespace RCDragManagerProd
             Logger.Log("🔥 Logging system initialized");
 
             _controller.CanAdvanceChanged += canAdvance => btnNextRound.Enabled = canAdvance;
+
+            // Enable the “Generate Losers Bracket” button once RR is complete
+            _controller.CanOfferBuybackChanged += () =>
+            {
+                btnGenerateLosersBracket.Enabled = true;
+                Logger.Log("UI: Generate Losers Bracket button enabled.");
+            };
+
         }
 
 
@@ -193,7 +204,9 @@ namespace RCDragManagerProd
 
             try
             {
-                _controller.GenerateBracket("Pro Ladder", drivers);
+                string raceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
+                Logger.Log($"[FORM1] GenerateBracket called with race type: {raceType}");
+                _controller.GenerateBracket(raceType, drivers);
                 btnGenerateBracket.Enabled = false; // controller drives UI state
             }
             catch (Exception ex)
@@ -206,15 +219,38 @@ namespace RCDragManagerProd
 
         private void btnWinner1_Click(object sender, EventArgs e)
         {
-            if (btnWinner1.Tag is int matchId)          // Tag was set in NextMatchReady
+            if (btnWinner1.Tag is int matchId)
+            {
                 _controller.SubmitWinner(matchId, firstOption: true);
+
+                var match = _controller.GetMatch(matchId);
+                var winner = _controller.GetWinner(matchId);
+                var loser = _controller.GetLoser(matchId);
+                string round = match?.RoundLabel ?? "Unknown";
+                string winnerName = winner?.Name ?? "BYE/Unknown";
+                string loserName = loser?.Name ?? "BYE/Unknown";
+
+                Logger.Log($"[RESULT] Match {matchId} ({round}): {winnerName} defeated {loserName}");
+            }
         }
 
         private void btnWinner2_Click(object sender, EventArgs e)
         {
             if (btnWinner2.Tag is int matchId)
+            {
                 _controller.SubmitWinner(matchId, firstOption: false);
+
+                var match = _controller.GetMatch(matchId);
+                var winner = _controller.GetWinner(matchId);
+                var loser = _controller.GetLoser(matchId);
+                string round = match?.RoundLabel ?? "Unknown";
+                string winnerName = winner?.Name ?? "BYE/Unknown";
+                string loserName = loser?.Name ?? "BYE/Unknown";
+
+                Logger.Log($"[RESULT] Match {matchId} ({round}): {winnerName} defeated {loserName}");
+            }
         }
+
 
 
 
@@ -244,14 +280,19 @@ namespace RCDragManagerProd
         {
             try
             {
+                var nextRound = _controller.GetNextHiddenRound();
+                Logger.Log($"[FORM1] Generate Next Round clicked — revealing: {nextRound}");
+
                 _controller.AdvanceRound();
+
+                Logger.Log("[FORM1] AdvanceRound() completed");
             }
             catch (Exception ex)
             {
+                Logger.Log($"[FORM1] AdvanceRound FAILED: {ex.Message}");
                 MessageBox.Show($"Cannot advance round:\n{ex.Message}");
             }
         }
-
 
 
         private void RedrawFullBracket(IReadOnlyList<PairingRow> rows)
@@ -280,8 +321,8 @@ namespace RCDragManagerProd
                 else
                 {
                     var item = new ListViewItem($"M{row.MatchId}");
-                    item.SubItems.Add(row.Driver1);
-                    item.SubItems.Add(row.Driver2);
+                    item.SubItems.Add(row.Driver1 ?? "BYE");
+                    item.SubItems.Add(row.Driver2 ?? "BYE");
                     lvPairings.Items.Add(item);
                 }
             }
@@ -354,6 +395,78 @@ namespace RCDragManagerProd
                 default: return 100;
             }
         }
+
+        private void btnGenerateLosersBracket_Click(object sender, EventArgs e)
+        {
+            btnGenerateLosersBracket.Enabled = false;   // prevent second click
+
+            Logger.Log("🔁 User triggered Generate Losers Bracket");
+
+            var eligible = _controller.GetEligibleBuybackDrivers();
+
+            if (eligible == null || eligible.Count == 0)
+            {
+                MessageBox.Show("No eligible buyback drivers found.", "No Entries", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Logger.Log("⚠️ No eligible buybacks found.");
+                return;
+            }
+
+            using (var dlg = new BuybackDriverSelectionForm(eligible))
+
+            {
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;                                // user cancelled
+
+                // ✅ grab the selection from the property, not a method
+                var selectedDrivers = dlg.SelectedDrivers;
+
+                if (selectedDrivers == null || selectedDrivers.Count == 0)
+                {
+                    MessageBox.Show("No drivers selected.");
+                    return;
+                }
+
+                Logger.Log($"[LB] Drivers chosen: {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+
+                // hand off to the controller – it will generate and run the bracket
+                Logger.Log("[LB] Hand-off to controller.GenerateLosersBracket()");
+                _controller.GenerateLosersBracket(selectedDrivers);
+
+            }
+
+        }
+
+        /// <summary>
+        /// Convenience overload so legacy call-sites that invoked
+        /// <c>RedrawFullBracket()</c> with no parameters still compile.
+        /// It fetches the latest bracket rows from the controller,
+        /// emits a DEBUG log, and delegates to the real method.
+        /// </summary>
+        private void RedrawFullBracket()
+        {
+            if (_controller == null)
+            {
+                Logger.Log("⚠️  RedrawFullBracket(): _controller is null — aborting redraw");
+                return;
+            }
+
+            IReadOnlyList<PairingRow> rows = _controller.BuildCurrentBracketRows();
+
+            Logger.Log($"🔄 UI bracket redraw triggered — rows={rows.Count}");
+            RedrawFullBracket(rows);              // ← existing, parameterised overload
+        }
+
+
+        private void UpdateUIAfterBracketChange()
+        {
+            RedrawFullBracket();      // now compiles — calls the wrapper above
+            UpdateNextUp();
+            UpdateWinnersList();
+            UpdateButtonStates();
+            // NB: Any additional per-round logic can be added here later.
+        }
+
+
 
 
     }

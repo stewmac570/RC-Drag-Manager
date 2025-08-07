@@ -182,12 +182,12 @@
     <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
     <Compile Include="RaceSession.cs" />
     <Compile Include="RaceSessionRepository.cs" />
-    <Compile Include="RandomBracket.cs" />
-    <Compile Include="RandomMatch.cs" />
-    <Compile Include="RandomMatchEngine.cs" />
-    <Compile Include="RoundRobinEngine.cs" />
-    <Compile Include="RoundRobinMatch.cs" />
-    <Compile Include="RoundRobinRanker.cs" />
+    <Compile Include="RandomMode\RandomBracket.cs" />
+    <Compile Include="RandomMode\RandomMatch.cs" />
+    <Compile Include="RandomMode\RandomMatchEngine.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinEngine.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -245,6 +245,7 @@
   <ItemGroup>
     <Content Include="retro trans icon.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

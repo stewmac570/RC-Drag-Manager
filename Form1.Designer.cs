@@ -34,6 +34,7 @@ namespace RCDragManagerProd
         private Button btnReset;
         private Button btnEditResult;
         private Button btnSaveAndClose;
+        private Button btnGenerateLosersBracket;
 
         protected override void Dispose(bool disposing)
         {
@@ -326,16 +327,16 @@ namespace RCDragManagerProd
             this.cmbRaceType.TabIndex = 50;
             // 
             // btnGenerateLosersBracket
-            // 
-            //this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
-            //this.btnGenerateLosersBracket.Enabled = false;
-          //  this.btnGenerateLosersBracket.Location = new System.Drawing.Point(675, 489);
-           // this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
-            //this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
-            //this.btnGenerateLosersBracket.TabIndex = 0;
-            //this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
-           // this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
-           // this.Controls.Add(this.btnGenerateLosersBracket);
+            this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
+            this.btnGenerateLosersBracket.Enabled = false;
+            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(678, 489);
+            this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
+            this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
+            this.btnGenerateLosersBracket.TabIndex = 20;
+            this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
+            this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
+            this.Controls.Add(this.btnGenerateLosersBracket);
+
 
             // 
             // Form1
