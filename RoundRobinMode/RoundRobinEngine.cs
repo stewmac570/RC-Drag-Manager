@@ -136,6 +136,39 @@ namespace RCDragManagerProd
                           .ToList();
         }
 
+        public List<(Driver Driver, int Wins)> GetStandings()
+        {
+            return matches
+                .Where(m => results.HasResult(m.MatchId))
+                .Select(m => results.GetWinner(m.MatchId))
+                .GroupBy(d => d)
+                .Select(g => (Driver: g.Key, Wins: g.Count()))
+                .OrderByDescending(x => x.Wins)
+                .ToList();
+        }
+
+        public List<Driver> GetAllDrivers()
+        {
+            return new List<Driver>(drivers);
+        }
+        public List<Driver> GetTopN(int count)
+        {
+            return GetStandings()
+                .OrderByDescending(s => s.Wins)
+                .Take(count)
+                .Select(s => s.Driver)
+                .ToList();
+        }
+        public List<Driver> GetTopRankedDrivers(int count)
+        {
+            var ranker = new RoundRobinRanker();
+            var ranked = ranker.Rank(GetResults(), drivers, results);
+
+            return ranked.Take(count)
+                         .Select(r => drivers.First(d => d.Id == r.DriverId))
+                         .ToList();
+        }
+
 
 
     }

@@ -1,11 +1,9 @@
 ﻿// ============================================================================
 // LosersBracketEngine.cs
-// RC Drag Manager — Simple Single-Elim “Second-Chance” Bracket (MVP v1.0)
-// ============================================================================
-//
-// Takes everyone not ranked Top-3 from a round-robin and runs a blind
-// single-elimination to crown one winner destined for the Pro Ladder.
-// BYEs are inserted only as needed.  No rematches occur inside this bracket.
+// RC Drag Manager — Single-Elim Losers-Bracket (buy-back) helper
+// ✔ Uses Driver objects (no Guid confusion)
+// ✔ BYE support via nullable Driver slots
+// ✔ Detailed logging at each major step
 // ============================================================================
 
 using System;
@@ -16,50 +14,78 @@ namespace RCDragManagerProd
 {
     public class LosersBracketEngine
     {
-        private readonly Random _rng = new();
+        // Static RNG so the static RunBracket can access it
+        private static readonly Random _rng = new();
 
-        public Guid RunBracket(IReadOnlyCollection<Guid> driverIds,
-                               Func<Guid, Guid, Guid> raceCallback)
+        /// <summary>
+        /// Runs a blind single-elimination bracket for the supplied drivers.
+        /// </summary>
+        /// <param name="drivers">All entrants (buy-backs, etc.). Count must be ≥ 1.</param>
+        /// <param name="raceCallback">
+        /// A delegate your UI/controller supplies that takes two <see cref="Driver"/>s
+        /// and returns the winner.
+        /// </param>
+        /// <returns>The bracket champion (who will advance to the final ladder).</returns>
+        public static Driver RunBracket(
+            IReadOnlyCollection<Driver> drivers,
+            Func<Driver, Driver, Driver> raceCallback)
         {
-            if (driverIds.Count < 1)
-                throw new ArgumentException("No drivers supplied.", nameof(driverIds));
+            if (drivers == null || drivers.Count < 1)
+                throw new ArgumentException("No drivers supplied.", nameof(drivers));
 
-            // shuffle
-            var pool = driverIds.OrderBy(_ => _rng.Next()).ToList();
+            // 1️⃣  Shuffle the field.
+            var pool = drivers.OrderBy(_ => _rng.Next()).ToList<Driver?>();
+            Logger.Log($"[LB] Starting losers bracket with {pool.Count} drivers.");
 
-            // bump to next power-of-two
-            int rounds =
-            (int)Math.Ceiling(Math.Log(pool.Count, 2));
-            int size = 1 << rounds;
-            int byes = size - pool.Count;
+            // 2️⃣  Pad to next power-of-two with BYEs (null slots).
+            int targetSize = NextPowerOfTwo(pool.Count);
+            while (pool.Count < targetSize)
+                pool.Add(null);
 
-            // disperse BYEs
-            for (int i = 0; i < byes; i++)
-            {
-                pool.Insert(i * 2, Guid.Empty); // Guid.Empty marks a BYE slot
-            }
+            Logger.Log($"[LB] Bracket size padded to {targetSize} (BYEs inserted = {targetSize - drivers.Count}).");
 
-            // run rounds
+            // 3️⃣  Run rounds until one champion remains.
+            int round = 1;
             while (pool.Count > 1)
             {
-                var next = new List<Guid>();
+                Logger.Log($"[LB] ---------- Round {round} | Field = {pool.Count} ----------");
 
+                var next = new List<Driver?>();
                 for (int i = 0; i < pool.Count; i += 2)
                 {
                     var a = pool[i];
                     var b = pool[i + 1];
 
-                    if (a == Guid.Empty) { next.Add(b); continue; }
-                    if (b == Guid.Empty) { next.Add(a); continue; }
+                    // BYE handling
+                    if (a == null) { next.Add(b); continue; }
+                    if (b == null) { next.Add(a); continue; }
 
+                    // Real race — ask the controller UI who won
                     var winner = raceCallback(a, b);
+                    if (winner == null)
+                        throw new InvalidOperationException("raceCallback returned null!");
+
+                    Logger.Log($"[LB]   Match: {a.Name} vs {b.Name} → Winner: {winner.Name}");
                     next.Add(winner);
                 }
 
                 pool = next;
+                round++;
             }
 
-            return pool[0]; // champion to feed back into Pro Ladder
+            var champion = pool[0]!; // never null here
+            Logger.Log($"[LB] Losers-Bracket champion: {champion.Name}");
+            return champion;
+        }
+
+        // -------------------------------------------------------------------
+        // Utility helpers
+        // -------------------------------------------------------------------
+        private static int NextPowerOfTwo(int n)
+        {
+            int p = 1;
+            while (p < n) p <<= 1;
+            return p;
         }
     }
 }

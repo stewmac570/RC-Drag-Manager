@@ -1406,4 +1406,125 @@ Stewart McMillan — RC Drag Manager
 ✅ All code tested and merged
 
 ------------------------------------------------------------------------------
+✅ Dev Log Update — Logging System Integration
+Feature: feature/logging-system
+Date: 2025-08-03
+Context: Infrastructure Improvement
+
+🎯 Goal
+Implement a configurable logging system that saves logs to a known location for debugging and audit purposes.
+
+🛠️ Work Completed
+Area	Details
+Logger Class	New Logger static utility class added in RCDragManagerProd.
+• Reads settings from App.config.	
+• Logs messages only if EnableLogging=true.	
+• Creates target directory if missing.	
+• Appends timestamped log lines to specified file.	
+App.config	Added two keys under <appSettings>:
+• EnableLogging = true	
+• LogFilePath = %APPDATA%\RC_Drag_Manager\app.log (auto-expanded in code)	
+Path Expansion	Custom logic handles %APPDATA% token in .config. Resolves to full roaming path on any system.
+Form1.cs	Call to Logger.Log("🔥 Logging system initialized") added in constructor to confirm init.
+
+📁 Result
+Logs now saved to:
+C:\Users\<YourUser>\AppData\Roaming\RC_Drag_Manager\app.log
+------------------------------------------------------------------------------
+✅ Dev Log Summary – Round Robin Buyback Refactor
+📅 Date: 2025-08-04
+🔁 Feature Branch: feature/roundrobin-buyback-restore
+
+🧠 Problem
+After completing all 3 rounds in Round Robin mode, no progression or buyback prompt was shown.
+
+Previous logic for Buyback Phase was removed during Form1/UI refactor.
+
+Missing features:
+
+No “Generate Losers Bracket” button.
+
+No buyback driver selection popup.
+
+No promotion to Pro Ladder after RR standings.
+
+✅ Work Completed
+Confirmed current RoundRobinEngine & Adapter work correctly.
+
+Verified RoundRobinRanker is now in charge of standings & tiebreak logic.
+
+Reinstated PushAdvanceState() and ensured it fires on winner selection.
+
+Located missing buyback entry point:
+
+PushNextMatch() correctly ends RR but did not emit buyback trigger.
+
+Proposed and outlined full reimplementation of Buyback Phase, including:
+
+UI Button: btnGenerateLosersBracket
+
+Event: CanOfferBuybackChanged
+
+Dialog: BuybackSelectionDialog (not yet coded)
+
+Controller logic: GetEligibleBuybackDrivers() + GenerateLosersBracket()
+
+Enabled logging at key points (match submission, standings, bracket generation).
+
+🧪 Pending Tasks
+ Implement and wire BuybackSelectionDialog UI.
+
+ Add btnGenerateLosersBracket to Form1.Designer.cs.
+
+ Final controller integration + test.
+
+ Confirm buyback → ladder flow works with 2–4 drivers.
+
+🧷 Notes
+All logic stays modular.
+
+Pro Ladder engine reused after RR.
+
+No database dependencies in this phase.
+------------------------------------------------------------------------------
+Dev-Log Summary — 2025-08-08
+Topic: Fix compile errors and complete Round-Robin → Losers-Bracket flow
+
+1. Compile-time fixes
+File	Change
+RandomEngineAdapter.cs	• Added InjectMatches(List<RandomMatch>)
+• Added default & param ctors
+• Made _engine readonly field (no inline new)
+• Injected concise logging
+RaceController.cs	• Field _losersEngine now IRaceEngine
+• New field _selectedDrivers (buy-back list)
+• GenerateLosersBracket() now:  • builds adapter, calls InjectMatches, sets _inLosersPhase  • stores _selectedDrivers, fires PushNextMatch()  • logging refined
+Form1.cs	• btnGenerateLosersBracket_Click now disables button on first click and forwards selectedDrivers to controller
+• Constructor: subscribes to CanOfferBuybackChanged to enable the LB button; sets initial btnGenerateLosersBracket.Enabled = false
+PushAdvanceState()	• Buy-back trigger guarded by !_inLosersPhase and RoundRobinEngineAdapter check
+LosersBracketEngine.cs	• _rng static; logging improved
+
+2. Buy-back eligibility
+GetEligibleBuybackDrivers() now uses RoundRobinEngineAdapter.GetStandings() + GetTopRankedDrivers(3) (no session string dependency).
+
+3. UI behaviour
+LB button enabled only once all RR matches resolved, disabled immediately after click.
+
+First LB pairing auto-pushed to UI; “Next Round” button now activates correctly.
+
+4. Logging
+Added granular [LB], 🔁, and UI: log entries for bracket generation, injection counts, first-match push, and button state.
+
+Status: Build clean, Round-Robin → Buy-back → Losers-Bracket flow functional; finals phase next on roadmap.
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
 

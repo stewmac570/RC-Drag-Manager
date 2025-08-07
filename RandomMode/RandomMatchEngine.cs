@@ -115,8 +115,67 @@ namespace RCDragManagerProd
 
         public void GenerateBracket()
         {
-            bracketMatches = RandomBracket.GenerateFirstRound(drivers);
+            bracketMatches.Clear();
+
+            int totalDrivers = drivers.Count;
+            if (totalDrivers < 2) return;
+
+            // 1️⃣ Shuffle drivers randomly
+            var rnd = new Random();
+            var shuffled = drivers.OrderBy(_ => rnd.Next()).ToList();
+
+            // 2️⃣ Pad with BYE if odd
+            if (shuffled.Count % 2 != 0)
+                shuffled.Add(null);
+
+            // 3️⃣ Create R1 matches
+            var currentRound = new List<RandomMatch>();
+            int matchId = 1;
+            for (int i = 0; i < shuffled.Count; i += 2)
+            {
+                currentRound.Add(new RandomMatch
+                {
+                    MatchId = matchId++,
+                    Seed1 = shuffled[i],
+                    Seed2 = shuffled[i + 1],
+                    RoundLabel = "R1"
+                });
+            }
+
+            bracketMatches.AddRange(currentRound);
+
+            int roundNum = 2;
+            while (currentRound.Count > 1)
+            {
+                var nextRound = new List<RandomMatch>();
+
+                for (int i = 0; i < currentRound.Count; i += 2)
+                {
+                    var m1 = currentRound[i];
+                    var m2 = (i + 1 < currentRound.Count) ? currentRound[i + 1] : null;
+
+                    nextRound.Add(new RandomMatch
+                    {
+                        MatchId = matchId++,
+                        FromMatch1 = m1.MatchId,
+                        FromMatch2 = m2?.MatchId,
+                        RoundLabel = $"R{roundNum}"
+                    });
+                }
+
+                bracketMatches.AddRange(nextRound);
+                currentRound = nextRound;
+                roundNum++;
+            }
+
+            // Optional: label the final as "F"
+            if (bracketMatches.Count > 0)
+            {
+                var final = bracketMatches.Last();
+                final.RoundLabel = "F";
+            }
         }
+
 
 
         public void Reset()
