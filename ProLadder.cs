@@ -57,12 +57,13 @@ namespace RCDragManagerProd
         private static List<LadderMatch> GetLadder4()
         {
             return new List<LadderMatch>
-            {
-                new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 4, RoundLabel = "R1" },
-                new LadderMatch { MatchId = 2, Seed1 = 2, Seed2 = 3, RoundLabel = "R1" },
-                new LadderMatch { MatchId = 3, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "F" }
-            };
+    {
+        new LadderMatch { MatchId = 1, Seed1 = 1, Seed2 = 4, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 2, Seed1 = 2, Seed2 = 3, RoundLabel = "SF" },
+        new LadderMatch { MatchId = 3, FromMatch1 = 1, FromMatch2 = 2, RoundLabel = "F" }
+    };
         }
+
 
         private static List<LadderMatch> GetLadder5()
         {

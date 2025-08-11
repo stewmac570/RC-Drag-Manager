@@ -71,47 +71,184 @@ namespace RCDragManagerProd
 
 
             // This is in Form1.cs
+            // Unified Results panel: RR → Losers → Finals, continuous M# and headers
             _controller.WinnersUpdated += rows =>
             {
+                if (lvWinners.Columns.Count == 0)
+                {
+                    lvWinners.View = View.Details;
+                    lvWinners.Columns.Add("M#", 45, HorizontalAlignment.Left);
+                    lvWinners.Columns.Add("Loser", 120, HorizontalAlignment.Left);
+                    lvWinners.Columns.Add("Winner", 120, HorizontalAlignment.Left);
+                    Logger.Log("[UI:Winners] Columns initialised.");
+                }
+
                 lvWinners.BeginUpdate();
                 lvWinners.Items.Clear();
 
-                // ✅ Use bracket sort — not alphabetical
-                var grouped = rows.GroupBy(w => w.RoundLabel)
-                                  .OrderBy(g => GetRoundOrder(g.Key));
+                // Order across ALL stages with a single key:
+                //  - R1..R9 (Round Robin) first
+                //  - Losers Bracket R1..Rn
+                //  - SF, then F
+                var ordered = rows
+                    .OrderBy(w => GetGlobalRoundOrder(w.RoundLabel))
+                    .ThenBy(w => w.MatchId) // tie-breaker inside the same round
+                    .ToList();
 
-                foreach (var group in grouped)
+                int displayNo = 1;
+                string currentHeader = null;
+
+                foreach (var w in ordered)
                 {
-                    var header = new ListViewItem("");
-                    header.SubItems.Add($"Round {group.Key}");
-                    header.BackColor = Color.LightGray;
-                    header.Font = new Font(header.Font, FontStyle.Italic);
-                    lvWinners.Items.Add(header);
-
-                    foreach (var w in group)
+                    // Insert a header when round changes
+                    if (!string.Equals(currentHeader, w.RoundLabel, StringComparison.OrdinalIgnoreCase))
                     {
-                        var item = new ListViewItem($"M{w.MatchId}");
-                        item.SubItems.Add(w.Loser ?? "");
-                        item.SubItems.Add(w.Winner ?? "");
-                        lvWinners.Items.Add(item);
+                        currentHeader = w.RoundLabel;
+
+                        var hdr = new ListViewItem("");
+                        hdr.SubItems.Add(GetFullRoundLabel(currentHeader)); // same pretty label you use on the left pane
+                        hdr.SubItems.Add("");
+                        hdr.BackColor = Color.LightGray;
+                        hdr.Font = new Font(hdr.Font, FontStyle.Italic);
+                        lvWinners.Items.Add(hdr);
+
+                        Logger.Log($"[UI:Winners] Header added: {currentHeader}");
                     }
+
+                    // Continuous M# across the whole event
+                    var item = new ListViewItem($"M{displayNo++}");
+                    item.SubItems.Add(w.Loser ?? "");
+                    item.SubItems.Add(w.Winner ?? "");
+                    lvWinners.Items.Add(item);
+
+                    Logger.Log($"[UI:Winners] Row added: {item.Text}  {w.Loser ?? ""} → {w.Winner ?? ""}  [Round={w.RoundLabel}, MatchId={w.MatchId}]");
                 }
 
+                Logger.Log($"[UI:Winners] Rebuilt: total rows={lvWinners.Items.Count}, matches(numbered)={displayNo - 1}");
                 lvWinners.EndUpdate();
             };
 
+
             Logger.Log("🔥 Logging system initialized");
 
-            _controller.CanAdvanceChanged += canAdvance => btnNextRound.Enabled = canAdvance;
-
-            // Enable the “Generate Losers Bracket” button once RR is complete
-            _controller.CanOfferBuybackChanged += () =>
+            // ── toggle “Generate Next Round” state — with logging ───────────────
+            _controller.CanAdvanceChanged += canAdvance =>
             {
-                btnGenerateLosersBracket.Enabled = true;
-                Logger.Log("UI: Generate Losers Bracket button enabled.");
+                btnNextRound.Enabled = canAdvance;
+                Logger.Log($"UI: Generate Next Round button {(canAdvance ? "enabled" : "disabled")}.");
             };
 
+            // ── toggle “Generate Losers Bracket” state and popup prompt ─────────
+            _controller.CanOfferBuybackChanged += enabled =>
+            {
+                btnGenerateLosersBracket.Enabled = enabled;
+                Logger.Log($"UI: Generate Losers Bracket button {(enabled ? "enabled" : "disabled")}.");
+
+                if (enabled)
+                {
+                    MessageBox.Show(
+                        "Round-Robin complete.\nClick 'Buy Back' to add drivers to the Losers Bracket.",
+                        "Buy-Back Phase Ready",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            };
+            // ── Finals gate: enable Generate Bracket and inform RD ─────────────
+            bool finalsPopupShown = false; // prevent duplicate popups if event fires again
+            _controller.CanStartFinalsChanged += enabled =>
+            {
+                btnGenerateBracket.Enabled = enabled;
+                Logger.Log($"UI: Finals pending — Generate Bracket {(enabled ? "enabled" : "disabled")}.");
+
+                if (enabled && !finalsPopupShown)
+                {
+                    finalsPopupShown = true;
+                    MessageBox.Show(
+                        "Losers Bracket complete.\nWinner will be added to the Finals.\n\nClick 'Generate Bracket' to start the Finals.",
+                        "Finals Ready",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+
+                if (!enabled)
+                {
+                    finalsPopupShown = false;
+                }
+            };
+            // ── Tournament complete popup (OK only; no reset/close) ─────────────
+            _controller.TournamentCompleted += summary =>
+            {
+                var winner = summary.Winner?.Name ?? "N/A";
+                var runnerUp = summary.RunnerUp?.Name ?? "N/A";
+
+                var msg =
+                    $"Event: {summary.EventName}\n" +
+                    $"Bracket: {summary.Bracket}\n" +
+                    $"Winner: {winner}\n" +
+                    $"Runner-up: {runnerUp}\n" +
+                    $"Matches: {summary.TotalMatches}";
+
+                Logger.Log($"[UI] TournamentCompleted → Winner={winner}, RunnerUp={runnerUp}");
+                MessageBox.Show(msg, "Event Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // No automatic reset/close. Leave UI as-is; Reset Race stays available.
+                Logger.Log("[UI] Event Complete acknowledged (OK). Session left intact.");
+            };
         }
+
+        // Sort key for ANY round label so Results panel is globally ordered.
+        // Order: RR R1..Rn (100+x) -> LB R1..Rn (200+x) -> LB Final (299) -> SF (990) -> F (1000).
+        private int GetGlobalRoundOrder(string roundLabel)
+        {
+            if (string.IsNullOrWhiteSpace(roundLabel)) return 999;
+
+            // Finals last
+            if (string.Equals(roundLabel, "F", StringComparison.OrdinalIgnoreCase)) return 1000;
+            if (string.Equals(roundLabel, "SF", StringComparison.OrdinalIgnoreCase)) return 990;
+
+            // Losers Bracket mapping
+            if (roundLabel.StartsWith("Losers Bracket", StringComparison.OrdinalIgnoreCase))
+            {
+                var label = roundLabel.Trim();
+
+                // Explicit: put LB Final after all LB Rounds
+                if (label.EndsWith("Final", StringComparison.OrdinalIgnoreCase))
+                    return 299;
+
+                // "Losers Bracket R{n}"
+                string[] parts = label.Split(' ');
+                if (parts.Length >= 3)
+                {
+                    string last = parts[parts.Length - 1];
+                    if (last.Length >= 2 && (last[0] == 'R' || last[0] == 'r'))
+                    {
+                        int n;
+                        if (int.TryParse(last.Substring(1), out n))
+                            return 200 + n;
+                    }
+                }
+
+                Logger.Log($"[UI:Winners] LB round label not recognized: '{roundLabel}' — defaulting to 290");
+                return 290; // still before SF/F
+            }
+
+            // Round Robin: "R1", "R2", ...
+            if (roundLabel.Length >= 2 && (roundLabel[0] == 'R' || roundLabel[0] == 'r'))
+            {
+                int n;
+                if (int.TryParse(roundLabel.Substring(1), out n))
+                    return 100 + n;
+            }
+
+            // Safety: handle spelled-out headers if they ever slip through
+            if (roundLabel.StartsWith("Semi", StringComparison.OrdinalIgnoreCase)) return 990;
+            if (roundLabel.StartsWith("Final", StringComparison.OrdinalIgnoreCase)) return 1000;
+
+            Logger.Log($"[UI:Winners] Unrecognized round label for ordering: '{roundLabel}' — defaulting to 800");
+            return 800;
+        }
+
+
 
 
         private void btnAddDriver_Click(object sender, EventArgs e)
@@ -180,9 +317,9 @@ namespace RCDragManagerProd
                 MessageBox.Show("Select a driver to edit qualifying time.");
             }
         }
-
         private void UpdateDriverList()
         {
+            // ── refresh list view ─────────────────────────────────────────────
             lvDrivers.Items.Clear();
             foreach (var d in drivers.OrderBy(d => d.QualTime))
             {
@@ -190,33 +327,41 @@ namespace RCDragManagerProd
                 item.SubItems.Add((d.QualTime ?? 0.0).ToString("0.000"));
                 lvDrivers.Items.Add(item);
             }
-        }
 
+            // ── NEW: toggle “Generate Bracket” availability ───────────────────
+            bool canGenerate = drivers.Count >= 2 && !_controller.HasBracketStarted;
+            btnGenerateBracket.Enabled = canGenerate;
+            Logger.Log($"[UI] Generate Bracket {(canGenerate ? "ENABLED" : "disabled")} — drivers={drivers.Count}");
+        }
 
 
         private void btnGenerateBracket_Click(object sender, EventArgs e)
         {
-            if (drivers.Count < 2)
+            // ── Finals start path (gated) ───────────────────────────────────
+            if (_controller.IsFinalsPending)
             {
-                MessageBox.Show("Not enough drivers to generate bracket.");
+                Logger.Log("[FORM1] Generate Bracket pressed — starting Finals…");
+                _controller.StartFinals();
+                btnGenerateBracket.Enabled = false;
                 return;
             }
 
-            try
+            // ── Losers-Bracket path ─────────────────────────────────────────
+            if (_controller.IsInLosersBracketPhase)
             {
-                string raceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
-                Logger.Log($"[FORM1] GenerateBracket called with race type: {raceType}");
-                _controller.GenerateBracket(raceType, drivers);
-                btnGenerateBracket.Enabled = false; // controller drives UI state
+                Logger.Log("[FORM1] Starting Losers Bracket from stored buybacks...");
+                _controller.StartLosersBracket();
+                btnGenerateBracket.Enabled = false;
+                btnGenerateLosersBracket.Enabled = false;
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Bracket generation failed:\n{ex.Message}");
-            }
+
+            // ── Initial bracket build ───────────────────────────────────────
+            var selectedType = cmbRaceType.SelectedItem?.ToString();
+            Logger.Log($"[FORM1] GenerateBracket called with race type: {selectedType} and {drivers.Count} drivers");
+            _controller.GenerateBracket(selectedType, drivers);
+            btnGenerateBracket.Enabled = false;
         }
-
-
-
         private void btnWinner1_Click(object sender, EventArgs e)
         {
             if (btnWinner1.Tag is int matchId)
@@ -297,36 +442,65 @@ namespace RCDragManagerProd
 
         private void RedrawFullBracket(IReadOnlyList<PairingRow> rows)
         {
+            // ── guard ────────────────────────────────────────────────────────
+            if (rows == null)
+            {
+                Logger.Log("[UI] RedrawFullBracket called with rows=null");
+                return;
+            }
+            Logger.Log($"[UI] RedrawFullBracket: incoming rows={rows.Count}");
+
+            // ── one-time ListView setup ──────────────────────────────────────
             if (lvPairings.Columns.Count == 0)
             {
                 lvPairings.View = View.Details;
+                lvPairings.FullRowSelect = true;
                 lvPairings.Columns.Add("M#", 45, HorizontalAlignment.Left);
                 lvPairings.Columns.Add("Driver 1", 100, HorizontalAlignment.Left);
                 lvPairings.Columns.Add("Driver 2", 100, HorizontalAlignment.Left);
+                Logger.Log("[UI] lvPairings columns initialised (M#, Driver1, Driver2)");
             }
 
+            lvPairings.BeginUpdate();
             lvPairings.Items.Clear();
 
+            int added = 0;
             foreach (var row in rows)
             {
+                if (row == null) continue;
+
                 if (row.IsHeader)
                 {
-                    var header = new ListViewItem("");
-                    header.SubItems.Add($"Round {row.RoundLabel}");
-                    header.SubItems.Add("");
+                    // round header row
+                    string label = GetFullRoundLabel(row.RoundLabel);
+                    var header = new ListViewItem(string.Empty);
+                    header.SubItems.Add(label);
+                    header.SubItems.Add(string.Empty);
                     header.BackColor = Color.LightGray;
                     header.Font = new Font(header.Font, FontStyle.Italic);
                     lvPairings.Items.Add(header);
+                    Logger.Log($"[UI] Header added: {label}");
+                    continue;
                 }
-                else
-                {
-                    var item = new ListViewItem($"M{row.MatchId}");
-                    item.SubItems.Add(row.Driver1 ?? "BYE");
-                    item.SubItems.Add(row.Driver2 ?? "BYE");
-                    lvPairings.Items.Add(item);
-                }
+
+                // normal match row
+                string mLabel = !string.IsNullOrEmpty(row.MatchNumber) ? row.MatchNumber : $"M{row.MatchId}";
+                string d1 = row.Driver1 ?? "BYE";
+                string d2 = row.Driver2 ?? "BYE";
+
+                var item = new ListViewItem(mLabel);
+                item.SubItems.Add(d1);
+                item.SubItems.Add(d2);
+                lvPairings.Items.Add(item);
+                added++;
+
+                Logger.Log($"[UI] Row added: {mLabel}  {d1} vs {d2}  [Round={row.RoundLabel}, MatchId={row.MatchId}]");
             }
+
+            lvPairings.EndUpdate();
+            Logger.Log($"[UI] Redraw complete: headers+rows total={lvPairings.Items.Count}, matches added={added}");
         }
+
 
         private void btnReset_Click(object sender, EventArgs e)
         {
@@ -398,43 +572,47 @@ namespace RCDragManagerProd
 
         private void btnGenerateLosersBracket_Click(object sender, EventArgs e)
         {
-            btnGenerateLosersBracket.Enabled = false;   // prevent second click
+            Logger.Log("🔁 [UI] Buybacks button clicked");
 
-            Logger.Log("🔁 User triggered Generate Losers Bracket");
+            btnGenerateLosersBracket.Enabled = false;   // prevent double-click
 
             var eligible = _controller.GetEligibleBuybackDrivers();
 
-            if (eligible == null || eligible.Count == 0)
+            if (eligible == null || eligible.Count < 2)
             {
-                MessageBox.Show("No eligible buyback drivers found.", "No Entries", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                Logger.Log("⚠️ No eligible buybacks found.");
+                MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
                 return;
             }
 
             using (var dlg = new BuybackDriverSelectionForm(eligible))
-
             {
                 if (dlg.ShowDialog() != DialogResult.OK)
-                    return;                                // user cancelled
-
-                // ✅ grab the selection from the property, not a method
-                var selectedDrivers = dlg.SelectedDrivers;
-
-                if (selectedDrivers == null || selectedDrivers.Count == 0)
                 {
-                    MessageBox.Show("No drivers selected.");
+                    Logger.Log("🔕 [LB] Buyback dialog cancelled by user.");
                     return;
                 }
 
-                Logger.Log($"[LB] Drivers chosen: {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+                var selectedDrivers = dlg.SelectedDrivers;
 
-                // hand off to the controller – it will generate and run the bracket
-                Logger.Log("[LB] Hand-off to controller.GenerateLosersBracket()");
-                _controller.GenerateLosersBracket(selectedDrivers);
+                if (selectedDrivers == null || selectedDrivers.Count < 2)
+                {
+                    MessageBox.Show("At least two drivers must be selected.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
+                    return;
+                }
 
+                Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+
+                // ✅ Store the drivers, but do not start the bracket yet
+                _controller.SetBuybackDrivers(selectedDrivers);
+
+                // ✅ Enable the "Generate Bracket" button so the race director can manually start
+                btnGenerateBracket.Enabled = true;
+                Logger.Log("[UI] Generate Bracket button enabled for Losers Bracket start.");
             }
-
         }
+
 
         /// <summary>
         /// Convenience overload so legacy call-sites that invoked
@@ -464,6 +642,21 @@ namespace RCDragManagerProd
             UpdateWinnersList();
             UpdateButtonStates();
             // NB: Any additional per-round logic can be added here later.
+        }
+        private string GetFullRoundLabel(string label)
+        {
+            switch (label)
+            {
+                case "R1": return "Round 1";
+                case "R2": return "Round 2";
+                case "R3": return "Round 3";
+                case "R4": return "Round 4";
+                case "QF": return "Quarterfinals";
+                case "SF": return "Semi-Finals";
+                case "F": return "Final";
+                case "LBF": return "Losers Bracket Final";
+                default: return label;
+            }
         }
 
 

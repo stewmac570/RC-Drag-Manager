@@ -19,6 +19,11 @@ namespace RCDragManagerProd
             return results.ContainsKey(matchId) ? results[matchId].Winner : null;
         }
 
+        public Driver GetLoser(int matchId)
+        {
+            return results.ContainsKey(matchId) ? results[matchId].Loser : null;
+        }
+
 
         public bool HasResult(int matchId)
         {
@@ -50,10 +55,6 @@ namespace RCDragManagerProd
 
             }
             return false;
-        }
-        public Driver GetLoser(int matchId)
-        {
-            return results.ContainsKey(matchId) ? results[matchId].Loser : null;
         }
 
         public HashSet<(int, int)> GetAllPairings()

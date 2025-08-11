@@ -188,6 +188,7 @@
     <Compile Include="RoundRobinMode\RoundRobinEngine.cs" />
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger.cs" />
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -200,6 +201,7 @@
     <Compile Include="SessionSetupForm.Designer.cs">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\DictEx.cs" />
     <Compile Include="ViewModels\MatchResultSave.cs" />
     <Compile Include="ViewModels\PairingRow.cs" />
     <Compile Include="ViewModels\WinnerRow.cs" />

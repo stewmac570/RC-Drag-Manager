@@ -16,5 +16,8 @@ namespace RCDragManagerProd.ViewModels
 
         /// <summary>True if this row is a header (“Round 1”, “SF”, …).</summary>
         public bool IsHeader { get; set; }
+
+        public string MatchNumber { get; set; }
     }
+
 }
