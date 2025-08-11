@@ -17,6 +17,27 @@ namespace RCDragManagerProd
 
     public sealed class RoundRobinRanker
     {
+        // STEP 1: Public points accessor
+        public static (double Win, double Loss, double Bye) PointsForRound(string lbl)
+        {
+            string key = (lbl ?? string.Empty).Trim().ToUpperInvariant();
+            (double Win, double Loss, double Bye) pts;
+
+            switch (key)
+            {
+                case "R1": pts = (4.0, 1.0, 2.0); break;
+                case "R2": pts = (3.5, 0.75, 1.5); break;
+                case "R3": pts = (3.0, 0.5, 1.0); break;
+                default:
+                    pts = (0, 0, 0);
+                    Logger.Log($"[RR-PTS] Unknown round label '{lbl}' → using Win=0, Loss=0, BYE=0");
+                    break;
+            }
+
+            Logger.Log($"[RR-PTS] Schedule for '{(string.IsNullOrEmpty(key) ? "(blank)" : key)}': Win={pts.Win:0.00}, Loss={pts.Loss:0.00}, BYE={pts.Bye:0.00}");
+            return pts;
+        }
+
         private readonly Dictionary<(int, int), int> _h2h = new();
 
         public List<DriverRankResult> Rank(
@@ -24,44 +45,75 @@ namespace RCDragManagerProd
             List<Driver> drivers,
             MatchResult results)
         {
+            Logger.Log($"[RR-RANK] Starting ranking process — Drivers={drivers?.Count ?? 0}, Matches={matches?.Count ?? 0}");
+
+            var idToName = drivers?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<int, string>();
             var stats = drivers.ToDictionary(d => d.Id, _ => new Aggregate());
 
             foreach (var m in matches)
             {
                 var pts = GetPoints(m.RoundLabel);
-
                 bool isBye = m.Driver1 == null || m.Driver2 == null;
 
                 var winner = results.GetWinner(m.MatchId);
                 var loser = results.GetLoser(m.MatchId);
 
                 int? winnerId = winner?.Id;
-                int? loserId = loser?.Id ?? 0;
+                int loserId = loser?.Id ?? 0;
 
+                // 🔧 Derive loser if only winner recorded (non-BYE)
+                if (!isBye && winnerId != null && loserId == 0)
+                {
+                    int d1 = m.Driver1?.Id ?? 0;
+                    int d2 = m.Driver2?.Id ?? 0;
+
+                    if (winnerId.Value == d1) loserId = d2;
+                    else if (winnerId.Value == d2) loserId = d1;
+                    else
+                    {
+                        // Winner doesn't match either participant — skip safely
+                        string bad = idToName.ContainsKey(winnerId.Value) ? idToName[winnerId.Value] : (winner?.Name ?? "—");
+                        Logger.Log($"[RR-PTS] M{m.MatchId}: winner '{bad}' not in pairing — skipping.");
+                        continue;
+                    }
+                }
+
+                string wName = (winnerId != null && idToName.ContainsKey(winnerId.Value)) ? idToName[winnerId.Value] : (winner?.Name ?? "—");
+                string lName = (loserId != 0 && idToName.ContainsKey(loserId)) ? idToName[loserId] : (loser?.Name ?? "—");
+
+                Logger.Log($"[RR-MATCH] Processing Match {m.MatchId} ({m.RoundLabel}) → W={wName}, L={lName}, Bye={isBye}");
+
+                // BYE: award BYE points to the winner only
                 if (isBye && winnerId != null)
                 {
                     stats[winnerId.Value].Points += pts.Bye;
+                    Logger.Log($"[RR-PTS] Match {m.MatchId} BYE → {wName} gains {pts.Bye:0.00} points");
                     continue;
                 }
 
-
+                // Normal resolved match
                 if (winnerId != null && loserId != 0)
                 {
                     var w = stats[winnerId.Value];
-                    var l = stats[loserId.Value];
+                    var l = stats[loserId];
 
                     w.Points += pts.Win;
-                    w.Wins += 1;
-                    w.Defeated.Add(loserId.Value);
+                    w.Wins++;
+                    w.Defeated.Add(loserId);
 
                     l.Points += pts.Loss;
-                    l.Losses += 1;
+                    l.Losses++;
 
-                    _h2h[PairKey(winnerId.Value, loserId.Value)] = winnerId.Value;
+                    _h2h[PairKey(winnerId.Value, loserId)] = winnerId.Value;
+
+                    Logger.Log($"[RR-PTS] Match {m.MatchId} {wName} def {lName} → Win+{pts.Win:0.00}, Loss+{pts.Loss:0.00}");
                 }
-
-
+                else
+                {
+                    Logger.Log($"[RR-PTS] Match {m.MatchId} has no result yet");
+                }
             }
+
 
             var table = stats.Select(kvp => new DriverRankResult
             {
@@ -73,19 +125,7 @@ namespace RCDragManagerProd
                 OpponentStrength = 0
             }).ToList();
 
-            var pointLookup = table.ToDictionary(x => x.DriverId, x => x.Points);
-            foreach (var r in table)
-            {
-                double total = 0;
-                foreach (var m in matches)
-                {
-                    if (m.Driver1 != null && pointLookup.ContainsKey(m.Driver1.Id))
-                        total += pointLookup[m.Driver1.Id];
-                    if (m.Driver2 != null && pointLookup.ContainsKey(m.Driver2.Id))
-                        total += pointLookup[m.Driver2.Id];
-                }
-                r.OpponentStrength = total;
-            }
+            // STEP 2 — Opponent Strength (SoS) = sum of FINAL points of opponents actually faced (BYEs ignored)
 
             table.Sort((a, b) =>
             {
@@ -103,20 +143,17 @@ namespace RCDragManagerProd
                 return a.DriverId.CompareTo(b.DriverId);
             });
 
-            for (int i = 0; i < table.Count; i++) table[i].Rank = i + 1;
+            for (int i = 0; i < table.Count; i++)
+                table[i].Rank = i + 1;
+
+            Logger.Log("[RR-RANK] Final sorted standings:");
+            foreach (var r in table)
+                Logger.Log($"  #{r.Rank} {idToName.GetValueOrDefault(r.DriverId, r.DriverId.ToString())}  Pts={r.Points:0.00}  W-L={r.Wins}-{r.Losses}  OS={r.OpponentStrength:0.00}");
+
             return table;
         }
 
         private static (int, int) PairKey(int a, int b) => (a < b) ? (a, b) : (b, a);
-
-        private static (double Win, double Loss, double Bye) GetPoints(string lbl) =>
-            lbl?.ToUpperInvariant() switch
-            {
-                "R1" => (4.0, 1.0, 2.0),
-                "R2" => (3.5, 0.75, 1.5),
-                "R3" => (3.0, 0.5, 1.0),
-                _ => (0, 0, 0)
-            };
 
         private sealed class Aggregate
         {
@@ -125,5 +162,9 @@ namespace RCDragManagerProd
             public int Losses = 0;
             public HashSet<int> Defeated = new();
         }
+
+        // Legacy alias
+        private static (double Win, double Loss, double Bye) GetPoints(string lbl) =>
+            PointsForRound(lbl);
     }
 }

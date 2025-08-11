@@ -1517,6 +1517,453 @@ Added granular [LB], 🔁, and UI: log entries for bracket generation, injection
 
 Status: Build clean, Round-Robin → Buy-back → Losers-Bracket flow functional; finals phase next on roadmap.
 ------------------------------------------------------------------------------
+To get everything compiling and wire up the Round-Robin → Buyback → Losers-Bracket flow end-to-end, you’ll need changes in four places:
+
+RandomEngineAdapter.cs
+
+Add an InjectMatches(List<RandomMatch> matches) method on your adapter so it can seed in the pre-built losers-bracket matches.
+
+Provide both a default ctor (for “new” LB builds) and a ctor that accepts an existing RandomMatchEngine, and make your _engine field readonly.
+
+Sprinkle in your [LB]-style log calls around the injection and match resolution.
+
+RaceController.cs
+
+Change your _losersEngine field to type IRaceEngine.
+
+Add a List<Driver> _selectedDrivers to hold the buy-back picks.
+
+In GenerateLosersBracket(...) do:
+
+csharp
+Copy
+Edit
+var adapter = new RandomEngineAdapter();
+adapter.LoadDrivers(_selectedDrivers);
+adapter.InjectMatches(builtLbMatches);
+_inLosersPhase = true;
+_losersEngine = adapter;
+PushNextMatch(); // kick off the first LB pairing
+Fire your CanOfferBuybackChanged and BracketRedrawn events at the right spots.
+
+Form1.cs
+
+Wire up btnGenerateLosersBracket_Click to call controller.GenerateLosersBracket(...), then immediately disable the button so you can’t re-trigger it.
+
+In your form’s constructor subscribe to the controller’s CanOfferBuybackChanged event and do btnGenerateLosersBracket.Enabled = e;.
+
+Initialize btnGenerateLosersBracket.Enabled = false; so it only comes alive once Round Robin is fully resolved.
+
+LosersBracketEngine.cs
+
+Make sure any RNG you use is a static readonly Random _rng = new Random(); so you don’t get threading or repeat-seed problems.
+
+Add logging around match build so you see “🔒 Stored X LB drivers” and “📦 Starting Losers Bracket generation…”.
+
+With those in place, your compile errors will vanish and the full RR → buyback → LB flow will actually run. Would you like me to drop in the updated code for one of these files first (say, the adapter), or would you prefer a full diff across all four?
+------------------------------------------------------------------------------
+Dev-Log Entry — “Buy-back & Losers-Bracket Integration” (2025-08-08)
+1. Compile-time fixes
+
+RandomEngineAdapter.cs
+
+Added two constructors (default & parameterized) to accept an injected RandomMatchEngine.
+
+Changed _engine to a readonly field without inline instantiation.
+
+Introduced InjectMatches(List<RandomMatch>) to wrap LoadMatches(...).
+
+Sprinkled concise Logger.Log(...) calls in constructors and injection.
+
+RaceController.cs
+
+Changed _losersEngine field from RandomMatchEngine to IRaceEngine.
+
+Added private field _selectedDrivers to persist buy-back selection.
+
+Updated GenerateLosersBracket(...):
+
+Stores selectedDrivers into _selectedDrivers.
+
+Spins up RandomEngineAdapter, calls InjectMatches, sets _inLosersPhase.
+
+Fires PushNextMatch() immediately after bracket redraw.
+
+Enhanced logging around each major step.
+
+LosersBracketEngine.cs
+
+Made the internal RNG static so the static RunBracket method compiles.
+
+Retained detailed round-by-round and champion logging.
+
+RoundRobinEngineAdapter.cs
+
+Confirmed availability of GetStandings() and GetTopRankedDrivers(int).
+
+No structural changes; used its API to power eligibility logic.
+
+2. Buy-back eligibility & dialog
+
+RaceController.GetEligibleBuybackDrivers()
+
+Dropped the fragile session-string check; keyed off _engine is RoundRobinEngineAdapter.
+
+Retrieved all drivers via GetStandings() + selected top-3 via GetTopRankedDrivers(3).
+
+Logged total count and names of eligible drivers.
+
+3. UI wiring and button flow
+
+Form1.cs
+
+Initialized btnGenerateLosersBracket.Enabled = false on form load.
+
+Subscribed to _controller.CanOfferBuybackChanged (inline lambda) to enable the buy-back button.
+
+In btnGenerateLosersBracket_Click: disabled the button immediately, invoked the buy-back dialog, and passed selectedDrivers to the controller.
+
+PushAdvanceState()
+
+Wrapped the Round-Robin completion trigger in !_inLosersPhase && _engine is RoundRobinEngineAdapter.
+
+Ensured CanOfferBuybackChanged fires only once, once all RR matches resolve.
+
+Post-buyback LB flow
+
+Controller now pushes the first LB match via PushNextMatch() and logs it.
+
+btnNextRound and winner buttons activate correctly for Losers-Bracket rounds.
+------------------------------------------------------------------------------
+ Branch: feature/losers-bracket-plumbing
+Date: 2025-08-08
+
+🛠️ What We Fixed
+Compile errors in RaceController
+
+Changed the _losersEngine field from RandomMatchEngine to the shared IRaceEngine interface to eliminate implicit-conversion errors (CS0266).
+
+Updated all assignments so that RandomMatchEngine is wrapped or cast to IRaceEngine (via a new adapter or explicit cast).
+
+Missing methods on RandomMatchEngine
+
+Added a SetExternalMatches(List<RandomMatch>) API so the engine can accept the bracket built by LosersBracketBuilder.Build(...).
+
+Ensured the engine exposes RunBracket(...) via either the LosersBracketEngine or a properly-typed helper.
+
+Scope and naming fixes in Form1
+
+Replaced the nonexistent GetSelectedDrivers() call on the buy-back dialog with its actual SelectedDrivers property.
+
+Fixed uses of eligibleDrivers and selectedDrivers so they’re in-scope and correctly typed.
+
+RaceController.GenerateLosersBracket overhaul
+
+Sanity checks for selectedDrivers count.
+
+Built the new bracket via:
+
+csharp
+Copy
+Edit
+var lbMatches = LosersBracketBuilder.Build(
+    selectedDrivers,
+    _session.PairingHistory,
+    startMatchId:1000
+);
+Spun up a RandomMatchEngine, injected lbMatches with SetExternalMatches(...), then set _engine = _losersEngine.
+
+Reset UI state: cleared _revealedRounds, added "Losers Bracket R1", and fired BracketRedrawn with BuildCurrentBracketRows().
+
+Added logging at each step (Logger.Log($"…")) to trace flow.
+
+Bridging UI ↔ Controller
+
+In Form1, wired btnGenerateLosersBracket_Click to:
+
+Show BuybackDriverSelectionForm(eligibleDrivers)
+
+Disable the button on first click
+
+Pass dlg.SelectedDrivers into RaceController.GenerateLosersBracket(...)
+
+Row building stays engine-agnostic
+
+BuildCurrentBracketRows() uses the common IRaceEngine.GetMatches() and filters by _revealedRounds.
+
+🚀 Outcome & Next Steps
+The Losers-Bracket pipeline now compiles cleanly and integrates end-to-end: session history → bracket builder → engine injection → UI redraw.
+
+Logging at every major action makes it easy to trace bracket generation, engine switching and UI updates.
+
+Next: tie in RunBracket(...) calls or adapter so the bracket actually runs via LosersBracketEngine, and then wire up the “Generate Next Round” button for the new bracket mode.
+------------------------------------------------------------------------------
+🧩 Feature: Final-4 Race Flow Fix + UI Polish Prep
+Branch:
+
+feature/quick-session-edge-cases (✅ completed)
+
+feature/ui-enhancements (🚧 in progress)
+
+✅ Work Completed in This Chat:
+🏁 Round Robin → Losers Bracket → Final-4 flow (fully working)
+Captured Top-3 from Round Robin using _rrTop3 before engine swap
+
+Injected Losers Bracket with eligible drivers via RandomEngineAdapter
+
+Added .GetWinner() to extract LB champion from final match
+
+Patched to accept any match with "final" in the label
+
+Injected new Pro Ladder Final-4 bracket with correct drivers
+
+Triggered bracket redraw with "SF" round
+
+All race engines confirmed to interoperate correctly
+
+📦 Logging Enhancements
+Added detailed Logger.Log() output throughout:
+
+Top-3 capture
+
+LB matches injected
+
+Final-4 injection
+
+Winner extraction
+
+Round transitions
+
+Debug visibility now present at all major race transitions
+
+🚧 New Feature Started: UI/UX Cleanup (feature/ui-enhancements)
+Purpose: polish bracket rendering, round headers, user messages, and button flow
+
+Identified initial issue:
+🖼️ Final-4 bracket shows 0 rows due to BuildCurrentBracketRows() filtering bug
+
+Planned:
+
+Fix SF/F round redraw bug
+
+Add end-of-round and end-of-race feedback
+
+Improve bracket round labels and user clarity
+
+Log every UI transition and state change
+
+------------------------------------------------------------------------------
+Dev Log Summary — UI & UX Polishing Phase (Chat: Final-4 UI Fixes & Flow)
+📦 Feature Branch
+feature/ui-enhancements
+
+✅ Work Completed
+🖼️ Final-4 Bracket Display Fixed
+Updated ProLadder.cs → GetLadder4() to use correct round labels:
+"SF" instead of "R1" for Final-4 semi-finals.
+
+Verified bracket rendering works with revealedRounds = { "SF", "F" }.
+
+Logged match trace output from Final-4 generation.
+
+🧠 Match Logging + Debug Tracing
+Added full logging to BuildCurrentBracketRows():
+
+Skips for hidden/missing rounds
+
+Match tracing with Driver1/2, RoundLabel, HasResult
+
+Header row and pairing row logging
+
+Verified app.log shows accurate flow from Round Robin → LB → Finals.
+
+🏁 Verified Full Race Progression (8 Drivers)
+Round Robin:
+
+All 3 rounds logged with wins for Drivers 8, 5, 3
+
+Losers Bracket:
+
+4 drivers via buyback → Driver 4 wins
+
+Final-4:
+
+Finalists: 1, 2, 3 (RR) + 4 (LB winner)
+
+Final Result: Driver 4 defeats Driver 3 in Match 3 (F)
+
+🔄 Final Bracket Rendering Validated
+Confirmed correct number of rows: 2 headers + 3 matches = 5 rows.
+
+Confirmed all round transitions logged and visible.
+
+Final UI displayed Driver 4 as overall winner.
+
+🧪 Identified Next Tasks
+Improve Generate Bracket button state flow across RR, LB, Finals.
+
+Add popup alerts for race director at key phase transitions:
+
+After RR complete
+
+After LB winner selected
+
+After Finals conclude
+------------------------------------------------------------------------------
+Dev Log – Buybacks Flow & Losers Bracket Start Logic
+
+Updated btnGenerateLosersBracket_Click in Form1.cs to:
+
+Rename button text to "Buybacks".
+
+Only open the driver selection dialog and store selected drivers — no automatic race start.
+
+Added detailed logging for eligibility, selection, and storage.
+
+Enabled Generate Bracket button after storing buybacks.
+
+Added SetBuybackDrivers(List<Driver>) method in RaceController.cs to store selected buyback drivers in the session for later use.
+
+Began restructuring Generate Bracket flow so that:
+
+Clicking Generate Bracket after buybacks triggers Losers Bracket instead of restarting Round Robin.
+
+Added IsInLosersBracketPhase property to RaceController.cs for phase detection.
+
+Drafted StartLosersBracket() method in RaceController.cs to build matches from stored buybacks and switch engine to RandomEngineAdapter.
+
+Encountered compilation issues due to:
+
+Missing BuybackDrivers and TopDriversSnapshot properties in RaceSession.cs.
+
+Nonexistent SetExternalMatches() method in RandomEngineAdapter (replaced with LoadDrivers() + InjectMatches()).
+
+Event/method name mismatches (RedrawFullBracket → BracketRedrawn).
+
+Missing GenerateBracket(string) overload in RaceController.cs.
+
+Added BuybackDrivers and TopDriversSnapshot properties to RaceSession.cs.
+
+Created wrapper GenerateBracket(string) method in RaceController.cs to call the 2-argument version using session drivers.
+
+Found that _session.Drivers was never set, causing “session driver list is invalid” log message — identified need to assign driver list during setup.
+
+Status:
+Buybacks dialog works without auto-starting race. Generate Bracket button re-enabled after buyback selection. Losers Bracket start wiring in progress but currently blocked by driver list assignment and session state handoff.
+------------------------------------------------------------------------------
+RC Drag Manager — Dev Log (Finals/LB gating, UI lists, scoring)
+Date: 2025-08-10 (AEST)
+Author: Stewart + assistant pairing
+
+Flow & Gating
+Added finals gate: finals no longer auto-inject on LB completion.
+
+RaceController.cs: CanStartFinalsChanged event, _finalsPending flag, IsFinalsPending prop.
+
+Form1.cs: enables Generate Bracket and shows “Finals Ready” popup when LB ends.
+
+Finals start only when Generate Bracket is pressed.
+
+RaceController.cs: StartFinals() calls InjectFinal4Bracket() and drops gate.
+
+Finals reveal sequencing fixed:
+
+InjectFinal4Bracket() now reveals SF only; F is revealed after Generate Next Round.
+
+Preserves revealed Losers rounds when injecting Finals (no list reset).
+
+Losers Bracket (LB)
+Start LB shows R1 immediately and pushes first pairing.
+
+RaceController.cs: StartLosersBracket() loads drivers, injects matches, sets _inLosersPhase, reveals "Losers Bracket R1".
+
+LB builder robustness:
+
+Avoid BYE-vs-BYE in R1; no infinite loops; correct odd-carry to next round so LB Final always exists.
+
+LosersBracketBuilder.cs: rebuilt Build(...) with paired iteration, odd-carry BYE match, consolidated id/r1 lists.
+
+LB champion retrieval hardened:
+
+RandomEngineAdapter.GetWinner() falls back to last round by order if “final” label not found.
+
+Unified UI Lists (left/right panes)
+Current Round Pairings now shows all phases (RR → LB → Finals) with continuous M#:
+
+Snapshot RR matches/order at RR completion (and fallback snapshot in StartLosersBracket()).
+
+RaceController.cs: BuildCurrentBracketRows() aggregates RR snapshot, LB engine, and Finals engine; assigns MatchNumber = M1..M*.
+
+PairingRow gained MatchNumber; Form1.RedrawFullBracket() uses it (with headers + logging).
+
+Generate Next Round redraws go through the unified builder:
+
+RaceController.cs: replaced AdvanceRound() to always BuildCurrentBracketRows() → BracketRedrawn.
+
+Match Winners ordering fixed & numbered continuously:
+
+Form1.cs: new WinnersUpdated handler with global sort helper GetGlobalRoundOrder().
+
+Explicit ranking: RR R1..Rn (100+n) → LB R1..Rn (200+n) → LB Final (299) → SF (990) → F (1000).
+
+Buyback Eligibility
+Corrected eligible list to be all RR entrants minus Top-3 (not just those appearing in standings).
+
+RaceController.cs: GetEligibleBuybackDrivers() derives roster from RR matches; logs roster, Top-3, eligible names.
+
+Sanity: 10 entries → 7 eligible (verified in logs).
+
+Finals Completion & UX
+Added tournament completion event and simple OK-only popup (no auto reset/close).
+
+RaceController.cs: RaceSummary DTO, TournamentCompleted event, summary emission in PushAdvanceState() when Final resolved.
+
+Form1.cs: popup shows Event/Bracket/Winner/Runner-up/Matches; leaves session intact.
+
+Added safe Reset() that clears engines/flags/UI when used manually.
+
+Made GetMatch(int) null-safe after reset to prevent NRE.
+
+Round Robin Scoring (auditability)
+Exposed shared points schedule for R1/R2/R3:
+
+RoundRobinRanker.cs: public static PointsForRound(string) and legacy GetPoints() delegating to it (with logging of schedule/unknown labels).
+
+Added clear W-L scoreboard at RR completion:
+
+RaceController.cs: LogRoundRobinScoreboard(rr) (names + W-L).
+
+(Prepared) Detailed per-round/per-match scorecard helper (ready to enable next):
+
+RaceController.cs: LogRoundRobinScorecardDetailed(rr) prints per-match points, round subtotals, final totals (not always on by default).
+
+Logging & Diagnostics
+Button state changes logged (Generate Bracket / Next Round / Generate Losers Bracket).
+
+Lifecycle snapshots at key transitions: LB pre/post swap, finals gating, revealed rounds, row builds.
+
+[ROWS] BUILD v2 entry logs active engines, snapshot counts, and revealed rounds every redraw.
+
+LB builder logs R1 pairings, odd-carry creation, and total match counts.
+
+Finals inject logs all generated matches with driver names.
+
+Known Follow-ups / Nice-to-haves
+Ensure btnNextRound is wired once (avoid duplicate “AdvanceRound completed” logs if double-subscribed).
+
+Optionally enable the detailed RR scorecard at RR completion (per-round subtotals) for race-day clarity.
+
+Integrate MatchResult fully to eliminate any “Winner Mx” placeholders in legacy paths.
+
+Quick Acceptance (verified)
+RR → Buyback (correct eligible count) → LB (R1..Final) → Finals gate → SF → Next Round → Final → OK popup.
+
+Left Current Round Pairings lists all rounds continuously, even after LB/Finals transitions.
+
+Right Match Winners ordered RR → LB R1..Final → SF → F with continuous M#.
+
+No freezes on LB start; no auto-starting Finals; no Finals without user gating.
+------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
 

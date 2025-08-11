@@ -333,7 +333,7 @@ namespace RCDragManagerProd
             this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
             this.btnGenerateLosersBracket.Size = new System.Drawing.Size(200, 45);
             this.btnGenerateLosersBracket.TabIndex = 20;
-            this.btnGenerateLosersBracket.Text = "Generate Losers Bracket";
+            this.btnGenerateLosersBracket.Text = "Buy Back";
             this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
             this.Controls.Add(this.btnGenerateLosersBracket);
 
