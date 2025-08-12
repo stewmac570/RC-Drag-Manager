@@ -103,32 +103,69 @@ namespace RCDragManagerProd
         {
             var sessions = new List<RaceSessionSummary>();
 
-            using (var conn = new SQLiteConnection(_connectionString))
+            try
             {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, EventName, EventDate, RaceType, ClassType FROM RaceSessions ORDER BY Id DESC;";
+                Logger.Log("[LOAD] Fetching session summaries…");
 
-                using (var reader = cmd.ExecuteReader())
+                using (var conn = new SQLiteConnection(_connectionString))
                 {
-                    while (reader.Read())
+                    conn.Open();
+
+                    using (var cmd = conn.CreateCommand())
                     {
-                        var summary = new RaceSessionSummary
+                        cmd.CommandText = "SELECT Id, EventName, EventDate, RaceType, ClassType FROM RaceSessions ORDER BY Id DESC";
+
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            Id = reader.GetInt32(0),
-                            EventName = reader.GetString(1),
-                            EventDate = DateTime.Parse(reader.GetString(2)),
-                            RaceType = reader.GetString(3),
-                            ClassType = reader.GetString(4)
-                        };
-                        sessions.Add(summary);
+                            while (reader.Read())
+                            {
+                                int id = reader.IsDBNull(0) ? 0 : Convert.ToInt32(reader.GetValue(0));
+                                string eventName = reader.IsDBNull(1) ? string.Empty : reader.GetValue(1).ToString();
+
+                                DateTime eventDate;
+                                if (reader.IsDBNull(2))
+                                {
+                                    eventDate = DateTime.MinValue;
+                                }
+                                else if (reader.GetFieldType(2) == typeof(DateTime))
+                                {
+                                    eventDate = reader.GetDateTime(2);
+                                }
+                                else
+                                {
+                                    string raw = reader.GetValue(2).ToString();
+                                    if (!DateTime.TryParse(raw, out eventDate))
+                                        eventDate = DateTime.MinValue;
+                                }
+
+                                string raceType = reader.IsDBNull(3) ? string.Empty : reader.GetValue(3).ToString();
+                                string classType = reader.IsDBNull(4) ? string.Empty : reader.GetValue(4).ToString();
+
+                                var summary = new RaceSessionSummary
+                                {
+                                    Id = id,
+                                    EventName = eventName,
+                                    EventDate = eventDate,
+                                    RaceType = raceType,
+                                    ClassType = classType
+                                };
+
+                                sessions.Add(summary);
+                            }
+                        }
                     }
-
                 }
-            }
 
-            return sessions;
+                Logger.Log($"[LOAD] Session summaries loaded: {sessions.Count}");
+                return sessions;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[LOAD][ERROR] GetAllSessions failed: {ex}");
+                throw;
+            }
         }
+
 
         public RaceSession LoadSession(int id)
         {

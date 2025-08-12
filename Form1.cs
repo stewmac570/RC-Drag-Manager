@@ -594,44 +594,63 @@ namespace RCDragManagerProd
         {
             Logger.Log("🔁 [UI] Buybacks button clicked");
 
-            btnGenerateLosersBracket.Enabled = false;   // prevent double-click
+            // temporary lock while the dialog is open
+            btnGenerateLosersBracket.Enabled = false;
 
-            var eligible = _controller.GetEligibleBuybackDrivers();
-
-            if (eligible == null || eligible.Count < 2)
+            try
             {
-                MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
-                return;
+                var eligible = _controller.GetEligibleBuybackDrivers();
+
+                if (eligible == null || eligible.Count < 2)
+                {
+                    MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
+                    return;
+                }
+
+                using (var dlg = new BuybackDriverSelectionForm(eligible))
+                {
+                    var dr = dlg.ShowDialog();
+
+                    if (dr != DialogResult.OK)
+                    {
+                        Logger.Log("🔕 [LB] Buyback dialog cancelled by user.");
+                        return;
+                    }
+
+                    var selectedDrivers = dlg.SelectedDrivers;
+
+                    if (selectedDrivers == null || selectedDrivers.Count < 2)
+                    {
+                        MessageBox.Show("At least two drivers must be selected.", "Invalid Selection",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
+                        return;
+                    }
+
+                    Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+
+                    // Store selection, but DO NOT start the bracket yet
+                    _controller.SetBuybackDrivers(selectedDrivers);
+
+                    // Keep Buy Back editable until the round is actually generated
+                    btnGenerateBracket.Enabled = true;          // RD will press this to start LB
+                    btnGenerateLosersBracket.Enabled = true;    // allow edits before generation
+                    btnGenerateLosersBracket.Text = "Edit Buybacks";
+
+                    Logger.Log("[UI] Buybacks stored. 'Generate Bracket' enabled; 'Buy Back' stays enabled for edits until LB is generated.");
+                }
             }
-
-            using (var dlg = new BuybackDriverSelectionForm(eligible))
+            finally
             {
-                if (dlg.ShowDialog() != DialogResult.OK)
-                {
-                    Logger.Log("🔕 [LB] Buyback dialog cancelled by user.");
-                    return;
-                }
-
-                var selectedDrivers = dlg.SelectedDrivers;
-
-                if (selectedDrivers == null || selectedDrivers.Count < 2)
-                {
-                    MessageBox.Show("At least two drivers must be selected.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
-                    return;
-                }
-
-                Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
-
-                // ✅ Store the drivers, but do not start the bracket yet
-                _controller.SetBuybackDrivers(selectedDrivers);
-
-                // ✅ Enable the "Generate Bracket" button so the race director can manually start
-                btnGenerateBracket.Enabled = true;
-                Logger.Log("[UI] Generate Bracket button enabled for Losers Bracket start.");
+                // If we exited early (no entries / cancel), re-enable so RD can try again
+                if (!btnGenerateBracket.Enabled)
+                    btnGenerateLosersBracket.Enabled = true;
             }
         }
+
+
 
 
         /// <summary>

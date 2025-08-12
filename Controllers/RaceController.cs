@@ -386,7 +386,7 @@ namespace RCDragManagerProd.Controllers
                     try
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
-                        MessageBox.Show(card, "Round Robin — Standings", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ScrollableTextDialog.Show("Round Robin — Standings", card);
                     }
                     catch (Exception ex)
                     {
@@ -1148,5 +1148,61 @@ namespace RCDragManagerProd.Controllers
                 _rrLoggedRounds.Add(r);
             }
         }
+        public void StartFinalsTop3NoBuyback()
+        {
+            // Finals with only the RR Top-3 (no buybacks)
+            Logger.Log("[FINALS][NOBUYBACK] Starting Finals with Top-3 only (no buyback entries).");
+
+            // Make sure Top-3 snapshot exists
+            if (_rrTop3 == null || _rrTop3.Count != 3)
+            {
+                Logger.Log("❌ [FINALS][NOBUYBACK] Top-3 snapshot missing or incomplete — aborting.");
+                return;
+            }
+
+            // Clear Losers phase and mark Finals
+            _inLosersPhase = false;
+            _session.RaceType = "Finals";
+            _finalsPending = false;
+            CanStartFinalsChanged?.Invoke(false);
+            Logger.Log("[FINALS][NOBUYBACK] Session race type set to 'Finals'. LB phase cleared. Finals gate lowered.");
+
+            // Build Final-3 list
+            var finalists = new List<Driver>(_rrTop3);
+            Logger.Log($"[PRO] Final-3 = {string.Join(", ", finalists.Select(d => d.Name))}");
+
+            // Spin up Pro Ladder engine for 3 drivers
+            var proAdapter = new ProLadderEngineAdapter();
+            proAdapter.LoadDrivers(finalists);
+            proAdapter.GenerateBracket();
+            _engine = proAdapter;
+
+            // Log generated matches
+            var finalMatches = proAdapter.GetMatches();
+            Logger.Log($"[PRO] Matches generated: {finalMatches.Count}");
+            foreach (var match in finalMatches)
+            {
+                Logger.Log($"[PRO] Match {match.MatchId}: Round={match.RoundLabel}, " +
+                           $"Driver1={(match.Driver1?.Name ?? "BYE")}, Driver2={(match.Driver2?.Name ?? "BYE")}");
+            }
+
+            // Reveal only SF first; Final will appear on Next Round
+            _revealedRounds.Clear();
+            _revealedRounds.Add("SF");
+            Logger.Log($"🎯 [FINALS][NOBUYBACK] Revealed rounds set to: {string.Join(",", _revealedRounds)}");
+
+            // UI updates
+            var rows = BuildCurrentBracketRows();
+            BracketRedrawn?.Invoke(rows);
+            Logger.Log($"🖼️  [FINALS][NOBUYBACK] Bracket redrawn with {rows.Count} rows");
+
+            // Push first SF pairing and evaluate buttons
+            PushNextMatch();
+            Logger.Log("🔔 [FINALS][NOBUYBACK] First Finals match pushed to UI");
+
+            PushAdvanceState();
+            Logger.Log("[FINALS][NOBUYBACK] Advance state evaluated.");
+        }
+
     }
 }
