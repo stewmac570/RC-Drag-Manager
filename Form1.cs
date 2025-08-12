@@ -1,11 +1,10 @@
-﻿using System;
+﻿using RCDragManagerProd.Controllers;
+using RCDragManagerProd.ViewModels;   // for PairingRow
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Windows.Forms;
-using RCDragManagerProd.Controllers;
-using RCDragManagerProd.ViewModels;   // for PairingRow
 
 
 
@@ -35,6 +34,30 @@ namespace RCDragManagerProd
             lblEventTitle.Text = currentSession != null
                 ? $"Event: {currentSession.EventName}"
                 : "Quick Session";
+
+            // 🔌 CREATE SESSION: hydrate drivers + restore race type
+            if (currentSession != null && currentSession.DriverEntries != null && currentSession.DriverEntries.Count > 0)
+            {
+                drivers = currentSession.DriverEntries
+                    .Select(e => new Driver
+                    {
+                        Id = e.DriverID,
+                        Name = e.DriverName,
+                        QualTime = e.QualifyingTime
+                    })
+                    .ToList();
+
+                Logger.Log($"[CREATE] Hydrated {drivers.Count} drivers from RaceSession.DriverEntries.");
+
+                if (!string.IsNullOrWhiteSpace(currentSession.RaceType) && cmbRaceType != null)
+                {
+                    try { cmbRaceType.SelectedItem = currentSession.RaceType; } catch { /* ignore */ }
+                    Logger.Log($"[CREATE] Restored RaceType on UI: '{currentSession.RaceType}'");
+                }
+
+                UpdateDriverList();                  // refresh list & button states
+                btnGenerateBracket.Enabled = true;   // allow immediate bracket start
+            }
 
             // If you want the race type combo for Quick Session:
             // cmbRaceType.Visible = lblRaceType.Visible = (currentSession == null);
@@ -67,10 +90,6 @@ namespace RCDragManagerProd
                 btnWinner2.Enabled = !string.Equals(row.Driver2?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
             };
 
-
-
-
-            // This is in Form1.cs
             // Unified Results panel: RR → Losers → Finals, continuous M# and headers
             _controller.WinnersUpdated += rows =>
             {
@@ -86,13 +105,9 @@ namespace RCDragManagerProd
                 lvWinners.BeginUpdate();
                 lvWinners.Items.Clear();
 
-                // Order across ALL stages with a single key:
-                //  - R1..R9 (Round Robin) first
-                //  - Losers Bracket R1..Rn
-                //  - SF, then F
                 var ordered = rows
                     .OrderBy(w => GetGlobalRoundOrder(w.RoundLabel))
-                    .ThenBy(w => w.MatchId) // tie-breaker inside the same round
+                    .ThenBy(w => w.MatchId)
                     .ToList();
 
                 int displayNo = 1;
@@ -100,13 +115,12 @@ namespace RCDragManagerProd
 
                 foreach (var w in ordered)
                 {
-                    // Insert a header when round changes
                     if (!string.Equals(currentHeader, w.RoundLabel, StringComparison.OrdinalIgnoreCase))
                     {
                         currentHeader = w.RoundLabel;
 
                         var hdr = new ListViewItem("");
-                        hdr.SubItems.Add(GetFullRoundLabel(currentHeader)); // same pretty label you use on the left pane
+                        hdr.SubItems.Add(GetFullRoundLabel(currentHeader));
                         hdr.SubItems.Add("");
                         hdr.BackColor = Color.LightGray;
                         hdr.Font = new Font(hdr.Font, FontStyle.Italic);
@@ -115,7 +129,6 @@ namespace RCDragManagerProd
                         Logger.Log($"[UI:Winners] Header added: {currentHeader}");
                     }
 
-                    // Continuous M# across the whole event
                     var item = new ListViewItem($"M{displayNo++}");
                     item.SubItems.Add(w.Loser ?? "");
                     item.SubItems.Add(w.Winner ?? "");
@@ -127,7 +140,6 @@ namespace RCDragManagerProd
                 Logger.Log($"[UI:Winners] Rebuilt: total rows={lvWinners.Items.Count}, matches(numbered)={displayNo - 1}");
                 lvWinners.EndUpdate();
             };
-
 
             Logger.Log("🔥 Logging system initialized");
 
@@ -153,6 +165,7 @@ namespace RCDragManagerProd
                         MessageBoxIcon.Information);
                 }
             };
+
             // ── Finals gate: enable Generate Bracket and inform RD ─────────────
             bool finalsPopupShown = false; // prevent duplicate popups if event fires again
             _controller.CanStartFinalsChanged += enabled =>
@@ -175,6 +188,7 @@ namespace RCDragManagerProd
                     finalsPopupShown = false;
                 }
             };
+
             // ── Tournament complete popup (OK only; no reset/close) ─────────────
             _controller.TournamentCompleted += summary =>
             {
@@ -191,10 +205,10 @@ namespace RCDragManagerProd
                 Logger.Log($"[UI] TournamentCompleted → Winner={winner}, RunnerUp={runnerUp}");
                 MessageBox.Show(msg, "Event Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // No automatic reset/close. Leave UI as-is; Reset Race stays available.
                 Logger.Log("[UI] Event Complete acknowledged (OK). Session left intact.");
             };
         }
+
 
         // Sort key for ANY round label so Results panel is globally ordered.
         // Order: RR R1..Rn (100+x) -> LB R1..Rn (200+x) -> LB Final (299) -> SF (990) -> F (1000).
@@ -419,25 +433,31 @@ namespace RCDragManagerProd
             }
         }
 
-
-
         private void btnNextRound_Click(object sender, EventArgs e)
         {
+            // prevent double-clicks / re-entrancy
+            if (!btnNextRound.Enabled) return;
+
             try
             {
-                var nextRound = _controller.GetNextHiddenRound();
-                Logger.Log($"[FORM1] Generate Next Round clicked — revealing: {nextRound}");
+                btnNextRound.Enabled = false;
+                Logger.Log("[FORM1] Generate Next Round clicked");
 
                 _controller.AdvanceRound();
-
-                Logger.Log("[FORM1] AdvanceRound() completed");
             }
             catch (Exception ex)
             {
-                Logger.Log($"[FORM1] AdvanceRound FAILED: {ex.Message}");
-                MessageBox.Show($"Cannot advance round:\n{ex.Message}");
+                Logger.Log($"[FORM1][ERROR] AdvanceRound failed: {ex.Message}");
+                MessageBox.Show("Failed to advance the round. Check the log for details.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Let CanAdvanceChanged decide the final enabled state; keep it off until controller signals.
+                Logger.Log("[FORM1] AdvanceRound() completed");
             }
         }
+
 
 
         private void RedrawFullBracket(IReadOnlyList<PairingRow> rows)
@@ -574,44 +594,63 @@ namespace RCDragManagerProd
         {
             Logger.Log("🔁 [UI] Buybacks button clicked");
 
-            btnGenerateLosersBracket.Enabled = false;   // prevent double-click
+            // temporary lock while the dialog is open
+            btnGenerateLosersBracket.Enabled = false;
 
-            var eligible = _controller.GetEligibleBuybackDrivers();
-
-            if (eligible == null || eligible.Count < 2)
+            try
             {
-                MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
-                return;
+                var eligible = _controller.GetEligibleBuybackDrivers();
+
+                if (eligible == null || eligible.Count < 2)
+                {
+                    MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
+                    return;
+                }
+
+                using (var dlg = new BuybackDriverSelectionForm(eligible))
+                {
+                    var dr = dlg.ShowDialog();
+
+                    if (dr != DialogResult.OK)
+                    {
+                        Logger.Log("🔕 [LB] Buyback dialog cancelled by user.");
+                        return;
+                    }
+
+                    var selectedDrivers = dlg.SelectedDrivers;
+
+                    if (selectedDrivers == null || selectedDrivers.Count < 2)
+                    {
+                        MessageBox.Show("At least two drivers must be selected.", "Invalid Selection",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
+                        return;
+                    }
+
+                    Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+
+                    // Store selection, but DO NOT start the bracket yet
+                    _controller.SetBuybackDrivers(selectedDrivers);
+
+                    // Keep Buy Back editable until the round is actually generated
+                    btnGenerateBracket.Enabled = true;          // RD will press this to start LB
+                    btnGenerateLosersBracket.Enabled = true;    // allow edits before generation
+                    btnGenerateLosersBracket.Text = "Edit Buybacks";
+
+                    Logger.Log("[UI] Buybacks stored. 'Generate Bracket' enabled; 'Buy Back' stays enabled for edits until LB is generated.");
+                }
             }
-
-            using (var dlg = new BuybackDriverSelectionForm(eligible))
+            finally
             {
-                if (dlg.ShowDialog() != DialogResult.OK)
-                {
-                    Logger.Log("🔕 [LB] Buyback dialog cancelled by user.");
-                    return;
-                }
-
-                var selectedDrivers = dlg.SelectedDrivers;
-
-                if (selectedDrivers == null || selectedDrivers.Count < 2)
-                {
-                    MessageBox.Show("At least two drivers must be selected.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
-                    return;
-                }
-
-                Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
-
-                // ✅ Store the drivers, but do not start the bracket yet
-                _controller.SetBuybackDrivers(selectedDrivers);
-
-                // ✅ Enable the "Generate Bracket" button so the race director can manually start
-                btnGenerateBracket.Enabled = true;
-                Logger.Log("[UI] Generate Bracket button enabled for Losers Bracket start.");
+                // If we exited early (no entries / cancel), re-enable so RD can try again
+                if (!btnGenerateBracket.Enabled)
+                    btnGenerateLosersBracket.Enabled = true;
             }
         }
+
+
 
 
         /// <summary>

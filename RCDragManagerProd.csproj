@@ -189,6 +189,9 @@
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
     <Compile Include="RoundRobinMode\RoundRobinScorecardLogger.cs" />
+    <Compile Include="ScrollableTextDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
