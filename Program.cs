@@ -1,8 +1,6 @@
-﻿using RCDragManagerProd;               // for RaceSession
-using RCDragManagerProd.Controllers;   // for RaceController
+﻿using RCDragManagerProd;               // DatabaseInitializer
 using System;
 using System.Windows.Forms;
-
 
 namespace RCDragManagerProd
 {
@@ -11,17 +9,41 @@ namespace RCDragManagerProd
         [STAThread]
         static void Main()
         {
-            string dbPath = "race_data.db";
-            string connectionString = $"Data Source={dbPath};Version=3;";
+            try
+            {
+                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+                Application.ThreadException += (s, e) =>
+                {
+                    Logger.Log($"[APP][UI-ERROR] {e.Exception}");
+                    MessageBox.Show("An unexpected error occurred. Check the log for details.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                };
+                AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                {
+                    var ex = e.ExceptionObject as Exception;
+                    Logger.Log($"[APP][FATAL] {ex}");
+                };
 
-            DatabaseInitializer.InitializeDatabase(connectionString);
+                string dbPath = "race_data.db";
+                string connectionString = $"Data Source={dbPath};Version=3;";
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LandingForm());
-            var session = new RaceSession();           // NEW
-            var controller = new RaceController(session); // NEW
-            Application.Run(new Form1(controller));       // NEW
+                Logger.Log("[APP] Starting RC Drag Manager");
+                DatabaseInitializer.InitializeDatabase(connectionString);
+                Logger.Log($"[APP] Database initialized at '{dbPath}'");
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                Logger.Log("[APP] Showing LandingForm");
+                Application.Run(new LandingForm());
+                Logger.Log("[APP] LandingForm closed — exiting application");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[APP][FATAL] Unhandled in Main: {ex}");
+                MessageBox.Show("A fatal error occurred. The application will close.", "Fatal Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

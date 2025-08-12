@@ -1964,6 +1964,94 @@ Right Match Winners ordered RR → LB R1..Final → SF → F with continuous M#.
 
 No freezes on LB start; no auto-starting Finals; no Finals without user gating.
 ------------------------------------------------------------------------------
+2025-08-12 — UI/UX + Round-Robin scoring + Random mode fixes
+Features
+Round-Robin score popup: Added RoundRobinScorecardLogger (new file) and wired it to show at RR completion. Includes per-round lines and a composite “Score = Pts + Wins×0.01 + H2H×0.001 + SoS×0.000001” so ties are numerically clear.
+
+In-app tie clarity: Popup rows now include driver names and show (Pts, W, H2H, SoS) for transparency.
+
+Auto finals when no Buyback: If <2 eligible Buyback drivers (e.g., 4 racers), controller skips LB and injects Finals with the “wildcard” 4th. User is notified.
+
+Controller (RaceController.cs)
+PushAdvanceState():
+
+Logs RR standings, shows popup, snapshots RR, then:
+
+If ≥2 Buyback eligible → enable Buyback button.
+
+Else → auto-advance with wildcard and inject Final-4.
+
+InjectFinal4Bracket(): Cleaned up; supports wildcard when LB absent; preserves LB rounds in left panel; reveals only SF initially.
+
+BuildCurrentBracketRows():
+
+Unified renderer now supports RandomEngineAdapter rounds (R2/R3 stay visible).
+
+Fix for “self-match” display in LB Final: if engine collapses to champ vs champ, we recover (loser, winner) from MatchResult for display.
+
+PushFullRefresh(): Uses unified builder (not the old BuildPairingRows()).
+
+SubmitWinner(): Logs per-round RR scoring once a round fully resolves.
+
+SaveSession(): Hardened (null-safe engines, results, revealed rounds). Writes only resolved/recorded matches; logs summary.
+
+Default raceType: If UI passes blank, default to Round Robin and log.
+
+Round-Robin ranking (RoundRobinMode/RoundRobinRanker.cs)
+Loser derivation: If only a winner is stored (non-BYE), infer loser from the pairing.
+
+SoS fix: Strength-of-Schedule sums final points of actual opponents and only for resolved matches.
+
+Logging: [RR-PTS], [RR-OS], and pre/post sort tables for auditability.
+
+Random mode (RaceEngines/RandomEngineAdapter.cs)
+BYE fairness: Audits every round and redistributes BYEs so:
+
+BYE goes to drivers with the fewest prior BYEs.
+
+Avoids back-to-back BYEs for the same driver when possible.
+
+Swaps recipients within the round as needed; detailed [RND-BYE] logs.
+
+Next-round builder: Fair BYE selection in GenerateNextRoundFair() (for controller use).
+
+GetWinner(): Replaced ^1 with Count-1 for legacy C# compatibility.
+
+UI/UX
+Current Round Pairings stays populated for Random mode across R2/R3.
+
+Name visibility: Scorecard lines show driver names (not just IDs).
+
+Finals gating: Finals button only enabled when LB completes or when we auto-advance.
+
+Bugs fixed
+Duplicate BYEs to the same driver across rounds (Random) → fixed with fairness audit.
+
+LB Final displayed as “X vs X” → fixed by expanding from MatchResult.
+
+Null-ref on Save & Close when engines/state were cleared → fixed.
+
+Files touched
+Controllers/RaceController.cs
+
+RoundRobinMode/RoundRobinRanker.cs
+
+RoundRobinMode/RoundRobinScorecardLogger.cs (new)
+
+RaceEngines/RandomEngineAdapter.cs
+
+RaceEngines/RoundRobinEngineAdapter.cs (minor wiring)
+
+ViewModels/PairingRow.cs (display support)
+
+MatchResult.cs, RaceSession.cs, Form1*.cs (wiring + UI)
+
+Docs/_PROJECT_STATUS_DEVLOG_FULL.md (updated)
+
+Notes / Next
+Optional: expose and call GenerateNextRoundFair() from the Random “Generate Next Round” UI handler (if not already).
+
+If desired, re-run BYE audit on each round reveal to keep fairness bullet-proof after edits/imports.
 
 ------------------------------------------------------------------------------
 

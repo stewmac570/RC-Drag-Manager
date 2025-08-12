@@ -87,7 +87,7 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
-            // NEW: normalize + default
+            // normalize + default to RR if empty
             var rt = (raceType ?? _session?.RaceType ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(rt))
             {
@@ -97,12 +97,16 @@ namespace RCDragManagerProd.Controllers
             _session.RaceType = rt;
 
             _drivers = drivers;
-            _engine = RaceEngineFactory.Create(rt);
+            _session.Drivers = new List<Driver>(_drivers);   // ✅ keep session + controller in sync
 
-            Logger.Log($"[DEBUG] Bracket using: {_engine.GetType().Name} for race type \"{rt}\"");
+            _engine = RaceEngineFactory.Create(rt);
+            Logger.Log($"[ENGINE] Created '{_engine.GetType().Name}' for raceType='{rt}' (drivers={_drivers.Count})");
 
             _engine.LoadDrivers(_drivers);
+            Logger.Log("[ENGINE] Drivers loaded into engine.");
+
             _engine.GenerateBracket();
+            Logger.Log("[ENGINE] Bracket generated.");
 
             _revealedRounds.Clear();
             _revealedRounds.Add(_engine.GetRoundOrder().First());
@@ -110,7 +114,6 @@ namespace RCDragManagerProd.Controllers
             _winners.Clear();
             PushFullRefresh();
         }
-
 
         public void GenerateBracket(string raceType)
         {
@@ -120,8 +123,9 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
-            GenerateBracket(raceType, _session.Drivers); // the defaulting happens inside
+            GenerateBracket(raceType, _session.Drivers); // defaulting happens inside
         }
+
 
 
         public void SubmitWinner(int matchId, bool firstOption)
@@ -790,46 +794,20 @@ namespace RCDragManagerProd.Controllers
                 var mList = matches.ToList();
                 var rList = roundOrder.ToList();
 
-                Logger.Log($"[ROWS] AppendFrom({tag}) start — rounds={rList.Count}, matches={mList.Count}, filterByRevealed={filterByRevealed}");
-
                 foreach (var round in rList)
                 {
                     if (filterByRevealed && !_revealedRounds.Contains(round)) continue;
 
                     rows.Add(new PairingRow { IsHeader = true, RoundLabel = round });
 
-                    foreach (var m in mList.Where(x => x.RoundLabel == round).OrderBy(x => x.MatchId))
+                    foreach (var m in mList.Where(x => x.RoundLabel == round))
                     {
-                        // defaults from engine
-                        var d1 = m.Driver1;
-                        var d2 = m.Driver2;
-
-                        // 🔧 Fix: collapsed losers-final (engine writes champ on both sides).
-                        // If both sides are the same driver and we have a recorded result,
-                        // expand using (loser, winner) so the UI shows the real pairing.
-                        if (d1 != null && d2 != null && d1.Id == d2.Id && _matchResult.HasResult(m.MatchId))
-                        {
-                            var w = _matchResult.GetWinner(m.MatchId);
-                            var l = _matchResult.GetLoser(m.MatchId);
-
-                            if (w != null && l != null && w.Id != l.Id)
-                            {
-                                Logger.Log($"[LB-FIX] M{m.MatchId} '{round}' collapsed as {d1.Name} vs {d2.Name} → displaying {l.Name} vs {w.Name}");
-                                d1 = l;   // show loser on one side
-                                d2 = w;   // winner on the other
-                            }
-                            else
-                            {
-                                Logger.Log($"[LB-FIX] M{m.MatchId} '{round}' collapsed but no recoverable result (w={w?.Name ?? "null"}, l={l?.Name ?? "null"})");
-                            }
-                        }
-
                         rows.Add(new PairingRow
                         {
                             MatchNumber = null, // filled after aggregation
                             MatchId = m.MatchId,
-                            Driver1 = d1?.Name ?? "BYE",
-                            Driver2 = d2?.Name ?? "BYE",
+                            Driver1 = m.Driver1?.Name ?? "BYE",
+                            Driver2 = m.Driver2?.Name ?? "BYE",
                             RoundLabel = m.RoundLabel
                         });
                     }
@@ -874,7 +852,6 @@ namespace RCDragManagerProd.Controllers
             Logger.Log($"[ROWS] BuiltCurrentBracketRows → items={rows.Count}, matches(numbered)={displayNo - 1}");
             return rows;
         }
-
 
 
         /// <summary>

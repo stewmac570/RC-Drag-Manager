@@ -22,22 +22,30 @@ namespace RCDragManagerProd
 
         private void btnNewEvent_Click(object sender, EventArgs e)
         {
-            // Quick mode (legacy, direct to empty Form1)
+            Logger.Log("[QUICK] Launching Quick Session → RaceController(new RaceSession())");
             var controller = new RaceController(new RaceSession());   // empty quick session
             Form1 mainForm = new Form1(controller);
             mainForm.Show();
-
         }
+
 
         private void btnCreateSession_Click(object sender, EventArgs e)
         {
+            Logger.Log("[CREATE] Opening Create Session setup dialog…");
             SessionSetupForm sessionForm = new SessionSetupForm(repository);
             if (sessionForm.ShowDialog() == DialogResult.OK)
             {
-                var controller = new RaceController(sessionForm.RaceSessionResult);   // or “loaded”
-                Form1 mainForm = new Form1(controller);
+                var rs = sessionForm.RaceSessionResult;
+                int count = rs?.DriverEntries?.Count ?? 0;
+                Logger.Log($"[CREATE] Session created: '{rs?.EventName ?? "(unnamed)"}' | raceType='{rs?.RaceType ?? "n/a"}' | entries={count}");
 
+                var controller = new RaceController(rs);
+                Form1 mainForm = new Form1(controller);
                 mainForm.Show();
+            }
+            else
+            {
+                Logger.Log("[CREATE] Session creation cancelled.");
             }
         }
 
