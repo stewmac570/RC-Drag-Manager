@@ -1,3 +1,47 @@
+# --- Visual Studio / .NET ---
 .vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 bin/
 obj/
+Debug/
+Release/
+x64/
+x86/
+TestResults/
+.vscode/
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+# --- NuGet ---
+packages/
+!packages/build/
+*.nupkg
+
+# --- Installer (Inno) payload & outputs ---
+installer/payload/
+installer/output/
+
+# --- Logs & local data files ---
+*.log
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# --- Publish/build artifacts ---
+[Bb]uild/
+[Bb]inaries/
+publish/
+*.exe
+*.msi
+
+# --- OS cruft ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
