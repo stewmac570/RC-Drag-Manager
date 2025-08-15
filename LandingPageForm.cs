@@ -2,45 +2,54 @@
 using System.Windows.Forms;
 using RCDragManagerProd.Controllers;
 
-
 namespace RCDragManagerProd
 {
     public partial class LandingForm : Form
     {
-        private DriverRepository repository;
-        private RaceSessionRepository sessionRepository;
-        private string dbPath = "race_data.db";
+        private readonly string _connStr;
+        private DriverRepository _driverRepo;
+        private RaceSessionRepository _sessionRepo;
 
-        public LandingForm()
+        // ✅ primary runtime ctor
+        public LandingForm(string connectionString)
         {
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new ArgumentNullException(nameof(connectionString));
+
+            _connStr = connectionString;
+
             InitializeComponent();
 
-            // Initialize repositories ONCE for entire app
-            repository = new DriverRepository(dbPath);
-            sessionRepository = new RaceSessionRepository(dbPath);
+            // Init repos once
+            _driverRepo = new DriverRepository(_connStr);
+            _sessionRepo = new RaceSessionRepository(_connStr);
+
+            Logger.Log("[UI][Landing] repositories wired");
         }
+
+        // ✅ keep designer convenience
+        public LandingForm() : this(Program.ConnectionString) { }
 
         private void btnNewEvent_Click(object sender, EventArgs e)
         {
             Logger.Log("[QUICK] Launching Quick Session → RaceController(new RaceSession())");
             var controller = new RaceController(new RaceSession());   // empty quick session
-            Form1 mainForm = new Form1(controller);
+            var mainForm = new Form1(controller);
             mainForm.Show();
         }
-
 
         private void btnCreateSession_Click(object sender, EventArgs e)
         {
             Logger.Log("[CREATE] Opening Create Session setup dialog…");
-            SessionSetupForm sessionForm = new SessionSetupForm(repository);
-            if (sessionForm.ShowDialog() == DialogResult.OK)
+            var setup = new SessionSetupForm(_driverRepo);
+            if (setup.ShowDialog() == DialogResult.OK)
             {
-                var rs = sessionForm.RaceSessionResult;
+                var rs = setup.RaceSessionResult;
                 int count = rs?.DriverEntries?.Count ?? 0;
                 Logger.Log($"[CREATE] Session created: '{rs?.EventName ?? "(unnamed)"}' | raceType='{rs?.RaceType ?? "n/a"}' | entries={count}");
 
                 var controller = new RaceController(rs);
-                Form1 mainForm = new Form1(controller);
+                var mainForm = new Form1(controller);
                 mainForm.Show();
             }
             else
@@ -51,23 +60,24 @@ namespace RCDragManagerProd
 
         private void btnLoadEvent_Click(object sender, EventArgs e)
         {
-            LoadSessionForm loadForm = new LoadSessionForm("race_data.db");
-            if (loadForm.ShowDialog() == DialogResult.OK)
+            using (var load = new LoadSessionForm(_connStr))
             {
-                RaceSession loaded = loadForm.LoadedSession;
-                var controller = new RaceController(loaded);
-                Form1 mainForm = new Form1(controller);
-
-
-                mainForm.Show();
+                if (load.ShowDialog() == DialogResult.OK)
+                {
+                    var loaded = load.LoadedSession;
+                    var controller = new RaceController(loaded);
+                    var mainForm = new Form1(controller);
+                    mainForm.Show();
+                }
             }
         }
 
-
         private void btnDriverLists_Click(object sender, EventArgs e)
         {
-            DriverManagerForm driverManager = new DriverManagerForm();
-            driverManager.ShowDialog();
+            // If DriverManagerForm has an overload that takes conn string, use it.
+            // Otherwise it can read Program.ConnectionString internally.
+            var dlg = new DriverManagerForm();
+            dlg.ShowDialog();
         }
 
         private void btnSettings_Click(object sender, EventArgs e)

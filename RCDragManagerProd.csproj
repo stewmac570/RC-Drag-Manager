@@ -197,6 +197,7 @@
     <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
     <Compile Include="RaceSession.cs" />
     <Compile Include="RaceSessionRepository.cs" />
+    <Compile Include="RaceSessionSummary.cs" />
     <Compile Include="RandomMode\RandomBracket.cs" />
     <Compile Include="RandomMode\RandomMatch.cs" />
     <Compile Include="RandomMode\RandomMatchEngine.cs" />

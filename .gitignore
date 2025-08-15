@@ -45,3 +45,6 @@ publish/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+Installer/Payload/
+Installer/output/
