@@ -6,210 +6,204 @@ using System.Text.Json;
 
 namespace RCDragManagerProd
 {
-    public class RaceSessionRepository
+    public sealed class RaceSessionRepository
     {
-        private readonly string _connectionString;
+        private readonly string _connStr;
 
-        public RaceSessionRepository(string dbPath)
+        public RaceSessionRepository(string connectionOrPath)
         {
-            _connectionString = $"Data Source={dbPath};Version=3;";
+            if (string.IsNullOrWhiteSpace(connectionOrPath))
+                throw new ArgumentNullException(nameof(connectionOrPath));
 
-            // ADD THIS LINE INSIDE YOUR EXISTING CONSTRUCTOR:
-            Console.WriteLine("DB File Path: " + Path.GetFullPath(dbPath));
-
-            EnsureTableExists();
+            _connStr = NormalizeConnString(connectionOrPath);
+            Logger.Log($"[DB][SessionRepo] ctor | conn='{_connStr}'");
         }
 
-
-        private void EnsureTableExists()
+        // Accepts EITHER a full connection string or a db file path (relative or absolute)
+        private static string NormalizeConnString(string input)
         {
-            using (var conn = new SQLiteConnection(_connectionString))
+            // Already a connection string?
+            if (input.IndexOf('=') >= 0 &&
+                input.IndexOf("Data Source", StringComparison.OrdinalIgnoreCase) >= 0)
+                return input;
+
+            // Treat as path. If relative, place under %APPDATA%\RC_Drag_Manager
+            string path = input;
+            if (!Path.IsPathRooted(path))
             {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = @"
-                    CREATE TABLE IF NOT EXISTS RaceSessions (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        EventName TEXT,
-                        EventDate TEXT,
-                        RaceType TEXT,
-                        ClassType TEXT,
-                        FixedDialIn REAL,
-                        SessionData TEXT
-                    );
-                ";
-                cmd.ExecuteNonQuery();
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string folder = Path.Combine(appData, "RC_Drag_Manager");
+                Directory.CreateDirectory(folder);
+                path = Path.Combine(folder, path);
             }
+            // Ensure parent exists
+            Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
+            return $"Data Source={path};Version=3;";
         }
 
-        public void SaveSession(RaceSession session)
+        private SQLiteConnection Open()
         {
-            string jsonData = JsonSerializer.Serialize(session);
-
-            using (var conn = new SQLiteConnection(_connectionString))
-            {
-                conn.Open();
-
-                if (session.Id == 0)
-                {
-                    // INSERT
-                    var cmd = conn.CreateCommand();
-                    cmd.CommandText = @"
-                        INSERT INTO RaceSessions 
-                        (EventName, EventDate, RaceType, ClassType, FixedDialIn, SessionData)
-                        VALUES (@EventName, @EventDate, @RaceType, @ClassType, @FixedDialIn, @SessionData);
-                        SELECT last_insert_rowid();
-                    ";
-
-                    cmd.Parameters.AddWithValue("@EventName", session.EventName);
-                    cmd.Parameters.AddWithValue("@EventDate", session.EventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                    cmd.Parameters.AddWithValue("@RaceType", session.RaceType);
-                    cmd.Parameters.AddWithValue("@ClassType", session.ClassType);
-                    cmd.Parameters.AddWithValue("@FixedDialIn", session.FixedDialIn ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@SessionData", jsonData);
-
-                    long insertedId = (long)cmd.ExecuteScalar();
-                    session.Id = (int)insertedId;
-                }
-                else
-                {
-                    // UPDATE
-                    var cmd = conn.CreateCommand();
-                    cmd.CommandText = @"
-                        UPDATE RaceSessions
-                        SET EventName = @EventName,
-                            EventDate = @EventDate,
-                            RaceType = @RaceType,
-                            ClassType = @ClassType,
-                            FixedDialIn = @FixedDialIn,
-                            SessionData = @SessionData
-                        WHERE Id = @Id;
-                    ";
-
-                    cmd.Parameters.AddWithValue("@EventName", session.EventName);
-                    cmd.Parameters.AddWithValue("@EventDate", session.EventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                    cmd.Parameters.AddWithValue("@RaceType", session.RaceType);
-                    cmd.Parameters.AddWithValue("@ClassType", session.ClassType);
-                    cmd.Parameters.AddWithValue("@FixedDialIn", session.FixedDialIn ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@SessionData", jsonData);
-                    cmd.Parameters.AddWithValue("@Id", session.Id);
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            var cn = new SQLiteConnection(_connStr);
+            cn.Open();
+            return cn;
         }
 
+        // ---------- SAVE ----------
+        public int SaveSession(object session)
+        {
+            if (session == null) throw new ArgumentNullException(nameof(session));
+            Logger.Log("[DB][SessionRepo] SaveSession()");
+
+            string eventName = GetStringProp(session, "EventName", "(event)");
+            string classType = GetStringProp(session, "ClassType", "");
+            string raceType = GetStringProp(session, "RaceType", "");
+            DateTime eventDate = GetDateTimeProp(session, "EventDate", DateTime.Now);
+
+            string json = JsonSerializer.Serialize(session, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            });
+
+            const string sql = @"
+INSERT INTO RaceSessions (EventName, EventDate, ClassType, RaceType, SessionData)
+VALUES (@EventName, @EventDate, @ClassType, @RaceType, @SessionData);
+SELECT last_insert_rowid();";
+
+            int newId;
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand(sql, cn))
+            {
+                cmd.Parameters.AddWithValue("@EventName", eventName ?? "");
+                cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.Parameters.AddWithValue("@ClassType", classType ?? "");
+                cmd.Parameters.AddWithValue("@RaceType", raceType ?? "");
+                cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
+
+                newId = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
+            TrySetIntProp(session, "Id", newId);
+            Logger.Log($"[DB][SessionRepo] SaveSession → Id={newId}");
+            return newId;
+        }
+
+        // ---------- LIST ----------
         public List<RaceSessionSummary> GetAllSessions()
         {
-            var sessions = new List<RaceSessionSummary>();
+            Logger.Log("[DB][SessionRepo] GetAllSessions()");
+            var list = new List<RaceSessionSummary>();
 
-            try
+            const string sql = @"
+SELECT Id, EventName, EventDate, ClassType, RaceType
+FROM RaceSessions
+ORDER BY datetime(EventDate) DESC";
+
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand(sql, cn))
+            using (var rd = cmd.ExecuteReader())
             {
-                Logger.Log("[LOAD] Fetching session summaries…");
-
-                using (var conn = new SQLiteConnection(_connectionString))
+                while (rd.Read())
                 {
-                    conn.Open();
-
-                    using (var cmd = conn.CreateCommand())
+                    var s = new RaceSessionSummary
                     {
-                        cmd.CommandText = "SELECT Id, EventName, EventDate, RaceType, ClassType FROM RaceSessions ORDER BY Id DESC";
-
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                int id = reader.IsDBNull(0) ? 0 : Convert.ToInt32(reader.GetValue(0));
-                                string eventName = reader.IsDBNull(1) ? string.Empty : reader.GetValue(1).ToString();
-
-                                DateTime eventDate;
-                                if (reader.IsDBNull(2))
-                                {
-                                    eventDate = DateTime.MinValue;
-                                }
-                                else if (reader.GetFieldType(2) == typeof(DateTime))
-                                {
-                                    eventDate = reader.GetDateTime(2);
-                                }
-                                else
-                                {
-                                    string raw = reader.GetValue(2).ToString();
-                                    if (!DateTime.TryParse(raw, out eventDate))
-                                        eventDate = DateTime.MinValue;
-                                }
-
-                                string raceType = reader.IsDBNull(3) ? string.Empty : reader.GetValue(3).ToString();
-                                string classType = reader.IsDBNull(4) ? string.Empty : reader.GetValue(4).ToString();
-
-                                var summary = new RaceSessionSummary
-                                {
-                                    Id = id,
-                                    EventName = eventName,
-                                    EventDate = eventDate,
-                                    RaceType = raceType,
-                                    ClassType = classType
-                                };
-
-                                sessions.Add(summary);
-                            }
-                        }
-                    }
+                        Id = rd.GetInt32(0),
+                        EventName = rd.IsDBNull(1) ? "" : rd.GetString(1),
+                        EventDate = rd.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(rd.GetString(2)),
+                        ClassType = rd.IsDBNull(3) ? "" : rd.GetString(3),
+                        RaceType = rd.IsDBNull(4) ? "" : rd.GetString(4)
+                    };
+                    list.Add(s);
                 }
+            }
 
-                Logger.Log($"[LOAD] Session summaries loaded: {sessions.Count}");
-                return sessions;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"[LOAD][ERROR] GetAllSessions failed: {ex}");
-                throw;
-            }
+            Logger.Log($"[DB][SessionRepo] GetAllSessions → {list.Count} rows");
+            return list;
         }
 
-
+        // ---------- LOAD ----------
         public RaceSession LoadSession(int id)
         {
-            using (var conn = new SQLiteConnection(_connectionString))
+            Logger.Log($"[DB][SessionRepo] LoadSession(id={id})");
+
+            const string sql = "SELECT SessionData FROM RaceSessions WHERE Id = @Id";
+
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand(sql, cn))
             {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, SessionData FROM RaceSessions WHERE Id = @Id;";
                 cmd.Parameters.AddWithValue("@Id", id);
 
-                using (var reader = cmd.ExecuteReader())
+                var json = cmd.ExecuteScalar() as string;
+                if (string.IsNullOrWhiteSpace(json))
                 {
-                    if (reader.Read())
-                    {
-                        int dbId = reader.GetInt32(0);
-                        string jsonData = reader.GetString(1);
-                        var session = JsonSerializer.Deserialize<RaceSession>(jsonData);
-                        session.Id = dbId; // Restore DB Id to object
-                        return session;
-                    }
+                    Logger.Log("[DB][SessionRepo][WARN] No JSON session data found");
+                    return null;
+                }
+
+                try
+                {
+                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var session = JsonSerializer.Deserialize<RaceSession>(json, opts);
+                    Logger.Log("[DB][SessionRepo] LoadSession → OK");
+                    return session;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"[DB][SessionRepo][ERROR] Deserialize failed: {ex}");
+                    return null;
                 }
             }
-            return null;
         }
 
+        // ---------- DELETE ----------
         public void DeleteSession(int id)
         {
-            using (var conn = new SQLiteConnection(_connectionString))
+            Logger.Log($"[DB][SessionRepo] DeleteSession(id={id})");
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand("DELETE FROM RaceSessions WHERE Id = @Id", cn))
             {
-                conn.Open();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "DELETE FROM RaceSessions WHERE Id = @Id;";
                 cmd.Parameters.AddWithValue("@Id", id);
                 cmd.ExecuteNonQuery();
             }
+            Logger.Log("[DB][SessionRepo] DeleteSession → OK");
         }
-    }
 
-    public class RaceSessionSummary
-    {
-        public int Id { get; set; }
-        public string EventName { get; set; }
-        public DateTime EventDate { get; set; }
-        public string RaceType { get; set; }
-        public string ClassType { get; set; }
+        // ---------- helpers ----------
+        private static string GetStringProp(object obj, string name, string fallback)
+        {
+            try
+            {
+                var pi = obj.GetType().GetProperty(name);
+                if (pi == null) return fallback;
+                var val = pi.GetValue(obj);
+                return val?.ToString() ?? fallback;
+            }
+            catch { return fallback; }
+        }
+
+        private static DateTime GetDateTimeProp(object obj, string name, DateTime fallback)
+        {
+            try
+            {
+                var pi = obj.GetType().GetProperty(name);
+                if (pi == null) return fallback;
+                var val = pi.GetValue(obj);
+                if (val is DateTime dt) return dt;
+                if (val is string s && DateTime.TryParse(s, out var p)) return p;
+                return fallback;
+            }
+            catch { return fallback; }
+        }
+
+        private static void TrySetIntProp(object obj, string name, int value)
+        {
+            try
+            {
+                var pi = obj.GetType().GetProperty(name);
+                if (pi == null || !pi.CanWrite) return;
+                if (pi.PropertyType == typeof(int)) pi.SetValue(obj, value, null);
+            }
+            catch { /* ignore */ }
+        }
     }
 }

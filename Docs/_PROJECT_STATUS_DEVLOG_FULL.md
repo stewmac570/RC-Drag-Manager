@@ -2054,11 +2054,177 @@ Optional: expose and call GenerateNextRoundFair() from the Random “Generate Ne
 If desired, re-run BYE audit on each round reveal to keep fairness bullet-proof after edits/imports.
 
 ------------------------------------------------------------------------------
+Repo + base project
 
+Full repo recovery and cleanup finished; main stabilized, designers re-linked, namespace unified to RCDragManagerProd, and remote set.
+
+Architecture + folder layout documented (UI, engines, repositories, domain).
+
+Core features in place
+
+Driver + car management, unified “Add driver & car” dialog, SQLite persistence, session setup (event name/date/type), and NHRA Pro Ladder engine (3–10 drivers) are all marked ✅.
+
+Session creation / setup
+
+Built out the entire SessionSetupForm: event details, class selection (Heads Up, Dial, Index), roster building, and live filtering; creates a RaceSession wired with correct DriverEntry objects.
+
+Form1 workflow and race engine control
+
+Race flow was rebuilt to be fully manual NHRA style: old auto-advance logic removed, BYEs kept but require manual advance, “Generate Next Round” now the only way to move rounds, and match results are stored manually.
+
+UI tweaks branch: added “Set Qual Time” below the driver list; fixed “Edit Driver” wiring; standardized Form1 size; aligned bottom controls; tightened “Generate Next Round” enable/disable rules; and clarified Save/Close in Quick Session.
+
+Pro Ladder expansion
+
+NHRA Pro Ladder expanded from 11 to 16 cars with correct seed/match mapping and round labels (R1, R2, SF, F). Compatible with existing save/load.
+
+Save/Load system hardening
+
+Session table auto-created when missing; insert/update flows fixed; debug tooling added; several save/load bugs identified and resolved. Outcome: save/load/delete now “100% stable.”
+
+Runtime signals in logs (examples)
+
+Bracket/UI rebuilds and finals completion are logged (headers/rows added, winner/runner-up, etc.), confirming the wiring during play.
+
+Engine selection and bracket generation for Round Robin / Random Draw are logged during session runs.
 ------------------------------------------------------------------------------
+Branch / scope
 
+Branch: feature/installer-stabilization (pushed)
+
+Commit: 9d8ca13 + .gitignore commit 7973960
+
+Installer (Inno) – final
+
+Fixed arch line (x86 instead of ia32).
+
+Switched to per-user install: DefaultDirName={localappdata}\Programs\RC Drag Manager, PrivilegesRequired=lowest.
+
+Shortcuts use WorkingDir {app}, first-run uses runasoriginaluser.
+
+Desktop shortcut moved to {userdesktop} to avoid UAC/write errors.
+
+Kept %APPDATA%\RC_Drag_Manager dir creation for logs.
+
+App boot + DB
+
+Program.cs:
+
+Builds absolute %APPDATA%\RC_Drag_Manager\race_data.db.
+
+Exposes Program.ConnectionString.
+
+Global exception handlers + fatal message.
+
+DatabaseInitializer.cs:
+
+Ensures schema for Drivers, Cars, RaceSessions (fix for “no such table: RaceSessions”).
+
+Repositories:
+
+DriverRepository + RaceSessionRepository accept either a full connection string or a file path; normalize to Data Source=...;Version=3;.
+
+Implemented SaveSession(session); added GetAllSessions, LoadSession, DeleteSession.
+
+Models / UI wiring
+
+Added RaceSessionSummary (for session list).
+
+LoadSessionForm:
+
+Uses connection string; robust list rebuild; logging; guarded handlers.
+
+LandingPageForm:
+
+Accepts conn string; wires repositories once; launches forms cleanly.
+
+Logging
+
+App.config points to %APPDATA%\RC_Drag_Manager\app.log.
+
+Added consistent repo/UI logging lines for startup, CRUD, errors.
+
+Git hygiene
+
+Expanded .gitignore (VS, Installer/Payload, Installer/output, logs, DB, binaries).
+
+Purged already-tracked payload/output from index.
+
+Feature branch pushed; ready for PR.
+
+Result
+
+Installer builds cleanly, installs without admin, creates per-user shortcuts, launches app.
+
+App uses a writable SQLite DB and logs; sessions can be saved/loaded; schema auto-ensured.
+
+Build errors from missing types/tables resolved.
 ------------------------------------------------------------------------------
+Dev Log — UI cleanup (Form1) — 2025-08-16
 
+Goal
+
+Stop Form1 and Designer “fighting”. Make Designer the single source of truth for UI. Keep logic + logging in Form1.cs only.
+
+What changed
+
+Designer ownership restored
+
+All controls, columns, layout, anchors, sizes, fonts, event hookups moved/kept in Form1.Designer.cs.
+
+Fixed form canvas: AutoScaleMode=None, ClientSize=1200x600, FixedSingle, no maximize.
+
+Form1.cs trimmed to logic
+
+Removed runtime layout code (ApplyLayout14InchGrid, FixAnchors14, DPI tweaks, column width fiddling, resize handlers).
+
+Removed any control instantiation or Controls.Add(...).
+
+Kept only event handlers and controller wiring.
+
+UI behavior (unchanged or improved)
+
+Next match panel: sets winner buttons’ text/tags; auto-disables BYE side.
+
+Pairings/Winners ListViews: Designer defines columns; code only rebuilds items (adds grey round headers + rows).
+
+Buttons gating:
+
+CanAdvanceChanged → enables “Generate Next Round”.
+
+CanOfferBuybackChanged → enables “Buy Back” + info popup.
+
+CanStartFinalsChanged → re-enables “Generate Bracket” for Finals + info popup.
+
+Generate Bracket click flow:
+
+Finals pending → starts Finals.
+
+Losers Bracket phase → starts LB from stored buybacks.
+
+Otherwise → generates initial bracket from cmbRaceType.
+
+Session save/reset:
+
+Reset clears lists/labels; re-enables Generate Bracket; restores race type when applicable.
+
+Save writes driver entries + calls controller SaveSession(); persists via repository.
+
+Logging
+
+Kept and focused logs: bracket generation, BYE guards, winners list rebuild, button state changes, popups, results, errors.
+
+How to edit UI now
+
+Use Visual Studio Designer for all movement/size/font/anchors.
+
+Fonts & sizes: select control → Properties → Font / Size (Form’s Font acts as base; controls can reset to inherit).
+
+Files touched
+
+Form1.cs: logic-only, no UI creation/layout.
+
+Form1.Designer.cs: full UI initialization, layout, fonts, event hookups, fixed form size/scaling.
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
