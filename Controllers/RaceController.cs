@@ -1203,6 +1203,108 @@ namespace RCDragManagerProd.Controllers
             PushAdvanceState();
             Logger.Log("[FINALS][NOBUYBACK] Advance state evaluated.");
         }
+        // Returns the next unresolved matches in revealed rounds (current first).
+        public IReadOnlyList<EngineMatch> PeekUpcomingMatches(int count = 3)
+        {
+            try
+            {
+                if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
+
+                var list = _engine.GetMatches()
+                                  .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
+                                  .OrderBy(m => m.MatchId)
+                                  .Take(count)
+                                  .ToList();
+
+                Logger.Log($"[CTRL][PEEK] Upcoming count={list.Count}, take={count} " +
+                           $"→ [{string.Join(", ", list.Select(m => $"M{m.MatchId}:{m.Driver1?.Name ?? "BYE"} vs {m.Driver2?.Name ?? "BYE"}"))}]");
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[CTRL][PEEK][ERROR] {ex}");
+                return Array.Empty<EngineMatch>();
+            }
+        }
+        public string GetActiveRoundLabel()
+        {
+            EnsureReady();
+            string active = null;
+            foreach (var r in _engine.GetRoundOrder())
+                if (_revealedRounds.Contains(r))
+                    active = r;                       // last revealed round in engine order
+            Logger.Log($"[CTRL][EDIT] Active round = '{active ?? "null"}'");
+            return active;
+        }
+        public bool IsMatchInActiveRound(int matchId)
+        {
+            var m = GetMatch(matchId);
+            var active = GetActiveRoundLabel();
+            bool ok = m != null && !string.IsNullOrEmpty(active) &&
+                      string.Equals(m.RoundLabel, active, StringComparison.OrdinalIgnoreCase);
+            Logger.Log($"[CTRL][EDIT] IsMatchInActiveRound(M{matchId}) → {ok}");
+            return ok;
+        }
+        public bool EditWinnerInActiveRound(int matchId, bool firstOption)
+        {
+            EnsureReady();
+
+            var match = _engine.GetMatches().FirstOrDefault(m => m.MatchId == matchId);
+            if (match == null)
+            {
+                Logger.Log($"[CTRL][EDIT] M{matchId} not found.");
+                return false;
+            }
+
+            var active = GetActiveRoundLabel();
+            if (string.IsNullOrEmpty(active) ||
+                !string.Equals(match.RoundLabel, active, StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Log($"[CTRL][EDIT] Reject edit — M{matchId} is in '{match.RoundLabel}', active='{active}'.");
+                return false;
+            }
+
+            var newWinner = firstOption ? match.Driver1 : match.Driver2;
+            var newLoser = firstOption ? match.Driver2 : match.Driver1;
+
+            if (newWinner == null || string.Equals(newWinner.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Log($"[CTRL][EDIT] Reject edit — cannot set BYE as winner (M{matchId}).");
+                return false;
+            }
+
+            // Commit to engine + our result store
+            _engine.SetWinner(matchId, newWinner);
+            _matchResult.SetWinner(matchId, newWinner, newLoser);
+
+            // Update Winners panel row (edit in place or add if missing)
+            var row = _winners.FirstOrDefault(w => w.MatchId == matchId);
+            if (row != null)
+            {
+                row.Winner = newWinner.Name;
+                row.Loser = newLoser?.Name ?? "BYE";
+            }
+            else
+            {
+                _winners.Add(new WinnerRow
+                {
+                    MatchId = matchId,
+                    RoundLabel = match.RoundLabel,
+                    Winner = newWinner.Name,
+                    Loser = newLoser?.Name ?? "BYE"
+                });
+            }
+
+            Logger.Log($"[CTRL][EDIT] Override: M{matchId} ({match.RoundLabel}) → {newWinner.Name} over {(newLoser?.Name ?? "BYE")}.");
+
+            // Push UI updates
+            WinnersUpdated?.Invoke(_winners);
+            PushNextMatch();
+            PushAdvanceState();
+            return true;
+        }
+
 
     }
 }

@@ -47,8 +47,26 @@ namespace RCDragManagerProd
         {
             Logger.Log($"[RR-RANK] Starting ranking process — Drivers={drivers?.Count ?? 0}, Matches={matches?.Count ?? 0}");
 
-            var idToName = drivers?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<int, string>();
-            var stats = drivers.ToDictionary(d => d.Id, _ => new Aggregate());
+            var idToName = new Dictionary<int, string>();
+            var stats = new Dictionary<int, Aggregate>();
+
+            if (drivers != null)
+            {
+                foreach (var d in drivers)
+                {
+                    if (d == null) continue;
+                    if (!idToName.ContainsKey(d.Id))
+                    {
+                        idToName[d.Id] = d.Name;
+                        stats[d.Id] = new Aggregate();
+                    }
+                    else
+                    {
+                        Logger.Log($"[RR-RANK] Duplicate driver Id detected ({d.Id}, '{d.Name}'). Keeping first '{idToName[d.Id]}'.");
+                    }
+                }
+            }
+
 
             foreach (var m in matches)
             {
