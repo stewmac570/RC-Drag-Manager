@@ -15,18 +15,30 @@ namespace RCDragManagerProd
 
         public void Initialize(List<Driver> drivers)
         {
-            allDrivers = drivers.OrderBy(d => d.QualTime).ToList();
+            // Seed order: timed first (fastest → slowest), then no-time at the bottom.
+            allDrivers = (drivers ?? new List<Driver>())
+                .OrderBy(d => d.QualTime.HasValue ? 0 : 1)
+                .ThenBy(d => d.QualTime ?? double.MaxValue)
+                .ThenBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             for (int i = 0; i < allDrivers.Count; i++)
-            {
                 allDrivers[i].Seed = i + 1;
-            }
 
             bracketMatches = ProLadder.GetLadder(allDrivers.Count);
             seedMap = allDrivers
                 .Where(d => d.Seed.HasValue)
                 .ToDictionary(d => d.Seed.Value, d => d);
+
+            try
+            {
+                int timed = allDrivers.Count(d => d.QualTime.HasValue);
+                int untimed = allDrivers.Count - timed;
+                Logger.Log($"[ENGINE] Initialize: drivers={allDrivers.Count}, timed={timed}, no-time={untimed}");
+            }
+            catch { /* logging optional */ }
         }
+
 
         public void SetWinner(int matchId, Driver winner, Driver loser)
         {

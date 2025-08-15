@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Text.Json;
 
 namespace RCDragManagerProd
 {
@@ -246,6 +247,99 @@ namespace RCDragManagerProd
                     command.Parameters.AddWithValue("@Id", driverId);
                     command.ExecuteNonQuery();
                 }
+            }
+        }
+        // using System;
+        // using System.Collections.Generic;
+        // using System.Data.SQLite;
+        // using System.Text.Json;
+
+        /// <summary>
+        /// Counts how many saved sessions this driver won, using only SavedResults
+        /// (winner/loser pairs). Works for all bracket types without round-label mapping.
+        /// </summary>
+        public int ComputeEventsWonFromSavedSessions(int driverId)
+        {
+            Logger.Log($"[STATS] ComputeEventsWonFromSavedSessions: driverId={driverId}");
+
+            int wins = 0;
+
+            // Open the same SQLite DB you already use (this._connectionString exists in your repo).
+
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+
+                // Pull the JSON blob for every saved session.
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT SessionData FROM RaceSessions";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            try
+                            {
+                                string json = reader.GetString(0);
+                                if (string.IsNullOrWhiteSpace(json)) continue;
+
+                                using var doc = JsonDocument.Parse(json);
+                                var root = doc.RootElement;
+
+                                if (!root.TryGetProperty("SavedResults", out var arr) || arr.ValueKind != JsonValueKind.Array)
+                                {
+                                    Logger.Log("[STATS] Session skipped: no SavedResults array.");
+                                    continue;
+                                }
+
+                                // Build sets of winners and losers for this session
+                                var winners = new HashSet<int>();
+                                var losers = new HashSet<int>();
+
+                                foreach (var r in arr.EnumerateArray())
+                                {
+                                    int? w = TryReadInt(r, "WinnerDriverId") ?? TryReadInt(r, "WinnerId");
+                                    int? l = TryReadInt(r, "LoserDriverId") ?? TryReadInt(r, "LoserId");
+
+                                    if (w.HasValue && w.Value > 0) winners.Add(w.Value);
+                                    if (l.HasValue && l.Value > 0) losers.Add(l.Value);
+                                }
+
+                                // Champion = winners \ losers (should be exactly 1 in a clean single-elim event)
+                                winners.ExceptWith(losers);
+
+                                if (winners.Contains(driverId))
+                                {
+                                    wins++;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Log($"[STATS] Session parse failed: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            Logger.Log($"[STATS] EventsWon computed for DriverId={driverId}: {wins}");
+            return wins;
+
+            // Local helper
+            static int? TryReadInt(JsonElement obj, string name)
+            {
+                if (!obj.TryGetProperty(name, out var el)) return null;
+                try
+                {
+                    // Stored as number?
+                    if (el.ValueKind == JsonValueKind.Number && el.TryGetInt32(out var n)) return n;
+                    // Stored as string?
+                    if (el.ValueKind == JsonValueKind.String && int.TryParse(el.GetString(), out var s)) return s;
+                }
+                catch { /* ignore */ }
+                return null;
             }
         }
 

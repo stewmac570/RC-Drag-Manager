@@ -71,18 +71,27 @@ namespace RCDragManagerProd
             lvDriverDetails.Items.Clear();
             if (selectedDriver == null) return;
 
+            // 🔎 Compute event wins from saved sessions (Final winners)
+            int computedEventWins = ComputeEventsWonFromHistory(selectedDriver.Id);
+            Logger.Log($"[STATS] DriverId={selectedDriver.Id} '{selectedDriver.Name}' → EventsWon(computed)={computedEventWins}");
+
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Name", selectedDriver.Name }));
-            lvDriverDetails.Items.Add(new ListViewItem(new[] {
-                "Qual Time",
-                selectedDriver.QualTime.HasValue ? selectedDriver.QualTime.Value.ToString("0.000") : ""
-            }));
+            lvDriverDetails.Items.Add(new ListViewItem(new[]
+            {
+        "Qual Time",
+        selectedDriver.QualTime.HasValue ? selectedDriver.QualTime.Value.ToString("0.000") : ""
+    }));
 
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "State", selectedDriver.State ?? "" }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Notes", selectedDriver.Notes ?? "" }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Wins", selectedDriver.TotalWins.ToString() }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Losses", selectedDriver.TotalLosses.ToString() }));
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "Events Entered", selectedDriver.EventsEntered.ToString() }));
-            lvDriverDetails.Items.Add(new ListViewItem(new[] { "Events Won", selectedDriver.EventsWon.ToString() }));
+
+            // ✅ Show computed event wins (not the stale DB column)
+            var computedWins = repository.ComputeEventsWonFromSavedSessions(selectedDriver.Id);
+            lvDriverDetails.Items.Add(new ListViewItem(new[] { "Events Won", computedWins.ToString() }));
+
 
             lvDriverDetails.Items.Add(new ListViewItem(new[] { "--- Cars ---", "" }));
 
@@ -92,6 +101,7 @@ namespace RCDragManagerProd
                 lvDriverDetails.Items.Add(new ListViewItem(new[] { "Car", carInfo }));
             }
         }
+
 
         // ADD DRIVER
 
@@ -354,6 +364,65 @@ namespace RCDragManagerProd
                 statsForm.ShowDialog();
             }
         }
+        // Count events where the driver won the FINAL.
+        // Handles normal Pro Ladder and our Final-4 after Round Robin.
+        // Uses whichever ladder size best matches the saved results (session size or 4).
+        private int ComputeEventsWonFromHistory(int driverId)
+        {
+            try
+            {
+                var repo = new RaceSessionRepository("race_data.db");
+                var summaries = repo.GetAllSessions();
+                int wins = 0;
+
+                foreach (var s in summaries)
+                {
+                    var session = repo.LoadSession(s.Id);
+                    if (session?.SavedResults == null || session.SavedResults.Count == 0)
+                        continue;
+
+                    // Build candidate ladders and pick the one matching most results
+                    var candidateSizes = new HashSet<int> { session.DriverEntries?.Count ?? 0, 4 };
+                    candidateSizes.RemoveWhere(n => n <= 0);
+
+                    int bestSize = 0;
+                    int bestHit = -1;
+                    var resultIds = session.SavedResults.Select(r => r.MatchId).ToHashSet();
+
+                    foreach (var size in candidateSizes)
+                    {
+                        var ladder = ProLadder.GetLadder(size);
+                        var ladderIds = ladder.Select(m => m.MatchId).ToHashSet();
+                        int hits = resultIds.Count(id => ladderIds.Contains(id));
+                        if (hits > bestHit) { bestHit = hits; bestSize = size; }
+                    }
+
+                    var bestLadder = bestSize > 0 ? ProLadder.GetLadder(bestSize) : new List<ProLadder.LadderMatch>();
+
+                    // Find the FINAL in that ladder
+                    var finalMatch = bestLadder.FirstOrDefault(m =>
+                        string.Equals(m.RoundLabel, "Final", StringComparison.OrdinalIgnoreCase));
+
+                    if (finalMatch == null)
+                    {
+                        Logger.Log($"[STATS] Session {s.Id} — no Final match in chosen ladder (size={bestSize}).");
+                        continue;
+                    }
+
+                    var finalResult = session.SavedResults.FirstOrDefault(r => r.MatchId == finalMatch.MatchId);
+                    if (finalResult != null && finalResult.WinnerDriverId == driverId)
+                        wins++;
+                }
+
+                return wins;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[STATS][ERROR] ComputeEventsWonFromHistory: {ex}");
+                return 0;
+            }
+        }
+
 
     }
 }

@@ -96,7 +96,7 @@ namespace RCDragManagerProd
             Controls.Add(grpDriverSelection);
 
             btnAddNewDriver = new Button() { Text = "Add New Driver", Location = new Point(30, 30), Size = new Size(180, 40) };
-            btnAddDriverFromList = new Button() { Text = "Add Driver From List", Location = new Point(230, 30), Size = new Size(200, 40) };
+            //btnAddDriverFromList = new Button() { Text = "Add Driver From List", Location = new Point(230, 30), Size = new Size(200, 40) };
 
             lvEventRoster = new ListView()
             {
