@@ -1,20 +1,14 @@
-﻿// ==========================================================================
-// ProLadderEngineAdapter.cs
-// RC Drag Manager  –  bridges the existing MatchEngine (NHRA Pro-Ladder)
-// to the new IRaceEngine contract.
-// ==========================================================================
-//  • ZERO ladder logic is modified; this is pure “glue” code.
-//  • Uses MatchEngine.Initialize(..), SetWinner(..), GetBracketMatches()
-//    and Results.HasResult(..) exactly as they appear in the current source :contentReference[oaicite:0]{index=0}.
-//  • Converts each ProLadder.LadderMatch into the neutral EngineMatch DTO
-//    defined in IRaceEngine.cs.
-// ==========================================================================
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using RCDragManagerProd;               // Driver, MatchEngine
 using RCDragManagerProd.RaceEngines;   // IRaceEngine, EngineMatch
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;    // only if returning VM rows
+using RCDragManagerProd.Logging;      // Logger
+
 
 namespace RCDragManagerProd.RaceEngines
 {

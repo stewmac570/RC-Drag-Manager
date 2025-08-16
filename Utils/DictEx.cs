@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RCDragManagerProd
+namespace RCDragManagerProd.DicEx
 {
     internal static class DictEx
     {

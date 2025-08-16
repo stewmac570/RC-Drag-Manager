@@ -51,7 +51,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>retro trans icon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\retro trans icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
@@ -102,102 +102,106 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddCarDialog.cs">
+    <Compile Include="Helpers\AssetPath.cs" />
+    <Compile Include="UI\Forms\AddCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\AddCarDialog.Designer.cs">
       <DependentUpon>AddCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddDriverAndCarDialog.cs">
+    <Compile Include="UI\Forms\AddDriverAndCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddDriverAndCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\AddDriverAndCarDialog.Designer.cs">
       <DependentUpon>AddDriverAndCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddDriverDialog.cs">
+    <Compile Include="UI\Forms\AddDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddDriverDialog.Designer.cs">
+    <Compile Include="UI\Forms\AddDriverDialog.Designer.cs">
       <DependentUpon>AddDriverDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddEditQualTimeDialog.cs">
+    <Compile Include="UI\Forms\AddEditQualTimeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddEditQualTimeDialog.Designer.cs">
+    <Compile Include="UI\Forms\AddEditQualTimeDialog.Designer.cs">
       <DependentUpon>AddEditQualTimeDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="BuybackDriverSelectionForm.cs">
+    <Compile Include="UI\Forms\BuybackDriverSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BuybackDriverSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\BuybackDriverSelectionForm.Designer.cs">
       <DependentUpon>BuybackDriverSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Car.cs" />
-    <Compile Include="CarRepository.cs" />
+    <Compile Include="Domain\Car.cs" />
+    <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
-    <Compile Include="DatabaseInitializer.cs" />
-    <Compile Include="DriverManagerForm.cs">
+    <Compile Include="Repositories\DatabaseInitializer.cs" />
+    <Compile Include="UI\Forms\DriverManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DriverManagerForm.Designer.cs">
+    <Compile Include="UI\Forms\DriverManagerForm.Designer.cs">
       <DependentUpon>DriverManagerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DriverRepository.cs" />
-    <Compile Include="Drivers.cs" />
-    <Compile Include="DriverStatsForm.cs">
+    <Compile Include="Repositories\DriverRepository.cs" />
+    <Compile Include="Domain\Drivers.cs" />
+    <Compile Include="UI\Forms\DriverStatsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DriverStatsForm.Designer.cs">
+    <Compile Include="UI\Forms\DriverStatsForm.Designer.cs">
       <DependentUpon>DriverStatsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditDriverDialog.cs">
+    <Compile Include="UI\Forms\EditDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditDriverDialog.Designer.cs">
+    <Compile Include="UI\Forms\EditDriverDialog.Designer.cs">
       <DependentUpon>EditDriverDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditWinnerDialog.cs">
+    <Compile Include="UI\Forms\EditWinnerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditWinnerDialog.Designer.cs">
+    <Compile Include="UI\Forms\EditWinnerDialog.Designer.cs">
       <DependentUpon>EditWinnerDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form1.cs">
+    <Compile Include="UI\Forms\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="UI\Forms\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="LandingPageForm.cs">
+    <Compile Include="UI\Forms\LandingPageForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LandingPageForm.Designer.cs">
+    <Compile Include="UI\Forms\LandingPageForm.Designer.cs">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoadSessionForm.cs">
+    <Compile Include="UI\Forms\LoadSessionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoadSessionForm.Designer.cs">
+    <Compile Include="UI\Forms\LoadSessionForm.Designer.cs">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Logging\Logger.cs" />
-    <Compile Include="LosersBracketBuilder.cs" />
-    <Compile Include="LosersBracketEngine.cs" />
-    <Compile Include="MatchEngine.cs" />
-    <Compile Include="MatchLookupHelper.cs" />
-    <Compile Include="MatchResult.cs" />
+    <Compile Include="RandomMode\LosersBracketBuilder.cs" />
+    <Compile Include="RandomMode\LosersBracketEngine.cs" />
+    <Compile Include="RaceEngines\MatchEngine.cs" />
+    <Compile Include="Helpers\MatchLookupHelper.cs" />
+    <Compile Include="Domain\MatchResult.cs" />
     <Compile Include="Controllers\RaceController.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ProLadder.cs" />
+    <Compile Include="Domain\ProLadder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaceEngines\IRaceEngine.cs" />
     <Compile Include="RaceEngines\ProLadderEngineAdapter.cs" />
     <Compile Include="RaceEngines\RaceEngineFactory.cs" />
     <Compile Include="RaceEngines\RandomEngineAdapter.cs" />
     <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
-    <Compile Include="RaceSession.cs" />
-    <Compile Include="RaceSessionRepository.cs" />
-    <Compile Include="RaceSessionSummary.cs" />
+    <Compile Include="Domain\RaceSession.cs" />
+    <Compile Include="Repositories\RaceSessionRepository.cs" />
+    <Compile Include="UI\Forms\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewModels\RaceSessionSummary.cs" />
     <Compile Include="RandomMode\RandomBracket.cs" />
     <Compile Include="RandomMode\RandomMatch.cs" />
     <Compile Include="RandomMode\RandomMatchEngine.cs" />
@@ -205,35 +209,35 @@
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
     <Compile Include="RoundRobinMode\RoundRobinScorecardLogger.cs" />
-    <Compile Include="ScrollableTextDialog.cs">
+    <Compile Include="UI\Forms\ScrollableTextDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectCarDialog.cs">
+    <Compile Include="UI\Forms\SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\SelectCarDialog.Designer.cs">
       <DependentUpon>SelectCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="SessionSetupForm.cs">
+    <Compile Include="UI\Forms\SessionSetupForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SessionSetupForm.Designer.cs">
+    <Compile Include="UI\Forms\SessionSetupForm.Designer.cs">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\DictEx.cs" />
     <Compile Include="ViewModels\MatchResultSave.cs" />
     <Compile Include="ViewModels\PairingRow.cs" />
     <Compile Include="ViewModels\WinnerRow.cs" />
-    <EmbeddedResource Include="DriverManagerForm.resx">
+    <EmbeddedResource Include="UI\Forms\DriverManagerForm.resx">
       <DependentUpon>DriverManagerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="UI\Forms\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LandingPageForm.resx">
+    <EmbeddedResource Include="UI\Forms\LandingPageForm.resx">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoadSessionForm.resx">
+    <EmbeddedResource Include="UI\Forms\LoadSessionForm.resx">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -246,7 +250,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SessionSetupForm.resx">
+    <EmbeddedResource Include="UI\Forms\SessionSetupForm.resx">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -264,7 +268,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="retro trans icon.ico" />
+    <Content Include="Assets\rcdrag_logo 2.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Reto logo trans full 256.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Reto logo trans full.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\retro trans icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
@@ -278,6 +293,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.119.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

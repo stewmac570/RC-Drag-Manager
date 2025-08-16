@@ -1,10 +1,11 @@
-﻿// ==========================================================================
-// RaceEngineFactory.cs
-// RC Drag Manager  –  maps the user-selected race type string to the correct
-// IRaceEngine adapter.  Keeps creation logic out of the controller/UI.
-// ==========================================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-using System;
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;    // only if returning VM rows
+using RCDragManagerProd.Logging;      // Logger
+
 
 namespace RCDragManagerProd.RaceEngines
 {

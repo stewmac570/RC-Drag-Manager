@@ -1,23 +1,16 @@
-﻿// ==========================================================================
-// IRaceEngine.cs
-// RC Drag Manager — common contract for all bracket engines
-// ==========================================================================
-//  • The UI (Form1) and the new RaceController will depend ONLY on this
-//    interface, never on concrete engines.
-//  • Every existing engine (MatchEngine, RandomMatchEngine, RoundRobinEngine,
-//    LosersBracketEngine, etc.) will get a small *Adapter* class that
-//    implements IRaceEngine and forwards the calls.
-// ==========================================================================
-
+﻿using System.Collections.Generic;
+using RCDragManagerProd.Domain;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;    // only if returning VM rows
+
 
 namespace RCDragManagerProd.RaceEngines
 {
-    /// <summary>
-    /// Normalised contract every race-logic engine (Pro-Ladder, Random Draw,
-    /// Round Robin, etc.) must satisfy.  Zero WinForms or persistence details
-    /// — pure bracket logic.
-    /// </summary>
+
     public interface IRaceEngine
     {
         // ── life-cycle ────────────────────────────────────────────────
