@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static RCDragManagerProd.ProLadder;
+using RCDragManagerProd.Domain;
+using LadderMatch = RCDragManagerProd.Domain.ProLadder.LadderMatch;
 
-namespace RCDragManagerProd
+
+
+namespace RCDragManagerProd.RoundRobinMode
 {
     public class RoundRobinEngine
     {

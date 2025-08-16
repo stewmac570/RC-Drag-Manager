@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
+using RCDragManagerProd.DicEx;
 
-namespace RCDragManagerProd
+namespace RCDragManagerProd.RoundRobinMode
 {
     public class DriverRankResult
     {

@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RCDragManagerProd
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;   // if it talks to core engine types
+
+
+
+namespace RCDragManagerProd.RandomMode
 {
     /// <summary>
     /// Handles match storage and result resolution for blind-draw brackets

@@ -1,9 +1,17 @@
-﻿using RCDragManagerProd.RaceEngines;        // IRaceEngine, EngineMatch, factory
-using RCDragManagerProd.ViewModels;         // PairingRow, WinnerRow
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+using System.Windows.Forms;            // if you show dialogs
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;
+using RCDragManagerProd.RaceEngines;
+using RCDragManagerProd.RandomMode;
+using RCDragManagerProd.RoundRobinMode;
+using RCDragManagerProd.UI.Forms;
+using RCDragManagerProd.Logging;
+
+
 
 
 namespace RCDragManagerProd.Controllers
@@ -247,7 +255,7 @@ namespace RCDragManagerProd.Controllers
                 var lbMatches = _losersEngine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
                 var allMatches = mainMatches.Concat(lbMatches);
 
-                var list = new List<MatchResultSave>();
+                var list = new List<RCDragManagerProd.Domain.MatchResultSave>();
                 foreach (var m in allMatches)
                 {
                     var w = _matchResult?.GetWinner(m.MatchId);
@@ -255,7 +263,7 @@ namespace RCDragManagerProd.Controllers
 
                     if (m.HasResult || w != null || l != null)
                     {
-                        list.Add(new MatchResultSave
+                        list.Add(new RCDragManagerProd.Domain.MatchResultSave
                         {
                             MatchId = m.MatchId,
                             WinnerDriverId = w?.Id ?? -1,

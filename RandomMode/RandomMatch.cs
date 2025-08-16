@@ -1,4 +1,12 @@
-﻿namespace RCDragManagerProd
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;   // if it talks to core engine types
+
+
+namespace RCDragManagerProd.RandomMode
 {
     public class RandomMatch
     {

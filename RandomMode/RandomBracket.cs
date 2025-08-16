@@ -1,14 +1,13 @@
-﻿// ──────────────────────────────────────────────────────────────────────────────
-// File: RandomBracket.cs
-// Project: RCDragManagerProd
-// Purpose: Blind-draw bracket generator with 1 BYE max per driver.
-// ──────────────────────────────────────────────────────────────────────────────
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RCDragManagerProd
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;   // if it talks to core engine types
+using RCDragManagerProd.Logging;      // Logger 
+
+
+namespace RCDragManagerProd.RandomMode
 {
     public static class RandomBracket
     {

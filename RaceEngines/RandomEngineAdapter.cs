@@ -1,7 +1,11 @@
-﻿using RCDragManagerProd;                  // Logger
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;    // only if returning VM rows
+using RCDragManagerProd.Logging;      // Logger 
+using RCDragManagerProd.RandomMode;
 
 namespace RCDragManagerProd.RaceEngines
 {

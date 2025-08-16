@@ -1,7 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Windows.Forms;
+
+using RCDragManagerProd.UI.Forms;
+using RCDragManagerProd.Logging;
+using RCDragManagerProd.Repositories;
+using RCDragManagerProd.Config;
 
 namespace RCDragManagerProd
 {
@@ -15,28 +19,42 @@ namespace RCDragManagerProd
         [STAThread]
         private static void Main()
         {
+            // Load persisted settings BEFORE any logging happens
+            AppSettings.Load();
+
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            Application.ThreadException += (s, e) => { Logger.Log($"[APP][UI-ERROR] {e.Exception}"); ShowFatal(e.Exception); };
+            Application.ThreadException += (s, e) =>
+            {
+                Logger.Log($"[APP][UI-ERROR] {e.Exception}");
+                ShowFatal(e.Exception);
+            };
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                var ex = e.ExceptionObject as Exception ?? new Exception(e.ExceptionObject?.ToString() ?? "Unknown fatal error");
-                Logger.Log($"[APP][FATAL-DOMAIN] {ex}"); ShowFatal(ex);
+                var ex = e.ExceptionObject as Exception
+                         ?? new Exception(e.ExceptionObject?.ToString() ?? "Unknown fatal error");
+                Logger.Log($"[APP][FATAL-DOMAIN] {ex}");
+                ShowFatal(ex);
             };
 
             try
             {
-                string dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppDataFolder);
+                // Ensure %APPDATA%\RC_Drag_Manager exists
+                string dataDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    AppDataFolder);
                 Directory.CreateDirectory(dataDir);
 
+                // Ensure DB file exists
                 string dbPath = Path.Combine(dataDir, DbFileName);
                 if (!File.Exists(dbPath))
                 {
-                    using (var fs = new FileStream(dbPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read)) { }
+                    using var _ = new FileStream(dbPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
                 }
 
                 ConnectionString = $"Data Source={dbPath};Version=3;";
-                Logger.Log($"[APP] Startup | DataDir='{dataDir}' | DB='{dbPath}'");
+                Logger.Log($"[APP] Startup | DataDir='{dataDir}' | DB='{dbPath}' | Logging={(AppSettings.EnableLogging ? "ON" : "OFF")}");
 
+                // Init DB schema/tables
                 DatabaseInitializer.InitializeDatabase(ConnectionString);
                 Logger.Log("[APP] Database ready.");
 
@@ -59,7 +77,7 @@ namespace RCDragManagerProd
             MessageBox.Show(
                 "A fatal error occurred and the application must close." + Environment.NewLine + Environment.NewLine +
                 ex.Message + Environment.NewLine + Environment.NewLine +
-                "Check the log at: %APPDATA%\\RC_Drag_Manager\\app.log",
+                $"Check the log at: {AppSettings.LogFilePath}",
                 "RC Drag Manager — Fatal Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);

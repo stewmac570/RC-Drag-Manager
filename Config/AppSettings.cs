@@ -1,26 +1,76 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
+using System.Text.Json;
 
 namespace RCDragManagerProd.Config
 {
     public static class AppSettings
     {
-        public static bool EnableLogging =>
-            bool.TryParse(ConfigurationManager.AppSettings["EnableLogging"], out var flag) && flag;
+        private sealed class Model
+        {
+            // Debug builds: ON by default; Release builds: OFF by default
+            public bool EnableLogging { get; set; } =
+#if DEBUG
+                true;
+#else
+                false;
+#endif
+        }
+
+        private static readonly string AppFolder =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                         "RC_Drag_Manager");
+
+        private static readonly string FilePath = Path.Combine(AppFolder, "appsettings.json");
+
+        private static Model _model = new Model();
+
+        public static void Load()
+        {
+            try
+            {
+                Directory.CreateDirectory(AppFolder);
+
+                if (File.Exists(FilePath))
+                {
+                    var json = File.ReadAllText(FilePath);
+                    _model = JsonSerializer.Deserialize<Model>(json) ?? new Model();
+                }
+                else
+                {
+                    // Persist the build-default the very first time
+                    Save();
+                }
+            }
+            catch
+            {
+                _model = new Model(); // fail-safe defaults
+            }
+        }
+
+        public static void Save()
+        {
+            try
+            {
+                Directory.CreateDirectory(AppFolder);
+                var json = JsonSerializer.Serialize(_model, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, json);
+            }
+            catch { /* ignore */ }
+        }
+
+        public static bool EnableLogging
+        {
+            get => _model.EnableLogging;
+            set { _model.EnableLogging = value; Save(); }
+        }
 
         public static string LogFilePath
         {
             get
             {
-                string baseFolder = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "RC-Drag_Manager");
-
-                if (!Directory.Exists(baseFolder))
-                    Directory.CreateDirectory(baseFolder);
-
-                return Path.Combine(baseFolder, "log.txt");
+                Directory.CreateDirectory(AppFolder);
+                return Path.Combine(AppFolder, "app.log");
             }
         }
     }
