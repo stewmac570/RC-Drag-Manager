@@ -2226,6 +2226,99 @@ Form1.cs: logic-only, no UI creation/layout.
 
 Form1.Designer.cs: full UI initialization, layout, fonts, event hookups, fixed form size/scaling.
 ------------------------------------------------------------------------------
+RC Drag Manager — Dev Log (cleanup & fixes)
+Repo / Structure
 
+Standardized solution folders in project root:
+
+Assets/, Config/, Controllers/, Domain/, Helpers/, Logging/, RaceEngines/, RandomMode/, RoundRobinMode/, Repositories/, UI/, Utils/, ViewModels/, Properties/.
+
+Moved Docs → docs/, Installer → installer/.
+
+Prepared plan to move whole project under src/RCDragManagerProd (new branch: feature/move-to-src).
+
+Namespaces / Using
+
+Unified WinForms to RCDragManagerProd.UI.Forms.
+
+Fixed missing/ambiguous using across files (Domain, Repositories, Logging, RaceEngines, RoundRobinMode).
+
+Resolved MatchResultSave ambiguity by using fully-qualified names (Domain vs ViewModels) where needed.
+
+Assets / Resources
+
+Created Helpers/AssetPath.cs to resolve Assets\... paths reliably.
+
+Moved logos to Assets/ and patched Resources.resx references.
+
+Added tracing in AssetPath via Logger.Log.
+
+Logging + Settings
+
+New Config/AppSettings.cs (persisted JSON in AppData).
+
+Logger honors AppSettings.IsLoggingEnabled.
+
+Default: Debug = ON, Release = OFF.
+
+Program.cs: AppSettings.Load() on startup; fatal handler shows log path.
+
+Database / Persistence
+
+DatabaseInitializer added; ensures all tables (incl. RaceSessions) exist.
+
+Called initializer at app start and in repositories opening connections.
+
+Fixed Quick Session “no such table: RaceSessions” by creating table before save.
+
+Session / Stats
+
+Form1:
+
+Winner buttons now call _controller.SubmitWinner(...), then UpdateDriverStats(winner, loser) with DB bump (Wins/Losses).
+
+On TournamentCompleted: +EventsEntered for roster; +EventsWon for winner (with DB update + logging).
+
+DriverManagerForm:
+
+Details grid shows computed “Events Won” from saved sessions (not stale DB field).
+
+Added ComputeEventsWonFromHistory() using RaceSessionRepository + ladder map; works for Pro Ladder and Final-4 after Round Robin.
+
+Compile / Runtime Fixes
+
+Fixed ?? operator misuse (List vs IEnumerable) by normalizing repository returns to concrete lists.
+
+Restored Logger symbol errors by centralizing Logging\Logger.cs and correct namespace imports.
+
+Resolved missing type errors (Driver/Car/LadderMatch/Engine* etc.) after namespace consolidation.
+
+UI Polish
+
+Winners panel: grouped by round with headers; stable ordering (R1.., SF, F, LB rounds).
+
+“Edit Result” picker dialog to change winners for active round only (BYE guarded).
+
+Next-match label shows “On Deck / In The Hole” preview.
+
+Git / Branches
+
+Branch feature/structure-cleanup-1 committed & merged (folder tidy, fixes).
+
+Next: create feature/move-to-src, move project under src/RCDragManagerProd, update solution, push PR.
+
+Suggested commit titles already used / to use
+
+repo: structure cleanup (folders + namespaces)
+
+logging: settings-backed logger (Release OFF by default)
+
+db: add DatabaseInitializer + ensure RaceSessions
+
+ui: driver stats computed from saved sessions
+
+ui: winners panel + edit result flow
+
+repo: move project under src/RCDragManagerProd (next)
 ------------------------------------------------------------------------------
 
