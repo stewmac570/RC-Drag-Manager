@@ -17,7 +17,7 @@ namespace RCDragManagerProd.UI.Forms
         public DriverManagerForm()
         {
             InitializeComponent();
-            repository = new DriverRepository("race_data.db");
+            repository = new DriverRepository(Program.ConnectionString);
 
             SetupDriverDetailsGrid();
             LoadDrivers();
@@ -26,7 +26,7 @@ namespace RCDragManagerProd.UI.Forms
         public DriverManagerForm(DriverRepository repo)
         {
             InitializeComponent();
-            repository = repo ?? new DriverRepository("race_data.db");
+            repository = repo ?? new DriverRepository(Program.ConnectionString);
 
             SetupDriverDetailsGrid();
             LoadDrivers();
@@ -386,7 +386,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            using (var statsForm = new DriverStatsForm(selectedDriver, "race_data.db"))
+            using (var statsForm = new DriverStatsForm(selectedDriver, Program.ConnectionString))
             {
                 statsForm.ShowDialog();
             }

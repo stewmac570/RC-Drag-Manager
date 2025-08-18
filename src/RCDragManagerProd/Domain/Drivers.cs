@@ -6,16 +6,7 @@ namespace RCDragManagerProd.Domain
 {
     public class Driver
     {
-        // ==============================================================
-        // 🔒 Runtime-unique Id generator
-        // --------------------------------------------------------------
-        //  • Each new Driver instance that arrives with Id == 0
-        //    receives the next atomic counter value.
-        //  • If the caller later sets a non-zero Id (e.g., loading
-        //    from persistent storage), that explicit value is kept.
-        //  • Any attempt to overwrite an already-assigned Id with 0
-        //    is silently ignored so we never “lose” the unique Id.
-        // ==============================================================
+
         private static int _nextRuntimeId = 0;
         private int _id;   // backing field for the custom property
 
@@ -45,9 +36,6 @@ namespace RCDragManagerProd.Domain
             }
         }
 
-        // ------------------------------------------------------------------
-        // Existing public properties (unchanged)
-        // ------------------------------------------------------------------
         public string Name { get; set; }
         public double? QualTime { get; set; }
         public string Notes { get; set; }

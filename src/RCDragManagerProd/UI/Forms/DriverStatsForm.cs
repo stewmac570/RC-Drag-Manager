@@ -30,7 +30,8 @@ namespace RCDragManagerProd.UI.Forms
                               $"Events Entered: {driver.EventsEntered} | Events Won: {driver.EventsWon}";
 
             // Prepare session repo
-            var sessionRepository = new RaceSessionRepository(dbPath);
+            var sessionRepository = new RaceSessionRepository(Program.ConnectionString);
+
             var sessionSummaries = sessionRepository.GetAllSessions();
 
             lvMatches.Items.Clear();

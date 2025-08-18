@@ -1,12 +1,8 @@
 ﻿using System;
 using System.IO;
 using RCDragManagerProd.Logging;
-using System.Linq;
 
-using RCDragManagerProd.Domain;        // only if a helper touches models
-
-
-namespace RCDragManagerProd.Helpers.Helpers
+namespace RCDragManagerProd.Helpers
 {
     internal static class AssetPath
     {
