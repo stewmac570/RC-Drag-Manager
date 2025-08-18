@@ -398,6 +398,80 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
+<<<<<<< Updated upstream
+=======
+        private void RedrawFullBracket(IReadOnlyList<PairingRow> rows)
+        {
+            if (InvokeRequired) { BeginInvoke(new Action<IReadOnlyList<PairingRow>>(RedrawFullBracket), rows); return; }
+            if (rows == null) { Logger.Log("[UI] RedrawFullBracket called with rows=null"); return; }
+
+            try
+            {
+                Logger.Log($"[UI] RedrawFullBracket: incoming rows={rows.Count}");
+                lvPairings.BeginUpdate();
+                lvPairings.Items.Clear();
+
+                int added = 0;
+                foreach (var row in rows)
+                {
+                    if (row == null) continue;
+
+                    if (row.IsHeader)
+                    {
+                        string label = GetFullRoundLabel(row.RoundLabel);
+                        var header = new ListViewItem(string.Empty);
+                        header.SubItems.Add(label);
+                        header.SubItems.Add(string.Empty);
+                        header.BackColor = Color.LightGray;
+                        header.Font = new Font(lvPairings.Font, FontStyle.Italic);
+                        lvPairings.Items.Add(header);
+                        Logger.Log($"[UI] Header added: {label}");
+                        continue;
+                    }
+
+                    string mLabel = !string.IsNullOrEmpty(row.MatchNumber) ? row.MatchNumber : $"M{row.MatchId}";
+                    bool bye1 = string.IsNullOrWhiteSpace(row.Driver1);
+                    bool bye2 = string.IsNullOrWhiteSpace(row.Driver2);
+
+                    string d1 = bye1 ? "BYE" : row.Driver1;
+                    string d2 = bye2 ? "BYE" : row.Driver2;
+
+                    var item = new ListViewItem(mLabel);
+                    item.SubItems.Add(d1);
+                    item.SubItems.Add(d2);
+                    item.UseItemStyleForSubItems = false;
+
+                    if (bye1 ^ bye2)
+                    {
+                        int byeIdx = bye1 ? 1 : 2;
+                        var byeSub = item.SubItems[byeIdx];
+                        byeSub.ForeColor = SystemColors.GrayText;
+                        byeSub.Font = new Font(lvPairings.Font, FontStyle.Italic);
+                        Logger.Log($"[UI] BYE styled in {mLabel} → {(bye1 ? "D1" : "D2")} is BYE");
+                    }
+                    else if (bye1 && bye2)
+                    {
+                        item.ForeColor = SystemColors.GrayText;
+                        item.Font = new Font(lvPairings.Font, FontStyle.Italic);
+                        Logger.Log($"[UI] Both sides BYE in {mLabel} (unexpected)");
+                    }
+
+                    lvPairings.Items.Add(item);
+                    added++;
+                    Logger.Log($"[UI] Row added: {mLabel}  {d1} vs {d2}  [Round={row.RoundLabel}, MatchId={row.MatchId}]");
+                }
+
+                lvPairings.EndUpdate();
+                Logger.Log($"[UI] Redraw complete: headers+rows={lvPairings.Items.Count}, matches added={added}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[UI] RedrawFullBracket() exception: {ex.GetType().Name}: {ex.Message}\n{ex}");
+            }
+        }
+
+
+>>>>>>> Stashed changes
         private void btnReset_Click(object sender, EventArgs e)
         {
             _controller.Reset();
@@ -997,6 +1071,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Logger.Log($"[UI] OnNextMatchReady() exception: {ex.GetType().Name}: {ex.Message}\n{ex}");
             }
+<<<<<<< Updated upstream
         }
         }
 
@@ -1017,7 +1092,10 @@ namespace RCDragManagerProd.UI.Forms
             lblNext.Text = text;
 
             Logger.Log($"[UI][NEXT] Current=M{row.MatchId}:{row.Driver1} vs {row.Driver2} | Label='{text.Replace(Environment.NewLine, " / ")}'");
+=======
+>>>>>>> Stashed changes
         }
+
         private static string FormatMatchForNext(EngineMatch m)
         {
             string n1 = m.Driver1?.Name ?? "BYE";
