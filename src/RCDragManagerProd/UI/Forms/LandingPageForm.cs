@@ -24,8 +24,9 @@ namespace RCDragManagerProd.UI.Forms
             InitializeComponent();
 
             // Init repos once
-            _driverRepo = new DriverRepository(_connStr);
-            _sessionRepo = new RaceSessionRepository(_connStr);
+            _driverRepo = new DriverRepository(Program.ConnectionString);
+            _sessionRepo = new RaceSessionRepository(Program.ConnectionString);
+
 
             Logger.Log("[UI][Landing] repositories wired");
         }

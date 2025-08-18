@@ -1,32 +1,25 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RCDragManagerProd;               // Driver, MatchEngine
-using RCDragManagerProd.RaceEngines;   // IRaceEngine, EngineMatch
-
 using RCDragManagerProd.Domain;
-using RCDragManagerProd.ViewModels;    // only if returning VM rows
-using RCDragManagerProd.Logging;      // Logger
-
 
 namespace RCDragManagerProd.RaceEngines
 {
     /// <summary>
-    /// Adapter that lets <see cref="MatchEngine"/> fulfil the <see cref="IRaceEngine"/>
-    /// interface expected by the new controller / UI.
+    /// Adapter that lets <see cref="MatchEngine"/> fulfill the <see cref="IRaceEngine"/> interface
+    /// expected by the controller/UI.
     /// </summary>
     public sealed class ProLadderEngineAdapter : IRaceEngine
     {
         private MatchEngine _engine = new MatchEngine();
-        private List<Driver> _drivers = null;
-        private bool _ready = false;
+        private List<Driver> _drivers;
+        private bool _ready;
 
-        // ────────────────  IRaceEngine implementation  ────────────────
+        // ────────────────  IRaceEngine  ────────────────
         public void LoadDrivers(List<Driver> drivers)
         {
             _drivers = drivers ?? throw new ArgumentNullException(nameof(drivers));
-            _ready = false;          // must call GenerateBracket afterwards
+            _ready = false; // must call GenerateBracket afterwards
         }
 
         public void GenerateBracket()
@@ -34,36 +27,27 @@ namespace RCDragManagerProd.RaceEngines
             if (_drivers == null || _drivers.Count < 2)
                 throw new InvalidOperationException("LoadDrivers must be called with two or more drivers.");
 
-            _engine.Initialize(_drivers);   // builds the full Pro-Ladder bracket :contentReference[oaicite:1]{index=1}
+            _engine.Initialize(_drivers);   // builds the full Pro-Ladder bracket
             _ready = true;
         }
 
         public IReadOnlyList<EngineMatch> GetMatches()
         {
             EnsureReady();
-           
-                return _engine.GetBracketMatches()
-                              .Select(this.MapToDto)
-                              .Where(m => !(m.Driver1 == null && m.Driver2 == null)) // drop BYE-BYE
-                              .ToList();
-        }
 
-        public void SetWinner(int matchId, Driver winner)
-        {
-            EnsureReady();
-            _engine.SetWinner(matchId, winner);          // loser inferred by MatchEngine :contentReference[oaicite:3]{index=3}
-        }
-
-        public bool HasWinner(int matchId)
-        {
-            EnsureReady();
-            return _engine.Results.HasResult(matchId);   // tracks results internally :contentReference[oaicite:4]{index=4}
+            // Map engine matches to neutral DTO; skip BYE-vs-BYE
+            return _engine.GetBracketMatches()
+                          .Select(MapToDto)
+                          .Where(m => !IsBye(m.Driver1) || !IsBye(m.Driver2))
+                          .OrderBy(m => m.MatchId)
+                          .ToList();
         }
 
         public IReadOnlyList<string> GetRoundOrder()
         {
             EnsureReady();
 
+            // Distinct by label, ordered by bracket progression
             return _engine.GetBracketMatches()
                           .Select(m => m.RoundLabel)
                           .Distinct()
@@ -71,38 +55,43 @@ namespace RCDragManagerProd.RaceEngines
                           .ToList();
         }
 
+        public void SetWinner(int matchId, Driver winner)
+        {
+            EnsureReady();
+            if (winner == null || IsBye(winner))
+                throw new InvalidOperationException("Cannot set BYE as a match winner.");
+
+            _engine.SetWinner(matchId, winner);
+        }
+
+        public bool HasWinner(int matchId)
+        {
+            EnsureReady();
+            return _engine.Results.HasResult(matchId);
+        }
+
         public void Reset()
         {
-            _engine = new MatchEngine();   // simplest way to clear internal state
+            _engine = new MatchEngine(); // simplest way to clear internal state
             _drivers = null;
             _ready = false;
         }
 
-        // ─────────────────────  helpers  ─────────────────────
+        // ────────────────  helpers  ────────────────
         private void EnsureReady()
         {
-            if (!_ready)
-                throw new InvalidOperationException("Bracket not generated – call GenerateBracket() first.");
+            if (!_ready) throw new InvalidOperationException("Bracket not generated — call GenerateBracket() first.");
         }
 
-
+        private static bool IsBye(Driver d) =>
+            d == null || string.Equals(d.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
 
         private EngineMatch MapToDto(ProLadder.LadderMatch src)
         {
-            // Seed 0 means BYE → resolve to null first
-            Driver d1 = src.Seed1 == 0
-                ? null
-                : src.Seed1.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed1)
-                                     : ResolveFromMatch(src.FromMatch1);
-
-            Driver d2 = src.Seed2 == 0
-                ? null
-                : src.Seed2.HasValue ? _drivers.FirstOrDefault(d => d.Seed == src.Seed2)
-                                     : ResolveFromMatch(src.FromMatch2);
-
-            // ✅ Fallback — guarantee no null leaks
-            if (d1 == null) d1 = new Driver { Name = "BYE" };
-            if (d2 == null) d2 = new Driver { Name = "BYE" };
+            // Let the MatchEngine resolve seeds/upstream winners; then normalize BYEs
+            var (rd1, rd2) = _engine.ResolveDriversForMatch(src);
+            var d1 = rd1 ?? new Driver { Name = "BYE" };
+            var d2 = rd2 ?? new Driver { Name = "BYE" };
 
             return new EngineMatch
             {
@@ -116,16 +105,6 @@ namespace RCDragManagerProd.RaceEngines
             };
         }
 
-
-
-        // helper – safe resolve from prior match if result already stored
-        private Driver ResolveFromMatch(int? fromId)
-        {
-            if (fromId == null) return null;
-            var prior = _engine.Results.GetWinner(fromId.Value);
-            return prior;
-        }
-
         private static int LabelToIndex(string lbl) => lbl switch
         {
             "R1" => 1,
@@ -133,9 +112,9 @@ namespace RCDragManagerProd.RaceEngines
             "R3" => 3,
             "R4" => 4,
             "R5" => 5,
-            "QF" => 90,   // quarter-final
-            "SF" => 98,   // semi-final
-            "F" => 99,   // final
+            "QF" => 90,  // quarter-final
+            "SF" => 98,  // semi-final
+            "F" => 99,  // final
             _ => 100
         };
     }

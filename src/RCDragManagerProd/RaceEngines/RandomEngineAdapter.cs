@@ -1,37 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using RCDragManagerProd.Domain;
-using RCDragManagerProd.ViewModels;    // only if returning VM rows
-using RCDragManagerProd.Logging;      // Logger 
+using RCDragManagerProd.Logging;
 using RCDragManagerProd.RandomMode;
 
 namespace RCDragManagerProd.RaceEngines
 {
-    public class RandomEngineAdapter : IRaceEngine
+    /// <summary>
+    /// Adapter around <see cref="RandomMatchEngine"/> that implements IRaceEngine and
+    /// adds fair BYE distribution + a helper to generate the next round from winners.
+    /// </summary>
+    public sealed class RandomEngineAdapter : IRaceEngine
     {
-        // ──────────────────── STATE ────────────────────
+        // ── state ─────────────────────────────────────────────────────
         private readonly RandomMatchEngine _engine;
-
-        // Global BYE tracking across the whole randomized event
-        private readonly Dictionary<int, int> _byeCount = new(); // DriverId -> BYEs seen
-        private int? _lastByeRecipient = null;                    // prevent consecutive BYEs
+        private readonly Dictionary<int, int> _byeCount = new Dictionary<int, int>(); // DriverId -> BYEs so far
+        private int? _lastByeRecipient;
         private readonly Random _rng = new Random();
 
-        public RandomEngineAdapter()
-        {
-            _engine = new RandomMatchEngine();
-            Logger.Log("[RND] Adapter created (internal engine).");
-        }
+        public RandomEngineAdapter() : this(new RandomMatchEngine()) { }
 
         public RandomEngineAdapter(RandomMatchEngine engine)
         {
             _engine = engine ?? new RandomMatchEngine();
-            Logger.Log("[RND] Adapter created (external engine supplied).");
+            Logger.Log("[RND] Adapter ready.");
         }
 
-        // ──────────────────── IRaceEngine passthroughs ────────────────────
+        // ── IRaceEngine ───────────────────────────────────────────────
         public void LoadDrivers(List<Driver> drivers)
         {
             _byeCount.Clear();
@@ -44,9 +40,7 @@ namespace RCDragManagerProd.RaceEngines
         public void GenerateBracket()
         {
             _engine.GenerateBracket();
-            Logger.Log("[RND] GenerateBracket → underlying engine built initial round(s).");
-
-            // Sync BYE counters from whatever the engine produced (e.g., if it inserted a BYE in R1)
+            Logger.Log("[RND] GenerateBracket → underlying engine produced initial rounds.");
             RecomputeByeCountsFromSchedule();
         }
 
@@ -58,153 +52,143 @@ namespace RCDragManagerProd.RaceEngines
             Logger.Log("[RND] Reset: engine + BYE counters cleared.");
         }
 
-        public void InjectMatches(List<RandomMatch> matches)
-        {
-            Logger.Log($"[RND] InjectMatches: {matches?.Count ?? 0} matches.");
-            _engine.LoadMatches(matches ?? new List<RandomMatch>());
-            RecomputeByeCountsFromSchedule();
-        }
-
         public IReadOnlyList<EngineMatch> GetMatches()
         {
-            return _engine.GetMatches().Select(m => new EngineMatch
+            // Project engine's match objects to the IRaceEngine surface model
+            var src = _engine.GetMatches() ?? new List<RandomMatch>();
+            var list = new List<EngineMatch>(src.Count);
+            foreach (var m in src.OrderBy(x => x.MatchId))
             {
-                MatchId = m.MatchId,
-                Driver1 = m.Seed1,
-                Driver2 = m.Seed2,
-                RoundLabel = m.RoundLabel,
-                FromMatch1 = m.FromMatch1,
-                FromMatch2 = m.FromMatch2,
-                HasResult = _engine.HasWinner(m.MatchId)
-            }).ToList();
+                list.Add(new EngineMatch
+                {
+                    MatchId = m.MatchId,
+                    Driver1 = m.Seed1,
+                    Driver2 = m.Seed2,
+                    RoundLabel = m.RoundLabel,
+                    FromMatch1 = m.FromMatch1,
+                    FromMatch2 = m.FromMatch2,
+                    HasResult = _engine.HasWinner(m.MatchId)
+                });
+            }
+            return list;
         }
 
         public IReadOnlyList<string> GetRoundOrder() => _engine.GetRoundOrder();
 
-        public void SetWinner(int matchId, Driver winner) => _engine.SetWinner(matchId, winner);
+        public void SetWinner(int matchId, Driver winner)
+        {
+            if (winner == null || IsBye(winner))
+                throw new InvalidOperationException("Cannot set BYE as a match winner.");
+            _engine.SetWinner(matchId, winner);
+        }
 
         public bool HasWinner(int matchId) => _engine.HasWinner(matchId);
 
+        // ── extras used by controller flow ────────────────────────────
+        public void InjectMatches(List<RandomMatch> matches)
+        {
+            _engine.LoadMatches(matches ?? new List<RandomMatch>());
+            Logger.Log($"[RND] InjectMatches: {matches?.Count ?? 0} matches loaded.");
+            RecomputeByeCountsFromSchedule();
+        }
+
+        /// <summary>Returns the champion if the final appears resolved; otherwise null.</summary>
         public Driver GetWinner()
         {
-            var matches = _engine.GetMatches();
-            // Prefer an explicit "Final"
-            var final = matches.FirstOrDefault(m =>
-                (m.RoundLabel ?? "").IndexOf("final", StringComparison.OrdinalIgnoreCase) >= 0);
+            var all = _engine.GetMatches() ?? new List<RandomMatch>();
+            if (all.Count == 0) return null;
+
+            // Prefer a labeled final, else the last round seen in order.
+            var final = all.FirstOrDefault(m =>
+                !string.IsNullOrEmpty(m.RoundLabel) &&
+                m.RoundLabel.IndexOf("final", StringComparison.OrdinalIgnoreCase) >= 0);
 
             if (final == null)
             {
-                // Fallback: last labeled round in the order
                 var order = _engine.GetRoundOrder();
-                string lastRound = (order != null && order.Count > 0) ? order[order.Count - 1] : null;
-
+                var lastRound = (order != null && order.Count > 0) ? order[order.Count - 1] : null;
                 if (!string.IsNullOrEmpty(lastRound))
-                    final = matches.LastOrDefault(m => string.Equals(m.RoundLabel, lastRound, StringComparison.Ordinal));
-                if (final == null)
-                {
-                    Logger.Log("❌ RandomEngineAdapter.GetWinner → no final match found (label or order).");
-                    return null;
-                }
+                    final = all.LastOrDefault(m => string.Equals(m.RoundLabel, lastRound, StringComparison.Ordinal));
+                if (final == null) return null;
             }
 
-            var w = _engine.GetWinner(final.MatchId);
-            Logger.Log(w != null
-                ? $"🏆 RandomEngineAdapter.GetWinner → {w.Name} (M{final.MatchId})"
-                : $"⚠️ RandomEngineAdapter.GetWinner → Match {final.MatchId} has no winner");
-            return w;
+            var champ = _engine.GetWinner(final.MatchId);
+            Logger.Log($"[RND] GetWinner → {(champ != null ? champ.Name : "null")} from M{final.MatchId} ({final.RoundLabel})");
+            return champ;
         }
 
-        // ──────────────────── New: fair next-round builder ────────────────────
         /// <summary>
-        /// Build the next randomized round with a fair BYE rule (no repeats/consecutive if avoidable).
-        /// Call this from the controller when the user clicks "Generate Next Round" for Randomized races.
+        /// Build the next randomized round from winners of the last revealed round,
+        /// distributing a BYE fairly (no consecutive if avoidable; minimize total BYEs).
         /// </summary>
         public void GenerateNextRoundFair()
         {
-            var all = _engine.GetMatches().ToList();
-            var order = _engine.GetRoundOrder().ToList();
+            // Take snapshots as Lists to avoid IReadOnlyList mutation issues.
+            var all = (_engine.GetMatches() ?? new List<RandomMatch>()).ToList();
+            var order = (_engine.GetRoundOrder() ?? new List<string>()).ToList();
+
             if (order.Count == 0)
             {
-                Logger.Log("❌ [RND] GenerateNextRoundFair: no existing rounds to build from.");
+                Logger.Log("❌ [RND] GenerateNextRoundFair: no existing rounds to extend.");
                 return;
             }
 
             string lastRound = order[order.Count - 1];
             var lastRoundMatches = all.Where(m => string.Equals(m.RoundLabel, lastRound, StringComparison.Ordinal)).ToList();
 
-            // winners that actually advanced
-            var winners = new List<Driver>();
+            var winners = new List<Driver>(lastRoundMatches.Count);
             foreach (var m in lastRoundMatches)
             {
                 var w = _engine.HasWinner(m.MatchId) ? _engine.GetWinner(m.MatchId) : null;
                 if (w != null) winners.Add(w);
             }
 
-            Logger.Log($"[RND] GenerateNextRoundFair: lastRound='{lastRound}'  winners={winners.Count}");
+            Logger.Log($"[RND] GenerateNextRoundFair: lastRound='{lastRound}', winners={winners.Count}");
+            if (winners.Count == 0) return;
 
-            if (winners.Count == 0)
-            {
-                Logger.Log("⚠️ [RND] No resolved winners in the last round — next round not generated.");
-                return;
-            }
-
-            // Label the next round
-            string nextLabel = LabelForNextRound(order);
+            string nextLabel = LabelForNextRound(order, winners.Count);
             var nextRound = new List<RandomMatch>();
             var pool = winners.ToList();
 
-            // BYE selection (odd only)
-            Driver byeRecipient = null;
+            // BYE if odd
             if ((pool.Count % 2) == 1)
             {
-                byeRecipient = ChooseByeRecipientFair(pool);
+                var byeRecipient = ChooseByeRecipientFair(pool);
                 if (byeRecipient != null)
                 {
-                    _byeCount.TryGetValue(byeRecipient.Id, out int before);
-                    _byeCount[byeRecipient.Id] = before + 1;
+                    IncrementBye(byeRecipient.Id);      // default remember=false
                     _lastByeRecipient = byeRecipient.Id;
 
-                    Logger.Log($"[RND] BYE awarded to {byeRecipient.Name} (DriverId={byeRecipient.Id}) — " +
-                               $"BYEs now={_byeCount[byeRecipient.Id]} (next round label={nextLabel}).");
-
-                    // Create the BYE match
                     nextRound.Add(new RandomMatch
                     {
-                        MatchId = NextMatchId(all),
+                        MatchId = NextMatchId(all) + nextRound.Count,
                         Seed1 = byeRecipient,
-                        Seed2 = null,          // BYE
-                        RoundLabel = nextLabel,
-                        FromMatch1 = null,
-                        FromMatch2 = null
+                        Seed2 = null,
+                        RoundLabel = nextLabel
                     });
 
-                    // remove from pairing pool
                     pool.RemoveAll(d => d.Id == byeRecipient.Id);
+                    Logger.Log($"[RND] BYE → {byeRecipient.Name} (DriverId={byeRecipient.Id}) for {nextLabel}");
                 }
                 else
                 {
-                    Logger.Log("⚠️ [RND] No valid BYE recipient found — will pair all, engine may handle overhang.");
+                    Logger.Log("⚠️ [RND] Unable to assign BYE fairly — continuing without explicit BYE.");
                 }
             }
 
-            // Shuffle and pair the rest
+            // Pair remainder — simple shuffle, avoid self-match if the shuffle produced one.
             pool = pool.OrderBy(_ => _rng.Next()).ToList();
             for (int i = 0; i + 1 < pool.Count; i += 2)
             {
                 var d1 = pool[i];
                 var d2 = pool[i + 1];
 
-                if (d1.Id == d2.Id)
+                if (d1.Id == d2.Id && i + 2 < pool.Count)
                 {
-                    Logger.Log($"🚫 [RND] Self-match prevented ({d1.Name}) — reshuffling pair.");
-                    // simple swap with next if possible
-                    if (i + 2 < pool.Count)
-                    {
-                        var tmp = pool[i + 1];
-                        pool[i + 1] = pool[i + 2];
-                        pool[i + 2] = tmp;
-                        d2 = pool[i + 1];
-                    }
+                    var tmp = pool[i + 1];
+                    pool[i + 1] = pool[i + 2];
+                    pool[i + 2] = tmp;
+                    d2 = pool[i + 1];
                 }
 
                 nextRound.Add(new RandomMatch
@@ -212,89 +196,80 @@ namespace RCDragManagerProd.RaceEngines
                     MatchId = NextMatchId(all) + nextRound.Count,
                     Seed1 = d1,
                     Seed2 = d2,
-                    RoundLabel = nextLabel,
-                    FromMatch1 = null,
-                    FromMatch2 = null
+                    RoundLabel = nextLabel
                 });
             }
 
-            // Append new round to full schedule and write back
-            var updated = all.Concat(nextRound).ToList();
+            // Write back as a brand-new list so the engine can recompute any cached order.
+            var updated = new List<RandomMatch>(all.Count + nextRound.Count);
+            updated.AddRange(all);
+            updated.AddRange(nextRound);
             _engine.LoadMatches(updated);
 
-            // Maintain/display round order
-            if (!order.Contains(nextLabel, StringComparer.Ordinal))
-                order.Add(nextLabel);
-            Logger.Log($"[RND] Next round '{nextLabel}' generated → matches={nextRound.Count} (bye={(byeRecipient != null ? byeRecipient.Name : "none")}).");
+            Logger.Log($"[RND] Next round '{nextLabel}' generated: matches={nextRound.Count} (new total={updated.Count})");
+            RecomputeByeCountsFromSchedule();
         }
 
-        // ──────────────────── helpers ────────────────────
+        // ── helpers ───────────────────────────────────────────────────
         private void RecomputeByeCountsFromSchedule()
         {
             _byeCount.Clear();
             _lastByeRecipient = null;
 
-            foreach (var m in _engine.GetMatches())
+            var all = _engine.GetMatches() ?? new List<RandomMatch>();
+            foreach (var m in all)
             {
                 var d1 = m.Seed1;
                 var d2 = m.Seed2;
-                if (d1 != null && d2 == null)
-                {
-                    _byeCount[d1.Id] = _byeCount.TryGetValue(d1.Id, out var n) ? n + 1 : 1;
-                    _lastByeRecipient = d1.Id; // last BYE we saw in the schedule
-                }
-                if (d2 != null && d1 == null)
-                {
-                    _byeCount[d2.Id] = _byeCount.TryGetValue(d2.Id, out var n) ? n + 1 : 1;
-                    _lastByeRecipient = d2.Id;
-                }
+                if (d1 != null && d2 == null) IncrementBye(d1.Id, remember: true);
+                if (d2 != null && d1 == null) IncrementBye(d2.Id, remember: true);
             }
 
-            var dump = string.Join(", ", _byeCount.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}:{kv.Value}"));
-            Logger.Log($"[RND] BYE count recomputed from schedule → {{{dump}}}");
+            var dump = string.Join(", ", _byeCount.OrderBy(kv => kv.Key)
+                                                  .Select(kv => kv.Key + ":" + kv.Value));
+            Logger.Log($"[RND] BYE counters recomputed → {{ {dump} }}");
+        }
+
+        private void IncrementBye(int driverId, bool remember = false)
+        {
+            if (_byeCount.TryGetValue(driverId, out var n)) _byeCount[driverId] = n + 1;
+            else _byeCount[driverId] = 1;
+            if (remember) _lastByeRecipient = driverId;
         }
 
         private Driver ChooseByeRecipientFair(List<Driver> candidates)
         {
             if (candidates == null || candidates.Count == 0) return null;
 
-            // Build (driver, byeCount) and find the minimum
-            var stats = candidates.Select(d => (d, Count: _byeCount.TryGetValue(d.Id, out var n) ? n : 0)).ToList();
-            int min = stats.Min(s => s.Count);
-
-            // Prefer anyone with the minimum BYE count and NOT the last recipient
-            var best = stats.Where(s => s.Count == min && s.d.Id != _lastByeRecipient).Select(s => s.d).ToList();
-
-            if (best.Count == 0)
+            // Build (driver, byeCount) list
+            var stats = new List<Tuple<Driver, int>>(candidates.Count);
+            foreach (var d in candidates)
             {
-                // If forced (e.g., only one driver left, or everyone had a BYE already), allow last recipient
-                best = stats.Where(s => s.Count == min).Select(s => s.d).ToList();
-                Logger.Log("⚠️ [RND] BYE fairness forced: only previous recipient available or all tied.");
+                _byeCount.TryGetValue(d.Id, out var c);
+                stats.Add(Tuple.Create(d, c));
             }
 
-            var pick = best[_rng.Next(best.Count)];
-            return pick;
+            var min = stats.Min(s => s.Item2);
+
+            // Prefer anyone at the min count who didn't just get a bye last time.
+            var best = stats.Where(s => s.Item2 == min && s.Item1.Id != _lastByeRecipient).Select(s => s.Item1).ToList();
+            if (best.Count == 0)
+                best = stats.Where(s => s.Item2 == min).Select(s => s.Item1).ToList();
+
+            if (best.Count == 0) return null;
+            return best[_rng.Next(best.Count)];
         }
 
-        private int NextMatchId(List<RandomMatch> all) =>
-            (all != null && all.Count > 0) ? all.Max(m => m.MatchId) + 1 : 1;
-
-        private string LabelForNextRound(List<string> order)
+        private static string LabelForNextRound(List<string> order, int lastWinnerCount)
         {
-            // If last is "Final", we shouldn’t be here
-            string last = (order != null && order.Count > 0) ? order[order.Count - 1] : "Round 1";
-            int index = ParseRoundIndex(last);
-            int nextIndex = index + 1;
-
-            // If exactly two winners, call it "Final"
-            var lastWinners = _engine.GetMatches().Where(m => string.Equals(m.RoundLabel, last, StringComparison.Ordinal))
-                                   .Count(m => _engine.HasWinner(m.MatchId));
-            if (lastWinners == 2) return "Final";
-
-            return $"Round {nextIndex}";
+            // Very simple scheme: Round N → Round N+1; if exactly two winners were produced, call it "Final".
+            var last = (order != null && order.Count > 0) ? order[order.Count - 1] : "Round 1";
+            var index = ParseRoundIndex(last);
+            if (lastWinnerCount == 2) return "Final";
+            return "Round " + (index + 1);
         }
 
-        private int ParseRoundIndex(string roundLabel)
+        private static int ParseRoundIndex(string roundLabel)
         {
             if (string.IsNullOrWhiteSpace(roundLabel)) return 1;
             if (roundLabel.StartsWith("Round ", StringComparison.OrdinalIgnoreCase))
@@ -302,6 +277,18 @@ namespace RCDragManagerProd.RaceEngines
                 if (int.TryParse(roundLabel.Substring(6).Trim(), out var n) && n > 0) return n;
             }
             return 1;
+        }
+
+        private static int NextMatchId(List<RandomMatch> all)
+        {
+            if (all != null && all.Count > 0) return all.Max(m => m.MatchId) + 1;
+            return 1;
+        }
+
+        private static bool IsBye(Driver d)
+        {
+            var name = d?.Name ?? "";
+            return string.Equals(name.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
