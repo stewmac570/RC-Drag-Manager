@@ -504,9 +504,37 @@ namespace RCDragManagerProd.UI.Forms
 
             try
             {
+                btnNextRound.Enabled = false;
+                Logger.Log("[FORM1] Generate Next Round clicked");
+                _controller.AdvanceRound();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[FORM1][ERROR] AdvanceRound failed: {ex.Message}");
+                MessageBox.Show("Failed to advance the round. Check the log for details.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Logger.Log("[FORM1] AdvanceRound() completed");
+            }
+        }
+
+        private void RedrawFullBracket(IReadOnlyList<PairingRow> rows)
+        {
+            if (InvokeRequired) { BeginInvoke(new Action<IReadOnlyList<PairingRow>>(RedrawFullBracket), rows); return; }
+            if (rows == null) { Logger.Log("[UI] RedrawFullBracket called with rows=null"); return; }
+
+            try
+            {
                 Logger.Log($"[UI] RedrawFullBracket: incoming rows={rows.Count}");
                 lvPairings.BeginUpdate();
                 lvPairings.Items.Clear();
+                Logger.Log($"[UI] RedrawFullBracket: incoming rows={rows.Count}");
+                lvPairings.BeginUpdate();
+                lvPairings.Items.Clear();
+            lvPairings.BeginUpdate();
+            lvPairings.Items.Clear();
 
                 int added = 0;
                 foreach (var row in rows)
@@ -528,8 +556,33 @@ namespace RCDragManagerProd.UI.Forms
 
                     string mLabel = !string.IsNullOrEmpty(row.MatchNumber) ? row.MatchNumber : $"M{row.MatchId}";
                     bool bye1 = string.IsNullOrWhiteSpace(row.Driver1);
-                    bool bye2 = string.IsNullOrWhiteSpace(row.Driver2);
+                    string d1 = bye1 ? "BYE" : row.Driver1;
+                    string d2 = bye2 ? "BYE" : row.Driver2;
 
+                    var item = new ListViewItem(mLabel);
+                    item.SubItems.Add(d1);
+                    item.SubItems.Add(d2);
+                    item.UseItemStyleForSubItems = false;
+
+                    if (bye1 ^ bye2)
+                    {
+                        int byeIdx = bye1 ? 1 : 2;
+                        var byeSub = item.SubItems[byeIdx];
+                        byeSub.ForeColor = SystemColors.GrayText;
+                        byeSub.Font = new Font(lvPairings.Font, FontStyle.Italic);
+                        Logger.Log($"[UI] BYE styled in {mLabel} → {(bye1 ? "D1" : "D2")} is BYE");
+                    }
+                    else if (bye1 && bye2)
+                    {
+                        item.ForeColor = SystemColors.GrayText;
+                        item.Font = new Font(lvPairings.Font, FontStyle.Italic);
+                        Logger.Log($"[UI] Both sides BYE in {mLabel} (unexpected)");
+                    }
+
+                    lvPairings.Items.Add(item);
+                    added++;
+                    Logger.Log($"[UI] Row added: {mLabel}  {d1} vs {d2}  [Round={row.RoundLabel}, MatchId={row.MatchId}]");
+                }
                     string d1 = bye1 ? "BYE" : row.Driver1;
                     string d2 = bye2 ? "BYE" : row.Driver2;
 
@@ -562,7 +615,15 @@ namespace RCDragManagerProd.UI.Forms
 
                     Logger.Log($"[UI] Row added: {mLabel}  {d1} vs {d2}  [Round={row.RoundLabel}, MatchId={row.MatchId}]");
                 }
-
+                Logger.Log($"[UI] Row added: {mLabel}  {d1} vs {d2}  [Round={row.RoundLabel}, MatchId={row.MatchId}]");
+                lvPairings.EndUpdate();
+                Logger.Log($"[UI] Redraw complete: headers+rows={lvPairings.Items.Count}, matches added={added}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[UI] RedrawFullBracket() exception: {ex.GetType().Name}: {ex.Message}\n{ex}");
+            }
+        }
                 lvPairings.EndUpdate();
                 Logger.Log($"[UI] Redraw complete: headers+rows={lvPairings.Items.Count}, matches added={added}");
             }
@@ -571,9 +632,13 @@ namespace RCDragManagerProd.UI.Forms
                 Logger.LogException(ex, "[UI] RedrawFullBracket()");
             }
         }
+            Logger.Log($"[UI] Redraw complete: headers+rows total={lvPairings.Items.Count}, matches added={added}");
 
+        private void btnReset_Click(object sender, EventArgs e)
 
         private void OnNextMatchReady(PairingRow row)
+
+        private void btnReset_Click(object sender, EventArgs e)
         {
             if (InvokeRequired) { BeginInvoke(new Action<PairingRow>(OnNextMatchReady), row); return; }
 
@@ -861,10 +926,104 @@ namespace RCDragManagerProd.UI.Forms
             finally
             {
                 if (!btnGenerateBracket.Enabled)
-                    btnGenerateLosersBracket.Enabled = true;
-            }
         }
 
+        private void txtTime_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbRaceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblPairingsHeader_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblDriversHeader_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblWinnersHeader_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblEventTitle_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lvDrivers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+        // Buttons show CURRENT; label shows NEXT TWO (names only) + logging.
+        private void OnNextMatchReady(PairingRow row)
+        {
+            try
+            {
+                if (row == null)
+                {
+                    lblNext.Text = "No match ready";
+                    btnWinner1.Enabled = false;
+                    btnWinner2.Enabled = false;
+                    return;
+                }
+
+                string n1 = string.IsNullOrWhiteSpace(row.Driver1) ? "BYE" : row.Driver1;
+                string n2 = string.IsNullOrWhiteSpace(row.Driver2) ? "BYE" : row.Driver2;
+                lblNext.Text = $"{n1} vs {n2}  —  {GetFullRoundLabel(row.RoundLabel)} (M{(row.MatchId > 0 ? row.MatchId : 0)})";
+
+                bool byePair = string.IsNullOrWhiteSpace(row.Driver1) ^ string.IsNullOrWhiteSpace(row.Driver2);
+
+                if (byePair)
+                {
+                    btnWinner1.Enabled = false;
+                    btnWinner2.Enabled = false;
+                    string adv = string.IsNullOrWhiteSpace(row.Driver1) ? n2 : n1;
+                    Logger.Log($"[UI] BYE detected in next match. Auto-advance should select: {adv}");
+                    return;
+                }
+
+                btnWinner1.Enabled = !string.IsNullOrWhiteSpace(row.Driver1);
+                btnWinner2.Enabled = !string.IsNullOrWhiteSpace(row.Driver2);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[UI] OnNextMatchReady() exception: {ex.GetType().Name}: {ex.Message}\n{ex}");
+            }
+        }
+        }
+
+            string n1 = m.Driver1?.Name ?? "BYE";
+            string n2 = m.Driver2?.Name ?? "BYE";
+            return $"M{m.MatchId}: {n1} vs {n2}";
+        }
+            {
+                text = $"On Deck — {FormatMatchForNext(upcoming[0])}";
+            }
+            else
+            {
+                text = $"On Deck — {FormatMatchForNext(upcoming[0])}" +
+                       Environment.NewLine +
+                       $"In The Hole — {FormatMatchForNext(upcoming[1])}";
+            }
+
+            lblNext.Text = text;
+
+            Logger.Log($"[UI][NEXT] Current=M{row.MatchId}:{row.Driver1} vs {row.Driver2} | Label='{text.Replace(Environment.NewLine, " / ")}'");
+        }
+        private static string FormatMatchForNext(EngineMatch m)
+        {
+            string n1 = m.Driver1?.Name ?? "BYE";
+            string n2 = m.Driver2?.Name ?? "BYE";
+            return $"M{m.MatchId}: {n1} vs {n2}";
+        }
         private void btnEditResult_Click(object sender, EventArgs e)
         {
             try
