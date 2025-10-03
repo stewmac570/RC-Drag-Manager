@@ -2321,4 +2321,79 @@ ui: winners panel + edit result flow
 
 repo: move project under src/RCDragManagerProd (next)
 ------------------------------------------------------------------------------
+Dev Log — Round Robin Fairness & 3-Round Cap
 
+Date: 3 Oct 2025 (AEST)
+Branch: feature/roundrobin-fairness-cap3
+Commit: feat(round-robin): cap to 3 rounds; rotate/shuffle to avoid R1 BYE on first-picked; improved logging
+Files:
+
+src/RCDragManagerProd/RoundRobinMode/RoundRobinEngine.cs
+
+Installer/RCDragManager.iss (version bump only)
+
+What Changed
+
+3-round cap: totalRounds = Math.Min(3, n - 1) to match event format.
+
+Fair BYE + start order:
+
+No seed sort in RR; respects user pick order.
+
+Roster shuffle each run to avoid “first picked gets BYE” bias.
+
+Random pre-rotation (for odd N) so BYE recipient and match position move round-to-round (not stuck on M1).
+
+No rematches within the 3 scheduled rounds (sanity check added).
+
+Logging upgrades (via Logger.Log with Debug.WriteLine fallback):
+
+Picked order, Shuffled order.
+
+Pre-rotation applied and R1 ring snapshot.
+
+Per-round pairings, [RR][BYE] Round X: <Driver>.
+
+End summaries: Driver1 distribution and BYE counts (odd fields).
+
+Acceptance — Verified
+
+5 drivers (odd): exactly 3 rounds, no duplicates in those rounds, BYE present each round, R1 BYE not always the first picked driver across repeated races; BYE match position not fixed to M1.
+
+4 drivers (even): 3 rounds, no BYEs, balanced Driver1 appearances (±1).
+
+Parallel classes unaffected: isolation preserved (engine runs per class; no cross-talk).
+
+Why
+
+Fixes bias where the first picked driver was consistently receiving the Round-1 BYE.
+
+Aligns Round Robin session length with track format (3 rounds), not theoretical N-1.
+
+How to Reproduce (Test Notes)
+
+Start 3 RR races back-to-back with the same driver order.
+
+Open app.log and verify per race:
+
+Lines: Shuffled: ..., Pre-rotation applied: ..., R1 ring snapshot: ....
+
+R1 grid changes; [RR][BYE] Round 1: <Driver> varies across the 3 runs.
+
+No duplicate head-to-heads within those 3 rounds.
+
+Risk / Follow-ups
+
+Randomness: results vary run-to-run by design. If you want deterministic cycling (repeatable across sessions), add a roster-keyed start offset toggle later.
+
+Optional next: config switch RRShuffle (on/off) and RRDeterministicCycle (on/off).
+
+Out of Scope (unchanged)
+
+NHRA ProLadder.cs, MatchEngine.cs, UI forms (beyond existing visibility toggles).
+---
+
+---
+
+---
+---
