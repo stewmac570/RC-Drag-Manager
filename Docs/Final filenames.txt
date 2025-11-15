@@ -1,0 +1,27 @@
+Final filenames (put all of these in ONE folder, e.g., ChatGPT_Docs/)
+--------------------------------------------------------------------
+00_INDEX.md
+01_Code_Structure.md
+02_System_Overview.md
+03_Controller_Engine_Contracts.md
+04_Mode_Randomized_Bracket_Spec.md
+05_Mode_RoundRobin_Spec.md
+06_SQLite_Schema.md
+07_Repository_Contracts.md
+08_UI_UX_Surface_Map.md
+09_Error_Handling_Logging.md
+10_Build_and_Release.md
+11_Installer_Packaging.md
+12_Configuration.md
+13_Project_Status_Summary.md
+90_Glossary.md
+91_Prompts_and_Recipes.md
+99_DevLog_README.md
+DEV_LOG_PART_1.txt
+DEV_LOG_PART_2.txt
+DEV_LOG_PART_3.txt
+DEV_LOG_PART_4.txt
+DEV_LOG_PART_5.txt
+DEV_LOG_PART_6.txt
+DEV_LOG_PART_7.txt
+DEV_LOG_PART_8.txt
