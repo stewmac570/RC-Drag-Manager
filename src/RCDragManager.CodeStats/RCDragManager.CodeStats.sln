@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36121.58
+VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RCDragManagerProd", "RCDragManagerProd.csproj", "{6B8887F0-38D9-47A1-9C6D-E1702F3FD1D6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RCDragManager.CodeStats", "..\RCDragManager.CodeStats\RCDragManager.CodeStats.csproj", "{F16DBC63-90D4-442B-A860-7349241AC6ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RCDragManager.CodeStats", "RCDragManager.CodeStats.csproj", "{F16DBC63-90D4-442B-A860-7349241AC6ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6B8887F0-38D9-47A1-9C6D-E1702F3FD1D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8887F0-38D9-47A1-9C6D-E1702F3FD1D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B8887F0-38D9-47A1-9C6D-E1702F3FD1D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B8887F0-38D9-47A1-9C6D-E1702F3FD1D6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F16DBC63-90D4-442B-A860-7349241AC6ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F16DBC63-90D4-442B-A860-7349241AC6ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F16DBC63-90D4-442B-A860-7349241AC6ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -26,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {49FC392A-91C5-4E58-9BE8-201A2DA8B61B}
+		SolutionGuid = {F5F47C65-7C6C-41F5-8F01-C19CB03B51F6}
 	EndGlobalSection
 EndGlobal
