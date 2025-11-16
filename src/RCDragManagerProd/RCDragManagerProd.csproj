@@ -102,6 +102,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\RaceController.Logging.cs" />
+    <Compile Include="Controllers\RaceController.Persistence.cs" />
+    <Compile Include="Controllers\RaceController.Results.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Core.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Finals.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Losers.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.View.cs" />
+    <Compile Include="Controllers\RaceController.Session.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L03.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L04.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L05.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L06.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L07.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L08.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L09.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L10.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L11.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L12.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L13.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L14.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L15.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L16.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L17.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L18.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L19.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L20.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L21.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L22.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L23.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L24.cs" />
+    <Compile Include="Domain\ProLadder.Ladders.Common.cs" />
+    <Compile Include="Domain\ProLadder.Structures.cs" />
     <Compile Include="Helpers\AssetPath.cs" />
     <Compile Include="UI\Forms\Cars\AddCarDialog.cs">
       <SubType>Form</SubType>
