@@ -135,6 +135,9 @@
     <Compile Include="Domain\ProLadder.Ladders.Common.cs" />
     <Compile Include="Domain\ProLadder.Structures.cs" />
     <Compile Include="Helpers\AssetPath.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardDebug.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardFormatter.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardWriter.cs" />
     <Compile Include="UI\Forms\Cars\AddCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -158,6 +161,12 @@
     </Compile>
     <Compile Include="UI\Forms\Drivers\AddEditQualTimeDialog.Designer.cs">
       <DependentUpon>AddEditQualTimeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.Events.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.UI.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Forms\Main\Form1.Display.cs">
       <SubType>Form</SubType>
@@ -252,7 +261,7 @@
     <Compile Include="RoundRobinMode\RoundRobinEngine.cs" />
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
-    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardLogger.cs" />
     <Compile Include="UI\Forms\Common\ScrollableTextDialog.cs">
       <SubType>Form</SubType>
     </Compile>

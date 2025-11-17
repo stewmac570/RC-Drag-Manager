@@ -1,0 +1,1142 @@
+[
+  {
+    "Name": "lblEventTitle",
+    "TypeFullName": "Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 29,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnNewEvent",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 30,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnNewEvent_Click",
+        "LineNumber": 60
+      }
+    ]
+  },
+  {
+    "Name": "btnCreateSession",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 31,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnCreateSession_Click",
+        "LineNumber": 67
+      }
+    ]
+  },
+  {
+    "Name": "btnLoadEvent",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 32,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnLoadEvent_Click",
+        "LineNumber": 74
+      }
+    ]
+  },
+  {
+    "Name": "btnDriverLists",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 33,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnDriverLists_Click",
+        "LineNumber": 81
+      }
+    ]
+  },
+  {
+    "Name": "btnSettings",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 34,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnSettings_Click",
+        "LineNumber": 88
+      }
+    ]
+  },
+  {
+    "Name": "btnExit",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 35,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnExit_Click",
+        "LineNumber": 95
+      }
+    ]
+  },
+  {
+    "Name": "lblVersion",
+    "TypeFullName": "Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 36,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "logoBox",
+    "TypeFullName": "PictureBox",
+    "TypeShortName": "PictureBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 37,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LandingForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "DeclarationLine": 42,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lvSessions",
+    "TypeFullName": "System.Windows.Forms.ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LoadSessionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "DeclarationLine": 22,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnLoad",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LoadSessionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "DeclarationLine": 23,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnLoad_Click",
+        "LineNumber": 49
+      }
+    ]
+  },
+  {
+    "Name": "btnDelete",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LoadSessionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "DeclarationLine": 24,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnDelete_Click",
+        "LineNumber": 59
+      }
+    ]
+  },
+  {
+    "Name": "btnCancel",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LoadSessionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "DeclarationLine": 25,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnCancel_Click",
+        "LineNumber": 69
+      }
+    ]
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "LoadSessionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "DeclarationLine": 73,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "SessionSetupForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.Designer.cs",
+    "DeclarationLine": 44,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "checkedListBoxDrivers",
+    "TypeFullName": "System.Windows.Forms.CheckedListBox",
+    "TypeShortName": "CheckedListBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "BuybackDriverSelectionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs",
+    "DeclarationLine": 12,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnConfirm",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "BuybackDriverSelectionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs",
+    "DeclarationLine": 13,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnNoBuyback",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "BuybackDriverSelectionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs",
+    "DeclarationLine": 14,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "BuybackDriverSelectionForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs",
+    "DeclarationLine": 50,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "cmbWinner",
+    "TypeFullName": "System.Windows.Forms.ComboBox",
+    "TypeShortName": "ComboBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "EditWinnerDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs",
+    "DeclarationLine": 21,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnOK",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "EditWinnerDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs",
+    "DeclarationLine": 22,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "BtnOK_Click",
+        "LineNumber": 43
+      }
+    ]
+  },
+  {
+    "Name": "btnCancel",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "EditWinnerDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs",
+    "DeclarationLine": 23,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "BtnCancel_Click",
+        "LineNumber": 53
+      }
+    ]
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "EditWinnerDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs",
+    "DeclarationLine": 57,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "txtName",
+    "TypeFullName": "System.Windows.Forms.TextBox",
+    "TypeShortName": "TextBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 50,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "txtTime",
+    "TypeFullName": "System.Windows.Forms.TextBox",
+    "TypeShortName": "TextBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 51,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "TextChanged",
+        "HandlerName": "txtTime_TextChanged",
+        "LineNumber": 100
+      }
+    ]
+  },
+  {
+    "Name": "btnAddDriver",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 52,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnAddDriver_Click",
+        "LineNumber": 111
+      }
+    ]
+  },
+  {
+    "Name": "btnGenerateBracket",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 53,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnGenerateBracket_Click",
+        "LineNumber": 122
+      }
+    ]
+  },
+  {
+    "Name": "btnNextRound",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 54,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnNextRound_Click",
+        "LineNumber": 133
+      }
+    ]
+  },
+  {
+    "Name": "lvDrivers",
+    "TypeFullName": "System.Windows.Forms.ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 55,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "SelectedIndexChanged",
+        "HandlerName": "lvDrivers_SelectedIndexChanged",
+        "LineNumber": 151
+      }
+    ]
+  },
+  {
+    "Name": "lvPairings",
+    "TypeFullName": "System.Windows.Forms.ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 58,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnWinner1",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 62,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnWinner1_Click",
+        "LineNumber": 206
+      }
+    ]
+  },
+  {
+    "Name": "btnWinner2",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 63,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnWinner2_Click",
+        "LineNumber": 217
+      }
+    ]
+  },
+  {
+    "Name": "btnEditDriver",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 64,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnEditDriver_Click",
+        "LineNumber": 228
+      }
+    ]
+  },
+  {
+    "Name": "btnSetQualTime",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 65,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnSetQualTime_Click",
+        "LineNumber": 239
+      }
+    ]
+  },
+  {
+    "Name": "lblNext",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 66,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lblDriversHeader",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 67,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "lblDriversHeader_Click",
+        "LineNumber": 261
+      }
+    ]
+  },
+  {
+    "Name": "lblPairingsHeader",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 68,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "lblPairingsHeader_Click",
+        "LineNumber": 271
+      }
+    ]
+  },
+  {
+    "Name": "lblWinnersHeader",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 69,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "lblWinnersHeader_Click",
+        "LineNumber": 282
+      }
+    ]
+  },
+  {
+    "Name": "btnReset",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 70,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnReset_Click",
+        "LineNumber": 293
+      }
+    ]
+  },
+  {
+    "Name": "btnEditResult",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 71,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnSaveAndClose",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 72,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnSaveAndClose_Click",
+        "LineNumber": 314
+      }
+    ]
+  },
+  {
+    "Name": "lblEventTitle",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 73,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "lblEventTitle_Click",
+        "LineNumber": 327
+      }
+    ]
+  },
+  {
+    "Name": "lvWinners",
+    "TypeFullName": "System.Windows.Forms.ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 74,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lblRaceType",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 78,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "cmbRaceType",
+    "TypeFullName": "System.Windows.Forms.ComboBox",
+    "TypeShortName": "ComboBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 79,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "SelectedIndexChanged",
+        "HandlerName": "cmbRaceType_SelectedIndexChanged",
+        "LineNumber": 384
+      }
+    ]
+  },
+  {
+    "Name": "btnGenerateLosersBracket",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 80,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnGenerateLosersBracket_Click",
+        "LineNumber": 396
+      }
+    ]
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "Form1",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "DeclarationLine": 401,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "AddDriverAndCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.Designer.cs",
+    "DeclarationLine": 26,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "AddDriverDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.AddDriverDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverDialog.Designer.cs",
+    "DeclarationLine": 19,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "AddEditQualTimeDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.Designer.cs",
+    "DeclarationLine": 16,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lblEventTitle",
+    "TypeFullName": "Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 31,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lstDrivers",
+    "TypeFullName": "ListBox",
+    "TypeShortName": "ListBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 32,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "SelectedIndexChanged",
+        "HandlerName": "lstDrivers_SelectedIndexChanged",
+        "LineNumber": 55
+      }
+    ]
+  },
+  {
+    "Name": "btnAddDriver",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 33,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnAddDriver_Click",
+        "LineNumber": 61
+      }
+    ]
+  },
+  {
+    "Name": "btnEditDriver",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 34,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnEditDriver_Click",
+        "LineNumber": 67
+      }
+    ]
+  },
+  {
+    "Name": "btnDeleteDriver",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 35,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnDeleteDriver_Click",
+        "LineNumber": 73
+      }
+    ]
+  },
+  {
+    "Name": "lvDriverDetails",
+    "TypeFullName": "ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 36,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnAddCar",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 37,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnAddCar_Click",
+        "LineNumber": 86
+      }
+    ]
+  },
+  {
+    "Name": "btnEditCar",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 38,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnEditCar_Click",
+        "LineNumber": 92
+      }
+    ]
+  },
+  {
+    "Name": "btnDeleteCar",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 39,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnDeleteCar_Click",
+        "LineNumber": 98
+      }
+    ]
+  },
+  {
+    "Name": "btnSaveChanges",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 40,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnSaveChanges_Click",
+        "LineNumber": 117
+      }
+    ]
+  },
+  {
+    "Name": "btnSetQualTime",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 41,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnSetQualTime_Click",
+        "LineNumber": 104
+      }
+    ]
+  },
+  {
+    "Name": "btnDriverStats",
+    "TypeFullName": "Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 42,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnDriverStats_Click",
+        "LineNumber": 111
+      }
+    ]
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverManagerForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "DeclarationLine": 134,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lblHeader",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverStatsForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "DeclarationLine": 19,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lblSummary",
+    "TypeFullName": "System.Windows.Forms.Label",
+    "TypeShortName": "Label",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverStatsForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "DeclarationLine": 20,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lvMatches",
+    "TypeFullName": "System.Windows.Forms.ListView",
+    "TypeShortName": "ListView",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverStatsForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "DeclarationLine": 21,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnClose",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverStatsForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "DeclarationLine": 22,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnClose_Click",
+        "LineNumber": 70
+      }
+    ]
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "DriverStatsForm",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "DeclarationLine": 75,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "EditDriverDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.EditDriverDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.Designer.cs",
+    "DeclarationLine": 27,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "AddCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.AddCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.Designer.cs",
+    "DeclarationLine": 35,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "lstCars",
+    "TypeFullName": "System.Windows.Forms.ListBox",
+    "TypeShortName": "ListBox",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "SelectCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs",
+    "DeclarationLine": 18,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "btnOK",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "SelectCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs",
+    "DeclarationLine": 19,
+    "ParentName": null,
+    "Events": [
+      {
+        "EventName": "Click",
+        "HandlerName": "btnOK_Click",
+        "LineNumber": 36
+      }
+    ]
+  },
+  {
+    "Name": "btnCancel",
+    "TypeFullName": "System.Windows.Forms.Button",
+    "TypeShortName": "Button",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "SelectCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs",
+    "DeclarationLine": 20,
+    "ParentName": null,
+    "Events": []
+  },
+  {
+    "Name": "ClientSize",
+    "TypeFullName": "System.Drawing.Size",
+    "TypeShortName": "Size",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "DeclaringType": "SelectCarDialog",
+    "DeclaringFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs",
+    "DeclarationLine": 47,
+    "ParentName": null,
+    "Events": []
+  }
+]
