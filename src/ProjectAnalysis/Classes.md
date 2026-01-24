@@ -1,6 +1,6 @@
 # Class List
 
-Total classes: 116
+Total classes: 118
 
 - RCDragManagerProd.Program  (RCDragManagerProd\Program.cs)
 - RCDragManagerProd.ViewModels.MatchResultSave  (RCDragManagerProd\ViewModels\MatchResultSave.cs)
@@ -14,6 +14,8 @@ Total classes: 116
 - RCDragManagerProd.UI.Forms.LoadSessionForm  (RCDragManagerProd\UI\Forms\Session\LoadSessionForm.Designer.cs)
 - RCDragManagerProd.UI.Forms.SessionSetupForm  (RCDragManagerProd\UI\Forms\Session\SessionSetupForm.cs)
 - RCDragManagerProd.UI.Forms.SessionSetupForm  (RCDragManagerProd\UI\Forms\Session\SessionSetupForm.Designer.cs)
+- RCDragManagerProd.UI.Forms.SessionSetupForm  (RCDragManagerProd\UI\Forms\Session\SessionSetupForm.Events.cs)
+- RCDragManagerProd.UI.Forms.SessionSetupForm  (RCDragManagerProd\UI\Forms\Session\SessionSetupForm.UI.cs)
 - RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm  (RCDragManagerProd\UI\Forms\Results\BuybackDriverSelectionForm.cs)
 - RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm  (RCDragManagerProd\UI\Forms\Results\BuybackDriverSelectionForm.Designer.cs)
 - RCDragManagerProd.UI.Forms.EditWinnerDialog  (RCDragManagerProd\UI\Forms\Results\EditWinnerDialog.cs)

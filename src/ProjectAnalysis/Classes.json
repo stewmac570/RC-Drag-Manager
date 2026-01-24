@@ -72,6 +72,18 @@
     "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
   },
   {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.Events.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.UI.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
     "Name": "BuybackDriverSelectionForm",
     "Namespace": "RCDragManagerProd.UI.Forms",
     "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.cs",

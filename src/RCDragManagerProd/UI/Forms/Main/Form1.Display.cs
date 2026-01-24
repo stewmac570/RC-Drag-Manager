@@ -104,6 +104,19 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
+        private string FormatMatchForNextLaneAdjusted(EngineMatch m)
+        {
+            if (m == null) return "M?: BYE vs BYE";
+
+            string left;
+            string right;
+
+            // This must exist on RaceController as internal/public
+            _controller.GetLaneAdjustedNames(m, out left, out right);
+
+            return "M" + m.MatchId + ": " + left + " vs " + right;
+        }
+
         private void OnNextMatchReady(PairingRow row)
         {
             try
@@ -115,20 +128,55 @@ namespace RCDragManagerProd.UI.Forms
                     lblNext.AutoSize = false;
                     lblNext.TextAlign = ContentAlignment.MiddleCenter;
                     lblNext.Text = "No match ready";
+
+                    btnWinner1.Text = "—";
+                    btnWinner2.Text = "—";
+                    btnWinner1.Tag = null;
+                    btnWinner2.Tag = null;
+
                     btnWinner1.Enabled = false;
                     btnWinner2.Enabled = false;
+
                     Logger.Log("[UI][NEXT] No current match.");
                     return;
                 }
 
-                btnWinner1.Text = string.IsNullOrWhiteSpace(row.Driver1) ? "BYE" : row.Driver1;
-                btnWinner2.Text = string.IsNullOrWhiteSpace(row.Driver2) ? "BYE"
-                    : row.Driver2;
+                // ALWAYS take the truth from the EngineMatch + lane adjustment
+                var current = _controller.GetMatch(row.MatchId);
+
+                string currentLeft;
+                string currentRight;
+
+                if (current != null)
+                {
+                    _controller.GetLaneAdjustedNames(current, out currentLeft, out currentRight);
+                }
+                else
+                {
+                    // fallback: use the row as-is
+                    currentLeft = string.IsNullOrWhiteSpace(row.Driver1) ? "BYE" : row.Driver1;
+                    currentRight = string.IsNullOrWhiteSpace(row.Driver2) ? "BYE" : row.Driver2;
+                }
+
+                btnWinner1.Text = currentLeft;
+                btnWinner2.Text = currentRight;
+
                 btnWinner1.Tag = row.MatchId;
                 btnWinner2.Tag = row.MatchId;
 
-                btnWinner1.Enabled = !IsByeName(btnWinner1.Text);
-                btnWinner2.Enabled = !IsByeName(btnWinner2.Text);
+                // Grey out / disable BYE buttons (so clicking does nothing because you can't click it)
+                bool leftIsBye;
+                bool rightIsBye;
+
+                leftIsBye = IsByeName(btnWinner1.Text);
+                rightIsBye = IsByeName(btnWinner2.Text);
+
+                ApplyByeButtonStyle(btnWinner1, leftIsBye);
+                ApplyByeButtonStyle(btnWinner2, rightIsBye);
+
+                Logger.Log("[UI][NEXT] Buttons: leftIsBye=" + leftIsBye + " rightIsBye=" + rightIsBye +
+                           " leftEnabled=" + btnWinner1.Enabled + " rightEnabled=" + btnWinner2.Enabled);
+
 
                 var upcoming = _controller.PeekUpcomingMatches(3)
                                           .Where(m => m.MatchId != row.MatchId)
@@ -141,26 +189,51 @@ namespace RCDragManagerProd.UI.Forms
                 string text;
                 if (upcoming.Count == 0)
                 {
-                    text = $"{btnWinner1.Text} vs {btnWinner2.Text}";
+                    text = currentLeft + " vs " + currentRight;
                 }
                 else if (upcoming.Count == 1)
                 {
-                    text = $"On Deck — {FormatMatchForNext(upcoming[0])}";
+                    text = "On Deck — " + FormatMatchForNextLaneAdjusted(upcoming[0]);
                 }
                 else
                 {
-                    text = $"On Deck — {FormatMatchForNext(upcoming[0])}" +
+                    text = "On Deck — " + FormatMatchForNextLaneAdjusted(upcoming[0]) +
                            Environment.NewLine +
-                           $"In The Hole — {FormatMatchForNext(upcoming[1])}";
+                           "In The Hole — " + FormatMatchForNextLaneAdjusted(upcoming[1]);
                 }
 
                 lblNext.Text = text;
 
-                Logger.Log($"[UI][NEXT] Current=M{row.MatchId}:{btnWinner1.Text} vs {btnWinner2.Text} | Label='{text.Replace(Environment.NewLine, " / ")}'");
+                Logger.Log(
+                    "[UI][NEXT] Current=M" + row.MatchId + ":" + currentLeft + " vs " + currentRight +
+                    " | Label='" + text.Replace(Environment.NewLine, " / ") + "'"
+                );
             }
             catch (Exception ex)
             {
-                Logger.Log($"[UI] OnNextMatchReady() exception: {ex}");
+                Logger.Log("[UI] OnNextMatchReady() exception: " + ex);
+            }
+        }
+
+
+        private void ApplyByeButtonStyle(Button btn, bool isBye)
+        {
+            if (btn == null) return;
+
+            if (isBye)
+            {
+                btn.Enabled = false;
+                btn.ForeColor = SystemColors.GrayText;
+                btn.BackColor = SystemColors.Control;
+                btn.FlatStyle = FlatStyle.Standard;
+                btn.Text = "BYE";
+            }
+            else
+            {
+                btn.Enabled = true;
+                btn.ForeColor = SystemColors.ControlText;
+                btn.UseVisualStyleBackColor = true;
+                btn.FlatStyle = FlatStyle.Standard;
             }
         }
 
@@ -217,7 +290,6 @@ namespace RCDragManagerProd.UI.Forms
                     item.SubItems.Add(w.Winner ?? string.Empty);
                     item.Tag = w.MatchId;
                     lvWinners.Items.Add(item);
-
 
                     Logger.Log($"[UI:Winners] Row added: {item.Text}  {w.Loser ?? ""} → {w.Winner ?? ""}  [Round={w.RoundLabel}, MatchId={w.MatchId}]");
                 }

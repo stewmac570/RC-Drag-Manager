@@ -1,0 +1,1964 @@
+[
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "SessionSetupForm",
+    "Kind": "MethodParameter",
+    "LineNumber": 35
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "BuybackDriverSelectionForm",
+    "Kind": "MethodParameter",
+    "LineNumber": 13
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "EditWinnerDialog",
+    "Kind": "MethodParameter",
+    "LineNumber": 12
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Controllers.RaceController",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FromMemberName": "Form1",
+    "Kind": "MethodParameter",
+    "LineNumber": 23
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.ViewModels.PairingRow",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\PairingRow.cs",
+    "FromMemberName": "RedrawFullBracket",
+    "Kind": "MethodParameter",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.ViewModels.PairingRow",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\PairingRow.cs",
+    "FromMemberName": "OnNextMatchReady",
+    "Kind": "MethodParameter",
+    "LineNumber": 107
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.ViewModels.WinnerRow",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\WinnerRow.cs",
+    "FromMemberName": "OnWinnersUpdated",
+    "Kind": "MethodParameter",
+    "LineNumber": 167
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FromMemberName": "OnTournamentCompleted",
+    "Kind": "MethodParameter",
+    "LineNumber": 63
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "FormatMatchForNext",
+    "Kind": "MethodParameter",
+    "LineNumber": 103
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "ShowWinnerPicker",
+    "Kind": "MethodParameter",
+    "LineNumber": 60
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "UpdateDriverStats",
+    "Kind": "MethodParameter",
+    "LineNumber": 117
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "BumpEventWon",
+    "Kind": "MethodParameter",
+    "LineNumber": 156
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "DriverManagerForm",
+    "Kind": "MethodParameter",
+    "LineNumber": 22
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "DriverStatsForm",
+    "Kind": "MethodParameter",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.AddCarDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "AddCarDialog",
+    "Kind": "MethodParameter",
+    "LineNumber": 16
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "SelectCarDialog",
+    "Kind": "MethodParameter",
+    "LineNumber": 13
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "LoadDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 24
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 168
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RoundRobinMatch",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs",
+    "FromMemberName": "GetResults",
+    "Kind": "MethodReturn",
+    "LineNumber": 191
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetAllDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 231
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetTopN",
+    "Kind": "MethodReturn",
+    "LineNumber": 236
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetTopRankedDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 245
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "RotateRightKeepingPivot",
+    "Kind": "MethodParameter",
+    "LineNumber": 258
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SafeName",
+    "Kind": "MethodParameter",
+    "LineNumber": 292
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardDebug.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "FromMemberName": "BuildScorecard",
+    "Kind": "MethodParameter",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardDebug.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "BuildScorecard",
+    "Kind": "MethodParameter",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.Line",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "FromMemberName": "Log",
+    "Kind": "MethodParameter",
+    "LineNumber": 32
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.Line",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "Log",
+    "Kind": "MethodParameter",
+    "LineNumber": 32
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.Line",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "HeadToHead",
+    "Kind": "MethodParameter",
+    "LineNumber": 229
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.Line",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "HeadToHead",
+    "Kind": "MethodParameter",
+    "LineNumber": 229
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.CarRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "AddCar",
+    "Kind": "MethodParameter",
+    "LineNumber": 51
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.CarRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "GetCarsByDriver",
+    "Kind": "MethodReturn",
+    "LineNumber": 72
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.CarRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "UpdateCar",
+    "Kind": "MethodParameter",
+    "LineNumber": 101
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetAllDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 51
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetDriverById",
+    "Kind": "MethodReturn",
+    "LineNumber": 84
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "AddDriver",
+    "Kind": "MethodParameter",
+    "LineNumber": 118
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "UpdateDriver",
+    "Kind": "MethodParameter",
+    "LineNumber": 154
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "AddCar",
+    "Kind": "MethodParameter",
+    "LineNumber": 225
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "GetCarsByDriverId",
+    "Kind": "MethodReturn",
+    "LineNumber": 252
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "ToFullName": "RCDragManagerProd.ViewModels.RaceSessionSummary",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\RaceSessionSummary.cs",
+    "FromMemberName": "GetAllSessions",
+    "Kind": "MethodReturn",
+    "LineNumber": 96
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "LoadSession",
+    "Kind": "MethodReturn",
+    "LineNumber": 129
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "GenerateFirstRound",
+    "Kind": "MethodReturn",
+    "LineNumber": 25
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GenerateFirstRound",
+    "Kind": "MethodParameter",
+    "LineNumber": 25
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "LoadMatches",
+    "Kind": "MethodParameter",
+    "LineNumber": 27
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 35
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetLoserFromMatch",
+    "Kind": "MethodReturn",
+    "LineNumber": 52
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetLoserFromMatch",
+    "Kind": "MethodParameter",
+    "LineNumber": 52
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetLoser",
+    "Kind": "MethodReturn",
+    "LineNumber": 66
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "ResolveFrom",
+    "Kind": "MethodReturn",
+    "LineNumber": 101
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "LoadDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 115
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Initialize",
+    "Kind": "MethodParameter",
+    "LineNumber": 23
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 50
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "ResolveDriver",
+    "Kind": "MethodReturn",
+    "LineNumber": 83
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetAllDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 99
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "LoadDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "GetMatches",
+    "Kind": "MethodReturn",
+    "LineNumber": 34
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 58
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "IsBye",
+    "Kind": "MethodParameter",
+    "LineNumber": 86
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "MapToDto",
+    "Kind": "MethodReturn",
+    "LineNumber": 89
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "MapToDto",
+    "Kind": "MethodParameter",
+    "LineNumber": 89
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "FromMemberName": "RandomEngineAdapter",
+    "Kind": "MethodParameter",
+    "LineNumber": 24
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "LoadDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 31
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "GetMatches",
+    "Kind": "MethodReturn",
+    "LineNumber": 55
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 78
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "InjectMatches",
+    "Kind": "MethodParameter",
+    "LineNumber": 88
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetWinner",
+    "Kind": "MethodReturn",
+    "LineNumber": 96
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "ChooseByeRecipientFair",
+    "Kind": "MethodReturn",
+    "LineNumber": 240
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "ChooseByeRecipientFair",
+    "Kind": "MethodParameter",
+    "LineNumber": 240
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "NextMatchId",
+    "Kind": "MethodParameter",
+    "LineNumber": 282
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "IsBye",
+    "Kind": "MethodParameter",
+    "LineNumber": 288
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "LoadDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "GetMatches",
+    "Kind": "MethodReturn",
+    "LineNumber": 36
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 61
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetTopRankedDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 86
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "IsBye",
+    "Kind": "MethodParameter",
+    "LineNumber": 94
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.MatchResult",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetWinner",
+    "Kind": "MethodParameter",
+    "LineNumber": 13
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.MatchResult",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetWinner",
+    "Kind": "MethodReturn",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.MatchResult",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetLoser",
+    "Kind": "MethodReturn",
+    "LineNumber": 24
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.MatchResult",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "IsTournamentComplete",
+    "Kind": "MethodParameter",
+    "LineNumber": 51
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder3",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder4",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder5",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder6",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder7",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder8",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder9",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder10",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder11",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder12",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder13",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder14",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder15",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder16",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder17",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder18",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder19",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder20",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder21",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder22",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder23",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.ProLadder",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "GetLadder24",
+    "Kind": "MethodReturn",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "RaceController",
+    "Kind": "MethodParameter",
+    "LineNumber": 80
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "FromMemberName": "TryLogCompletedRound",
+    "Kind": "MethodParameter",
+    "LineNumber": 26
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GetEligibleBuybackDrivers",
+    "Kind": "MethodReturn",
+    "LineNumber": 73
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GenerateBracket",
+    "Kind": "MethodParameter",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "GetMatch",
+    "Kind": "MethodReturn",
+    "LineNumber": 320
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "GenerateLosersBracket",
+    "Kind": "MethodParameter",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.ViewModels.PairingRow",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\PairingRow.cs",
+    "FromMemberName": "BuildCurrentBracketRows",
+    "Kind": "MethodReturn",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "AppendFrom",
+    "Kind": "MethodParameter",
+    "LineNumber": 30
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "PeekUpcomingMatches",
+    "Kind": "MethodReturn",
+    "LineNumber": 101
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SetBuybackDrivers",
+    "Kind": "MethodParameter",
+    "LineNumber": 42
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Program",
+    "ToFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "FromFilePath": "RCDragManagerProd\\Program.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 73
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "_driverRepo",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 13
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "_sessionRepo",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 27
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 28
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 39
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.Controllers.RaceController",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 40
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 41
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 48
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 67
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 83
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.SettingsForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Common\\SettingsForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 89
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "_sessionRepository",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 13
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "ToFullName": "RCDragManagerProd.ViewModels.RaceSessionSummary",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\RaceSessionSummary.cs",
+    "FromMemberName": "_sessions",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "LoadedSession",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 16
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 27
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "repository",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "RaceSessionResult",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 33
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 76
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SelectedDrivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 11
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "SelectedWinner",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 10
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "currentSession",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 18
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "sessionRepository",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Controllers.RaceController",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FromMemberName": "_controller",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 83
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.UI.Forms.EditDriverDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 195
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 213
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.Form1",
+    "ToFullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 373
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "repository",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 10
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "selectedDriver",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 11
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 16
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 30
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.EditDriverDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 71
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.AddCarDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 109
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 224
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "ToFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "ToFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 255
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "driver",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "ToFullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.cs",
+    "ToFilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 33
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.AddCarDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "NewCar",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 9
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "cars",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 10
+  },
+  {
+    "FromFullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "SelectedCar",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 11
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "results",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 12
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 12
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "ToFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinRanker",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 247
+  },
+  {
+    "FromFullName": "RoundRobinMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Driver1",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 7
+  },
+  {
+    "FromFullName": "RoundRobinMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Driver2",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 8
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinRanker",
+    "ToFullName": "RCDragManagerProd.RoundRobinMode.Aggregate",
+    "FromFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "ToFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 64
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "driver",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 87
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "shuffled",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 28
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "matches",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 30
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "byeDriver",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 52
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "p1",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 112
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "p2",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 120
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Seed1",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Seed2",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 15
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "bracketMatches",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "results",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 21
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 21
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 22
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "loser",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 37
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "d1",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 90
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "d2",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 91
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "final",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 109
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Driver1",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 42
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Driver2",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 43
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "allDrivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 16
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.LadderMatch",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FromMemberName": "bracketMatches",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "Results",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 21
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 21
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "FromMemberName": "_engine",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 14
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "_drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 15
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RaceEngineFactory",
+    "ToFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RaceEngineFactory.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 27
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RaceEngineFactory",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RaceEngineFactory.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 31
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RaceEngineFactory",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RaceEngineFactory.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 37
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "FromMemberName": "_engine",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 22
+  },
+  {
+    "FromFullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "ToFullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "FromFilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "ToFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "FromMemberName": "_engine",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 15
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.Driver",
+    "ToFullName": "RCDragManagerProd.Domain.Car",
+    "FromFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FromMemberName": "Cars",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 48
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSessionDriverEntry",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "DriverEntries",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 17
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.ViewModels.MatchResultSave",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\MatchResultSave.cs",
+    "FromMemberName": "SavedResults",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResultSave",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "SavedResults",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 19
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RoundRobinMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs",
+    "FromMemberName": "RoundRobinMatches",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 21
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FromMemberName": "Matches",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 22
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "BuybackDrivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 23
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "TopDriversSnapshot",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 24
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Domain.RaceSession",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 25
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "_session",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 20
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "_drivers",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 26
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.ViewModels.WinnerRow",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\ViewModels\\WinnerRow.cs",
+    "FromMemberName": "_winners",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 28
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.RaceSession",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FromMemberName": "Session",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 30
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "_matchResult",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 31
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.MatchResult",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FromMemberName": "_results",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 32
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "_buybackChampionOverride",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 39
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "_rrTop3",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 45
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "Winner",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 65
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "RunnerUp",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 66
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "ToFullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FromMemberName": "_rrMatchesSnapshot",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 76
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "wildcard",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 201
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "runnerUp",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 274
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.Domain.Driver",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FromMemberName": "lbChampion",
+    "Kind": "FieldOrPropertyType",
+    "LineNumber": 29
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 61
+  },
+  {
+    "FromFullName": "RCDragManagerProd.Controllers.RaceController",
+    "ToFullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "FromFilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "ToFilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "FromMemberName": "\u003Cnew\u003E",
+    "Kind": "NewExpression",
+    "LineNumber": 71
+  }
+]

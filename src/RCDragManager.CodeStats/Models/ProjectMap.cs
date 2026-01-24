@@ -17,5 +17,7 @@ namespace RCDragManager.CodeStats.Models
         public List<DependencyInfo> Dependencies { get; set; } = new List<DependencyInfo>();
 
         public List<DependencyInfo> Cycles { get; set; } = new List<DependencyInfo>();
+
+        public List<ClassRelationInfo> ClassRelations { get; set; } = new List<ClassRelationInfo>();
     }
 }

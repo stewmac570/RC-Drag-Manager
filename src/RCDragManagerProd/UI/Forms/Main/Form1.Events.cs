@@ -249,8 +249,34 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = false;
         }
 
-        private void btnWinner1_Click(object sender, EventArgs e) => HandleWinnerClick(true, btnWinner1.Tag);
-        private void btnWinner2_Click(object sender, EventArgs e) => HandleWinnerClick(false, btnWinner2.Tag);
+        private void btnWinner1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Log("[UI][CLICK] Winner1 clicked. Text='" + (btnWinner1.Text ?? "") + "' Tag=" + (btnWinner1.Tag != null ? btnWinner1.Tag.ToString() : "null") + " Enabled=" + btnWinner1.Enabled);
+                HandleWinnerClick(true, btnWinner1.Tag);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[UI][CLICK][ERROR] btnWinner1_Click failed: " + ex);
+                MessageBox.Show("Winner1 click failed. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnWinner2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Log("[UI][CLICK] Winner2 clicked. Text='" + (btnWinner2.Text ?? "") + "' Tag=" + (btnWinner2.Tag != null ? btnWinner2.Tag.ToString() : "null") + " Enabled=" + btnWinner2.Enabled);
+                HandleWinnerClick(false, btnWinner2.Tag);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[UI][CLICK][ERROR] btnWinner2_Click failed: " + ex);
+                MessageBox.Show("Winner2 click failed. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         private void btnNextRound_Click(object sender, EventArgs e)
         {

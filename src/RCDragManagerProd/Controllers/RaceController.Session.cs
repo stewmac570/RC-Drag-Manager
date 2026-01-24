@@ -16,6 +16,8 @@ namespace RCDragManagerProd.Controllers
 {
     public partial class RaceController
     {
+        private readonly LaneFairnessManager laneFairness = new LaneFairnessManager();
+
         public void Reset()
         {
             _engine = null;
@@ -28,6 +30,8 @@ namespace RCDragManagerProd.Controllers
             _revealedRounds.Clear();
             _winners.Clear();
 
+            laneFairness.Reset();
+
             if (_session != null) _session.RaceType = string.Empty;
 
             BracketRedrawn?.Invoke(Array.Empty<PairingRow>());
@@ -38,6 +42,7 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log("[RESET] Controller cleared — ready for new class.");
         }
+
 
         public void SetBuybackDrivers(List<Driver> drivers)
         {

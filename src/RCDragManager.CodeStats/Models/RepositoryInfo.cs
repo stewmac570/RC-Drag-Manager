@@ -51,5 +51,25 @@ namespace RCDragManager.CodeStats.Models
         /// Short single-line snippet of the SQL content.
         /// </summary>
         public string Snippet { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Command type, e.g. SELECT, INSERT, UPDATE, DELETE.
+        /// </summary>
+        public string? CommandType { get; set; }
+
+        /// <summary>
+        /// Tables referenced in the query (FROM, JOIN, INTO).
+        /// </summary>
+        public List<string> Tables { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Columns referenced in the SELECT or INSERT column list.
+        /// </summary>
+        public List<string> Columns { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Parameters like @Id, @SessionId.
+        /// </summary>
+        public List<string> Parameters { get; set; } = new List<string>();
     }
 }

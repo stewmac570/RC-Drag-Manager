@@ -102,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\LaneFairnessManager.cs" />
     <Compile Include="Controllers\RaceController.Logging.cs" />
     <Compile Include="Controllers\RaceController.Persistence.cs" />
     <Compile Include="Controllers\RaceController.Results.cs" />
@@ -252,6 +253,12 @@
     <Compile Include="Domain\RaceSession.cs" />
     <Compile Include="Repositories\RaceSessionRepository.cs" />
     <Compile Include="UI\Forms\Common\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\SessionSetupForm.Events.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\SessionSetupForm.UI.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ViewModels\RaceSessionSummary.cs" />

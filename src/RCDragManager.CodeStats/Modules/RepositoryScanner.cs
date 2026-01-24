@@ -21,11 +21,9 @@ namespace RCDragManager.CodeStats.Modules
                 "RCDragManager.CodeStats"
             };
 
-        // namespace RCDragManagerProd.Repositories
         private static readonly Regex NamespaceRegex =
             new Regex(@"^\s*namespace\s+([A-Za-z0-9_.]+)", RegexOptions.Compiled);
 
-        // class RaceSessionRepository : ISomething
         private static readonly Regex ClassRegex =
             new Regex(
                 @"^\s*(public|internal|protected|private|sealed|abstract|static|partial|\s)*\s*class\s+" +
@@ -33,19 +31,33 @@ namespace RCDragManager.CodeStats.Modules
                 @"(\s*:\s*(?<base>[A-Za-z0-9_.<>,\s]+))?",
                 RegexOptions.Compiled);
 
-        // Method signature (same pattern used earlier, simplified)
         private static readonly Regex MethodRegex =
             new Regex(
                 @"^\s*(public|private|protected|internal|static|virtual|override|abstract|sealed|async|extern|partial|\s)+\s+" +
-                @"([A-Za-z0-9_<>,\[\]\?]+)\s+" +      // return type
+                @"([A-Za-z0-9_<>,\[\]\?]+)\s+" +
                 @"(?<name>[A-Za-z0-9_]+)\s*\(",
                 RegexOptions.Compiled);
 
-        // Very rough SQL string finder: looks for string literals with SQL keywords
+        // Find SQL-ish strings
         private static readonly Regex SqlStringRegex =
             new Regex(
                 "\"([^\"]*(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE)[^\"]*)\"",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Tables after FROM / JOIN / INTO
+        private static readonly Regex TableRegex =
+            new Regex(@"\b(FROM|JOIN|INTO)\s+([A-Za-z0-9_\.\[\]]+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // SELECT column list (before FROM)
+        private static readonly Regex SelectColumnsRegex =
+            new Regex(@"SELECT\s+(?<cols>.+?)\s+FROM",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Parameters like @Id
+        private static readonly Regex ParameterRegex =
+            new Regex(@"@[A-Za-z0-9_]+",
+                RegexOptions.Compiled);
 
         public static List<RepositoryInfo> Scan(string root)
         {
@@ -60,18 +72,16 @@ namespace RCDragManager.CodeStats.Modules
                 ScanFile(root, file, repositories);
             }
 
-            Console.WriteLine($"[SCAN]   Files scanned       : {fileCount}");
-            Console.WriteLine($"[SCAN]   Repository classes  : {repositories.Count}");
+            Console.WriteLine("[SCAN]   Files scanned       : " + fileCount);
+            Console.WriteLine("[SCAN]   Repository classes  : " + repositories.Count);
 
             WriteJson(root, repositories);
             WriteMarkdown(root, repositories);
+            WriteSqlMap(root, repositories);
 
             return repositories;
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // File enumeration – all *.cs
-        // ─────────────────────────────────────────────────────────────
         private static IEnumerable<string> EnumerateCsFiles(string root)
         {
             Stack<string> pending = new Stack<string>();
@@ -121,9 +131,6 @@ namespace RCDragManager.CodeStats.Modules
             }
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // Per-file parsing
-        // ─────────────────────────────────────────────────────────────
         private static void ScanFile(string root, string filePath, List<RepositoryInfo> repositories)
         {
             string[] lines;
@@ -143,9 +150,6 @@ namespace RCDragManager.CodeStats.Modules
             RepositoryInfo? currentRepo = null;
             string? currentMethodName = null;
 
-            // We treat a file as potentially repo-related if:
-            // - it has namespace with ".Repositories" OR
-            // - it has a class ending in "Repository"
             bool namespaceLooksRepo = false;
 
             for (int i = 0; i < lines.Length; i++)
@@ -198,7 +202,6 @@ namespace RCDragManager.CodeStats.Modules
                     continue;
                 }
 
-                // track methods to attach SQL to methods
                 Match methodMatch = MethodRegex.Match(line);
                 if (methodMatch.Success)
                 {
@@ -210,7 +213,6 @@ namespace RCDragManager.CodeStats.Modules
                     continue;
                 }
 
-                // SQL strings inside repository class scope
                 Match sqlMatch = SqlStringRegex.Match(line);
                 if (!sqlMatch.Success)
                 {
@@ -218,8 +220,6 @@ namespace RCDragManager.CodeStats.Modules
                 }
 
                 string snippet = sqlMatch.Groups[1].Value.Trim();
-
-                // compress whitespace for brevity
                 snippet = CollapseWhitespace(snippet);
 
                 RepositorySqlUsage usage = new RepositorySqlUsage();
@@ -227,7 +227,87 @@ namespace RCDragManager.CodeStats.Modules
                 usage.LineNumber = i + 1;
                 usage.Snippet = snippet;
 
+                AnalyzeSql(snippet, usage);
+
                 currentRepo.SqlUsages.Add(usage);
+            }
+        }
+
+        private static void AnalyzeSql(string snippet, RepositorySqlUsage usage)
+        {
+            if (string.IsNullOrWhiteSpace(snippet))
+            {
+                return;
+            }
+
+            string upper = snippet.ToUpperInvariant();
+
+            if (upper.Contains("SELECT"))
+            {
+                usage.CommandType = "SELECT";
+            }
+            else if (upper.Contains("INSERT"))
+            {
+                usage.CommandType = "INSERT";
+            }
+            else if (upper.Contains("UPDATE"))
+            {
+                usage.CommandType = "UPDATE";
+            }
+            else if (upper.Contains("DELETE"))
+            {
+                usage.CommandType = "DELETE";
+            }
+
+            MatchCollection tableMatches = TableRegex.Matches(snippet);
+
+            for (int i = 0; i < tableMatches.Count; i++)
+            {
+                string table = tableMatches[i].Groups[2].Value.Trim();
+
+                if (!usage.Tables.Contains(table))
+                {
+                    usage.Tables.Add(table);
+                }
+            }
+
+            Match selectMatch = SelectColumnsRegex.Match(snippet);
+            if (selectMatch.Success)
+            {
+                string cols = selectMatch.Groups["cols"].Value;
+                string[] parts = cols.Split(',');
+
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    string col = parts[i].Trim();
+
+                    if (col.StartsWith("DISTINCT ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        col = col.Substring("DISTINCT ".Length).Trim();
+                    }
+
+                    if (col.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (!usage.Columns.Contains(col))
+                    {
+                        usage.Columns.Add(col);
+                    }
+                }
+            }
+
+            MatchCollection paramMatches = ParameterRegex.Matches(snippet);
+
+            for (int i = 0; i < paramMatches.Count; i++)
+            {
+                string param = paramMatches[i].Value;
+
+                if (!usage.Parameters.Contains(param))
+                {
+                    usage.Parameters.Add(param);
+                }
             }
         }
 
@@ -263,9 +343,6 @@ namespace RCDragManager.CodeStats.Modules
             return sb.ToString().Trim();
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // Outputs: JSON + Markdown
-        // ─────────────────────────────────────────────────────────────
         private static void WriteJson(string root, List<RepositoryInfo> repositories)
         {
             string dir = Path.Combine(root, "ProjectAnalysis");
@@ -290,11 +367,13 @@ namespace RCDragManager.CodeStats.Modules
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("# Repositories and SQL Usage");
             sb.AppendLine();
-            sb.AppendLine($"Total repositories: {repositories.Count}");
+            sb.AppendLine("Total repositories: " + repositories.Count);
             sb.AppendLine();
 
-            foreach (RepositoryInfo repo in repositories)
+            for (int i = 0; i < repositories.Count; i++)
             {
+                RepositoryInfo repo = repositories[i];
+
                 string heading = repo.FullName ?? repo.Name;
                 sb.AppendLine("## " + heading);
                 sb.AppendLine();
@@ -309,8 +388,10 @@ namespace RCDragManager.CodeStats.Modules
                 sb.AppendLine("- SQL usages: " + repo.SqlUsages.Count);
                 sb.AppendLine();
 
-                foreach (RepositorySqlUsage usage in repo.SqlUsages)
+                for (int j = 0; j < repo.SqlUsages.Count; j++)
                 {
+                    RepositorySqlUsage usage = repo.SqlUsages[j];
+
                     sb.Append("- [");
                     sb.Append(repo.FilePath);
                     sb.Append(":");
@@ -323,15 +404,53 @@ namespace RCDragManager.CodeStats.Modules
                         sb.Append(" : ");
                     }
 
+                    if (!string.IsNullOrWhiteSpace(usage.CommandType))
+                    {
+                        sb.Append(usage.CommandType);
+                        sb.Append(" ");
+                    }
+
                     sb.Append("`");
                     sb.Append(usage.Snippet);
                     sb.AppendLine("`");
+
+                    if (usage.Tables.Count > 0)
+                    {
+                        sb.Append("  - Tables: ");
+                        sb.AppendLine(string.Join(", ", usage.Tables));
+                    }
+
+                    if (usage.Columns.Count > 0)
+                    {
+                        sb.Append("  - Columns: ");
+                        sb.AppendLine(string.Join(", ", usage.Columns));
+                    }
+
+                    if (usage.Parameters.Count > 0)
+                    {
+                        sb.Append("  - Params: ");
+                        sb.AppendLine(string.Join(", ", usage.Parameters));
+                    }
                 }
 
                 sb.AppendLine();
             }
 
             File.WriteAllText(path, sb.ToString());
+        }
+
+        private static void WriteSqlMap(string root, List<RepositoryInfo> repositories)
+        {
+            string dir = Path.Combine(root, "ProjectAnalysis");
+            Directory.CreateDirectory(dir);
+
+            string path = Path.Combine(dir, "SqlMap.json");
+
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+
+            string json = JsonSerializer.Serialize(repositories, options);
+            File.WriteAllText(path, json);
         }
     }
 }

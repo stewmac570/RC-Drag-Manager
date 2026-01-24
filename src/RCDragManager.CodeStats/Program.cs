@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
-using RCDragManager.CodeStats.Modules;
+using System.Collections.Generic;
+using System.Diagnostics;
 using RCDragManager.CodeStats.Models;
+using RCDragManager.CodeStats.Modules;
 
 namespace RCDragManager.CodeStats
 {
@@ -13,11 +15,18 @@ namespace RCDragManager.CodeStats
             Console.WriteLine(" RC Drag Manager - CodeStats Analyzer");
             Console.WriteLine("--------------------------------------------------");
 
-            string root = args.Length > 0
-                ? args[0]
-                : Directory.GetCurrentDirectory();
+            string root;
 
-            Console.WriteLine($"[LOG] Using root directory: {root}");
+            if (args.Length > 0)
+            {
+                root = args[0];
+            }
+            else
+            {
+                root = Directory.GetCurrentDirectory();
+            }
+
+            Console.WriteLine("[LOG] Using root directory: " + root);
 
             if (!Directory.Exists(root))
             {
@@ -25,32 +34,37 @@ namespace RCDragManager.CodeStats
                 return;
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Phase orchestration
-            // ─────────────────────────────────────────────────────────────
-            var classResults = ClassScanner.Scan(root);
-            var methodResults = MethodScanner.Scan(root);
-            var eventResults = EventScanner.Scan(root);
-            var uiResults = UIControlScanner.Scan(root);
-            var repoResults = RepositoryScanner.Scan(root);
-            var dependencyGraph = DependencyGraphAnalyzer.Analyze(classResults, methodResults);
-            var circular = CircularDependencyDetector.Find(dependencyGraph);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            var projectMap = ProjectMapBuilder.Build(
+            List<ClassInfo> classResults = ClassScanner.Scan(root);
+            List<MethodInfo> methodResults = MethodScanner.Scan(root);
+            List<EventInfo> eventResults = EventScanner.Scan(root);
+            List<UIControlInfo> uiResults = UIControlScanner.Scan(root);
+            List<RepositoryInfo> repoResults = RepositoryScanner.Scan(root);
+            List<DependencyInfo> dependencyGraph = DependencyGraphAnalyzer.Analyze(root, classResults, methodResults);
+            List<DependencyInfo> circular = CircularDependencyDetector.Find(dependencyGraph);
+
+            List<ClassRelationInfo> classRelations = ClassRelationAnalyzer.Analyze(root, classResults, dependencyGraph);
+            UIEventMapExporter.Export(root, uiResults, eventResults);
+
+            ProjectMap projectMap = ProjectMapBuilder.Build(
                 classResults,
                 methodResults,
                 eventResults,
                 uiResults,
                 repoResults,
                 dependencyGraph,
-                circular
+                circular,
+                classRelations
             );
 
             JsonExporter.Export(projectMap, root);
             MarkdownExporter.Export(projectMap, root);
 
+            stopwatch.Stop();
             Console.WriteLine("--------------------------------------------------");
-            Console.WriteLine(" CodeStats Complete");
+            Console.WriteLine(" CodeStats Complete in " + stopwatch.Elapsed.TotalSeconds.ToString("0.000") + "s");
             Console.WriteLine("--------------------------------------------------");
         }
     }

@@ -17,21 +17,59 @@ namespace RCDragManagerProd.Controllers
     public partial class RaceController
     {
         // Called by Form1 to rebuild the ListView each time the bracket changes.
+
+        internal void GetLaneAdjustedNames(EngineMatch m, out string leftName, out string rightName)
+        {
+            leftName = m.Driver1?.Name ?? "BYE";
+            rightName = m.Driver2?.Name ?? "BYE";
+
+            if (m.Driver1 == null || m.Driver2 == null) return;
+
+            int a;
+            int b;
+
+            a = Math.Min(m.Driver1.Id, m.Driver2.Id);
+            b = Math.Max(m.Driver1.Id, m.Driver2.Id);
+
+            string laneKey;
+            laneKey = m.RoundLabel + "|M" + m.MatchId + "|" + a + "-" + b;
+
+            bool swap;
+            swap = laneFairness.ShouldSwap(laneKey, m.Driver1.Id, m.Driver2.Id);
+
+            if (swap)
+            {
+                string temp;
+                temp = leftName;
+                leftName = rightName;
+                rightName = temp;
+            }
+        }
+
+        private string BuildMatchDisplayText(EngineMatch m)
+        {
+            string l;
+            string r;
+
+            GetLaneAdjustedNames(m, out l, out r);
+            return "M" + m.MatchId + ":" + l + " vs " + r;
+        }
+
         public IReadOnlyList<PairingRow> BuildCurrentBracketRows()
         {
             var rows = new List<PairingRow>();
 
             Logger.Log(
-                $"[ROWS] BUILD v2 — snapshotMatches={_rrMatchesSnapshot?.Count.ToString() ?? "null"}, " +
-                $"snapshotRounds={_rrRoundOrderSnapshot?.Count.ToString() ?? "null"}, " +
-                $"engine={_engine?.GetType().Name ?? "null"}, losersEngine={_losersEngine?.GetType().Name ?? "null"}, " +
-                $"revealed=[{string.Join(",", _revealedRounds)}]");
+                "[ROWS] BUILD v2 — snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
+                "snapshotRounds=" + (_rrRoundOrderSnapshot?.Count.ToString() ?? "null") + ", " +
+                "engine=" + (_engine?.GetType().Name ?? "null") + ", losersEngine=" + (_losersEngine?.GetType().Name ?? "null") + ", " +
+                "revealed=[" + string.Join(",", _revealedRounds) + "]");
 
             void AppendFrom(IEnumerable<EngineMatch> matches, IEnumerable<string> roundOrder, string tag, bool filterByRevealed)
             {
                 if (matches == null || roundOrder == null)
                 {
-                    Logger.Log($"[ROWS] AppendFrom({tag}) skipped (matches/roundOrder null)");
+                    Logger.Log("[ROWS] AppendFrom(" + tag + ") skipped (matches/roundOrder null)");
                     return;
                 }
 
@@ -47,18 +85,23 @@ namespace RCDragManagerProd.Controllers
 
                     foreach (var m in mList.Where(x => x.RoundLabel == round))
                     {
+                        string leftName;
+                        string rightName;
+
+                        GetLaneAdjustedNames(m, out leftName, out rightName);
+
                         rows.Add(new PairingRow
                         {
                             MatchNumber = null,
                             MatchId = m.MatchId,
-                            Driver1 = m.Driver1?.Name ?? "BYE",
-                            Driver2 = m.Driver2?.Name ?? "BYE",
+                            Driver1 = leftName,
+                            Driver2 = rightName,
                             RoundLabel = m.RoundLabel
                         });
                     }
                 }
 
-                Logger.Log($"[ROWS] AppendFrom({tag}) → added {rows.Count - before} items. Total={rows.Count}");
+                Logger.Log("[ROWS] AppendFrom(" + tag + ") → added " + (rows.Count - before) + " items. Total=" + rows.Count);
             }
 
             // 1) Round Robin — show ALL rounds if we have a snapshot; otherwise only revealed
@@ -79,7 +122,9 @@ namespace RCDragManagerProd.Controllers
             // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
             if (_losersEngine != null)
             {
-                bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+                bool filterLb;
+                filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+
                 AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
             }
 
@@ -91,10 +136,30 @@ namespace RCDragManagerProd.Controllers
 
             int displayNo = 1;
             foreach (var r in rows)
-                if (!r.IsHeader) r.MatchNumber = $"M{displayNo++}";
+            {
+                if (!r.IsHeader)
+                {
+                    r.MatchNumber = "M" + displayNo;
+                    displayNo++;
+                }
+            }
 
-            Logger.Log($"[ROWS] BuiltCurrentBracketRows → items={rows.Count}, matches(numbered)={displayNo - 1}");
+            Logger.Log("[ROWS] BuiltCurrentBracketRows → items=" + rows.Count + ", matches(numbered)=" + (displayNo - 1));
             return rows;
+        }
+
+        public bool IsLaneSwapped(int matchId, string roundLabel, int driver1Id, int driver2Id)
+        {
+            int a;
+            int b;
+
+            a = Math.Min(driver1Id, driver2Id);
+            b = Math.Max(driver1Id, driver2Id);
+
+            string laneKey;
+            laneKey = roundLabel + "|M" + matchId + "|" + a + "-" + b;
+
+            return laneFairness.ShouldSwap(laneKey, driver1Id, driver2Id);
         }
 
         // Returns the next unresolved matches in revealed rounds (current first).
@@ -110,25 +175,64 @@ namespace RCDragManagerProd.Controllers
                                   .Take(count)
                                   .ToList();
 
-                Logger.Log($"[CTRL][PEEK] Upcoming count={list.Count}, take={count} → [{string.Join(", ", list.Select(m => $"M{m.MatchId}:{m.Driver1?.Name ?? "BYE"} vs {m.Driver2?.Name ?? "BYE"}"))}]");
+                // IMPORTANT: log lane-adjusted names so debug matches what UI bracket shows
+                string peek;
+                peek = string.Join(", ", list.Select(m => BuildMatchDisplayText(m)));
+
+                Logger.Log("[CTRL][PEEK] Upcoming count=" + list.Count + ", take=" + count + " → [" + peek + "]");
 
                 return list;
             }
             catch (Exception ex)
             {
-                Logger.Log($"[CTRL][PEEK][ERROR] {ex}");
+                Logger.Log("[CTRL][PEEK][ERROR] " + ex);
                 return Array.Empty<EngineMatch>();
             }
+        }
+
+        // NEW: UI should use this instead of building labels from raw EngineMatch order
+        public string BuildNextUpLabelText(int count = 3)
+        {
+            var list = PeekUpcomingMatches(count).ToList();
+            if (list.Count == 0) return "No current match.";
+
+            // Current
+            string current;
+            current = BuildMatchDisplayText(list[0]);
+            current = current.Substring(current.IndexOf(':') + 1).Trim(); // "Name vs Name"
+
+            if (list.Count == 1) return current;
+
+            // On Deck / In The Hole
+            string onDeck;
+            onDeck = BuildMatchDisplayText(list[1]);
+            onDeck = onDeck.Substring(onDeck.IndexOf(':') + 1).Trim();
+
+            if (list.Count == 2) return "On Deck — " + onDeck;
+
+            string inTheHole;
+            inTheHole = BuildMatchDisplayText(list[2]);
+            inTheHole = inTheHole.Substring(inTheHole.IndexOf(':') + 1).Trim();
+
+            return "On Deck — " + onDeck + " / In The Hole — " + inTheHole;
         }
 
         public string GetActiveRoundLabel()
         {
             EnsureReady();
-            string active = null;
+
+            string active;
+            active = null;
+
             foreach (var r in _engine.GetRoundOrder())
+            {
                 if (_revealedRounds.Contains(r))
+                {
                     active = r;   // last revealed
-            Logger.Log($"[CTRL][EDIT] Active round = '{active ?? "null"}'");
+                }
+            }
+
+            Logger.Log("[CTRL][EDIT] Active round = '" + (active ?? "null") + "'");
             return active;
         }
 
@@ -136,9 +240,13 @@ namespace RCDragManagerProd.Controllers
         {
             var m = GetMatch(matchId);
             var active = GetActiveRoundLabel();
-            bool ok = m != null && !string.IsNullOrEmpty(active) &&
-                      string.Equals(m.RoundLabel, active, StringComparison.OrdinalIgnoreCase);
-            Logger.Log($"[CTRL][EDIT] IsMatchInActiveRound(M{matchId}) → {ok}");
+
+            bool ok;
+            ok = m != null &&
+                 !string.IsNullOrEmpty(active) &&
+                 string.Equals(m.RoundLabel, active, StringComparison.OrdinalIgnoreCase);
+
+            Logger.Log("[CTRL][EDIT] IsMatchInActiveRound(M" + matchId + ") → " + ok);
             return ok;
         }
     }
