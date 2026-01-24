@@ -9,134 +9,8 @@ using RCDragManagerProd.Logging;
 
 namespace RCDragManagerProd.UI.Forms
 {
-    public partial class DriverManagerForm : Form
+    public partial class DriverManagerForm
     {
-        private readonly DriverRepository repository;
-        private Driver selectedDriver;
-
-        public DriverManagerForm()
-        {
-            InitializeComponent();
-            repository = new DriverRepository(Program.ConnectionString);
-
-            SetupDriverDetailsGrid();
-            LoadDrivers();
-        }
-
-        public DriverManagerForm(DriverRepository repo)
-        {
-            InitializeComponent();
-            repository = repo ?? new DriverRepository(Program.ConnectionString);
-
-            SetupDriverDetailsGrid();
-            LoadDrivers();
-        }
-
-        // ---------- UI wiring ----------
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-            // reload list + details from DB so stats are always current
-            LoadDrivers();
-            if (selectedDriver != null)
-                ShowDriverDetails(selectedDriver.Id);
-        }
-
-        private void SetupDriverDetailsGrid()
-        {
-            lvDriverDetails.Columns.Clear();
-            lvDriverDetails.View = View.Details;
-            lvDriverDetails.FullRowSelect = true;
-            lvDriverDetails.Columns.Add("Field", 150);
-            lvDriverDetails.Columns.Add("Value", 300);
-        }
-
-        private void LoadDrivers()
-        {
-            var previousId = selectedDriver?.Id ?? 0;
-
-            lstDrivers.Items.Clear();
-            var drivers = repository.GetAllDrivers();
-
-            foreach (var d in drivers.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))
-                lstDrivers.Items.Add($"{d.Id}: {d.Name}");
-
-            // restore selection if possible
-            if (previousId > 0)
-            {
-                for (int i = 0; i < lstDrivers.Items.Count; i++)
-                {
-                    var txt = lstDrivers.Items[i].ToString();
-                    if (txt.StartsWith(previousId.ToString() + ":", StringComparison.Ordinal))
-                    {
-                        lstDrivers.SelectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        }
-
-        private static int ParseIdFromListText(object listItem)
-        {
-            if (listItem == null) return 0;
-            var s = listItem.ToString();
-            if (string.IsNullOrWhiteSpace(s)) return 0;
-            var idx = s.IndexOf(':');
-            if (idx <= 0) return 0;
-            return int.TryParse(s.Substring(0, idx).Trim(), out var id) ? id : 0;
-        }
-
-        private void AddDetail(string field, string value)
-        {
-            var it = new ListViewItem(field);
-            it.SubItems.Add(value ?? "");
-            lvDriverDetails.Items.Add(it);
-        }
-
-        private void ShowDriverDetails(int driverId)
-        {
-            // ALWAYS read fresh from DB
-            selectedDriver = repository.GetDriverById(driverId);
-
-            lvDriverDetails.BeginUpdate();
-            lvDriverDetails.Items.Clear();
-
-            if (selectedDriver == null)
-            {
-                lvDriverDetails.EndUpdate();
-                btnDriverStats.Enabled = false;
-                return;
-            }
-
-            btnDriverStats.Enabled = true;
-
-            AddDetail("Name", selectedDriver.Name);
-            AddDetail("Qual Time", selectedDriver.QualTime?.ToString("0.000") ?? "");
-            AddDetail("State", selectedDriver.State ?? "");
-            AddDetail("Notes", selectedDriver.Notes ?? "");
-            AddDetail("Wins", selectedDriver.TotalWins.ToString());
-            AddDetail("Losses", selectedDriver.TotalLosses.ToString());
-            AddDetail("Events Entered", selectedDriver.EventsEntered.ToString());
-
-            // ✅ show the DB column we maintain when the Final is decided
-            AddDetail("Events Won", selectedDriver.EventsWon.ToString());
-
-            AddDetail("--- Cars ---", "");
-            if (selectedDriver.Cars != null)
-            {
-                foreach (var car in selectedDriver.Cars)
-                {
-                    var dial = car.DefaultDialIn?.ToString("0.000") ?? "-";
-                    AddDetail("Car", $"{car.CarName} - {car.ClassType} - {dial}");
-                }
-            }
-
-            lvDriverDetails.EndUpdate();
-        }
-
-        // ---------- Events ----------
-
         private void lstDrivers_SelectedIndexChanged(object sender, EventArgs e)
         {
             var id = ParseIdFromListText(lstDrivers.SelectedItem);
@@ -151,7 +25,6 @@ namespace RCDragManagerProd.UI.Forms
             ShowDriverDetails(id);
         }
 
-        // ADD DRIVER
         private void btnAddDriver_Click(object sender, EventArgs e)
         {
             using (var dlg = new AddDriverAndCarDialog())
@@ -187,7 +60,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        // EDIT DRIVER
         private void btnEditDriver_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null)
@@ -207,7 +79,6 @@ namespace RCDragManagerProd.UI.Forms
             ShowDriverDetails(selectedDriver.Id);
         }
 
-        // DELETE DRIVER
         private void btnDeleteDriver_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null)
@@ -227,7 +98,6 @@ namespace RCDragManagerProd.UI.Forms
             lvDriverDetails.Items.Clear();
         }
 
-        // ADD CAR
         private void btnAddCar_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null)
@@ -236,7 +106,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            using (var dlg = new AddCarDialog())   // adding a NEW car
+            using (var dlg = new AddCarDialog())
             {
                 if (dlg.ShowDialog() != DialogResult.OK) return;
 
@@ -250,7 +120,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        // EDIT CAR
         private void btnEditCar_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null || selectedDriver.Cars == null || selectedDriver.Cars.Count == 0)
@@ -265,7 +134,6 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            // map selected "Car" row to cars list index
             int rowIndex = lvDriverDetails.Items.IndexOf(lvDriverDetails.SelectedItems[0]);
             int headerIndex = -1;
             for (int i = 0; i < lvDriverDetails.Items.Count; i++)
@@ -276,6 +144,7 @@ namespace RCDragManagerProd.UI.Forms
                     break;
                 }
             }
+
             int carIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
             if (carIndex < 0 || carIndex >= selectedDriver.Cars.Count)
             {
@@ -299,7 +168,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        // DELETE CAR
         private void btnDeleteCar_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null || selectedDriver.Cars == null || selectedDriver.Cars.Count == 0)
@@ -324,6 +192,7 @@ namespace RCDragManagerProd.UI.Forms
                     break;
                 }
             }
+
             int carIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
             if (carIndex < 0 || carIndex >= selectedDriver.Cars.Count)
             {
@@ -342,7 +211,6 @@ namespace RCDragManagerProd.UI.Forms
             ShowDriverDetails(selectedDriver.Id);
         }
 
-        // SET QUAL TIME
         private void btnSetQualTime_Click(object sender, EventArgs e)
         {
             var id = ParseIdFromListText(lstDrivers.SelectedItem);
@@ -368,7 +236,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        // SAVE & CLOSE
         private void btnSaveChanges_Click(object sender, EventArgs e)
         {
             if (selectedDriver != null)
@@ -377,7 +244,6 @@ namespace RCDragManagerProd.UI.Forms
             Close();
         }
 
-        // DRIVER STATS POPUP
         private void btnDriverStats_Click(object sender, EventArgs e)
         {
             if (selectedDriver == null)

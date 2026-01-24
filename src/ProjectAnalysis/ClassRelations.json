@@ -1,0 +1,566 @@
+[
+  {
+    "FullName": "RCDragManagerProd.Program",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.UI.Forms.LandingForm"
+    ],
+    "FilePath": "RCDragManagerProd\\Program.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.ViewModels.MatchResultSave",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\ViewModels\\MatchResultSave.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.ViewModels.PairingRow",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\ViewModels\\PairingRow.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.ViewModels.RaceSessionSummary",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\ViewModels\\RaceSessionSummary.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.ViewModels.WinnerRow",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\ViewModels\\WinnerRow.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.DicEx.DictEx",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Utils\\DictEx.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.LandingForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Repositories.DriverRepository",
+      "RCDragManagerProd.Repositories.RaceSessionRepository",
+      "RCDragManagerProd.Domain.RaceSession",
+      "RCDragManagerProd.Controllers.RaceController",
+      "RCDragManagerProd.UI.Forms.Form1",
+      "RCDragManagerProd.UI.Forms.SessionSetupForm",
+      "RCDragManagerProd.UI.Forms.LoadSessionForm",
+      "RCDragManagerProd.UI.Forms.DriverManagerForm",
+      "RCDragManagerProd.UI.Forms.SettingsForm"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.LoadSessionForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Repositories.RaceSessionRepository",
+      "RCDragManagerProd.ViewModels.RaceSessionSummary",
+      "RCDragManagerProd.Domain.RaceSession"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Repositories.DriverRepository",
+      "RCDragManagerProd.Domain.RaceSession",
+      "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.UI.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.Form1",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Controllers.RaceController",
+      "RCDragManagerProd.ViewModels.PairingRow",
+      "RCDragManagerProd.ViewModels.WinnerRow",
+      "RCDragManagerProd.Controllers.RaceSummary",
+      "RCDragManagerProd.RaceEngines.EngineMatch",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Domain.RaceSession",
+      "RCDragManagerProd.Repositories.RaceSessionRepository",
+      "RCDragManagerProd.Repositories.DriverRepository",
+      "RCDragManagerProd.UI.Forms.EditDriverDialog",
+      "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+      "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.WinnerButtons.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.DriverManagerForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Repositories.DriverRepository",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog",
+      "RCDragManagerProd.UI.Forms.EditDriverDialog",
+      "RCDragManagerProd.UI.Forms.AddCarDialog",
+      "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog",
+      "RCDragManagerProd.UI.Forms.DriverStatsForm"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.UI.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.DriverStatsForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Repositories.RaceSessionRepository"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.EditDriverDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.ScrollableTextDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Common\\ScrollableTextDialog.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.SettingsForm",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Common\\SettingsForm.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.AddCarDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Car"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.UI.Forms.SelectCarDialog",
+    "BaseType": "Form",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Car"
+    ],
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RoundRobinMatch",
+      "RCDragManagerProd.Domain.MatchResult",
+      "RCDragManagerProd.RoundRobinMode.RoundRobinRanker"
+    ],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs"
+  },
+  {
+    "FullName": "RoundRobinMatch",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.DriverRankResult",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinRanker",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RoundRobinMode.Aggregate"
+    ],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.Aggregate",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+      "RCDragManagerProd.Domain.MatchResult"
+    ],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardWriter.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RoundRobinMode.Line",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+      "RCDragManagerProd.Domain.MatchResult",
+      "RCDragManagerProd.RaceEngines.EngineMatch"
+    ],
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Repositories.CarRepository",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Car"
+    ],
+    "FilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Repositories.DatabaseInitializer",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Repositories\\DatabaseInitializer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Domain.Car"
+    ],
+    "FilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.ViewModels.RaceSessionSummary",
+      "RCDragManagerProd.Domain.RaceSession"
+    ],
+    "FilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RandomMode.LosersBracketBuilder",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\RandomMode\\LosersBracketBuilder.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RandomMode.LosersBracketEngine",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\RandomMode\\LosersBracketEngine.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RandomMode.RandomBracket",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RandomMode.RandomMatch",
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RandomMode.RandomMatch",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RandomMode.RandomMatchEngine",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RandomMode.RandomMatch",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Domain.MatchResult"
+    ],
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.EngineMatch",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.MatchEngine",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Domain.LadderMatch",
+      "RCDragManagerProd.Domain.MatchResult"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+    "BaseType": "IRaceEngine",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.RaceEngines.EngineMatch",
+      "RCDragManagerProd.Domain.LadderMatch",
+      "RCDragManagerProd.RaceEngines.MatchEngine"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.RaceEngineFactory",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+      "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+      "RCDragManagerProd.RaceEngines.RandomEngineAdapter"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RaceEngineFactory.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter",
+    "BaseType": "IRaceEngine",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RandomMode.RandomMatchEngine",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.RaceEngines.EngineMatch",
+      "RCDragManagerProd.RandomMode.RandomMatch"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+    "BaseType": "IRaceEngine",
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.RaceEngines.EngineMatch",
+      "RCDragManagerProd.RoundRobinMode.RoundRobinEngine"
+    ],
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Properties.Resources",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Properties\\Resources.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Properties.Settings",
+    "BaseType": "global",
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Properties\\Settings.Designer.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Logging.Logger",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Logging\\Logger.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Helpers.AssetPath",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Helpers\\AssetPath.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Helpers.MatchLookupHelper",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Helpers\\MatchLookupHelper.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.Car",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Domain\\Car.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.Driver",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Car"
+    ],
+    "FilePath": "RCDragManagerProd\\Domain\\Drivers.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.MatchResult",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.Domain.LadderMatch"
+    ],
+    "FilePath": "RCDragManagerProd\\Domain\\MatchResult.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.ProLadder",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.LadderMatch"
+    ],
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L24.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.LadderMatch",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.RaceSession",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.RaceSessionDriverEntry",
+      "RCDragManagerProd.ViewModels.MatchResultSave",
+      "RCDragManagerProd.Domain.MatchResultSave",
+      "RoundRobinMatch",
+      "RCDragManagerProd.RandomMode.RandomMatch",
+      "RCDragManagerProd.Domain.Driver"
+    ],
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.RaceSessionDriverEntry",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Domain.MatchResultSave",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Controllers.RaceController",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.RaceEngines.EngineMatch",
+      "RCDragManagerProd.ViewModels.PairingRow",
+      "RCDragManagerProd.Domain.RaceSession",
+      "RCDragManagerProd.ViewModels.WinnerRow",
+      "RCDragManagerProd.Domain.MatchResult",
+      "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter",
+      "RCDragManagerProd.RaceEngines.RandomEngineAdapter"
+    ],
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.Session.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Controllers.RaceSummary",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [
+      "RCDragManagerProd.Domain.RaceSession",
+      "RCDragManagerProd.Domain.Driver",
+      "RCDragManagerProd.RaceEngines.EngineMatch"
+    ],
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Config.AppSettings",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Config\\AppSettings.cs"
+  },
+  {
+    "FullName": "RCDragManagerProd.Config.Model",
+    "BaseType": null,
+    "Interfaces": [],
+    "ComposesTypes": [],
+    "FilePath": "RCDragManagerProd\\Config\\AppSettings.cs"
+  }
+]

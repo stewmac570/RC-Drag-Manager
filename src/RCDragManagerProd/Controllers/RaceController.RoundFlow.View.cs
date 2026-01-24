@@ -1,0 +1,253 @@
+﻿// RaceController.RoundFlow.View.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;            // still used for a couple of info popups
+
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.ViewModels;
+using RCDragManagerProd.RaceEngines;
+using RCDragManagerProd.RandomMode;
+using RCDragManagerProd.RoundRobinMode;
+using RCDragManagerProd.UI.Forms;
+using RCDragManagerProd.Logging;
+
+namespace RCDragManagerProd.Controllers
+{
+    public partial class RaceController
+    {
+        // Called by Form1 to rebuild the ListView each time the bracket changes.
+
+        internal void GetLaneAdjustedNames(EngineMatch m, out string leftName, out string rightName)
+        {
+            leftName = m.Driver1?.Name ?? "BYE";
+            rightName = m.Driver2?.Name ?? "BYE";
+
+            if (m.Driver1 == null || m.Driver2 == null) return;
+
+            int a;
+            int b;
+
+            a = Math.Min(m.Driver1.Id, m.Driver2.Id);
+            b = Math.Max(m.Driver1.Id, m.Driver2.Id);
+
+            string laneKey;
+            laneKey = m.RoundLabel + "|M" + m.MatchId + "|" + a + "-" + b;
+
+            bool swap;
+            swap = laneFairness.ShouldSwap(laneKey, m.Driver1.Id, m.Driver2.Id);
+
+            if (swap)
+            {
+                string temp;
+                temp = leftName;
+                leftName = rightName;
+                rightName = temp;
+            }
+        }
+
+        private string BuildMatchDisplayText(EngineMatch m)
+        {
+            string l;
+            string r;
+
+            GetLaneAdjustedNames(m, out l, out r);
+            return "M" + m.MatchId + ":" + l + " vs " + r;
+        }
+
+        public IReadOnlyList<PairingRow> BuildCurrentBracketRows()
+        {
+            var rows = new List<PairingRow>();
+
+            Logger.Log(
+                "[ROWS] BUILD v2 — snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
+                "snapshotRounds=" + (_rrRoundOrderSnapshot?.Count.ToString() ?? "null") + ", " +
+                "engine=" + (_engine?.GetType().Name ?? "null") + ", losersEngine=" + (_losersEngine?.GetType().Name ?? "null") + ", " +
+                "revealed=[" + string.Join(",", _revealedRounds) + "]");
+
+            void AppendFrom(IEnumerable<EngineMatch> matches, IEnumerable<string> roundOrder, string tag, bool filterByRevealed)
+            {
+                if (matches == null || roundOrder == null)
+                {
+                    Logger.Log("[ROWS] AppendFrom(" + tag + ") skipped (matches/roundOrder null)");
+                    return;
+                }
+
+                var before = rows.Count;
+                var mList = matches.ToList();
+                var rList = roundOrder.ToList();
+
+                foreach (var round in rList)
+                {
+                    if (filterByRevealed && !_revealedRounds.Contains(round)) continue;
+
+                    rows.Add(new PairingRow { IsHeader = true, RoundLabel = round });
+
+                    foreach (var m in mList.Where(x => x.RoundLabel == round))
+                    {
+                        string leftName;
+                        string rightName;
+
+                        GetLaneAdjustedNames(m, out leftName, out rightName);
+
+                        rows.Add(new PairingRow
+                        {
+                            MatchNumber = null,
+                            MatchId = m.MatchId,
+                            Driver1 = leftName,
+                            Driver2 = rightName,
+                            RoundLabel = m.RoundLabel
+                        });
+                    }
+                }
+
+                Logger.Log("[ROWS] AppendFrom(" + tag + ") → added " + (rows.Count - before) + " items. Total=" + rows.Count);
+            }
+
+            // 1) Round Robin — show ALL rounds if we have a snapshot; otherwise only revealed
+            if (_rrMatchesSnapshot != null && _rrRoundOrderSnapshot != null)
+            {
+                AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
+            }
+            else if (_engine is RoundRobinEngineAdapter rrLive)
+            {
+                AppendFrom(rrLive.GetMatches(), rrLive.GetRoundOrder(), "RR-live", filterByRevealed: true);
+            }
+            // 2) Randomized — show only revealed rounds
+            else if (_engine is RandomEngineAdapter rndLive)
+            {
+                AppendFrom(rndLive.GetMatches(), rndLive.GetRoundOrder(), "Random-live", filterByRevealed: true);
+            }
+
+            // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
+            if (_losersEngine != null)
+            {
+                bool filterLb;
+                filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+
+                AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
+            }
+
+            // 4) Finals (Pro Ladder) — only revealed (SF, then F)
+            if (_engine is ProLadderEngineAdapter pro)
+            {
+                AppendFrom(pro.GetMatches(), pro.GetRoundOrder(), "Finals(Pro)", filterByRevealed: true);
+            }
+
+            int displayNo = 1;
+            foreach (var r in rows)
+            {
+                if (!r.IsHeader)
+                {
+                    r.MatchNumber = "M" + displayNo;
+                    displayNo++;
+                }
+            }
+
+            Logger.Log("[ROWS] BuiltCurrentBracketRows → items=" + rows.Count + ", matches(numbered)=" + (displayNo - 1));
+            return rows;
+        }
+
+        public bool IsLaneSwapped(int matchId, string roundLabel, int driver1Id, int driver2Id)
+        {
+            int a;
+            int b;
+
+            a = Math.Min(driver1Id, driver2Id);
+            b = Math.Max(driver1Id, driver2Id);
+
+            string laneKey;
+            laneKey = roundLabel + "|M" + matchId + "|" + a + "-" + b;
+
+            return laneFairness.ShouldSwap(laneKey, driver1Id, driver2Id);
+        }
+
+        // Returns the next unresolved matches in revealed rounds (current first).
+        public IReadOnlyList<EngineMatch> PeekUpcomingMatches(int count = 3)
+        {
+            try
+            {
+                if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
+
+                var list = _engine.GetMatches()
+                                  .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
+                                  .OrderBy(m => m.MatchId)
+                                  .Take(count)
+                                  .ToList();
+
+                // IMPORTANT: log lane-adjusted names so debug matches what UI bracket shows
+                string peek;
+                peek = string.Join(", ", list.Select(m => BuildMatchDisplayText(m)));
+
+                Logger.Log("[CTRL][PEEK] Upcoming count=" + list.Count + ", take=" + count + " → [" + peek + "]");
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[CTRL][PEEK][ERROR] " + ex);
+                return Array.Empty<EngineMatch>();
+            }
+        }
+
+        // NEW: UI should use this instead of building labels from raw EngineMatch order
+        public string BuildNextUpLabelText(int count = 3)
+        {
+            var list = PeekUpcomingMatches(count).ToList();
+            if (list.Count == 0) return "No current match.";
+
+            // Current
+            string current;
+            current = BuildMatchDisplayText(list[0]);
+            current = current.Substring(current.IndexOf(':') + 1).Trim(); // "Name vs Name"
+
+            if (list.Count == 1) return current;
+
+            // On Deck / In The Hole
+            string onDeck;
+            onDeck = BuildMatchDisplayText(list[1]);
+            onDeck = onDeck.Substring(onDeck.IndexOf(':') + 1).Trim();
+
+            if (list.Count == 2) return "On Deck — " + onDeck;
+
+            string inTheHole;
+            inTheHole = BuildMatchDisplayText(list[2]);
+            inTheHole = inTheHole.Substring(inTheHole.IndexOf(':') + 1).Trim();
+
+            return "On Deck — " + onDeck + " / In The Hole — " + inTheHole;
+        }
+
+        public string GetActiveRoundLabel()
+        {
+            EnsureReady();
+
+            string active;
+            active = null;
+
+            foreach (var r in _engine.GetRoundOrder())
+            {
+                if (_revealedRounds.Contains(r))
+                {
+                    active = r;   // last revealed
+                }
+            }
+
+            Logger.Log("[CTRL][EDIT] Active round = '" + (active ?? "null") + "'");
+            return active;
+        }
+
+        public bool IsMatchInActiveRound(int matchId)
+        {
+            var m = GetMatch(matchId);
+            var active = GetActiveRoundLabel();
+
+            bool ok;
+            ok = m != null &&
+                 !string.IsNullOrEmpty(active) &&
+                 string.Equals(m.RoundLabel, active, StringComparison.OrdinalIgnoreCase);
+
+            Logger.Log("[CTRL][EDIT] IsMatchInActiveRound(M" + matchId + ") → " + ok);
+            return ok;
+        }
+    }
+}

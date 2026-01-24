@@ -1,4 +1,5 @@
-﻿using RCDragManagerProd.Domain;        // RaceSession, RaceSessionDriverEntry
+﻿// SessionSetupForm.UI.cs
+using RCDragManagerProd.Domain;        // RaceSession, RaceSessionDriverEntry
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.RandomMode;
 using RCDragManagerProd.Repositories;
@@ -15,48 +16,6 @@ namespace RCDragManagerProd.UI.Forms
 {
     public partial class SessionSetupForm : Form
     {
-        private DriverRepository repository;
-
-        private List<(DDriver driver, DCar car)> allEligibleDrivers;
-        private List<(DDriver driver, DCar car)> eventRoster;
-
-        // runtime-only filter UI (NOT in Designer)
-        private Panel pnlFilters;
-        private ComboBox cmbFilterCar;
-        private ComboBox cmbFilterClass;
-        private ComboBox cmbFilterState;
-
-        // Suppress ItemChecked during bulk rebuilds
-        private bool _suppressRosterEvents = false;
-
-        public RaceSession RaceSessionResult { get; private set; }
-
-        public SessionSetupForm(DriverRepository repo)
-        {
-            InitializeComponent();
-
-            repository = repo ?? throw new ArgumentNullException(nameof(repo));
-
-            eventRoster = new List<(DDriver, DCar)>();
-            allEligibleDrivers = new List<(DDriver, DCar)>();
-
-            CreateFilterControls();
-            FillFilterCombos();
-
-            rbHeadsUp.CheckedChanged += ClassSelectionChanged;
-            rbBracket.CheckedChanged += ClassSelectionChanged;
-            rbDialIn.CheckedChanged += ClassSelectionChanged;
-
-            btnAddNewDriver.Click += BtnAddNewDriver_Click;
-            btnStartRace.Click += BtnStartRace_Click;
-            btnCancel.Click += BtnCancel_Click;
-
-            lvEventRoster.CheckBoxes = true;
-            lvEventRoster.ItemChecked += LvEventRoster_ItemChecked;
-
-            RefreshDriverList();
-        }
-
         private void CreateFilterControls()
         {
             var host = lvEventRoster.Parent ?? this;
@@ -160,15 +119,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        private void FilterChanged(object sender, EventArgs e)
-        {
-            var car = cmbFilterCar?.SelectedItem?.ToString() ?? "(null)";
-            var cls = cmbFilterClass?.SelectedItem?.ToString() ?? "(null)";
-            var state = cmbFilterState?.SelectedItem?.ToString() ?? "(null)";
-            Logger.Log($"[FILTER] Change → Car='{car}', Class='{cls}', State='{state}'");
-            RefreshDriverList();
-        }
-
         private void RefreshDriverList()
         {
             allEligibleDrivers ??= new List<(DDriver, DCar)>();
@@ -244,152 +194,6 @@ namespace RCDragManagerProd.UI.Forms
                 lvEventRoster.EndUpdate();
                 _suppressRosterEvents = false;
             }
-        }
-
-        private void LvEventRoster_ItemChecked(object sender, ItemCheckedEventArgs e)
-        {
-            if (_suppressRosterEvents) return;
-
-            if (e.Item?.Tag is ValueTuple<DDriver, DCar> t)
-            {
-                var (driver, car) = t;
-
-                if (e.Item.Checked)
-                {
-                    if (!eventRoster.Any(x => x.driver.Id == driver.Id && x.car.CarID == car.CarID))
-                    {
-                        eventRoster.Add((driver, car));
-                        Logger.Log($"[ROSTER] + d#{driver.Id}:{driver.Name}  car#{car.CarID}:{car.CarName}");
-                    }
-                }
-                else
-                {
-                    int removed = eventRoster.RemoveAll(x => x.driver.Id == driver.Id && x.car.CarID == car.CarID);
-                    Logger.Log($"[ROSTER] - d#{driver.Id}:{driver.Name}  car#{car.CarID}:{car.CarName}  (removed={removed})");
-                }
-            }
-        }
-
-        private void ClassSelectionChanged(object sender, EventArgs e)
-        {
-            if (rbHeadsUp.Checked)
-            {
-                lblFixedDial.Visible = false;
-                txtFixedDial.Visible = false;
-            }
-            else if (rbBracket.Checked)
-            {
-                lblFixedDial.Visible = true;
-                txtFixedDial.Visible = true;
-            }
-            else if (rbDialIn.Checked)
-            {
-                lblFixedDial.Visible = false;
-                txtFixedDial.Visible = false;
-            }
-
-            Logger.Log($"[CREATE] ClassSelectionChanged → HeadsUp={rbHeadsUp.Checked}, Bracket={rbBracket.Checked}, DialIn={rbDialIn.Checked}");
-            RefreshDriverList();
-        }
-
-        private void BtnAddNewDriver_Click(object sender, EventArgs e)
-        {
-            using (var addDialog = new AddDriverAndCarDialog())
-            {
-                if (addDialog.ShowDialog() != DialogResult.OK) return;
-
-                var newDriver = new DDriver
-                {
-                    Name = addDialog.DriverName,
-                    Cars = new List<DCar>()
-                };
-                repository.AddDriver(newDriver);
-
-                var insertedDriver = repository.GetAllDrivers().First(d => d.Name == newDriver.Name);
-
-                var newCar = new DCar
-                {
-                    CarName = addDialog.CarName,
-                    ClassType = addDialog.ClassType,
-                    DefaultDialIn = addDialog.DialIn
-                };
-                repository.AddCar(insertedDriver.Id, newCar);
-
-                Logger.Log($"[CREATE] Added driver '{insertedDriver.Name}' with car '{newCar.CarName}' ({newCar.ClassType}).");
-            }
-
-            FillFilterCombos();
-            RefreshDriverList();
-        }
-
-        private void BtnStartRace_Click(object sender, EventArgs e)
-        {
-            if (eventRoster.Count < 2)
-            {
-                MessageBox.Show("Please select at least 2 drivers.");
-                return;
-            }
-
-            string classType = rbHeadsUp.Checked ? "Heads Up" :
-                               rbBracket.Checked ? "Bracket Class" : "Dial-In";
-
-            double? fixedDial = null;
-            if (rbBracket.Checked && double.TryParse(txtFixedDial.Text, out double fd))
-                fixedDial = fd;
-
-            foreach (var (driver, _) in eventRoster)
-            {
-                var dbDriver = repository.GetDriverById(driver.Id);
-                if (dbDriver != null)
-                {
-                    dbDriver.EventsEntered += 1;
-                    repository.UpdateDriver(dbDriver);
-                    Logger.Log($"[CREATE][STATS] +EventsEntered → #{dbDriver.Id} {dbDriver.Name}: {dbDriver.EventsEntered}");
-                }
-            }
-
-            RaceSessionResult = new RaceSession
-            {
-                EventName = txtEventName.Text.Trim(),
-                EventDate = dateRaceDate.Value.Date,
-                RaceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder",
-                ClassType = classType,
-                FixedDialIn = fixedDial,
-                DriverEntries = eventRoster.Select(er =>
-                {
-                    double? dialIn = null;
-                    double? qualTime = null;
-
-                    if (classType == "Heads Up")
-                        qualTime = er.driver.QualTime;
-                    else if (classType == "Dial-In")
-                        dialIn = er.car.DefaultDialIn;
-                    else if (classType == "Bracket Class")
-                        dialIn = fixedDial;
-
-                    return new RaceSessionDriverEntry
-                    {
-                        DriverID = er.driver.Id,
-                        DriverName = er.driver.Name,
-                        CarID = er.car.CarID,
-                        CarName = er.car.CarName,
-                        ClassType = er.car.ClassType,
-                        DialIn = dialIn,
-                        QualifyingTime = qualTime,
-                        Seed = null
-                    };
-                }).ToList()
-            };
-
-            Logger.Log($"[CREATE] StartRace → Roster={eventRoster.Count}, ClassType='{classType}', RaceType='{RaceSessionResult.RaceType}'");
-            DialogResult = DialogResult.OK;
-            Close();
-        }
-
-        private void BtnCancel_Click(object sender, EventArgs e)
-        {
-            Logger.Log("[CREATE] SessionSetupForm cancelled.");
-            Close();
         }
     }
 }

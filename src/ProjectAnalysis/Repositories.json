@@ -1,0 +1,302 @@
+[
+  {
+    "Name": "CarRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FullName": "RCDragManagerProd.Repositories.CarRepository",
+    "FilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs",
+    "BaseType": null,
+    "SqlUsages": [
+      {
+        "MethodName": "GetCarsByDriver",
+        "LineNumber": 79,
+        "Snippet": "SELECT CarID, CarName, ClassType, DefaultDialIn FROM Cars WHERE DriverId = @DriverId",
+        "CommandType": "SELECT",
+        "Tables": [
+          "Cars"
+        ],
+        "Columns": [
+          "CarID",
+          "CarName",
+          "ClassType",
+          "DefaultDialIn"
+        ],
+        "Parameters": [
+          "@DriverId"
+        ]
+      },
+      {
+        "MethodName": "UpdateCar",
+        "LineNumber": 104,
+        "Snippet": "[DB][CarRepo] UpdateCar(CarID={car.CarID}, Name=\u0027{car.CarName}\u0027)",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "DeleteCar",
+        "LineNumber": 124,
+        "Snippet": "[DB][CarRepo] DeleteCar(CarID={carId})",
+        "CommandType": "DELETE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "DeleteCar",
+        "LineNumber": 126,
+        "Snippet": "DELETE FROM Cars WHERE CarID = @CarID",
+        "CommandType": "DELETE",
+        "Tables": [
+          "Cars"
+        ],
+        "Columns": [],
+        "Parameters": [
+          "@CarID"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "DatabaseInitializer",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FullName": "RCDragManagerProd.Repositories.DatabaseInitializer",
+    "FilePath": "RCDragManagerProd\\Repositories\\DatabaseInitializer.cs",
+    "BaseType": null,
+    "SqlUsages": []
+  },
+  {
+    "Name": "DriverRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FullName": "RCDragManagerProd.Repositories.DriverRepository",
+    "FilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "BaseType": null,
+    "SqlUsages": [
+      {
+        "MethodName": "GetAllDrivers",
+        "LineNumber": 57,
+        "Snippet": "SELECT * FROM Drivers",
+        "CommandType": "SELECT",
+        "Tables": [
+          "Drivers"
+        ],
+        "Columns": [
+          "*"
+        ],
+        "Parameters": []
+      },
+      {
+        "MethodName": "GetDriverById",
+        "LineNumber": 90,
+        "Snippet": "SELECT * FROM Drivers WHERE Id = @Id",
+        "CommandType": "SELECT",
+        "Tables": [
+          "Drivers"
+        ],
+        "Columns": [
+          "*"
+        ],
+        "Parameters": [
+          "@Id"
+        ]
+      },
+      {
+        "MethodName": "UpdateDriver",
+        "LineNumber": 157,
+        "Snippet": "[DB][DriverRepo] UpdateDriver(Id={driver.Id}, Name=\u0027{driver.Name}\u0027)",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "UpdateDriver",
+        "LineNumber": 187,
+        "Snippet": "DELETE FROM Cars WHERE DriverId = @DriverId",
+        "CommandType": "DELETE",
+        "Tables": [
+          "Cars"
+        ],
+        "Columns": [],
+        "Parameters": [
+          "@DriverId"
+        ]
+      },
+      {
+        "MethodName": "UpdateDriver",
+        "LineNumber": 200,
+        "Snippet": "[DB][DriverRepo] UpdateDriver \u2192 OK",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "DeleteDriver",
+        "LineNumber": 205,
+        "Snippet": "[DB][DriverRepo] DeleteDriver(Id={id})",
+        "CommandType": "DELETE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "DeleteDriver",
+        "LineNumber": 209,
+        "Snippet": "DELETE FROM Cars WHERE DriverId = @DriverId",
+        "CommandType": "DELETE",
+        "Tables": [
+          "Cars"
+        ],
+        "Columns": [],
+        "Parameters": [
+          "@DriverId"
+        ]
+      },
+      {
+        "MethodName": "DeleteDriver",
+        "LineNumber": 215,
+        "Snippet": "DELETE FROM Drivers WHERE Id = @Id",
+        "CommandType": "DELETE",
+        "Tables": [
+          "Drivers"
+        ],
+        "Columns": [],
+        "Parameters": [
+          "@Id"
+        ]
+      },
+      {
+        "MethodName": "DeleteDriver",
+        "LineNumber": 222,
+        "Snippet": "[DB][DriverRepo] DeleteDriver \u2192 OK",
+        "CommandType": "DELETE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "GetCarsByDriverId",
+        "LineNumber": 258,
+        "Snippet": "SELECT * FROM Cars WHERE DriverId = @DriverId",
+        "CommandType": "SELECT",
+        "Tables": [
+          "Cars"
+        ],
+        "Columns": [
+          "*"
+        ],
+        "Parameters": [
+          "@DriverId"
+        ]
+      },
+      {
+        "MethodName": "UpdateQualifyingTime",
+        "LineNumber": 283,
+        "Snippet": "[DB][DriverRepo] UpdateQualifyingTime(id={driverId}, time={qualTime})",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "UpdateQualifyingTime",
+        "LineNumber": 288,
+        "Snippet": "UPDATE Drivers SET QualTime = @QualTime WHERE Id = @Id",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": [
+          "@QualTime",
+          "@Id"
+        ]
+      },
+      {
+        "MethodName": "UpdateQualifyingTime",
+        "LineNumber": 294,
+        "Snippet": "[DB][DriverRepo] UpdateQualifyingTime \u2192 OK",
+        "CommandType": "UPDATE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "ComputeEventsWonFromSavedSessions",
+        "LineNumber": 300,
+        "Snippet": "[STATS] ComputeEventsWonFromSavedSessions: driverId={driverId}",
+        "CommandType": null,
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "ComputeEventsWonFromSavedSessions",
+        "LineNumber": 306,
+        "Snippet": "SELECT SessionData FROM RaceSessions",
+        "CommandType": "SELECT",
+        "Tables": [
+          "RaceSessions"
+        ],
+        "Columns": [
+          "SessionData"
+        ],
+        "Parameters": []
+      }
+    ]
+  },
+  {
+    "Name": "RaceSessionRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FullName": "RCDragManagerProd.Repositories.RaceSessionRepository",
+    "FilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "BaseType": null,
+    "SqlUsages": [
+      {
+        "MethodName": "LoadSession",
+        "LineNumber": 133,
+        "Snippet": "SELECT SessionData FROM RaceSessions WHERE Id = @Id",
+        "CommandType": "SELECT",
+        "Tables": [
+          "RaceSessions"
+        ],
+        "Columns": [
+          "SessionData"
+        ],
+        "Parameters": [
+          "@Id"
+        ]
+      },
+      {
+        "MethodName": "DeleteSession",
+        "LineNumber": 165,
+        "Snippet": "[DB][SessionRepo] DeleteSession(id={id})",
+        "CommandType": "DELETE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      },
+      {
+        "MethodName": "DeleteSession",
+        "LineNumber": 167,
+        "Snippet": "DELETE FROM RaceSessions WHERE Id = @Id",
+        "CommandType": "DELETE",
+        "Tables": [
+          "RaceSessions"
+        ],
+        "Columns": [],
+        "Parameters": [
+          "@Id"
+        ]
+      },
+      {
+        "MethodName": "DeleteSession",
+        "LineNumber": 172,
+        "Snippet": "[DB][SessionRepo] DeleteSession \u2192 OK",
+        "CommandType": "DELETE",
+        "Tables": [],
+        "Columns": [],
+        "Parameters": []
+      }
+    ]
+  }
+]

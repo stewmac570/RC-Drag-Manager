@@ -1,0 +1,710 @@
+[
+  {
+    "Name": "Program",
+    "Namespace": "RCDragManagerProd",
+    "FilePath": "RCDragManagerProd\\Program.cs",
+    "FullName": "RCDragManagerProd.Program"
+  },
+  {
+    "Name": "MatchResultSave",
+    "Namespace": "RCDragManagerProd.ViewModels",
+    "FilePath": "RCDragManagerProd\\ViewModels\\MatchResultSave.cs",
+    "FullName": "RCDragManagerProd.ViewModels.MatchResultSave"
+  },
+  {
+    "Name": "PairingRow",
+    "Namespace": "RCDragManagerProd.ViewModels",
+    "FilePath": "RCDragManagerProd\\ViewModels\\PairingRow.cs",
+    "FullName": "RCDragManagerProd.ViewModels.PairingRow"
+  },
+  {
+    "Name": "RaceSessionSummary",
+    "Namespace": "RCDragManagerProd.ViewModels",
+    "FilePath": "RCDragManagerProd\\ViewModels\\RaceSessionSummary.cs",
+    "FullName": "RCDragManagerProd.ViewModels.RaceSessionSummary"
+  },
+  {
+    "Name": "WinnerRow",
+    "Namespace": "RCDragManagerProd.ViewModels",
+    "FilePath": "RCDragManagerProd\\ViewModels\\WinnerRow.cs",
+    "FullName": "RCDragManagerProd.ViewModels.WinnerRow"
+  },
+  {
+    "Name": "DictEx",
+    "Namespace": "RCDragManagerProd.DicEx",
+    "FilePath": "RCDragManagerProd\\Utils\\DictEx.cs",
+    "FullName": "RCDragManagerProd.DicEx.DictEx"
+  },
+  {
+    "Name": "LandingForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.LandingForm"
+  },
+  {
+    "Name": "LandingForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LandingPageForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.LandingForm"
+  },
+  {
+    "Name": "LoadSessionForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.LoadSessionForm"
+  },
+  {
+    "Name": "LoadSessionForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\LoadSessionForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.LoadSessionForm"
+  },
+  {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.Events.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
+    "Name": "SessionSetupForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Session\\SessionSetupForm.UI.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SessionSetupForm"
+  },
+  {
+    "Name": "BuybackDriverSelectionForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm"
+  },
+  {
+    "Name": "BuybackDriverSelectionForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\BuybackDriverSelectionForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.BuybackDriverSelectionForm"
+  },
+  {
+    "Name": "EditWinnerDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog"
+  },
+  {
+    "Name": "EditWinnerDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Results\\EditWinnerDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.EditWinnerDialog"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Display.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.Events.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.UI.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "Form1",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Main\\Form1.WinnerButtons.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.Form1"
+  },
+  {
+    "Name": "AddDriverAndCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog"
+  },
+  {
+    "Name": "AddDriverAndCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverAndCarDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverAndCarDialog"
+  },
+  {
+    "Name": "AddDriverDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverDialog"
+  },
+  {
+    "Name": "AddDriverDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddDriverDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddDriverDialog"
+  },
+  {
+    "Name": "AddEditQualTimeDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog"
+  },
+  {
+    "Name": "AddEditQualTimeDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\AddEditQualTimeDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddEditQualTimeDialog"
+  },
+  {
+    "Name": "DriverManagerForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverManagerForm"
+  },
+  {
+    "Name": "DriverManagerForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverManagerForm"
+  },
+  {
+    "Name": "DriverManagerForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.Events.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverManagerForm"
+  },
+  {
+    "Name": "DriverManagerForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverManagerForm.UI.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverManagerForm"
+  },
+  {
+    "Name": "DriverStatsForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverStatsForm"
+  },
+  {
+    "Name": "DriverStatsForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\DriverStatsForm.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.DriverStatsForm"
+  },
+  {
+    "Name": "EditDriverDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.EditDriverDialog"
+  },
+  {
+    "Name": "EditDriverDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Drivers\\EditDriverDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.EditDriverDialog"
+  },
+  {
+    "Name": "ScrollableTextDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Common\\ScrollableTextDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.ScrollableTextDialog"
+  },
+  {
+    "Name": "SettingsForm",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Common\\SettingsForm.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SettingsForm"
+  },
+  {
+    "Name": "AddCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddCarDialog"
+  },
+  {
+    "Name": "AddCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\AddCarDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.AddCarDialog"
+  },
+  {
+    "Name": "SelectCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SelectCarDialog"
+  },
+  {
+    "Name": "SelectCarDialog",
+    "Namespace": "RCDragManagerProd.UI.Forms",
+    "FilePath": "RCDragManagerProd\\UI\\Forms\\Cars\\SelectCarDialog.Designer.cs",
+    "FullName": "RCDragManagerProd.UI.Forms.SelectCarDialog"
+  },
+  {
+    "Name": "RoundRobinEngine",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinEngine.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinEngine"
+  },
+  {
+    "Name": "RoundRobinMatch",
+    "Namespace": null,
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinMatch.cs",
+    "FullName": "RoundRobinMatch"
+  },
+  {
+    "Name": "DriverRankResult",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.DriverRankResult"
+  },
+  {
+    "Name": "RoundRobinRanker",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinRanker"
+  },
+  {
+    "Name": "Aggregate",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinRanker.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.Aggregate"
+  },
+  {
+    "Name": "RoundRobinScorecardLogger",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardDebug.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger"
+  },
+  {
+    "Name": "RoundRobinScorecardLogger",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardFormatter.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger"
+  },
+  {
+    "Name": "RoundRobinScorecardLogger",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger"
+  },
+  {
+    "Name": "Line",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardLogger.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.Line"
+  },
+  {
+    "Name": "RoundRobinScorecardLogger",
+    "Namespace": "RCDragManagerProd.RoundRobinMode",
+    "FilePath": "RCDragManagerProd\\RoundRobinMode\\RoundRobinScorecardLogger\\RoundRobinScorecardWriter.cs",
+    "FullName": "RCDragManagerProd.RoundRobinMode.RoundRobinScorecardLogger"
+  },
+  {
+    "Name": "CarRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FilePath": "RCDragManagerProd\\Repositories\\CarRepository.cs",
+    "FullName": "RCDragManagerProd.Repositories.CarRepository"
+  },
+  {
+    "Name": "DatabaseInitializer",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FilePath": "RCDragManagerProd\\Repositories\\DatabaseInitializer.cs",
+    "FullName": "RCDragManagerProd.Repositories.DatabaseInitializer"
+  },
+  {
+    "Name": "DriverRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FilePath": "RCDragManagerProd\\Repositories\\DriverRepository.cs",
+    "FullName": "RCDragManagerProd.Repositories.DriverRepository"
+  },
+  {
+    "Name": "RaceSessionRepository",
+    "Namespace": "RCDragManagerProd.Repositories",
+    "FilePath": "RCDragManagerProd\\Repositories\\RaceSessionRepository.cs",
+    "FullName": "RCDragManagerProd.Repositories.RaceSessionRepository"
+  },
+  {
+    "Name": "LosersBracketBuilder",
+    "Namespace": "RCDragManagerProd.RandomMode",
+    "FilePath": "RCDragManagerProd\\RandomMode\\LosersBracketBuilder.cs",
+    "FullName": "RCDragManagerProd.RandomMode.LosersBracketBuilder"
+  },
+  {
+    "Name": "LosersBracketEngine",
+    "Namespace": "RCDragManagerProd.RandomMode",
+    "FilePath": "RCDragManagerProd\\RandomMode\\LosersBracketEngine.cs",
+    "FullName": "RCDragManagerProd.RandomMode.LosersBracketEngine"
+  },
+  {
+    "Name": "RandomBracket",
+    "Namespace": "RCDragManagerProd.RandomMode",
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomBracket.cs",
+    "FullName": "RCDragManagerProd.RandomMode.RandomBracket"
+  },
+  {
+    "Name": "RandomMatch",
+    "Namespace": "RCDragManagerProd.RandomMode",
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomMatch.cs",
+    "FullName": "RCDragManagerProd.RandomMode.RandomMatch"
+  },
+  {
+    "Name": "RandomMatchEngine",
+    "Namespace": "RCDragManagerProd.RandomMode",
+    "FilePath": "RCDragManagerProd\\RandomMode\\RandomMatchEngine.cs",
+    "FullName": "RCDragManagerProd.RandomMode.RandomMatchEngine"
+  },
+  {
+    "Name": "EngineMatch",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\IRaceEngine.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.EngineMatch"
+  },
+  {
+    "Name": "MatchEngine",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\MatchEngine.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.MatchEngine"
+  },
+  {
+    "Name": "ProLadderEngineAdapter",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\ProLadderEngineAdapter.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.ProLadderEngineAdapter"
+  },
+  {
+    "Name": "RaceEngineFactory",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RaceEngineFactory.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.RaceEngineFactory"
+  },
+  {
+    "Name": "RandomEngineAdapter",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RandomEngineAdapter.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.RandomEngineAdapter"
+  },
+  {
+    "Name": "RoundRobinEngineAdapter",
+    "Namespace": "RCDragManagerProd.RaceEngines",
+    "FilePath": "RCDragManagerProd\\RaceEngines\\RoundRobinEngineAdapter.cs",
+    "FullName": "RCDragManagerProd.RaceEngines.RoundRobinEngineAdapter"
+  },
+  {
+    "Name": "Resources",
+    "Namespace": "RCDragManagerProd.Properties",
+    "FilePath": "RCDragManagerProd\\Properties\\Resources.Designer.cs",
+    "FullName": "RCDragManagerProd.Properties.Resources"
+  },
+  {
+    "Name": "Settings",
+    "Namespace": "RCDragManagerProd.Properties",
+    "FilePath": "RCDragManagerProd\\Properties\\Settings.Designer.cs",
+    "FullName": "RCDragManagerProd.Properties.Settings"
+  },
+  {
+    "Name": "Logger",
+    "Namespace": "RCDragManagerProd.Logging",
+    "FilePath": "RCDragManagerProd\\Logging\\Logger.cs",
+    "FullName": "RCDragManagerProd.Logging.Logger"
+  },
+  {
+    "Name": "AssetPath",
+    "Namespace": "RCDragManagerProd.Helpers",
+    "FilePath": "RCDragManagerProd\\Helpers\\AssetPath.cs",
+    "FullName": "RCDragManagerProd.Helpers.AssetPath"
+  },
+  {
+    "Name": "MatchLookupHelper",
+    "Namespace": "RCDragManagerProd.Helpers",
+    "FilePath": "RCDragManagerProd\\Helpers\\MatchLookupHelper.cs",
+    "FullName": "RCDragManagerProd.Helpers.MatchLookupHelper"
+  },
+  {
+    "Name": "Car",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Car.cs",
+    "FullName": "RCDragManagerProd.Domain.Car"
+  },
+  {
+    "Name": "Driver",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Drivers.cs",
+    "FullName": "RCDragManagerProd.Domain.Driver"
+  },
+  {
+    "Name": "MatchResult",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\MatchResult.cs",
+    "FullName": "RCDragManagerProd.Domain.MatchResult"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\ProLadder.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\ProLadder.Ladders.Common.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "LadderMatch",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\ProLadder.Structures.cs",
+    "FullName": "RCDragManagerProd.Domain.LadderMatch"
+  },
+  {
+    "Name": "RaceSession",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FullName": "RCDragManagerProd.Domain.RaceSession"
+  },
+  {
+    "Name": "RaceSessionDriverEntry",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FullName": "RCDragManagerProd.Domain.RaceSessionDriverEntry"
+  },
+  {
+    "Name": "MatchResultSave",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\RaceSession.cs",
+    "FullName": "RCDragManagerProd.Domain.MatchResultSave"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L03.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L04.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L05.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L06.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L07.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L08.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L09.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L10.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L11.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L12.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L13.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L14.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L15.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L16.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L17.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L18.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L19.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L20.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L21.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L22.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L23.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "ProLadder",
+    "Namespace": "RCDragManagerProd.Domain",
+    "FilePath": "RCDragManagerProd\\Domain\\Ladders\\ProLadder.Ladders.L24.cs",
+    "FullName": "RCDragManagerProd.Domain.ProLadder"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceSummary",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceSummary"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.Logging.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.Persistence.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.Results.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.RoundFlow.Core.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.RoundFlow.Finals.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.RoundFlow.Losers.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.RoundFlow.View.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "RaceController",
+    "Namespace": "RCDragManagerProd.Controllers",
+    "FilePath": "RCDragManagerProd\\Controllers\\RaceController.Session.cs",
+    "FullName": "RCDragManagerProd.Controllers.RaceController"
+  },
+  {
+    "Name": "AppSettings",
+    "Namespace": "RCDragManagerProd.Config",
+    "FilePath": "RCDragManagerProd\\Config\\AppSettings.cs",
+    "FullName": "RCDragManagerProd.Config.AppSettings"
+  },
+  {
+    "Name": "Model",
+    "Namespace": "RCDragManagerProd.Config",
+    "FilePath": "RCDragManagerProd\\Config\\AppSettings.cs",
+    "FullName": "RCDragManagerProd.Config.Model"
+  }
+]

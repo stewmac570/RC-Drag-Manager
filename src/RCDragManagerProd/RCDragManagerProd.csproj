@@ -102,83 +102,137 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\LaneFairnessManager.cs" />
+    <Compile Include="Controllers\RaceController.Logging.cs" />
+    <Compile Include="Controllers\RaceController.Persistence.cs" />
+    <Compile Include="Controllers\RaceController.Results.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Core.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Finals.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Losers.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.View.cs" />
+    <Compile Include="Controllers\RaceController.Session.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L03.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L04.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L05.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L06.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L07.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L08.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L09.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L10.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L11.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L12.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L13.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L14.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L15.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L16.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L17.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L18.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L19.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L20.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L21.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L22.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L23.cs" />
+    <Compile Include="Domain\Ladders\ProLadder.Ladders.L24.cs" />
+    <Compile Include="Domain\ProLadder.Ladders.Common.cs" />
+    <Compile Include="Domain\ProLadder.Structures.cs" />
     <Compile Include="Helpers\AssetPath.cs" />
-    <Compile Include="UI\Forms\AddCarDialog.cs">
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardDebug.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardFormatter.cs" />
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardWriter.cs" />
+    <Compile Include="UI\Forms\Cars\AddCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\AddCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\Cars\AddCarDialog.Designer.cs">
       <DependentUpon>AddCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\AddDriverAndCarDialog.cs">
+    <Compile Include="UI\Forms\Drivers\AddDriverAndCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\AddDriverAndCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\AddDriverAndCarDialog.Designer.cs">
       <DependentUpon>AddDriverAndCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\AddDriverDialog.cs">
+    <Compile Include="UI\Forms\Drivers\AddDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\AddDriverDialog.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\AddDriverDialog.Designer.cs">
       <DependentUpon>AddDriverDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\AddEditQualTimeDialog.cs">
+    <Compile Include="UI\Forms\Drivers\AddEditQualTimeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\AddEditQualTimeDialog.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\AddEditQualTimeDialog.Designer.cs">
       <DependentUpon>AddEditQualTimeDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\BuybackDriverSelectionForm.cs">
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.Events.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\BuybackDriverSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.UI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\Form1.Display.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\Form1.Events.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\Form1.UI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\Form1.WinnerButtons.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Results\BuybackDriverSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Results\BuybackDriverSelectionForm.Designer.cs">
       <DependentUpon>BuybackDriverSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Domain\Car.cs" />
     <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
     <Compile Include="Repositories\DatabaseInitializer.cs" />
-    <Compile Include="UI\Forms\DriverManagerForm.cs">
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\DriverManagerForm.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\DriverManagerForm.Designer.cs">
       <DependentUpon>DriverManagerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Repositories\DriverRepository.cs" />
     <Compile Include="Domain\Drivers.cs" />
-    <Compile Include="UI\Forms\DriverStatsForm.cs">
+    <Compile Include="UI\Forms\Drivers\DriverStatsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\DriverStatsForm.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\DriverStatsForm.Designer.cs">
       <DependentUpon>DriverStatsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\EditDriverDialog.cs">
+    <Compile Include="UI\Forms\Drivers\EditDriverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\EditDriverDialog.Designer.cs">
+    <Compile Include="UI\Forms\Drivers\EditDriverDialog.Designer.cs">
       <DependentUpon>EditDriverDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\EditWinnerDialog.cs">
+    <Compile Include="UI\Forms\Results\EditWinnerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\EditWinnerDialog.Designer.cs">
+    <Compile Include="UI\Forms\Results\EditWinnerDialog.Designer.cs">
       <DependentUpon>EditWinnerDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\Form1.cs">
+    <Compile Include="UI\Forms\Main\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\Form1.Designer.cs">
+    <Compile Include="UI\Forms\Main\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\LandingPageForm.cs">
+    <Compile Include="UI\Forms\Session\LandingPageForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\LandingPageForm.Designer.cs">
+    <Compile Include="UI\Forms\Session\LandingPageForm.Designer.cs">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\LoadSessionForm.cs">
+    <Compile Include="UI\Forms\Session\LoadSessionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\LoadSessionForm.Designer.cs">
+    <Compile Include="UI\Forms\Session\LoadSessionForm.Designer.cs">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Logging\Logger.cs" />
@@ -198,7 +252,13 @@
     <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
     <Compile Include="Domain\RaceSession.cs" />
     <Compile Include="Repositories\RaceSessionRepository.cs" />
-    <Compile Include="UI\Forms\SettingsForm.cs">
+    <Compile Include="UI\Forms\Common\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\SessionSetupForm.Events.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\SessionSetupForm.UI.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ViewModels\RaceSessionSummary.cs" />
@@ -208,38 +268,38 @@
     <Compile Include="RoundRobinMode\RoundRobinEngine.cs" />
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
-    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger.cs" />
-    <Compile Include="UI\Forms\ScrollableTextDialog.cs">
+    <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardLogger.cs" />
+    <Compile Include="UI\Forms\Common\ScrollableTextDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\SelectCarDialog.cs">
+    <Compile Include="UI\Forms\Cars\SelectCarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\SelectCarDialog.Designer.cs">
+    <Compile Include="UI\Forms\Cars\SelectCarDialog.Designer.cs">
       <DependentUpon>SelectCarDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\Forms\SessionSetupForm.cs">
+    <Compile Include="UI\Forms\Session\SessionSetupForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\SessionSetupForm.Designer.cs">
+    <Compile Include="UI\Forms\Session\SessionSetupForm.Designer.cs">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\DictEx.cs" />
     <Compile Include="ViewModels\MatchResultSave.cs" />
     <Compile Include="ViewModels\PairingRow.cs" />
     <Compile Include="ViewModels\WinnerRow.cs" />
-    <EmbeddedResource Include="UI\Forms\DriverManagerForm.resx">
+    <EmbeddedResource Include="UI\Forms\Drivers\DriverManagerForm.resx">
       <DependentUpon>DriverManagerForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\Forms\Form1.resx">
+    <EmbeddedResource Include="UI\Forms\Main\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\Forms\LandingPageForm.resx">
+    <EmbeddedResource Include="UI\Forms\Session\LandingPageForm.resx">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\Forms\LoadSessionForm.resx">
+    <EmbeddedResource Include="UI\Forms\Session\LoadSessionForm.resx">
       <DependentUpon>LoadSessionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -252,7 +312,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\Forms\SessionSetupForm.resx">
+    <EmbeddedResource Include="UI\Forms\Session\SessionSetupForm.resx">
       <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
