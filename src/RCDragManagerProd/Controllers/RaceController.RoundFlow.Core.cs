@@ -16,6 +16,20 @@ namespace RCDragManagerProd.Controllers
 {
     public partial class RaceController
     {
+        // ────────── RR STANDINGS CACHE ──────────
+        private string _rrStandingsCardCache;
+
+        public bool TryShowRoundRobinStandings()
+        {
+            Logger.Log($"[RR][STANDINGS] TryShowRoundRobinStandings() called. CachePresent={!string.IsNullOrWhiteSpace(_rrStandingsCardCache)}");
+
+            if (string.IsNullOrWhiteSpace(_rrStandingsCardCache))
+                return false;
+
+            ScrollableTextDialog.Show("Round Robin — Standings", _rrStandingsCardCache);
+            return true;
+        }
+
         // ──────────────────  PUBLIC API (CORE FLOW)  ──────────────────
         public void GenerateBracket(string raceType, List<Driver> drivers)
         {
@@ -52,6 +66,8 @@ namespace RCDragManagerProd.Controllers
             _winners.Clear();
             PushFullRefresh();
         }
+
+
 
         // Convenience wrapper (kept in case other callers use it)
         public void GenerateBracket(string raceType)
@@ -182,6 +198,7 @@ namespace RCDragManagerProd.Controllers
                     try
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
+                        _rrStandingsCardCache = card;
                         ScrollableTextDialog.Show("Round Robin — Standings", card);
                     }
                     catch (Exception ex)
