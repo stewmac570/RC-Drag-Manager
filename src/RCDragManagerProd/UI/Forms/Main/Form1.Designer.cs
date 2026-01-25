@@ -35,6 +35,7 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnReset;
         private Button btnEditResult;
         private Button btnSaveAndClose;
+        private Button btnStandings;
         private Button btnGenerateLosersBracket;
         private Label lblRaceType;
         private ComboBox cmbRaceType;
@@ -77,6 +78,7 @@ namespace RCDragManagerProd.UI.Forms
             this.colWinner = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lblRaceType = new System.Windows.Forms.Label();
             this.cmbRaceType = new System.Windows.Forms.ComboBox();
+            this.btnStandings = new System.Windows.Forms.Button();
             this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -383,12 +385,24 @@ namespace RCDragManagerProd.UI.Forms
             this.cmbRaceType.TabIndex = 2;
             this.cmbRaceType.SelectedIndexChanged += new System.EventHandler(this.cmbRaceType_SelectedIndexChanged);
             // 
+            // btnStandings
+            // 
+            this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStandings.Enabled = false;
+            this.btnStandings.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
+            this.btnStandings.Location = new System.Drawing.Point(1076, 177);
+            this.btnStandings.Name = "btnStandings";
+            this.btnStandings.Size = new System.Drawing.Size(100, 45);
+            this.btnStandings.TabIndex = 23;
+            this.btnStandings.Text = "Standings";
+            this.btnStandings.Click += new System.EventHandler(this.btnStandings_Click);
+            // 
             // btnGenerateLosersBracket
             // 
             this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGenerateLosersBracket.Enabled = false;
             this.btnGenerateLosersBracket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 177);
+            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 228);
             this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
             this.btnGenerateLosersBracket.Size = new System.Drawing.Size(100, 45);
             this.btnGenerateLosersBracket.TabIndex = 21;
@@ -420,6 +434,7 @@ namespace RCDragManagerProd.UI.Forms
             this.Controls.Add(this.btnWinner2);
             this.Controls.Add(this.lblNext);
             this.Controls.Add(this.btnEditResult);
+            this.Controls.Add(this.btnStandings);
             this.Controls.Add(this.btnGenerateLosersBracket);
             this.Controls.Add(this.btnSaveAndClose);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

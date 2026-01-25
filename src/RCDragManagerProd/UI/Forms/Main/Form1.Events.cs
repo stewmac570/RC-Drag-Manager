@@ -28,6 +28,8 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (InvokeRequired) { BeginInvoke(new Action<bool>(OnCanOfferBuybackChanged), enabled); return; }
             btnGenerateLosersBracket.Enabled = enabled;
+            btnStandings.Enabled = enabled;
+
             Logger.Log($"UI: Generate Losers Bracket button {(enabled ? "enabled" : "disabled")}.");
 
             if (enabled)
@@ -310,6 +312,8 @@ namespace RCDragManagerProd.UI.Forms
 
             btnGenerateBracket.Enabled = true;
             btnNextRound.Enabled = false;
+            btnStandings.Enabled = false;
+
 
             if (currentSession != null && !string.IsNullOrEmpty(currentSession.RaceType))
             {
@@ -502,5 +506,30 @@ namespace RCDragManagerProd.UI.Forms
                     "Edit Match Result", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void btnStandings_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Log("[UI][CLICK] Standings clicked.");
+
+                var shown = _controller.TryShowRoundRobinStandings();
+                Logger.Log("[UI][STANDINGS] TryShowRoundRobinStandings() -> " + (shown ? "SHOWN" : "NOT AVAILABLE"));
+
+                if (!shown)
+                {
+                    MessageBox.Show(
+                        "Standings are not available yet.\n\nThey will be available after Round Robin is complete.",
+                        "Standings Not Ready",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[UI][STANDINGS][ERROR] " + ex);
+                MessageBox.Show("Failed to show standings. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 }
