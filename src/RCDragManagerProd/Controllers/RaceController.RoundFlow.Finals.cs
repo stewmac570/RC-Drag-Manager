@@ -71,7 +71,8 @@ namespace RCDragManagerProd.Controllers
             }
 
             var preserveLb = _revealedRounds
-                .Where(r => r.StartsWith("Losers Bracket", StringComparison.OrdinalIgnoreCase))
+                .Where(r => string.Equals(RoundLabels.Normalize(r), "LB-F", StringComparison.OrdinalIgnoreCase) ||
+                            RoundLabels.Normalize(r).StartsWith("LB-R", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             _revealedRounds.Clear();

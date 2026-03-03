@@ -67,7 +67,7 @@ namespace RCDragManagerProd.RandomMode
                     Seed2 = p2,                 // may be null (BYE)
                     FromMatch1 = 0,
                     FromMatch2 = 0,
-                    RoundLabel = "Losers Bracket R1"
+                    RoundLabel = RoundLabels.Normalize("LB-R1")
                 });
 
                 Logger.Log($"[LB-BUILD] R1 M{matchId}: {(p1?.Name ?? "BYE")} vs {(p2?.Name ?? "BYE")}");
@@ -98,8 +98,8 @@ namespace RCDragManagerProd.RandomMode
                             FromMatch1 = prevRound[i],
                             FromMatch2 = prevRound[i + 1],
                             RoundLabel = (prevRound.Count == 2)
-                                         ? "Losers Bracket Final"
-                                         : $"Losers Bracket R{roundIndex}"
+                                         ? RoundLabels.Normalize("LB-F")
+                                         : RoundLabels.Normalize($"LB-R{roundIndex}")
                         });
 
                         Logger.Log($"[LB-BUILD] R{roundIndex} M{matchId}: Winner M{prevRound[i]} vs Winner M{prevRound[i + 1]}");
@@ -115,7 +115,7 @@ namespace RCDragManagerProd.RandomMode
                             Seed2 = null,      // BYE
                             FromMatch1 = prevRound[i],
                             FromMatch2 = 0,
-                            RoundLabel = $"Losers Bracket R{roundIndex}"
+                            RoundLabel = RoundLabels.Normalize($"LB-R{roundIndex}")
                         });
 
                         Logger.Log($"[LB-BUILD] R{roundIndex} M{matchId}: Winner M{prevRound[i]} vs BYE (carry)");

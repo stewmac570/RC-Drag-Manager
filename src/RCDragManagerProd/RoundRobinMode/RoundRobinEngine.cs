@@ -141,7 +141,7 @@ namespace RCDragManagerProd.RoundRobinMode
                     if (isByePair)
                     {
                         var real = A ?? B;
-                        matches.Add((real, null, $"R{round}", matchIdCounter++));
+                        matches.Add((real, null, $"RR{round}", matchIdCounter++));
                         if (real != null && isOdd && byeCount.ContainsKey(real.Id))
                             byeCount[real.Id] = byeCount[real.Id] + 1;
 
@@ -163,7 +163,7 @@ namespace RCDragManagerProd.RoundRobinMode
                             Log("[RR][WARN] Duplicate head-to-head within current cycle: " + SafeName(d1Out) + " vs " + SafeName(d2Out));
 
 
-                        matches.Add((d1Out, d2Out, $"R{round}", matchIdCounter++));
+                        matches.Add((d1Out, d2Out, $"RR{round}", matchIdCounter++));
                         Log($"[RR]   M{matchIdCounter - 1:000}: {SafeName(d1Out)} vs {SafeName(d2Out)}");
                     }
 
@@ -244,6 +244,7 @@ namespace RCDragManagerProd.RoundRobinMode
         {
             return matches.Select(m => m.RoundLabel)
                           .Distinct()
+                          .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
                           .ToList();
         }
 

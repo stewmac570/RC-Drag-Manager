@@ -46,7 +46,10 @@ namespace RCDragManagerProd.RoundRobinMode
                                  .ToList();
 
             var idToName = drivers.ToDictionary(d => d.Id, d => d.Name);
-            var rounds = matches.Select(m => m.RoundLabel).Distinct().OrderBy(x => x).ToList();
+            var rounds = matches.Select(m => RoundLabels.Normalize(m.RoundLabel))
+                               .Distinct(StringComparer.OrdinalIgnoreCase)
+                               .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                               .ToList();
 
             // Points schedule
             Logger.Log("[RR-SCORE] Points schedule:");
@@ -179,7 +182,7 @@ namespace RCDragManagerProd.RoundRobinMode
 
                 if (lines.TryGetValue(d.Id, out var lns))
                 {
-                    foreach (var ln in lns.OrderBy(x => x.RoundLabel))
+                    foreach (var ln in lns.OrderBy(x => RoundLabels.Normalize(x.RoundLabel), Comparer<string>.Create(RoundLabels.Compare)))
                         Logger.Log($"      {ln.RoundLabel}: {ln.Outcome}(+{ln.Points:0.00}) vs {ln.Opponent}");
                 }
                 Logger.Log($"      Defeated: {defNames}");
@@ -217,10 +220,13 @@ namespace RCDragManagerProd.RoundRobinMode
         // ─────────────────────────────────────────────────────────────
         private static (double Win, double Loss, double Bye) PointsFor(string lbl)
         {
-            switch ((lbl ?? "").ToUpperInvariant())
+            switch (RoundLabels.Normalize(lbl).ToUpperInvariant())
             {
+                case "RR1":
                 case "R1": return (4.0, 1.0, 2.0);
+                case "RR2":
                 case "R2": return (3.5, 0.75, 1.5);
+                case "RR3":
                 case "R3": return (3.0, 0.5, 1.0);
                 default: return (0, 0, 0);
             }
