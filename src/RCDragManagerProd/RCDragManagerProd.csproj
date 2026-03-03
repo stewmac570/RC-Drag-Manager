@@ -135,6 +135,7 @@
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L24.cs" />
     <Compile Include="Domain\ProLadder.Ladders.Common.cs" />
     <Compile Include="Domain\ProLadder.Structures.cs" />
+    <Compile Include="Domain\RoundLabels.cs" />
     <Compile Include="Helpers\AssetPath.cs" />
     <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardDebug.cs" />
     <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardFormatter.cs" />

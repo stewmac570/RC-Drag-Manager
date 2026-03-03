@@ -28,6 +28,10 @@ namespace RCDragManagerProd.RandomMode
         public void LoadMatches(List<RandomMatch> matches)
         {
             bracketMatches = matches ?? new List<RandomMatch>();
+            foreach (var m in bracketMatches)
+            {
+                m.RoundLabel = RoundLabels.Normalize(m.RoundLabel);
+            }
         }
 
         public IReadOnlyList<RandomMatch> GetMatches() => bracketMatches;
@@ -145,7 +149,7 @@ namespace RCDragManagerProd.RandomMode
                     MatchId = matchId++,
                     Seed1 = shuffled[i],
                     Seed2 = shuffled[i + 1],
-                    RoundLabel = "R1"
+                    RoundLabel = RoundLabels.Normalize("R1")
                 });
             }
 
@@ -166,7 +170,7 @@ namespace RCDragManagerProd.RandomMode
                         MatchId = matchId++,
                         FromMatch1 = m1.MatchId,
                         FromMatch2 = m2?.MatchId,
-                        RoundLabel = $"R{roundNum}"
+                        RoundLabel = RoundLabels.Normalize($"R{roundNum}")
                     });
                 }
 
@@ -179,7 +183,7 @@ namespace RCDragManagerProd.RandomMode
             if (bracketMatches.Count > 0)
             {
                 var final = bracketMatches.Last();
-                final.RoundLabel = "F";
+                final.RoundLabel = RoundLabels.Normalize("F");
             }
         }
 
@@ -195,7 +199,10 @@ namespace RCDragManagerProd.RandomMode
 
         public IReadOnlyList<string> GetRoundOrder()
         {
-            return bracketMatches.Select(m => m.RoundLabel).Distinct().ToList();
+            return bracketMatches.Select(m => RoundLabels.Normalize(m.RoundLabel))
+                                .Distinct(StringComparer.OrdinalIgnoreCase)
+                                .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                                .ToList();
         }
 
     }

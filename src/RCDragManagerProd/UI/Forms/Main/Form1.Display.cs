@@ -261,7 +261,7 @@ namespace RCDragManagerProd.UI.Forms
                 }
 
                 var ordered = rows
-                    .OrderBy(w => GetGlobalRoundOrder(w.RoundLabel ?? string.Empty))
+                    .OrderBy(w => RoundLabels.Normalize(w.RoundLabel ?? string.Empty), Comparer<string>.Create(RoundLabels.Compare))
                     .ThenBy(w => w.MatchId)
                     .ToList();
 

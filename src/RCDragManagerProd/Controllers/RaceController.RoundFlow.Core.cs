@@ -408,7 +408,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             // ── Legacy fallback (if LB Final manually checked) ────────────
-            if (_session.RaceType == "Losers Bracket" && _revealedRounds.Contains("Losers Bracket Final"))
+            if (_session.RaceType == "Losers Bracket" && _revealedRounds.Any(r => string.Equals(RoundLabels.Normalize(r), "LB-F", StringComparison.OrdinalIgnoreCase)))
             {
                 var finalMatch = _engine.GetMatches().LastOrDefault();
                 if (finalMatch != null && finalMatch.HasResult)

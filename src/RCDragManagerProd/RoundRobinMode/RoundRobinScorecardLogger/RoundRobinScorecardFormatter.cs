@@ -143,7 +143,7 @@ namespace RCDragManagerProd.RoundRobinMode
             // Build popup with CompositeScore that encodes tie-breaks numerically
             var sb = new StringBuilder();
             sb.AppendLine("Round Robin — Standings");
-            sb.AppendLine($"Schedule: R1(W=4 L=1 BYE=2), R2(W=3.5 L=0.75 BYE=1.5), R3(W=3 L=0.5 BYE=1)");
+            sb.AppendLine($"Schedule: RR1(W=4 L=1 BYE=2), RR2(W=3.5 L=0.75 BYE=1.5), RR3(W=3 L=0.5 BYE=1)");
             sb.AppendLine($"Composite = Pts"
                 + $" + Wins×{WEIGHT_WINS:0.####}"
                 + $" + H2H×{WEIGHT_H2H:0.####}"
@@ -173,7 +173,7 @@ namespace RCDragManagerProd.RoundRobinMode
 
                 if (lines.TryGetValue(d.Id, out var lnz))
                 {
-                    foreach (var ln in lnz.OrderBy(x => x.RoundLabel))
+                    foreach (var ln in lnz.OrderBy(x => RoundLabels.Normalize(x.RoundLabel), Comparer<string>.Create(RoundLabels.Compare)))
                         sb.AppendLine($"   {ln.RoundLabel}: {ln.Outcome}(+{ln.Points:0.00}) vs {ln.Opponent}");
                 }
 

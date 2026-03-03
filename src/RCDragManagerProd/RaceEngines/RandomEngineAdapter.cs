@@ -64,7 +64,7 @@ namespace RCDragManagerProd.RaceEngines
                     MatchId = m.MatchId,
                     Driver1 = m.Seed1,
                     Driver2 = m.Seed2,
-                    RoundLabel = m.RoundLabel,
+                    RoundLabel = RoundLabels.Normalize(m.RoundLabel),
                     FromMatch1 = m.FromMatch1,
                     FromMatch2 = m.FromMatch2,
                     HasResult = _engine.HasWinner(m.MatchId)
@@ -73,7 +73,12 @@ namespace RCDragManagerProd.RaceEngines
             return list;
         }
 
-        public IReadOnlyList<string> GetRoundOrder() => _engine.GetRoundOrder();
+        public IReadOnlyList<string> GetRoundOrder() =>
+            _engine.GetRoundOrder()
+                   .Select(RoundLabels.Normalize)
+                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                   .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                   .ToList();
 
         public void SetWinner(int matchId, Driver winner)
         {
@@ -100,8 +105,8 @@ namespace RCDragManagerProd.RaceEngines
 
             // Prefer a labeled final, else the last round seen in order.
             var final = all.FirstOrDefault(m =>
-                !string.IsNullOrEmpty(m.RoundLabel) &&
-                m.RoundLabel.IndexOf("final", StringComparison.OrdinalIgnoreCase) >= 0);
+                string.Equals(RoundLabels.Normalize(m.RoundLabel), "F", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(RoundLabels.Normalize(m.RoundLabel), "LB-F", StringComparison.OrdinalIgnoreCase));
 
             if (final == null)
             {
@@ -262,16 +267,19 @@ namespace RCDragManagerProd.RaceEngines
 
         private static string LabelForNextRound(List<string> order, int lastWinnerCount)
         {
-            // Very simple scheme: Round N → Round N+1; if exactly two winners were produced, call it "Final".
-            var last = (order != null && order.Count > 0) ? order[order.Count - 1] : "Round 1";
+            var last = (order != null && order.Count > 0) ? RoundLabels.Normalize(order[order.Count - 1]) : "R1";
             var index = ParseRoundIndex(last);
-            if (lastWinnerCount == 2) return "Final";
-            return "Round " + (index + 1);
+            if (lastWinnerCount == 2) return "F";
+            return "R" + (index + 1);
         }
 
         private static int ParseRoundIndex(string roundLabel)
         {
             if (string.IsNullOrWhiteSpace(roundLabel)) return 1;
+            if (roundLabel.StartsWith("R", StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(roundLabel.Substring(1).Trim(), out var n) && n > 0) return n;
+            }
             if (roundLabel.StartsWith("Round ", StringComparison.OrdinalIgnoreCase))
             {
                 if (int.TryParse(roundLabel.Substring(6).Trim(), out var n) && n > 0) return n;

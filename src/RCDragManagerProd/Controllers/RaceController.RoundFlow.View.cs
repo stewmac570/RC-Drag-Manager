@@ -79,11 +79,12 @@ namespace RCDragManagerProd.Controllers
 
                 foreach (var round in rList)
                 {
-                    if (filterByRevealed && !_revealedRounds.Contains(round)) continue;
+                    var normalizedRound = RoundLabels.Normalize(round);
+                    if (filterByRevealed && !_revealedRounds.Contains(round) && !_revealedRounds.Contains(normalizedRound)) continue;
 
-                    rows.Add(new PairingRow { IsHeader = true, RoundLabel = round });
+                    rows.Add(new PairingRow { IsHeader = true, RoundLabel = normalizedRound });
 
-                    foreach (var m in mList.Where(x => x.RoundLabel == round))
+                    foreach (var m in mList.Where(x => string.Equals(RoundLabels.Normalize(x.RoundLabel), normalizedRound, StringComparison.OrdinalIgnoreCase)))
                     {
                         string leftName;
                         string rightName;
@@ -96,7 +97,7 @@ namespace RCDragManagerProd.Controllers
                             MatchId = m.MatchId,
                             Driver1 = leftName,
                             Driver2 = rightName,
-                            RoundLabel = m.RoundLabel
+                            RoundLabel = RoundLabels.Normalize(m.RoundLabel)
                         });
                     }
                 }

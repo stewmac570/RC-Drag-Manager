@@ -80,8 +80,8 @@ namespace RCDragManagerProd.Controllers
             Logger.Log("[LB] Engine swapped to LB adapter; LB phase entered; session type='Losers Bracket'.");
 
             _revealedRounds.Clear();
-            _revealedRounds.Add("Losers Bracket R1");
-            Logger.Log("🎬 Revealed: Losers Bracket R1");
+            _revealedRounds.Add(RoundLabels.Normalize("LB-R1"));
+            Logger.Log("🎬 Revealed: LB-R1");
 
             var rows = BuildCurrentBracketRows();
             BracketRedrawn?.Invoke(rows);
