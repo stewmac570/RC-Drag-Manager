@@ -111,7 +111,7 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            _revealedRounds.Add(roundOrder.First());
+            _revealedRounds.Add(roundOrder[0]);
 
             _winners.Clear();
             PushFullRefresh();
