@@ -64,8 +64,8 @@ namespace RCDragManagerProd.UI.Forms
                         continue;
                     }
 
-                    bool bye1 = string.IsNullOrWhiteSpace(row.Driver1);
-                    bool bye2 = string.IsNullOrWhiteSpace(row.Driver2);
+                    bool bye1 = string.IsNullOrWhiteSpace(row.Driver1) || IsByeName(row.Driver1);
+                    bool bye2 = string.IsNullOrWhiteSpace(row.Driver2) || IsByeName(row.Driver2);
 
                     string d1 = bye1 ? "BYE" : row.Driver1;
                     string d2 = bye2 ? "BYE" : row.Driver2;
@@ -173,6 +173,8 @@ namespace RCDragManagerProd.UI.Forms
 
                 ApplyByeButtonStyle(btnWinner1, leftIsBye);
                 ApplyByeButtonStyle(btnWinner2, rightIsBye);
+                if (leftIsBye) Logger.Log("[UI][BYE] Disabled winner button: matchId=" + row.MatchId + " side=Left");
+                if (rightIsBye) Logger.Log("[UI][BYE] Disabled winner button: matchId=" + row.MatchId + " side=Right");
 
                 Logger.Log("[UI][NEXT] Buttons: leftIsBye=" + leftIsBye + " rightIsBye=" + rightIsBye +
                            " leftEnabled=" + btnWinner1.Enabled + " rightEnabled=" + btnWinner2.Enabled);

@@ -103,6 +103,6 @@ namespace RCDragManagerProd.RaceEngines
         }
 
         private static bool IsBye(Driver d) =>
-            d == null || string.Equals(d.Name?.Trim(), "BYE", System.StringComparison.OrdinalIgnoreCase);
+            ByePolicy.IsBye(d);
     }
 }

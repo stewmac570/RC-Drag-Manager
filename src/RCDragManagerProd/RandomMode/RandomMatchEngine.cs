@@ -90,10 +90,6 @@ namespace RCDragManagerProd.RandomMode
             Driver d1 = match.Seed1 ?? ResolveFrom(match.FromMatch1);
             Driver d2 = match.Seed2 ?? ResolveFrom(match.FromMatch2);
 
-            // ✅ Inject BYE placeholder
-            if (d1 != null && d2 == null) return (d1, new Driver { Name = "BYE" });
-            if (d2 != null && d1 == null) return (new Driver { Name = "BYE" }, d2);
-
             // Up-stream matches unresolved
             return (d1, d2);
         }

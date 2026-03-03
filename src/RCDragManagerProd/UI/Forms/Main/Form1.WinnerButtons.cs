@@ -64,8 +64,8 @@ namespace RCDragManagerProd.UI.Forms
             bool d1IsBye;
             bool d2IsBye;
 
-            d1IsBye = (match.Driver1 == null) || IsByeName(match.Driver1.Name);
-            d2IsBye = (match.Driver2 == null) || IsByeName(match.Driver2.Name);
+            d1IsBye = ByePolicy.IsBye(match.Driver1);
+            d2IsBye = ByePolicy.IsBye(match.Driver2);
 
             Logger.Log("[UI][WINNER] Engine snapshot: M" + matchId + " (" + round + ") " +
                        "D1=" + (match.Driver1 != null ? match.Driver1.Name : "NULL") + " bye=" + d1IsBye + " | " +

@@ -133,6 +133,7 @@
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L22.cs" />
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L23.cs" />
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L24.cs" />
+    <Compile Include="Domain\ByePolicy.cs" />
     <Compile Include="Domain\ProLadder.Ladders.Common.cs" />
     <Compile Include="Domain\ProLadder.Structures.cs" />
     <Compile Include="Helpers\AssetPath.cs" />
