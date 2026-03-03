@@ -435,8 +435,14 @@ namespace RCDragManagerProd.Controllers
                     {
                         var d1 = final.Driver1;
                         var d2 = final.Driver2;
-                        runnerUp = (d1 != null && d1.Id != winner.Id) ? d1 : d2;
+
+                        if (d1 != null && d2 != null)
+                        {
+                            if (d1.Id == winner.Id) runnerUp = d2;
+                            else if (d2.Id == winner.Id) runnerUp = d1;
+                        }
                     }
+                    Logger.Log($"[FINALS] Runner-up resolution: M{final.MatchId}, winnerId={(winner != null ? winner.Id.ToString() : "null")}, runnerUpId={(runnerUp != null ? runnerUp.Id.ToString() : "null")}");
 
                     var summary = new RaceSummary
                     {
