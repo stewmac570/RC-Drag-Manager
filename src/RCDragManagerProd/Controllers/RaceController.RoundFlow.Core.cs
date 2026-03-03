@@ -59,15 +59,45 @@ namespace RCDragManagerProd.Controllers
 
             if (_engine is ProLadderEngineAdapter)
             {
+                Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count}");
+
                 if (_drivers.Count < 3 || _drivers.Count > 32)
                 {
-                    Logger.Log($"⛔ Cannot generate Pro Ladder bracket — field size {_drivers.Count} is outside supported range (3–32).");
+                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3–32)");
+                    try
+                    {
+                        MessageBox.Show(
+                            "Pro Ladder supports 3–32 drivers. Please adjust the driver count.",
+                            "Invalid Driver Count",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                    catch { /* ignore UI errors in headless runs */ }
+
+                    CanAdvanceChanged?.Invoke(false);
+                    CanPickWinnerChanged?.Invoke(false);
+                    NextMatchReady?.Invoke(null);
                     return;
                 }
 
-                if (ProLadder.GetLadder(_drivers.Count).Count == 0)
+                try
                 {
-                    Logger.Log($"⛔ Cannot generate Pro Ladder bracket — no ladder template exists for field size {_drivers.Count}.");
+                    var template = ProLadder.GetLadder(_drivers.Count);
+                    if (template == null || template.Count == 0)
+                    {
+                        Logger.Log($"[ProLadderValidate] missing template for size={_drivers.Count}");
+                        CanAdvanceChanged?.Invoke(false);
+                        CanPickWinnerChanged?.Invoke(false);
+                        NextMatchReady?.Invoke(null);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"[ProLadderValidate] missing template for size={_drivers.Count} (probe failed: {ex.Message})");
+                    CanAdvanceChanged?.Invoke(false);
+                    CanPickWinnerChanged?.Invoke(false);
+                    NextMatchReady?.Invoke(null);
                     return;
                 }
             }
@@ -111,7 +141,7 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            _revealedRounds.Add(roundOrder.First());
+            _revealedRounds.Add(roundOrder[0]);
 
             _winners.Clear();
             PushFullRefresh();
@@ -405,8 +435,14 @@ namespace RCDragManagerProd.Controllers
                     {
                         var d1 = final.Driver1;
                         var d2 = final.Driver2;
-                        runnerUp = (d1 != null && d1.Id != winner.Id) ? d1 : d2;
+
+                        if (d1 != null && d2 != null)
+                        {
+                            if (d1.Id == winner.Id) runnerUp = d2;
+                            else if (d2.Id == winner.Id) runnerUp = d1;
+                        }
                     }
+                    Logger.Log($"[FINALS] Runner-up resolution: M{final.MatchId}, winnerId={(winner != null ? winner.Id.ToString() : "null")}, runnerUpId={(runnerUp != null ? runnerUp.Id.ToString() : "null")}");
 
                     var summary = new RaceSummary
                     {

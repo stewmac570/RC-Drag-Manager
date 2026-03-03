@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.RaceEngines;   // if it talks to core engine types
+using RCDragManagerProd.Logging;
 
 
 
@@ -35,6 +36,7 @@ namespace RCDragManagerProd.RandomMode
         public void SetWinner(int matchId, Driver winner)
         {
             Driver loser = GetLoserFromMatch(matchId, winner);
+            Logger.Log($"[RND] Loser resolution: matchId={matchId}, winnerId={(winner != null ? winner.Id.ToString() : "null")}, loserId={(loser != null ? loser.Id.ToString() : "null")}");
             results.SetWinner(matchId, winner, loser);
 
             // 🔧 Patch downstream matches to replace null seeds
