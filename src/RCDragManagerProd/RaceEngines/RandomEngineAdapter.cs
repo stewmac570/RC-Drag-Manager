@@ -295,8 +295,7 @@ namespace RCDragManagerProd.RaceEngines
 
         private static bool IsBye(Driver d)
         {
-            var name = d?.Name ?? "";
-            return string.Equals(name.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
+            return ByePolicy.IsBye(d);
         }
     }
 }

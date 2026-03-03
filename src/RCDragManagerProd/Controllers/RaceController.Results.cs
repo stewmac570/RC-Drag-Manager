@@ -37,11 +37,13 @@ namespace RCDragManagerProd.Controllers
             var loser = firstOption ? match.Driver2 : match.Driver1;
 
             // Universal block — no BYE as winner
-            if (winner == null || string.Equals(winner.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
+            if (ByePolicy.IsBye(winner) || string.Equals(winner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
                 Logger.Log($"[WINNER] Reject — cannot select BYE as winner for M{matchId}.");
                 return;
             }
+            if (ByePolicy.IsBye(loser))
+                Logger.Log($"[WINNER][BYE] Auto-advance M{matchId} -> {winner.Name}");
 
             Logger.Log($"[WINNER] M{matchId} {match.RoundLabel}: {winner.Name} over {(loser?.Name ?? "BYE")}");
 
@@ -129,7 +131,7 @@ namespace RCDragManagerProd.Controllers
             var newWinner = firstOption ? match.Driver1 : match.Driver2;
             var newLoser = firstOption ? match.Driver2 : match.Driver1;
 
-            if (newWinner == null || string.Equals(newWinner.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
+            if (ByePolicy.IsBye(newWinner) || string.Equals(newWinner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
                 Logger.Log($"[CTRL][EDIT] Reject edit — cannot set BYE as winner (M{matchId}).");
                 return false;

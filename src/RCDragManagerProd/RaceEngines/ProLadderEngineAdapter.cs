@@ -84,20 +84,18 @@ namespace RCDragManagerProd.RaceEngines
         }
 
         private static bool IsBye(Driver d) =>
-            d == null || string.Equals(d.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
+            ByePolicy.IsBye(d);
 
         private EngineMatch MapToDto(ProLadder.LadderMatch src)
         {
             // Let the MatchEngine resolve seeds/upstream winners; then normalize BYEs
             var (rd1, rd2) = _engine.ResolveDriversForMatch(src);
-            var d1 = rd1 ?? new Driver { Name = "BYE" };
-            var d2 = rd2 ?? new Driver { Name = "BYE" };
 
             return new EngineMatch
             {
                 MatchId = src.MatchId,
-                Driver1 = d1,
-                Driver2 = d2,
+                Driver1 = rd1,
+                Driver2 = rd2,
                 RoundLabel = src.RoundLabel,
                 FromMatch1 = src.FromMatch1,
                 FromMatch2 = src.FromMatch2,

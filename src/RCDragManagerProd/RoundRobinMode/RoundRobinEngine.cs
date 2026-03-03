@@ -207,9 +207,6 @@ namespace RCDragManagerProd.RoundRobinMode
             var d1 = drivers.FirstOrDefault(d => d.Seed == match.Seed1);
             var d2 = drivers.FirstOrDefault(d => d.Seed == match.Seed2);
 
-            if (d1 != null && d2 == null) d2 = new Driver { Name = "BYE" };
-            if (d2 != null && d1 == null) d1 = new Driver { Name = "BYE" };
-
             return (d1, d2);
         }
 
