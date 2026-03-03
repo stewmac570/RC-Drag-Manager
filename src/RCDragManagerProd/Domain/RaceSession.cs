@@ -14,6 +14,15 @@ namespace RCDragManagerProd.Domain
         public string ClassType { get; set; }
         public double? FixedDialIn { get; set; }
 
+        // -----------------------------
+        // Round Robin configuration
+        // -----------------------------
+        // "Standard" or "QMDRA"
+        public string RoundRobinVariant { get; set; }
+
+        // Required when RoundRobinVariant == "QMDRA"
+        public int? RoundsToRun { get; set; }
+
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
         public HashSet<(int, int)> PairingHistory { get; set; } = new HashSet<(int, int)>();
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
@@ -27,7 +36,14 @@ namespace RCDragManagerProd.Domain
         public RaceSession()
         {
             DriverEntries = new List<RaceSessionDriverEntry>();
-            Logger.Log("[DEBUG] RaceSession ctor – Lists initialised.");   // <-- keeps init noise in one spot
+            Logger.Log("[DEBUG] RaceSession ctor – Lists initialised.");
+
+            // Defaults (keeps old behavior unless UI sets QMDRA + N)
+            RoundRobinVariant = "Standard";
+            RoundsToRun = null;
+
+            Logger.Log("[DEBUG] RaceSession ctor – RR defaults set: Variant=Standard, RoundsToRun=null");
+
         }
 
     }

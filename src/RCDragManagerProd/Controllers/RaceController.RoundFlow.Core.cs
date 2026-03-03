@@ -48,11 +48,50 @@ namespace RCDragManagerProd.Controllers
             }
             _session.RaceType = rt;
 
+            Logger.Log($"[CTRL][DEBUG] GenerateBracket inputs → raceTypeArg='{raceType}', rt='{rt}', session.RaceType='{_session.RaceType}', RRVariant='{_session.RoundRobinVariant}', N={_session.RoundsToRun}");
+
+
             _drivers = drivers;
             _session.Drivers = new List<Driver>(_drivers);   // keep session + controller in sync
 
             _engine = RaceEngineFactory.Create(rt);
             Logger.Log($"[ENGINE] Created '{_engine.GetType().Name}' for raceType='{rt}' (drivers={_drivers.Count})");
+
+            if (_engine is ProLadderEngineAdapter)
+            {
+                if (_drivers.Count < 3 || _drivers.Count > 32)
+                {
+                    Logger.Log($"⛔ Cannot generate Pro Ladder bracket — field size {_drivers.Count} is outside supported range (3–32).");
+                    return;
+                }
+
+                if (ProLadder.GetLadder(_drivers.Count).Count == 0)
+                {
+                    Logger.Log($"⛔ Cannot generate Pro Ladder bracket — no ladder template exists for field size {_drivers.Count}.");
+                    return;
+                }
+            }
+
+            // QMDRA: push requested rounds into RR engine before generating
+            if (_engine is RoundRobinEngineAdapter rrAdapter)
+            {
+                var variant = (_session?.RoundRobinVariant ?? "Standard").Trim();
+                var isQmdra = string.Equals(variant, "QMDRA", StringComparison.OrdinalIgnoreCase);
+
+                if (isQmdra)
+                {
+                    int nRounds = _session?.RoundsToRun ?? 0;
+                    if (nRounds <= 0) nRounds = 3;
+
+                    rrAdapter.SetRoundsToRun(nRounds);
+                    Logger.Log($"[ENGINE][RR] QMDRA active → SetRoundsToRun({nRounds})");
+                }
+                else
+                {
+                    rrAdapter.SetRoundsToRun(3);
+                    Logger.Log($"[ENGINE][RR] Standard RR → SetRoundsToRun(3)");
+                }
+            }
 
             _engine.LoadDrivers(_drivers);
             Logger.Log("[ENGINE] Drivers loaded into engine.");
@@ -60,8 +99,19 @@ namespace RCDragManagerProd.Controllers
             _engine.GenerateBracket();
             Logger.Log("[ENGINE] Bracket generated.");
 
+            var roundOrder = _engine.GetRoundOrder();
+            if (roundOrder == null || roundOrder.Count == 0)
+            {
+                Logger.Log("⛔ Bracket generated with no rounds — aborting reveal state update.");
+                CanAdvanceChanged?.Invoke(false);
+                CanPickWinnerChanged?.Invoke(false);
+                NextMatchReady?.Invoke(null);
+                return;
+            }
+
+
             _revealedRounds.Clear();
-            _revealedRounds.Add(_engine.GetRoundOrder().First());
+            _revealedRounds.Add(roundOrder.First());
 
             _winners.Clear();
             PushFullRefresh();
@@ -177,6 +227,67 @@ namespace RCDragManagerProd.Controllers
             // ── RR → Buyback or Auto-Advance to Finals ─────────────────────
             if (_engine is RoundRobinEngineAdapter rr)
             {
+                var variant = (_session?.RoundRobinVariant ?? "Standard").Trim();
+                var isQmdra = string.Equals(variant, "QMDRA", StringComparison.OrdinalIgnoreCase);
+
+                // ---------------------------------------------------------
+                // QMDRA RR completion: stop after N rounds revealed
+                // Complete when:
+                //   - revealedRounds.Count >= N
+                //   - all matches in revealed rounds are resolved
+                // Then: seed ALL drivers to finals in RR ranking order (no buyback)
+                // ---------------------------------------------------------
+                if (isQmdra)
+                {
+                    int n = _session?.RoundsToRun ?? 0;
+                    if (n <= 0)
+                    {
+                        Logger.Log("[RR][QMDRA][ERROR] Variant=QMDRA but RoundsToRun is missing/invalid. Blocking finals transition.");
+                        return;
+                    }
+
+                    var visibleMatchesQ = rr.GetMatches()
+                                            .Where(m => _revealedRounds.Contains(m.RoundLabel))
+                                            .ToList();
+
+                    bool allVisibleResolvedQ = visibleMatchesQ.All(m => m.HasResult);
+                    bool roundsReached = _revealedRounds.Count >= n;
+
+                    Logger.Log($"[RR][QMDRA] Check → Revealed={_revealedRounds.Count}, N={n}, roundsReached={roundsReached}, visibleMatches={visibleMatchesQ.Count}, allVisibleResolved={allVisibleResolvedQ}");
+
+                    if (roundsReached && allVisibleResolvedQ)
+                    {
+                        // standings display is allowed (keep your existing scorecard)
+                        try
+                        {
+                            var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
+                            _rrStandingsCardCache = card;
+                            ScrollableTextDialog.Show("Round Robin — Standings", card);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Log($"[RR][QMDRA] Scorecard popup failed: {ex.Message}");
+                        }
+                        RoundRobinScorecardLogger.Log(rr, _matchResult);
+
+                        int totalDrivers = _session?.Drivers?.Count ?? 0;
+                        if (totalDrivers <= 0) totalDrivers = rr.GetMatches().SelectMany(m => new[] { m.Driver1, m.Driver2 }).Where(d => d != null).Distinct().Count();
+
+                        var rankedAll = rr.GetTopRankedDrivers(totalDrivers);
+
+                        Logger.Log($"[RR][QMDRA] COMPLETE → Advancing ALL drivers to finals. RankedCount={rankedAll.Count}, SessionDrivers={totalDrivers}");
+                        Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
+
+                        InjectFinalsAllAdvance(rankedAll);
+                        return;
+                    }
+
+                    // Not complete yet → normal flow continues (no buyback in QMDRA ever)
+                }
+
+                // ---------------------------------------------------------
+                // Standard RR completion (existing behavior)
+                // ---------------------------------------------------------
                 bool allRRResolved =
                     rr.GetRoundOrder().All(r => _revealedRounds.Contains(r)) &&
                     rr.GetMatches().All(m => m.HasResult);
@@ -185,6 +296,7 @@ namespace RCDragManagerProd.Controllers
 
                 if (allRRResolved)
                 {
+
                     _rrTop3 = rr.GetTopRankedDrivers(3);
                     var names = (_rrTop3 != null && _rrTop3.Count > 0)
                         ? string.Join(", ", _rrTop3.Select(d => d.Name))
@@ -293,7 +405,7 @@ namespace RCDragManagerProd.Controllers
                     {
                         var d1 = final.Driver1;
                         var d2 = final.Driver2;
-                        runnerUp = (d1 != null && !ReferenceEquals(d1, winner)) ? d1 : d2;
+                        runnerUp = (d1 != null && d1.Id != winner.Id) ? d1 : d2;
                     }
 
                     var summary = new RaceSummary

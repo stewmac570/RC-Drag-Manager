@@ -100,6 +100,54 @@ namespace RCDragManagerProd.UI.Forms
             FillFilterCombos();
             RefreshDriverList();
         }
+        private void UpdateRoundRobinUiState()
+        {
+            var raceType = cmbRaceType?.SelectedItem?.ToString() ?? string.Empty;
+            var isRR = string.Equals(raceType, "Round Robin", StringComparison.OrdinalIgnoreCase);
+
+            // show/hide RR controls
+            if (lblRRVariant != null) lblRRVariant.Visible = isRR;
+            if (cmbRRVariant != null) cmbRRVariant.Visible = isRR;
+            if (lblRoundsToRun != null) lblRoundsToRun.Visible = isRR;
+            if (nudRoundsToRun != null) nudRoundsToRun.Visible = isRR;
+
+            if (!isRR)
+            {
+                if (cmbRRVariant != null) cmbRRVariant.SelectedItem = "Standard";
+                if (nudRoundsToRun != null)
+                {
+                    nudRoundsToRun.Enabled = false;
+                }
+
+                Logger.Log("[CREATE][RR] UI state → not RR (controls hidden, variant reset to Standard)");
+                return;
+            }
+
+            // RR mode: enable N only for QMDRA
+            var variant = cmbRRVariant?.SelectedItem?.ToString() ?? "Standard";
+            var isQmdra = string.Equals(variant, "QMDRA", StringComparison.OrdinalIgnoreCase);
+
+            if (nudRoundsToRun != null)
+            {
+                nudRoundsToRun.Enabled = isQmdra;
+                if (!isQmdra)
+                {
+                    // keep whatever default value you like; just disable it
+                }
+            }
+
+            Logger.Log($"[CREATE][RR] UI state → RR Variant='{variant}', NEnabled={isQmdra}");
+        }
+
+        private void CmbRaceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateRoundRobinUiState();
+        }
+
+        private void CmbRRVariant_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateRoundRobinUiState();
+        }
 
         private void BtnStartRace_Click(object sender, EventArgs e)
         {
@@ -127,13 +175,47 @@ namespace RCDragManagerProd.UI.Forms
                 }
             }
 
+            // Round Robin config (authoritative insertion point)
+            string rrVariant = null;
+            int? rrRoundsToRun = null;
+
+            string selectedRaceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
+            if (string.Equals(selectedRaceType, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            {
+                rrVariant = cmbRRVariant?.SelectedItem?.ToString() ?? "Standard";
+
+                if (string.Equals(rrVariant, "QMDRA", StringComparison.OrdinalIgnoreCase))
+                {
+                    int n = 0;
+                    try { n = (int)nudRoundsToRun.Value; } catch { n = 0; }
+
+                    if (n <= 0)
+                    {
+                        MessageBox.Show("Rounds To Run (N) is required for QMDRA and must be >= 1.");
+                        Logger.Log("[CREATE][RR] BLOCKED start → QMDRA missing/invalid N.");
+                        return;
+                    }
+
+                    rrRoundsToRun = n;
+                }
+
+                Logger.Log($"[CREATE][RR] Selected → Variant='{rrVariant}', RoundsToRun={(rrRoundsToRun.HasValue ? rrRoundsToRun.Value.ToString() : "null")}");
+            }
+
+
             RaceSessionResult = new RaceSession
             {
                 EventName = txtEventName.Text.Trim(),
                 EventDate = dateRaceDate.Value.Date,
                 RaceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder",
+
+                // RR config (null unless Round Robin)
+                RoundRobinVariant = rrVariant,
+                RoundsToRun = rrRoundsToRun,
+
                 ClassType = classType,
                 FixedDialIn = fixedDial,
+
                 DriverEntries = eventRoster.Select(er =>
                 {
                     double? dialIn = null;
@@ -159,6 +241,7 @@ namespace RCDragManagerProd.UI.Forms
                     };
                 }).ToList()
             };
+
 
             Logger.Log($"[CREATE] StartRace → Roster={eventRoster.Count}, ClassType='{classType}', RaceType='{RaceSessionResult.RaceType}'");
             DialogResult = DialogResult.OK;

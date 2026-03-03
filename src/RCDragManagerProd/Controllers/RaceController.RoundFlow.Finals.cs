@@ -161,5 +161,57 @@ namespace RCDragManagerProd.Controllers
             PushAdvanceState();
             Logger.Log("[FINALS][NOBUYBACK] Advance state evaluated.");
         }
+        // ─────────────────────────────────────────────────────────────
+        // QMDRA Finals Injection — ALL drivers advance (no buyback)
+        // Seed order MUST follow Round Robin ranking order
+        // ─────────────────────────────────────────────────────────────
+        private void InjectFinalsAllAdvance(List<Driver> rankedDrivers)
+        {
+            if (rankedDrivers == null || rankedDrivers.Count < 2)
+            {
+                Logger.Log("⛔ InjectFinalsAllAdvance aborted — rankedDrivers invalid or < 2.");
+                return;
+            }
+
+            Logger.Log($"[FINALS][QMDRA] Injecting finals — Drivers={rankedDrivers.Count}");
+            Logger.Log("[FINALS][QMDRA] Seed order: " +
+                string.Join(", ", rankedDrivers.Select(d => d.Name)));
+
+            // Switch session to Finals
+            _session.RaceType = "Finals";
+            _inLosersPhase = false;
+            _finalsPending = false;
+
+            // Reset state
+            _revealedRounds.Clear();
+            _winners.Clear();
+
+            // Create Pro Ladder engine
+            var pro = new ProLadderEngineAdapter();
+            _engine = pro;
+
+            _engine.LoadDrivers(rankedDrivers);
+            Logger.Log("[FINALS][QMDRA] Drivers loaded into ProLadder engine.");
+
+            _engine.GenerateBracket();
+            Logger.Log("[FINALS][QMDRA] ProLadder bracket generated.");
+
+            // Reveal FIRST round only (do NOT hardcode round name)
+            var firstRound = _engine.GetRoundOrder().FirstOrDefault();
+            if (string.IsNullOrEmpty(firstRound))
+            {
+                Logger.Log("⛔ InjectFinalsAllAdvance failed — no rounds returned from ProLadder.");
+                return;
+            }
+
+            _revealedRounds.Add(firstRound);
+            Logger.Log($"[FINALS][QMDRA] First round revealed: {firstRound}");
+
+            // Push UI + flow
+            PushFullRefresh();
+            PushNextMatch();
+            PushAdvanceState();
+        }
+
     }
 }

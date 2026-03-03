@@ -54,8 +54,8 @@ namespace RCDragManagerProd.RandomMode
             var match = bracketMatches.FirstOrDefault(m => m.MatchId == matchId);
             if (match == null) return null;
 
-            if (match.Seed1 == winner) return match.Seed2;
-            if (match.Seed2 == winner) return match.Seed1;
+            if (winner != null && match.Seed1 != null && match.Seed1.Id == winner.Id) return match.Seed2;
+            if (winner != null && match.Seed2 != null && match.Seed2.Id == winner.Id) return match.Seed1;
             return null;
         }
 
@@ -71,8 +71,8 @@ namespace RCDragManagerProd.RandomMode
             var winner = results.GetWinner(matchId);
             if (winner == null) return null;
 
-            if (match.Seed1 == winner) return match.Seed2;
-            if (match.Seed2 == winner) return match.Seed1;
+            if (match.Seed1 != null && match.Seed1.Id == winner.Id) return match.Seed2;
+            if (match.Seed2 != null && match.Seed2.Id == winner.Id) return match.Seed1;
             return null;
         }
 

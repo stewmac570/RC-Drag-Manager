@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using RCDragManagerProd.DicEx;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
-using RCDragManagerProd.DicEx;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
 namespace RCDragManagerProd.RoundRobinMode
 {
@@ -24,22 +25,30 @@ namespace RCDragManagerProd.RoundRobinMode
         public static (double Win, double Loss, double Bye) PointsForRound(string lbl)
         {
             string key = (lbl ?? string.Empty).Trim().ToUpperInvariant();
-            (double Win, double Loss, double Bye) pts;
 
-            switch (key)
+            // Accept any "R{number}" (R1, R12, etc). Constant scoring for all rounds.
+            // Policy: Win=4.0 Loss=1.0 Bye=2.0
+            double win = 4.0;
+            double loss = 1.0;
+            double bye = 2.0;
+
+            int roundNum = 0;
+
+            if (key.StartsWith("R") && key.Length >= 2)
             {
-                case "R1": pts = (4.0, 1.0, 2.0); break;
-                case "R2": pts = (3.5, 0.75, 1.5); break;
-                case "R3": pts = (3.0, 0.5, 1.0); break;
-                default:
-                    pts = (0, 0, 0);
-                    Logger.Log($"[RR-PTS] Unknown round label '{lbl}' → using Win=0, Loss=0, BYE=0");
-                    break;
+                var numPart = key.Substring(1);
+                int.TryParse(numPart, out roundNum);
             }
 
-            Logger.Log($"[RR-PTS] Schedule for '{(string.IsNullOrEmpty(key) ? "(blank)" : key)}': Win={pts.Win:0.00}, Loss={pts.Loss:0.00}, BYE={pts.Bye:0.00}");
-            return pts;
+            if (roundNum <= 0)
+            {
+                Logger.Log($"[RR-PTS][WARN] Unparseable round label '{lbl}' → treating as R? (using constant points anyway)");
+            }
+
+            Logger.Log($"[RR-PTS] Round='{(string.IsNullOrEmpty(key) ? "(blank)" : key)}' ParsedN={roundNum} → Win={win:0.00}, Loss={loss:0.00}, BYE={bye:0.00}");
+            return (win, loss, bye);
         }
+
 
         private readonly Dictionary<(int, int), int> _h2h = new();
 
@@ -49,9 +58,15 @@ namespace RCDragManagerProd.RoundRobinMode
             MatchResult results)
         {
             Logger.Log($"[RR-RANK] Starting ranking process — Drivers={drivers?.Count ?? 0}, Matches={matches?.Count ?? 0}");
+            _h2h.Clear();
+
 
             var idToName = new Dictionary<int, string>();
             var stats = new Dictionary<int, Aggregate>();
+
+            // Opponents actually faced (BYEs ignored)
+            var faced = new Dictionary<int, HashSet<int>>();
+
 
             if (drivers != null)
             {
@@ -62,6 +77,8 @@ namespace RCDragManagerProd.RoundRobinMode
                     {
                         idToName[d.Id] = d.Name;
                         stats[d.Id] = new Aggregate();
+                        faced[d.Id] = new HashSet<int>();
+
                     }
                     else
                     {
@@ -74,7 +91,21 @@ namespace RCDragManagerProd.RoundRobinMode
             foreach (var m in matches)
             {
                 var pts = GetPoints(m.RoundLabel);
+
+                // BYE if either side missing
                 bool isBye = m.Driver1 == null || m.Driver2 == null;
+
+                {
+                    int a = m.Driver1?.Id ?? 0;
+                    int b = m.Driver2?.Id ?? 0;
+
+                    if (a != 0 && b != 0 && faced.ContainsKey(a) && faced.ContainsKey(b))
+                    {
+                        faced[a].Add(b);
+                        faced[b].Add(a);
+                    }
+                }
+
 
                 var winner = results.GetWinner(m.MatchId);
                 var loser = results.GetLoser(m.MatchId);
@@ -145,6 +176,27 @@ namespace RCDragManagerProd.RoundRobinMode
                 DefeatedIds = kvp.Value.Defeated.ToArray(),
                 OpponentStrength = 0
             }).ToList();
+
+            // Opponent Strength (SoS) = sum of FINAL points of opponents actually faced (BYEs ignored)
+            var pointsById = table.ToDictionary(x => x.DriverId, x => x.Points);
+
+            foreach (var r in table)
+            {
+                if (!faced.TryGetValue(r.DriverId, out var opps) || opps.Count == 0)
+                {
+                    r.OpponentStrength = 0;
+                    continue;
+                }
+
+                double sum = 0;
+                foreach (var oppId in opps)
+                {
+                    if (pointsById.TryGetValue(oppId, out var pts))
+                        sum += pts;
+                }
+                r.OpponentStrength = sum;
+            }
+
 
             // STEP 2 — Opponent Strength (SoS) = sum of FINAL points of opponents actually faced (BYEs ignored)
 

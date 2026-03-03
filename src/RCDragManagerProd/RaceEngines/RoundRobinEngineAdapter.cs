@@ -14,6 +14,16 @@ namespace RCDragManagerProd.RaceEngines
     {
         private readonly RoundRobinEngine _engine = new();
 
+        // Controller calls this BEFORE GenerateBracket() (QMDRA variable rounds)
+        public void SetRoundsToRun(int rounds)
+        {
+            if (rounds <= 0) rounds = 3;
+
+            _engine.RoundsToRunRequested = rounds;
+            Logger.Log($"[RR-ADAPTER] SetRoundsToRun → requested={rounds}");
+        }
+
+
         public void LoadDrivers(List<Driver> drivers)
         {
             Logger.Log($"[RR-ADAPTER] Loading {drivers?.Count ?? 0} driver(s)...");
@@ -22,7 +32,8 @@ namespace RCDragManagerProd.RaceEngines
 
         public void GenerateBracket()
         {
-            Logger.Log("[RR-ADAPTER] Generating matches (circle method, 3 rounds max)...");
+            Logger.Log("[RR-ADAPTER] Generating matches (circle method, clamped to n-1)...");
+
             _engine.GenerateMatches();
             Logger.Log($"[RR-ADAPTER] Bracket generated: {_engine.GetMatches().Count} match(es).");
         }

@@ -1,0 +1,314 @@
+• A) Executive Summary
+
+  1. The highest-risk defects are in result persistence and winner correction logic; one line currently records the
+     loser as both winner and loser.
+  2. Pro Ladder can crash on valid UI input (2 drivers, or >24 drivers) because bracket generation assumes at least one
+     round exists.
+  3. Session persistence is incomplete: saved results/round state are written but never restored into controller/engine
+     state when loading.
+  4. Stats integrity is currently unstable: JSON casing mismatch breaks EventsWon recomputation, and some counters are
+     incremented twice.
+  5. Identity/reference comparisons are used in key places and can produce wrong runner-up/loser resolution when object
+     instances differ.
+  6. Round/BYE conventions are inconsistent across engines/UI (R1/R2/F, Round N/Final, Losers Bracket Final, null vs
+     "BYE"), causing ordering/display drift.
+  7. Repository layer has performance and safety debt (N+1 driver-car loads, repeated full-driver updates for stat
+     bumps, no transaction bundles for multi-step updates).
+  8. Logging is broad but has some blind spots (swallowed catches and no structured IDs around persistence restore path
+     because restore path is missing).
+  9. There is dead/unwired code and duplicated utility patterns that increase maintenance risk.
+  10. Recommendation: execute in staged PRs, isolating behavior changes from hygiene and keeping ProLadder bracket
+     definitions untouched.
+
+  ———
+
+  B) Findings Table (Grouped by Severity)
+
+  ### Critical
+
+  | Severity | File(s) + symbol | What breaks / risk | Minimal safe fix | Behavior change |
+  |---|---|---|---|---|
+  | Critical | [RaceController.Results.cs:139](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Controllers\RaceController.Results.cs:139) EditWinnerInActiveRound | Edit flow writes
+  _matchResult.SetWinner(matchId, newLoser, newLoser), corrupting winner/loser state after edits; downstream standings/
+  finals can be wrong. | Change to _matchResult.SetWinner(matchId, newWinner, newLoser) and add a regression test for
+  edit-in-active-round. | YES |
+  | Critical | [RaceController.RoundFlow.Core.cs:89](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Controllers\RaceController.RoundFlow.Core.cs:89), [ProLadder.Ladders.Common.cs:34](C:
+  \Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\Domain\ProLadder.Ladders.Common.cs:34) GenerateBracket,
+  GetLadder | GetRoundOrder().First() throws if ProLadder returns empty ladder (e.g., 2 drivers or >24). This is a hard
+  crash path from normal UI flows. | Guard empty round order before .First(), validate supported ProLadder field size
+  early, show user-friendly error. | YES |
+  | Critical | [RaceSessionRepository.cs:68](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Repositories\RaceSessionRepository.cs:68), [DriverRepository.cs:319](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\Repositories\DriverRepository.cs:319) SaveSession,
+  ComputeEventsWonFromSavedSessions | Sessions are saved in camelCase (savedResults) but stats parser expects
+  SavedResults (case-sensitive), so recompute often skips all sessions. | Make parser case-insensitive (JsonDocument
+  traversal helper for either case), or stop forcing camelCase on save. | YES |
+  | Critical | [Form1.cs:30](C:\Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.cs:30),
+  [RaceController.Persistence.cs:50](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Controllers\RaceController.Persistence.cs:50) session load/save path | SavedResults/
+  SavedRevealedRounds are saved but never re-applied into engine/controller on load; loaded sessions reopen as fresh
+  bracket input only. | Add explicit RestoreSessionState(...) in controller and call it when opening loaded session
+  before enabling actions. | YES |
+
+  ### High
+
+  | Severity | File(s) + symbol | What breaks / risk | Minimal safe fix | Behavior change |
+  |---|---|---|---|---|
+  | High | [SessionSetupForm.Events.cs:172](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Session\SessionSetupForm.Events.cs:172), [Form1.Events.cs:96](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.Events.cs:96), [Form1.Events.cs:110](C:
+  \Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.Events.cs:110),
+  [Form1.WinnerButtons.cs:309](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.WinnerButtons.cs:309) stats updates | EventsEntered/EventsWon are
+  incremented in multiple places; values can be double-counted per event. | Define one authoritative write point (on
+  tournament complete or on save) and remove other increments. | YES |
+  | High | [RaceController.RoundFlow.Core.cs:383](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Controllers\RaceController.RoundFlow.Core.cs:383) finals summary | ReferenceEquals is
+  used to find runner-up; if winner instance is not same reference as final driver object, runner-up may be wrong. |
+  Compare by stable ID (d1?.Id != winner.Id). | YES |
+  | High | [RaceController.Persistence.cs:29](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Controllers\RaceController.Persistence.cs:29), [RaceController.RoundFlow.Losers.cs:76]
+  (C:\Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\Controllers\RaceController.RoundFlow.Losers.cs:76)
+  save during LB | In losers phase _engine and _losersEngine point to same object; mainMatches.Concat(lbMatches)
+  duplicates persisted result rows. | Deduplicate by MatchId before save or avoid concat when references are same
+  engine. | YES |
+  | High | [DriverStatsForm.cs:41](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Drivers\DriverStatsForm.cs:41), [DriverStatsForm.cs:44](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\UI\Forms\Drivers\DriverStatsForm.cs:44), [MatchLookupHelper.cs:15](C:
+  \Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\Helpers\MatchLookupHelper.cs:15) driver stats history |
+  Null load/session assumptions can NRE; round lookup assumes ProLadder only, so history round labels are wrong for RR/
+  LB/finals mixes. | Add null guards and use saved round label from results/session data instead of ProLadder
+  reconstruction helper. | YES |
+  | High | [RandomMatchEngine.cs:57](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RandomMode\RandomMatchEngine.cs:57), [RandomMatchEngine.cs:74](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\RandomMode\RandomMatchEngine.cs:74) loser resolution | Uses reference
+  equality (match.Seed1 == winner) for determining loser; breaks if logically same driver is a different instance. |
+  Resolve by Id equality. | YES |
+
+  ### Medium
+
+  | Severity | File(s) + symbol | What breaks / risk | Minimal safe fix | Behavior change |
+  |---|---|---|---|---|
+  | Medium | [RoundRobinMatch.cs:4](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RoundRobinMode\RoundRobinMatch.cs:4), [RaceSession.cs:30](C:\Users\Stewart McMillan\RC-
+  Drag-Manager\src\RCDragManagerProd\Domain\RaceSession.cs:30) namespace/model hygiene | RoundRobinMatch is in global
+  namespace; fragile type resolution and easy future collisions. | Move class into RCDragManagerProd.RoundRobinMode and
+  update references explicitly. | NO |
+  | Medium | [RoundRobinEngine.cs:255](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RoundRobinMode\RoundRobinEngine.cs:255) standings | GroupBy(d => d) groups by object
+  reference, not driver identity; can split same driver into multiple buckets. | Group by d.Id and map back to canonical
+  driver. | YES |
+  | Medium | [Form1.Display.cs:67](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.Display.cs:67) BYE styling | BYE detection checks whitespace, but
+  rows commonly contain literal "BYE"; UI styling logic misses BYE rows. | Use shared IsByeName for display styling too.
+  | NO |
+  | Medium | [Form1.UI.cs:84](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.UI.cs:84), [LosersBracketBuilder.cs:101](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\RandomMode\LosersBracketBuilder.cs:101), [RandomEngineAdapter.cs:268]
+  (C:\Users\Stewart McMillan\RC-Drag-Manager\src\RCDragManagerProd\RaceEngines\RandomEngineAdapter.cs:268) round labels
+  | Label schemes are mixed (R*, Round *, Final, Losers Bracket Final, LBF mapping only). Ordering/display and future
+  parser logic are brittle. | Introduce centralized round-label constants/converter and standardize emitters. | NO (if
+  display only), YES (if persisted label normalization) |
+  | Medium | [RoundRobinScorecardLogger.cs:49](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardLogger.cs:49),
+  [RoundRobinScorecardLogger.cs:225](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardLogger.cs:225) RR scoring
+  display | Round order sorted lexicographically and points default to zero after R3; QMDRA >3 rounds logs misleading
+  points. | Numeric round sorting and either dynamic points policy or explicit “R4+ uses X” policy. | NO (display/log
+  only) |
+
+  ### Low
+
+  | Severity | File(s) + symbol | What breaks / risk | Minimal safe fix | Behavior change |
+  |---|---|---|---|---|
+  | Low | [MatchEngine.cs:1](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RaceEngines\MatchEngine.cs:1) and controller partials | Duplicate/unused using blocks
+  and mixed style reduce readability and increase merge noise. | Remove unused/usings via IDE or analyzer cleanup. | NO
+  |
+  | Low | Dead/unwired code: [LosersBracketEngine.cs](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\RandomMode\LosersBracketEngine.cs), [RandomBracket.cs](C:\Users\Stewart McMillan\RC-
+  Drag-Manager\src\RCDragManagerProd\RandomMode\RandomBracket.cs), [Form1.cs:88](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\UI\Forms\Main\Form1.cs:88) WinnerPick, [RaceController.Logging.cs:20](C:\Users\Stewart
+  McMillan\RC-Drag-Manager\src\RCDragManagerProd\Controllers\RaceController.Logging.cs:20) | Extra code paths increase
+  confusion and audit surface. | Remove or mark [Obsolete] with comment until removal. | NO |
+  | Low | Repository duplication/perf: [DriverRepository.cs:47](C:\Users\Stewart McMillan\RC-Drag-
+  Manager\src\RCDragManagerProd\Repositories\DriverRepository.cs:47) and GetCarsByDriverId | N+1 query in GetAllDrivers,
+  repeated full-row updates for stat-only changes. | Batch car load and add focused stat update commands. | NO/YES
+  (depending on refactor scope) |
+
+  ———
+
+  C) Staged Plan (Stage 0..n)
+
+  ### Stage 0: No behavior change hygiene only
+
+  - Scope:
+
+  1. Remove duplicate/unused usings and dead private helpers.
+  2. Move RoundRobinMatch into explicit namespace and update references only.
+  3. Add null guards/log statements where currently silent catches hide context.
+  4. Add analyzer rules for namespace/usings/nullability warnings (non-blocking).
+
+  - Exact files affected:
+
+  1. .../RaceEngines/MatchEngine.cs
+  2. .../Controllers/RaceController*.cs (using cleanup only)
+  3. .../RoundRobinMode/RoundRobinMatch.cs
+  4. .../Domain/RaceSession.cs (qualified type ref if needed)
+  5. .../UI/Forms/Main/Form1.cs, Form1.UI.cs (remove unused helpers/classes)
+
+  - Estimated risk: Low
+  - Quick validation checklist:
+
+  1. Open app and create session.
+  2. Generate RR, pick winners for one round.
+  3. Ensure UI loads and logs still write.
+
+  - Do not touch:
+
+  1. ProLadder ladder definitions (Domain/Ladders/ProLadder.Ladders.L*.cs)
+  2. Race pairing rules.
+
+  ### Stage 1: Clearly wrong bug fixes
+
+  - Scope:
+
+  1. Fix edit-result winner assignment bug.
+  2. Guard empty round-order crash and enforce ProLadder supported field-size checks.
+  3. Fix JSON casing mismatch in ComputeEventsWonFromSavedSessions.
+  4. Remove double-count stat increments (EventsEntered, EventsWon) by making one authoritative update point.
+  5. Replace reference equality in finals runner-up and Random loser resolution.
+  6. Deduplicate saved match rows when main engine == losers engine.
+
+  - Exact files affected:
+
+  1. .../Controllers/RaceController.Results.cs
+  2. .../Controllers/RaceController.RoundFlow.Core.cs
+  3. .../Controllers/RaceController.Persistence.cs
+  4. .../Domain/ProLadder.Ladders.Common.cs (validation usage only if needed)
+  5. .../Repositories/DriverRepository.cs
+  6. .../Repositories/RaceSessionRepository.cs (if serialization policy changed)
+  7. .../RandomMode/RandomMatchEngine.cs
+  8. .../UI/Forms/Main/Form1.Events.cs
+  9. .../UI/Forms/Main/Form1.WinnerButtons.cs
+  10. .../UI/Forms/Session/SessionSetupForm.Events.cs
+
+  - Estimated risk: Medium
+  - Quick validation checklist:
+
+  1. Pro Ladder with 2 drivers: get friendly block, no crash.
+  2. Pro Ladder with >24 drivers: get friendly block, no crash.
+  3. Edit winner in active round: standings and winners list reflect correct winner.
+  4. Complete event and confirm EventsEntered/EventsWon increments once.
+  5. Save during LB phase and inspect saved results count is not doubled.
+
+  - Do not touch:
+
+  1. ProLadder match structure and seed pairings.
+  2. RR ranking algorithm rules (except bug-only identity fixes).
+
+  ### Stage 2: Consistency upgrades
+
+  - Scope:
+
+  1. Standardize round label vocabulary and parsing across engines/UI (R*, SF, F, LB-R*, LB-F).
+  2. Standardize BYE representation policy (null in models, "BYE" only in render layer).
+  3. Unify match resolution path to ID-based identity checks.
+  4. Fix BYE styling and round header formatting alignment.
+
+  - Exact files affected:
+
+  1. .../RaceEngines/RandomEngineAdapter.cs
+  2. .../RandomMode/RandomMatchEngine.cs
+  3. .../RandomMode/LosersBracketBuilder.cs
+  4. .../UI/Forms/Main/Form1.UI.cs
+  5. .../UI/Forms/Main/Form1.Display.cs
+  6. .../Controllers/RaceController.RoundFlow.View.cs
+  7. .../RoundRobinMode/RoundRobinScorecardLogger/*.cs
+
+  - Estimated risk: Medium
+  - Quick validation checklist:
+
+  1. RR -> Buyback -> Finals flow displays stable round ordering.
+  2. BYE matches always render/styled consistently and cannot be selected as winner.
+  3. Next-up label and bracket rows agree on lane-adjusted names.
+
+  - Do not touch:
+
+  1. ProLadder bracket definitions.
+  2. Controller authority boundaries (RaceController drives flow, UI display/input only).
+
+  ### Stage 3: Performance + maintainability
+
+  - Scope:
+
+  1. Remove N+1 in driver loading (single car query + in-memory group map).
+  2. Add transaction wrappers for multi-step repo writes.
+  3. Add stat-only update commands instead of full UpdateDriver for counters.
+  4. Consider per-connection PRAGMA setup helper.
+  5. Replace reflection-based SaveSession(object) with typed SaveSession(RaceSession).
+
+  - Exact files affected:
+
+  1. .../Repositories/DriverRepository.cs
+  2. .../Repositories/CarRepository.cs
+  3. .../Repositories/RaceSessionRepository.cs
+  4. .../Repositories/DatabaseInitializer.cs
+
+  - Estimated risk: Medium
+  - Quick validation checklist:
+
+  1. Add/edit/delete drivers/cars.
+  2. Run full event and save/load.
+  3. Confirm DB rows/counters and no partial updates after forced exception.
+
+  - Do not touch:
+
+  1. ProLadder pairing logic.
+  2. RR/Finals bracket semantics.
+
+  ### Stage 4+: Optional enhancements
+
+  - Scope:
+
+  1. Log rotation/retention.
+  2. RaceType enum + mapping layer (UI string <-> enum).
+  3. Session restore integration tests + engine flow tests.
+  4. Add deterministic test fixtures for BYE/round-label behavior.
+
+  - Exact files affected:
+
+  1. .../Logging/Logger.cs
+  2. .../Domain/RaceSession.cs
+  3. .../RaceEngines/RaceEngineFactory.cs
+  4. New test project/files.
+
+  - Estimated risk: Low to Medium
+  - Quick validation checklist:
+
+  1. Long-run logging doesn’t grow unbounded.
+  2. Existing UI race type selections still load older saved sessions.
+
+  - Do not touch:
+
+  1. Existing ProLadder ladder files unless explicitly requested.
+
+  ———
+
+  D) Top 10 “Fix Next” Checklist
+
+  1. Fix _matchResult.SetWinner(matchId, newLoser, newLoser) in edit flow.
+  2. Add safe handling when _engine.GetRoundOrder() is empty before .First().
+  3. Block unsupported ProLadder field sizes (especially 2 and >24) with UI message.
+  4. Fix session JSON casing mismatch (savedResults vs SavedResults) in stats recomputation.
+  5. Implement real load/restore of saved results + revealed rounds into controller/engine.
+  6. Remove duplicate stats increments (EventsEntered/EventsWon) across setup/winner/completion.
+  7. Replace ReferenceEquals runner-up logic with ID comparison.
+  8. Dedupe persisted match list when _engine and _losersEngine are the same adapter.
+  9. Replace reference equality in Random loser detection with ID matching.
+  10. Add null guards in DriverStatsForm and remove ProLadder-only match lookup assumption.
+
+  Build note: I could not complete a local compile due environment/tooling (GenerateResource x86 task host issue), so
+  findings are from static audit and code-path inspection.
