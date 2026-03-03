@@ -16,6 +16,13 @@ namespace RCDragManagerProd.UI.Forms
         private Label lblRaceType;
         private ComboBox cmbRaceType;
 
+        // Round Robin config UI (shown only when Race Type == "Round Robin")
+        private Label lblRRVariant;
+        private ComboBox cmbRRVariant;
+        private Label lblRoundsToRun;
+        private NumericUpDown nudRoundsToRun;
+
+
         private GroupBox grpClassSelection;
         private RadioButton rbHeadsUp;
         private RadioButton rbBracket;
@@ -56,7 +63,8 @@ namespace RCDragManagerProd.UI.Forms
 
             grpEventDetails = new GroupBox();
             grpEventDetails.Text = "Event Details";
-            grpEventDetails.Size = new Size(860, 100);
+            grpEventDetails.Size = new Size(860, 140);
+
             grpEventDetails.Location = new Point(20, 60);
             Controls.Add(grpEventDetails);
 
@@ -68,12 +76,59 @@ namespace RCDragManagerProd.UI.Forms
             cmbRaceType = new ComboBox() { Location = new Point(120, 65), Width = 200 };
             cmbRaceType.Items.AddRange(new string[] { "Pro Ladder", "Random Draw", "Round Robin" });
             cmbRaceType.SelectedIndex = 0;
+            cmbRaceType.SelectedIndexChanged += CmbRaceType_SelectedIndexChanged;
+
+
+
+            // Round Robin: Variant + Rounds (hidden unless Race Type == Round Robin)
+            lblRRVariant = new Label()
+            {
+                Text = "RR Variant:",
+                AutoSize = true,
+                Location = new Point(340, 70),
+                Visible = false
+            };
+
+            cmbRRVariant = new ComboBox()
+            {
+                Location = new Point(420, 65),
+                Width = 140,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Visible = false
+            };
+            cmbRRVariant.Items.AddRange(new string[] { "Standard", "QMDRA" });
+            cmbRRVariant.SelectedIndex = 0;
+            cmbRRVariant.SelectedIndexChanged += CmbRRVariant_SelectedIndexChanged;
+
+
+            lblRoundsToRun = new Label()
+            {
+                Text = "Rounds (N):",
+                AutoSize = true,
+                Location = new Point(580, 70),
+                Visible = false
+            };
+
+            nudRoundsToRun = new NumericUpDown()
+            {
+                Location = new Point(670, 65),
+                Width = 70,
+                Minimum = 1,
+                Maximum = 100,
+                Value = 3,
+                Visible = false,
+                Enabled = false
+            };
+
 
             grpEventDetails.Controls.AddRange(new Control[] {
                 lblEventName, txtEventName,
                 lblRaceDate, dateRaceDate,
-                lblRaceType, cmbRaceType
+                lblRaceType, cmbRaceType,
+                lblRRVariant, cmbRRVariant,
+                lblRoundsToRun, nudRoundsToRun
             });
+
 
             grpClassSelection = new GroupBox();
             grpClassSelection.Text = "Class Selection";
@@ -111,12 +166,17 @@ namespace RCDragManagerProd.UI.Forms
             lvEventRoster.Columns.Add("Class Type", 150);
             lvEventRoster.Columns.Add("Dial-In", 100);
 
-            grpDriverSelection.Controls.AddRange(new Control[] { btnAddNewDriver, btnAddDriverFromList, lvEventRoster });
+            grpDriverSelection.Controls.AddRange(new Control[] { btnAddNewDriver, lvEventRoster });
+
 
             btnStartRace = new Button() { Text = "Start Race", Location = new Point(570, 540), Size = new Size(140, 40) };
             btnCancel = new Button() { Text = "Cancel", Location = new Point(720, 540), Size = new Size(140, 40) };
 
             Controls.AddRange(new Control[] { btnStartRace, btnCancel });
+
+            // Initialize RR UI state based on default Race Type
+            UpdateRoundRobinUiState();
+
         }
     }
 }

@@ -12,7 +12,11 @@ namespace RCDragManagerProd.RoundRobinMode
         private MatchResult results = new MatchResult();
         private int matchIdCounter = 1;
         private List<Driver> drivers = new List<Driver>();
+
         private readonly List<(Driver Driver1, Driver Driver2, string RoundLabel, int MatchId)> matches = new();
+        // Requested RR rounds (default = 3). Engine will clamp to max possible (n - 1).
+        public int RoundsToRunRequested { get; set; } = 3;
+
 
         // Thread-safe RNG for shuffle/offset
         private static readonly object _rngLock = new object();
@@ -28,7 +32,7 @@ namespace RCDragManagerProd.RoundRobinMode
         }
 
         /// <summary>
-        /// Round Robin (circle method), capped at 3 rounds.
+        /// Round Robin (circle method), variable rounds (clamped to n - 1).
         /// - Shuffles roster each run so the first-picked driver does NOT always get the Round-1 BYE.
         /// - Odd N: add BYE (null) and apply a random pre-rotation so BYE recipient and match position move.
         /// - Logs roster (picked), roster after shuffle, pre-rotation, R1 snapshot, per-round pairings/BYEs, and summary.
@@ -58,9 +62,21 @@ namespace RCDragManagerProd.RoundRobinMode
                 roster.Add(null);
             }
 
-            int n = roster.Count;                 // even
-            int totalRounds = Math.Min(3, n - 1); // hard cap at 3
+            int n = roster.Count; // even (after BYE insertion if needed)
+
+            int maxPossibleRounds = Math.Max(0, n - 1);
+            int requested = RoundsToRunRequested;
+            if (requested <= 0) requested = 3;
+
+            // QMDRA requirement: run exactly N rounds, even if N > (n - 1).
+            // After (n - 1) rounds, rematches are unavoidable and expected.
+            int totalRounds = requested;
+
             int pairingsPerRound = n / 2;
+
+            Log($"[RR] Rounds requested={requested}, maxPossible={maxPossibleRounds}, totalRounds={totalRounds}");
+
+
 
             // Random pre-rotation to move BYE position (and match order) in Round 1
             int applied = 0;
@@ -72,7 +88,10 @@ namespace RCDragManagerProd.RoundRobinMode
             }
             Log($"[RR] Pre-rotation applied: {applied} (span={Math.Max(0, n - 1)})");
             Log("[RR] R1 ring snapshot: " + string.Join(" | ", roster.Select(SafeName)));
-            Log($"[RR] Rounds={totalRounds}, Pairs/Round={pairingsPerRound}, Odd={(isOdd ? "YES" : "NO")}");
+            Log($"[RR] Rounds requested={requested}, totalRounds={totalRounds}, maxPossible={maxPossibleRounds}, Pairs/Round={pairingsPerRound}, Odd={(isOdd ? "YES" : "NO")}");
+            if (totalRounds > maxPossibleRounds)
+                Log($"[RR][QMDRA] Overschedule active → N={totalRounds} exceeds max unique rounds {maxPossibleRounds}. Rematches will occur after round {maxPossibleRounds}.");
+
 
             // Tracking
             var driver1Count = new Dictionary<int, int>();
@@ -83,11 +102,20 @@ namespace RCDragManagerProd.RoundRobinMode
                 if (isOdd) byeCount[d.Id] = 0;
             }
 
-            var seenPairs = new HashSet<(int, int)>(); // sanity check within 3 rounds
+            var seenPairs = new HashSet<(int, int)>(); // sanity check within a single full RR cycle
+
 
             for (int round = 1; round <= totalRounds; round++)
             {
                 Log($"[RR] ---- Round {round} ----");
+
+                // After one full cycle (n-1 rounds), reset seenPairs because rematches are now expected (QMDRA overschedule).
+                if (maxPossibleRounds > 0 && round > 1 && ((round - 1) % maxPossibleRounds) == 0)
+                {
+                    seenPairs.Clear();
+                    Log($"[RR][QMDRA] New cycle starting at round {round} → resetting duplicate-pair warnings.");
+                }
+
 
                 var roundPairs = new List<(Driver A, Driver B)>(pairingsPerRound);
                 for (int i = 0; i < pairingsPerRound; i++)
@@ -132,7 +160,8 @@ namespace RCDragManagerProd.RoundRobinMode
                         int b = d2Out.Id;
                         var key = a < b ? (a, b) : (b, a);
                         if (!seenPairs.Add(key))
-                            Log("[RR][WARN] Duplicate head-to-head within capped schedule: " + SafeName(d1Out) + " vs " + SafeName(d2Out));
+                            Log("[RR][WARN] Duplicate head-to-head within current cycle: " + SafeName(d1Out) + " vs " + SafeName(d2Out));
+
 
                         matches.Add((d1Out, d2Out, $"R{round}", matchIdCounter++));
                         Log($"[RR]   M{matchIdCounter - 1:000}: {SafeName(d1Out)} vs {SafeName(d2Out)}");
@@ -147,7 +176,8 @@ namespace RCDragManagerProd.RoundRobinMode
 
             if (isOdd)
             {
-                Log("[RR] ---- BYE distribution (capped 3 rounds) ----");
+                Log($"[RR] ---- BYE distribution (rounds={totalRounds}) ----");
+
                 foreach (var d in drivers)
                     Log($"[RR][BYE] {SafeName(d)} → {byeCount[d.Id]} BYE(s)");
             }

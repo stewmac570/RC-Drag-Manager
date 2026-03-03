@@ -136,7 +136,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             _engine.SetWinner(matchId, newWinner);
-            _matchResult.SetWinner(matchId, newLoser, newLoser);
+            _matchResult.SetWinner(matchId, newWinner, newLoser);
 
             var row = _winners.FirstOrDefault(w => w.MatchId == matchId);
             if (row != null)

@@ -29,10 +29,14 @@ namespace RCDragManagerProd.Controllers
                 var mainMatches = _engine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
                 var lbMatches = _losersEngine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
                 var allMatches = mainMatches.Concat(lbMatches);
+                var seenMatchIds = new HashSet<int>();
 
                 var list = new List<RCDragManagerProd.Domain.MatchResultSave>();
                 foreach (var m in allMatches)
                 {
+                    if (!seenMatchIds.Add(m.MatchId))
+                        continue;
+
                     var w = _matchResult.GetWinner(m.MatchId);
                     var l = _matchResult.GetLoser(m.MatchId);
 

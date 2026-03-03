@@ -52,6 +52,8 @@ namespace RCDragManagerProd.UI.Forms
                     Logger.Log($"[CREATE] Restored RaceType on UI: '{currentSession.RaceType}'");
                 }
 
+                Logger.Log($"[CREATE][RR] Session config at Form load → Variant='{currentSession.RoundRobinVariant}', N={currentSession.RoundsToRun}");
+
                 UpdateDriverList();
                 btnGenerateBracket.Enabled = true;
             }
