@@ -30,12 +30,18 @@ namespace RCDragManagerProd.Controllers
                 var lbMatches = _losersEngine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
                 var allMatches = mainMatches.Concat(lbMatches);
                 var seenMatchIds = new HashSet<int>();
+                int beforeCount = 0;
+                bool overlapDetected = ReferenceEquals(_engine, _losersEngine);
 
                 var list = new List<RCDragManagerProd.Domain.MatchResultSave>();
                 foreach (var m in allMatches)
                 {
+                    beforeCount++;
                     if (!seenMatchIds.Add(m.MatchId))
+                    {
+                        overlapDetected = true;
                         continue;
+                    }
 
                     var w = _matchResult.GetWinner(m.MatchId);
                     var l = _matchResult.GetLoser(m.MatchId);
@@ -50,6 +56,7 @@ namespace RCDragManagerProd.Controllers
                         });
                     }
                 }
+                Logger.Log($"[SAVE] Dedup matches: beforeCount={beforeCount}, afterCount={seenMatchIds.Count}, overlapDetected={overlapDetected}");
 
                 _session.SavedResults = list;
                 _session.SavedRevealedRounds = _revealedRounds?.ToList() ?? new List<string>();
