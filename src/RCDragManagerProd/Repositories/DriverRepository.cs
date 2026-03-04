@@ -379,6 +379,18 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
             ExecuteStatIncrement(driverId, "EventsWon", delta);
         }
 
+        public void IncrementWins(int driverId, int delta = 1)
+        {
+            Logger.Log($"[DB][DriverRepo][STATS] IncrementWins(driverId={driverId}, delta={delta})");
+            ExecuteStatIncrement(driverId, "TotalWins", delta);
+        }
+
+        public void IncrementLosses(int driverId, int delta = 1)
+        {
+            Logger.Log($"[DB][DriverRepo][STATS] IncrementLosses(driverId={driverId}, delta={delta})");
+            ExecuteStatIncrement(driverId, "TotalLosses", delta);
+        }
+
         public void IncrementWinsAndLosses(int winnerDriverId, int loserDriverId, int winDelta = 1, int lossDelta = 1)
         {
             Logger.Log($"[DB][DriverRepo][STATS] IncrementWinsAndLosses(winnerId={winnerDriverId}, loserId={loserDriverId}, winDelta={winDelta}, lossDelta={lossDelta})");

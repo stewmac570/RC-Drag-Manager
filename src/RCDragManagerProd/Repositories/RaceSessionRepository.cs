@@ -79,7 +79,7 @@ SELECT last_insert_rowid();";
             {
                 using (var tx = cn.BeginTransaction())
                 {
-                    Logger.Log("[DB][SessionRepo][TX] SaveSession begin");
+                    Logger.Log("[TX] BEGIN SaveSession");
                     try
                     {
                         using (var cmd = new SQLiteCommand(sql, cn, tx))
@@ -94,12 +94,12 @@ SELECT last_insert_rowid();";
                         }
 
                         tx.Commit();
-                        Logger.Log("[DB][SessionRepo][TX] SaveSession commit");
+                        Logger.Log("[TX] COMMIT SaveSession");
                     }
                     catch (Exception ex)
                     {
                         try { tx.Rollback(); } catch { }
-                        Logger.Log($"[DB][SessionRepo][TX][ERROR] SaveSession rollback: {ex}");
+                        Logger.Log($"[TX] ROLLBACK SaveSession: {ex}");
                         throw;
                     }
                 }
