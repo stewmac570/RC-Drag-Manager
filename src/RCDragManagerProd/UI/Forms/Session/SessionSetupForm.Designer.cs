@@ -32,7 +32,9 @@ namespace RCDragManagerProd.UI.Forms
 
         private GroupBox grpDriverSelection;
         private Button btnAddNewDriver;
+#pragma warning disable CS0169
         private Button btnAddDriverFromList;
+#pragma warning restore CS0169
         private ListView lvEventRoster;
 
         private Button btnStartRace;

@@ -2,7 +2,9 @@
 {
     partial class BuybackDriverSelectionForm
     {
+#pragma warning disable CS0169
         private System.ComponentModel.IContainer components;
+#pragma warning restore CS0169
         private System.Windows.Forms.CheckedListBox checkedListBoxDrivers;
         private System.Windows.Forms.Button btnConfirm;
         private System.Windows.Forms.Button btnNoBuyback;
