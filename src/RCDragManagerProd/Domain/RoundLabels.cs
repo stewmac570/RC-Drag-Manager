@@ -79,11 +79,16 @@ namespace RCDragManagerProd.Domain
             var na = Normalize(a);
             var nb = Normalize(b);
 
-            int ka = SortKey(na);
-            int kb = SortKey(nb);
+            int ka = CompareKey(na);
+            int kb = CompareKey(nb);
             if (ka != kb) return ka.CompareTo(kb);
 
             return string.Compare(na, nb, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static int CompareKey(string label)
+        {
+            return SortKey(Normalize(label));
         }
 
         public static bool TryParse(string label, out (bool IsLosers, int? RoundNumber, bool IsSemiFinal, bool IsFinal) parsed)

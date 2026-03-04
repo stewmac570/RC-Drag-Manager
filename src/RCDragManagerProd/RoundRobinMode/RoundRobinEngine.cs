@@ -244,7 +244,7 @@ namespace RCDragManagerProd.RoundRobinMode
         {
             return matches.Select(m => m.RoundLabel)
                           .Distinct()
-                          .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                          .OrderBy(x => RoundLabels.CompareKey(x))
                           .ToList();
         }
 

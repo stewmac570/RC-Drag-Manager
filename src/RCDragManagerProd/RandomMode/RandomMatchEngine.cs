@@ -201,7 +201,7 @@ namespace RCDragManagerProd.RandomMode
         {
             return bracketMatches.Select(m => RoundLabels.Normalize(m.RoundLabel))
                                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                                .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                                .OrderBy(x => RoundLabels.CompareKey(x))
                                 .ToList();
         }
 

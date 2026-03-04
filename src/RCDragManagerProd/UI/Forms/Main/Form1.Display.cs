@@ -261,9 +261,10 @@ namespace RCDragManagerProd.UI.Forms
                 }
 
                 var ordered = rows
-                    .OrderBy(w => RoundLabels.Normalize(w.RoundLabel ?? string.Empty), Comparer<string>.Create(RoundLabels.Compare))
+                    .OrderBy(w => RoundLabels.CompareKey(w.RoundLabel ?? string.Empty))
                     .ThenBy(w => w.MatchId)
                     .ToList();
+                Logger.Log("[RoundOrdering] Applied canonical ordering");
 
                 string currentHeader = null;
                 int displayNo = 1;

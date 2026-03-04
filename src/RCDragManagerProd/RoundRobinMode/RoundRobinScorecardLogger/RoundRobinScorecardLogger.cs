@@ -48,7 +48,7 @@ namespace RCDragManagerProd.RoundRobinMode
             var idToName = drivers.ToDictionary(d => d.Id, d => d.Name);
             var rounds = matches.Select(m => RoundLabels.Normalize(m.RoundLabel))
                                .Distinct(StringComparer.OrdinalIgnoreCase)
-                               .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                               .OrderBy(x => RoundLabels.CompareKey(x))
                                .ToList();
 
             // Points schedule
@@ -182,7 +182,7 @@ namespace RCDragManagerProd.RoundRobinMode
 
                 if (lines.TryGetValue(d.Id, out var lns))
                 {
-                    foreach (var ln in lns.OrderBy(x => RoundLabels.Normalize(x.RoundLabel), Comparer<string>.Create(RoundLabels.Compare)))
+                    foreach (var ln in lns.OrderBy(x => RoundLabels.CompareKey(x.RoundLabel)))
                         Logger.Log($"      {ln.RoundLabel}: {ln.Outcome}(+{ln.Points:0.00}) vs {ln.Opponent}");
                 }
                 Logger.Log($"      Defeated: {defNames}");

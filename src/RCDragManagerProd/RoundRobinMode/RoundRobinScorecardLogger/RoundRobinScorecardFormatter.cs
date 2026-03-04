@@ -173,7 +173,7 @@ namespace RCDragManagerProd.RoundRobinMode
 
                 if (lines.TryGetValue(d.Id, out var lnz))
                 {
-                    foreach (var ln in lnz.OrderBy(x => RoundLabels.Normalize(x.RoundLabel), Comparer<string>.Create(RoundLabels.Compare)))
+                    foreach (var ln in lnz.OrderBy(x => RoundLabels.CompareKey(x.RoundLabel)))
                         sb.AppendLine($"   {ln.RoundLabel}: {ln.Outcome}(+{ln.Points:0.00}) vs {ln.Opponent}");
                 }
 

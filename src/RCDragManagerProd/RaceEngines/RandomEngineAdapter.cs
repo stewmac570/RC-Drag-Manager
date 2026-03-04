@@ -77,7 +77,7 @@ namespace RCDragManagerProd.RaceEngines
             _engine.GetRoundOrder()
                    .Select(RoundLabels.Normalize)
                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                   .OrderBy(x => x, Comparer<string>.Create(RoundLabels.Compare))
+                   .OrderBy(x => RoundLabels.CompareKey(x))
                    .ToList();
 
         public void SetWinner(int matchId, Driver winner)
