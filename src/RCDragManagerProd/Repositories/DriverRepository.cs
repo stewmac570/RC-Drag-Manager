@@ -71,9 +71,18 @@ namespace RCDragManagerProd.Repositories
                         EventsEntered = Convert.ToInt32(reader["EventsEntered"]),
                         EventsWon = Convert.ToInt32(reader["EventsWon"]),
                         State = reader["State"] != DBNull.Value ? reader["State"].ToString() : string.Empty,
-                        Cars = GetCarsByDriverId(id)
+                        Cars = new List<Car>()
                     };
                     drivers.Add(d);
+                }
+
+                Logger.Log($"[DB][DriverRepo] GetAllDrivers drivers loaded: {drivers.Count}");
+                if (drivers.Count > 0)
+                {
+                    var carsByDriver = GetCarsByDriverIds(connection, drivers.ConvertAll(d => d.Id));
+                    foreach (var d in drivers)
+                        d.Cars = carsByDriver.TryGetValue(d.Id, out var cars) ? cars : new List<Car>();
+                    Logger.Log($"[DB][DriverRepo] GetAllDrivers batch cars loaded: {carsByDriver.Count} driver groups");
                 }
             }
 
@@ -122,29 +131,45 @@ namespace RCDragManagerProd.Repositories
 
             using (var connection = Open())
             {
-                const string sql = @"
+                using (var tx = connection.BeginTransaction())
+                {
+                    Logger.Log("[DB][DriverRepo][TX] AddDriver begin");
+                    try
+                    {
+                        const string sql = @"
 INSERT INTO Drivers (Name, QualTime, Notes, TotalWins, TotalLosses, EventsEntered, EventsWon, State)
 VALUES (@Name, @QualTime, @Notes, @TotalWins, @TotalLosses, @EventsEntered, @EventsWon, @State);
 SELECT last_insert_rowid();";
 
-                using (var cmd = new SQLiteCommand(sql, connection))
-                {
-                    cmd.Parameters.AddWithValue("@Name", driver.Name);
-                    cmd.Parameters.AddWithValue("@QualTime", (object)driver.QualTime ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Notes", driver.Notes ?? string.Empty);
-                    cmd.Parameters.AddWithValue("@TotalWins", driver.TotalWins);
-                    cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
-                    cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
-                    cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
-                    cmd.Parameters.AddWithValue("@State", driver.State ?? string.Empty);
+                        using (var cmd = new SQLiteCommand(sql, connection, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@Name", driver.Name);
+                            cmd.Parameters.AddWithValue("@QualTime", (object)driver.QualTime ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Notes", driver.Notes ?? string.Empty);
+                            cmd.Parameters.AddWithValue("@TotalWins", driver.TotalWins);
+                            cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
+                            cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
+                            cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
+                            cmd.Parameters.AddWithValue("@State", driver.State ?? string.Empty);
 
-                    driver.Id = Convert.ToInt32(cmd.ExecuteScalar());
-                }
+                            driver.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
 
-                if (driver.Cars != null)
-                {
-                    foreach (var car in driver.Cars)
-                        AddCar(car, driver.Id, connection);
+                        if (driver.Cars != null)
+                        {
+                            foreach (var car in driver.Cars)
+                                AddCar(car, driver.Id, connection, tx);
+                        }
+
+                        tx.Commit();
+                        Logger.Log("[DB][DriverRepo][TX] AddDriver commit");
+                    }
+                    catch (Exception ex)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        Logger.Log($"[DB][DriverRepo][TX][ERROR] AddDriver rollback: {ex}");
+                        throw;
+                    }
                 }
             }
 
@@ -158,7 +183,12 @@ SELECT last_insert_rowid();";
 
             using (var connection = Open())
             {
-                const string sql = @"
+                using (var tx = connection.BeginTransaction())
+                {
+                    Logger.Log("[DB][DriverRepo][TX] UpdateDriver begin");
+                    try
+                    {
+                        const string sql = @"
 UPDATE Drivers SET 
     Name = @Name, 
     QualTime = @QualTime, 
@@ -170,30 +200,41 @@ UPDATE Drivers SET
     State = @State
 WHERE Id = @Id";
 
-                using (var cmd = new SQLiteCommand(sql, connection))
-                {
-                    cmd.Parameters.AddWithValue("@Name", driver.Name);
-                    cmd.Parameters.AddWithValue("@QualTime", (object)driver.QualTime ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Notes", driver.Notes ?? string.Empty);
-                    cmd.Parameters.AddWithValue("@TotalWins", driver.TotalWins);
-                    cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
-                    cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
-                    cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
-                    cmd.Parameters.AddWithValue("@State", driver.State ?? string.Empty);
-                    cmd.Parameters.AddWithValue("@Id", driver.Id);
-                    cmd.ExecuteNonQuery();
-                }
+                        using (var cmd = new SQLiteCommand(sql, connection, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@Name", driver.Name);
+                            cmd.Parameters.AddWithValue("@QualTime", (object)driver.QualTime ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Notes", driver.Notes ?? string.Empty);
+                            cmd.Parameters.AddWithValue("@TotalWins", driver.TotalWins);
+                            cmd.Parameters.AddWithValue("@TotalLosses", driver.TotalLosses);
+                            cmd.Parameters.AddWithValue("@EventsEntered", driver.EventsEntered);
+                            cmd.Parameters.AddWithValue("@EventsWon", driver.EventsWon);
+                            cmd.Parameters.AddWithValue("@State", driver.State ?? string.Empty);
+                            cmd.Parameters.AddWithValue("@Id", driver.Id);
+                            cmd.ExecuteNonQuery();
+                        }
 
-                using (var delCmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection))
-                {
-                    delCmd.Parameters.AddWithValue("@DriverId", driver.Id);
-                    delCmd.ExecuteNonQuery();
-                }
+                        using (var delCmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection, tx))
+                        {
+                            delCmd.Parameters.AddWithValue("@DriverId", driver.Id);
+                            delCmd.ExecuteNonQuery();
+                        }
 
-                if (driver.Cars != null)
-                {
-                    foreach (var car in driver.Cars)
-                        AddCar(car, driver.Id, connection);
+                        if (driver.Cars != null)
+                        {
+                            foreach (var car in driver.Cars)
+                                AddCar(car, driver.Id, connection, tx);
+                        }
+
+                        tx.Commit();
+                        Logger.Log("[DB][DriverRepo][TX] UpdateDriver commit");
+                    }
+                    catch (Exception ex)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        Logger.Log($"[DB][DriverRepo][TX][ERROR] UpdateDriver rollback: {ex}");
+                        throw;
+                    }
                 }
             }
 
@@ -206,16 +247,32 @@ WHERE Id = @Id";
 
             using (var connection = Open())
             {
-                using (var cmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection))
+                using (var tx = connection.BeginTransaction())
                 {
-                    cmd.Parameters.AddWithValue("@DriverId", id);
-                    cmd.ExecuteNonQuery();
-                }
+                    Logger.Log("[DB][DriverRepo][TX] DeleteDriver begin");
+                    try
+                    {
+                        using (var cmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@DriverId", id);
+                            cmd.ExecuteNonQuery();
+                        }
 
-                using (var cmd = new SQLiteCommand("DELETE FROM Drivers WHERE Id = @Id", connection))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    cmd.ExecuteNonQuery();
+                        using (var cmd = new SQLiteCommand("DELETE FROM Drivers WHERE Id = @Id", connection, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@Id", id);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        tx.Commit();
+                        Logger.Log("[DB][DriverRepo][TX] DeleteDriver commit");
+                    }
+                    catch (Exception ex)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        Logger.Log($"[DB][DriverRepo][TX][ERROR] DeleteDriver rollback: {ex}");
+                        throw;
+                    }
                 }
             }
 
@@ -240,6 +297,22 @@ INSERT INTO Cars (DriverId, CarName, ClassType, DefaultDialIn)
 VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
 
             using (var cmd = new SQLiteCommand(sql, connection))
+            {
+                cmd.Parameters.AddWithValue("@DriverId", driverId);
+                cmd.Parameters.AddWithValue("@CarName", car.CarName ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ClassType", car.ClassType ?? string.Empty);
+                cmd.Parameters.AddWithValue("@DefaultDialIn", (object)car.DefaultDialIn ?? DBNull.Value);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void AddCar(Car car, int driverId, SQLiteConnection connection, SQLiteTransaction transaction)
+        {
+            const string sql = @"
+INSERT INTO Cars (DriverId, CarName, ClassType, DefaultDialIn)
+VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
+
+            using (var cmd = new SQLiteCommand(sql, connection, transaction))
             {
                 cmd.Parameters.AddWithValue("@DriverId", driverId);
                 cmd.Parameters.AddWithValue("@CarName", car.CarName ?? string.Empty);
@@ -292,6 +365,53 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
             }
 
             Logger.Log("[DB][DriverRepo] UpdateQualifyingTime → OK");
+        }
+
+        public void IncrementEventsEntered(int driverId, int delta = 1)
+        {
+            Logger.Log($"[DB][DriverRepo][STATS] IncrementEventsEntered(driverId={driverId}, delta={delta})");
+            ExecuteStatIncrement(driverId, "EventsEntered", delta);
+        }
+
+        public void IncrementEventsWon(int driverId, int delta = 1)
+        {
+            Logger.Log($"[DB][DriverRepo][STATS] IncrementEventsWon(driverId={driverId}, delta={delta})");
+            ExecuteStatIncrement(driverId, "EventsWon", delta);
+        }
+
+        public void IncrementWinsAndLosses(int winnerDriverId, int loserDriverId, int winDelta = 1, int lossDelta = 1)
+        {
+            Logger.Log($"[DB][DriverRepo][STATS] IncrementWinsAndLosses(winnerId={winnerDriverId}, loserId={loserDriverId}, winDelta={winDelta}, lossDelta={lossDelta})");
+            using (var connection = Open())
+            using (var tx = connection.BeginTransaction())
+            {
+                Logger.Log("[DB][DriverRepo][TX] IncrementWinsAndLosses begin");
+                try
+                {
+                    using (var winCmd = new SQLiteCommand("UPDATE Drivers SET TotalWins = TotalWins + @Delta WHERE Id = @Id", connection, tx))
+                    {
+                        winCmd.Parameters.AddWithValue("@Delta", winDelta);
+                        winCmd.Parameters.AddWithValue("@Id", winnerDriverId);
+                        winCmd.ExecuteNonQuery();
+                    }
+
+                    using (var lossCmd = new SQLiteCommand("UPDATE Drivers SET TotalLosses = TotalLosses + @Delta WHERE Id = @Id", connection, tx))
+                    {
+                        lossCmd.Parameters.AddWithValue("@Delta", lossDelta);
+                        lossCmd.Parameters.AddWithValue("@Id", loserDriverId);
+                        lossCmd.ExecuteNonQuery();
+                    }
+
+                    tx.Commit();
+                    Logger.Log("[DB][DriverRepo][TX] IncrementWinsAndLosses commit");
+                }
+                catch (Exception ex)
+                {
+                    try { tx.Rollback(); } catch { }
+                    Logger.Log($"[DB][DriverRepo][TX][ERROR] IncrementWinsAndLosses rollback: {ex}");
+                    throw;
+                }
+            }
         }
 
         // ---- Stats helper unchanged ----
@@ -357,6 +477,59 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                 }
                 catch { }
                 return null;
+            }
+        }
+
+        private Dictionary<int, List<Car>> GetCarsByDriverIds(SQLiteConnection connection, List<int> driverIds)
+        {
+            var map = new Dictionary<int, List<Car>>();
+            if (driverIds == null || driverIds.Count == 0)
+                return map;
+
+            var placeholders = new List<string>();
+            for (int i = 0; i < driverIds.Count; i++)
+                placeholders.Add("@d" + i);
+
+            var sql = "SELECT CarID, DriverId, CarName, ClassType, DefaultDialIn FROM Cars WHERE DriverId IN (" + string.Join(",", placeholders) + ")";
+            using (var cmd = new SQLiteCommand(sql, connection))
+            {
+                for (int i = 0; i < driverIds.Count; i++)
+                    cmd.Parameters.AddWithValue(placeholders[i], driverIds[i]);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var driverId = Convert.ToInt32(reader["DriverId"]);
+                        if (!map.TryGetValue(driverId, out var list))
+                        {
+                            list = new List<Car>();
+                            map[driverId] = list;
+                        }
+
+                        list.Add(new Car
+                        {
+                            CarID = Convert.ToInt32(reader["CarID"]),
+                            CarName = reader["CarName"].ToString(),
+                            ClassType = reader["ClassType"].ToString(),
+                            DefaultDialIn = reader["DefaultDialIn"] != DBNull.Value ? (double?)Convert.ToDouble(reader["DefaultDialIn"]) : null
+                        });
+                    }
+                }
+            }
+
+            return map;
+        }
+
+        private void ExecuteStatIncrement(int driverId, string columnName, int delta)
+        {
+            using (var connection = Open())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = $"UPDATE Drivers SET {columnName} = {columnName} + @Delta WHERE Id = @Id";
+                command.Parameters.AddWithValue("@Delta", delta);
+                command.Parameters.AddWithValue("@Id", driverId);
+                command.ExecuteNonQuery();
             }
         }
     }
