@@ -76,15 +76,33 @@ SELECT last_insert_rowid();";
 
             int newId;
             using (var cn = Open())
-            using (var cmd = new SQLiteCommand(sql, cn))
             {
-                cmd.Parameters.AddWithValue("@EventName", eventName ?? "");
-                cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                cmd.Parameters.AddWithValue("@ClassType", classType ?? "");
-                cmd.Parameters.AddWithValue("@RaceType", raceType ?? "");
-                cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
+                using (var tx = cn.BeginTransaction())
+                {
+                    Logger.Log("[DB][SessionRepo][TX] SaveSession begin");
+                    try
+                    {
+                        using (var cmd = new SQLiteCommand(sql, cn, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@EventName", eventName ?? "");
+                            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                            cmd.Parameters.AddWithValue("@ClassType", classType ?? "");
+                            cmd.Parameters.AddWithValue("@RaceType", raceType ?? "");
+                            cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
 
-                newId = Convert.ToInt32(cmd.ExecuteScalar());
+                            newId = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+
+                        tx.Commit();
+                        Logger.Log("[DB][SessionRepo][TX] SaveSession commit");
+                    }
+                    catch (Exception ex)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        Logger.Log($"[DB][SessionRepo][TX][ERROR] SaveSession rollback: {ex}");
+                        throw;
+                    }
+                }
             }
 
             TrySetIntProp(session, "Id", newId);
@@ -164,10 +182,28 @@ ORDER BY datetime(EventDate) DESC";
         {
             Logger.Log($"[DB][SessionRepo] DeleteSession(id={id})");
             using (var cn = Open())
-            using (var cmd = new SQLiteCommand("DELETE FROM RaceSessions WHERE Id = @Id", cn))
             {
-                cmd.Parameters.AddWithValue("@Id", id);
-                cmd.ExecuteNonQuery();
+                using (var tx = cn.BeginTransaction())
+                {
+                    Logger.Log("[DB][SessionRepo][TX] DeleteSession begin");
+                    try
+                    {
+                        using (var cmd = new SQLiteCommand("DELETE FROM RaceSessions WHERE Id = @Id", cn, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@Id", id);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        tx.Commit();
+                        Logger.Log("[DB][SessionRepo][TX] DeleteSession commit");
+                    }
+                    catch (Exception ex)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        Logger.Log($"[DB][SessionRepo][TX][ERROR] DeleteSession rollback: {ex}");
+                        throw;
+                    }
+                }
             }
             Logger.Log("[DB][SessionRepo] DeleteSession → OK");
         }
