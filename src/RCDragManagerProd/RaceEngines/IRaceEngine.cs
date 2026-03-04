@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RCDragManagerProd.Domain;
 
 namespace RCDragManagerProd.RaceEngines
@@ -25,12 +26,40 @@ namespace RCDragManagerProd.RaceEngines
         /// <summary>Ordered list of round labels (e.g., R1, R2, …, SF, F).</summary>
         IReadOnlyList<string> GetRoundOrder();
 
+        /// <summary>Matches belonging to a single round label.</summary>
+        IReadOnlyList<EngineMatch> GetRoundMatches(string roundLabel);
+
+        /// <summary>Try get one match by id.</summary>
+        bool TryGetMatch(int matchId, out EngineMatch match);
+
         // ── results ───────────────────────────────────────────────────
         /// <summary>Record the winner for a given match.</summary>
+        void SubmitWinner(int matchId, Driver winner);
+
+        /// <summary>Legacy bridge for existing controller paths.</summary>
+        [Obsolete("Use SubmitWinner(matchId, winner)")]
         void SetWinner(int matchId, Driver winner);
 
         /// <summary>True if a winner has been recorded for the given match.</summary>
         bool HasWinner(int matchId);
+
+        /// <summary>Winner for the match, if resolved.</summary>
+        Driver GetWinner(int matchId);
+
+        /// <summary>Loser for the match, if resolved.</summary>
+        Driver GetLoser(int matchId);
+
+        /// <summary>True when engine has reached its terminal match state.</summary>
+        bool IsComplete { get; }
+
+        /// <summary>Champion, if complete/resolvable.</summary>
+        Driver GetChampion();
+
+        /// <summary>Runner-up, if complete/resolvable.</summary>
+        Driver GetRunnerUp();
+
+        /// <summary>Engine-consistent BYE check helper.</summary>
+        bool IsBye(Driver driver);
     }
 
     /// <summary>

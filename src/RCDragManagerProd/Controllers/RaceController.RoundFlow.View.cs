@@ -110,14 +110,9 @@ namespace RCDragManagerProd.Controllers
             {
                 AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
             }
-            else if (_engine is RoundRobinEngineAdapter rrLive)
+            else if (_engine != null)
             {
-                AppendFrom(rrLive.GetMatches(), rrLive.GetRoundOrder(), "RR-live", filterByRevealed: true);
-            }
-            // 2) Randomized — show only revealed rounds
-            else if (_engine is RandomEngineAdapter rndLive)
-            {
-                AppendFrom(rndLive.GetMatches(), rndLive.GetRoundOrder(), "Random-live", filterByRevealed: true);
+                AppendFrom(_engine.GetMatches(), _engine.GetRoundOrder(), "Engine-live", filterByRevealed: true);
             }
 
             // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
@@ -127,12 +122,6 @@ namespace RCDragManagerProd.Controllers
                 filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
 
                 AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
-            }
-
-            // 4) Finals (Pro Ladder) — only revealed (SF, then F)
-            if (_engine is ProLadderEngineAdapter pro)
-            {
-                AppendFrom(pro.GetMatches(), pro.GetRoundOrder(), "Finals(Pro)", filterByRevealed: true);
             }
 
             int displayNo = 1;

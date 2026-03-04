@@ -20,8 +20,7 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
-            var match = _engine.GetMatches().FirstOrDefault(m => m.MatchId == matchId);
-            if (match == null)
+            if (!_engine.TryGetMatch(matchId, out var match))
             {
                 Logger.Log($"[WINNER] Reject — match {matchId} not found.");
                 return;
@@ -47,7 +46,8 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log($"[WINNER] M{matchId} {match.RoundLabel}: {winner.Name} over {(loser?.Name ?? "BYE")}");
 
-            _engine.SetWinner(matchId, winner);
+            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={winner?.Name ?? "null"}, loser={loser?.Name ?? "BYE"})");
+            _engine.SubmitWinner(matchId, winner);
             _matchResult.SetWinner(matchId, winner, loser);
 
             _winners.Add(new WinnerRow
@@ -113,8 +113,7 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
-            var match = _engine.GetMatches().FirstOrDefault(m => m.MatchId == matchId);
-            if (match == null)
+            if (!_engine.TryGetMatch(matchId, out var match))
             {
                 Logger.Log($"[CTRL][EDIT] M{matchId} not found.");
                 return false;
@@ -137,7 +136,8 @@ namespace RCDragManagerProd.Controllers
                 return false;
             }
 
-            _engine.SetWinner(matchId, newWinner);
+            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={newWinner?.Name ?? "null"}, loser={newLoser?.Name ?? "BYE"})");
+            _engine.SubmitWinner(matchId, newWinner);
             _matchResult.SetWinner(matchId, newWinner, newLoser);
             Logger.Log($"[CTRL][EDIT] SetWinner applied: M{matchId}, winner='{newWinner.Name}', loser='{newLoser?.Name ?? "BYE"}'");
 

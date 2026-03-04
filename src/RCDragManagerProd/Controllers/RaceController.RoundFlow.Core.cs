@@ -392,7 +392,8 @@ namespace RCDragManagerProd.Controllers
             // ── Losers Bracket complete → gate Finals ─────────────────────
             if (_inLosersPhase && _losersEngine != null)
             {
-                bool isLbComplete = _losersEngine.GetMatches().All(m => _losersEngine.HasWinner(m.MatchId));
+                Logger.Log($"[ENGINE-CALL] {_losersEngine.GetType().Name}.IsComplete");
+                bool isLbComplete = _losersEngine.IsComplete;
                 Logger.Log($"[DEBUG] PushAdvanceState (LB): inLosersPhase={_inLosersPhase}, resolvedLB={isLbComplete}");
 
                 if (isLbComplete)
@@ -490,7 +491,8 @@ namespace RCDragManagerProd.Controllers
                 return null;
             }
 
-            var match = _engine.GetMatches().FirstOrDefault(m => m.MatchId == matchId);
+            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.TryGetMatch(matchId={matchId})");
+            _engine.TryGetMatch(matchId, out var match);
             Logger.Log(match != null
                 ? $"[LOOKUP] GetMatch({matchId}) → Round={match.RoundLabel}"
                 : $"[LOOKUP] GetMatch({matchId}) → NOT FOUND");
