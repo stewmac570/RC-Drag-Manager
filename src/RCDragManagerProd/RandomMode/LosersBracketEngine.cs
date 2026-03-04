@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -87,3 +88,5 @@ namespace RCDragManagerProd.RandomMode
         }
     }
 }
+#nullable disable
+
