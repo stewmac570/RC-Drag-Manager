@@ -86,12 +86,6 @@ namespace RCDragManagerProd.UI.Forms
 
             base.OnFormClosed(e);
         }
-        private sealed class WinnerPick
-        {
-            public int MatchId { get; set; }
-            public int? DriverId { get; set; }
-        }
-
         private sealed class WinnerButtonContext
         {
             public int MatchId { get; set; }

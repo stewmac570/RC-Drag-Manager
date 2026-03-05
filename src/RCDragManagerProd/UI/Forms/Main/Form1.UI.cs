@@ -40,12 +40,6 @@ namespace RCDragManagerProd.UI.Forms
             Logger.Log($"[UI] Driver list updated ({drivers.Count}); Generate Bracket {(canGenerate ? "ENABLED" : "disabled")}.");
         }
 
-        private int GetGlobalRoundOrder(string roundLabel)
-        {
-            return RoundLabels.Compare(roundLabel, "R1");
-        }
-
-
         private string GetFullRoundLabel(string label)
         {
             return RoundLabels.Normalize(label);
@@ -54,11 +48,5 @@ namespace RCDragManagerProd.UI.Forms
         private static bool IsByeName(string name)
             => string.Equals((name ?? "").Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
 
-        private static string FormatMatchForNext(EngineMatch m)
-        {
-            string n1 = m.Driver1?.Name ?? "BYE";
-            string n2 = m.Driver2?.Name ?? "BYE";
-            return $"M{m.MatchId}: {n1} vs {n2}";
-        }
     }
 }
