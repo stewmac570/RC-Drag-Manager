@@ -63,11 +63,13 @@ namespace RCDragManagerProd.Controllers
 
                 if (string.IsNullOrWhiteSpace(_session.RaceType) && _engine != null)
                 {
-                    _session.RaceType =
-                        _engine is ProLadderEngineAdapter ? "Finals" :
-                        _engine is RoundRobinEngineAdapter ? "Round Robin" :
-                        _engine is RandomEngineAdapter ? "Losers Bracket" :
-                        _engine.GetType().Name;
+                    var roundOrder = _engine.GetRoundOrder() ?? Array.Empty<string>();
+                    if (roundOrder.Any(r => RoundLabels.Normalize(r).StartsWith("RR", StringComparison.OrdinalIgnoreCase)))
+                        _session.RaceType = "Round Robin";
+                    else if (roundOrder.Any(r => RoundLabels.Normalize(r).StartsWith("LB-", StringComparison.OrdinalIgnoreCase)))
+                        _session.RaceType = "Losers Bracket";
+                    else
+                        _session.RaceType = "Finals";
                 }
 
                 if (_session.Drivers == null && _drivers != null)
