@@ -48,11 +48,5 @@ namespace RCDragManagerProd.UI.Forms
         private static bool IsByeName(string name)
             => string.Equals((name ?? "").Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
 
-        private static string FormatMatchForNext(EngineMatch m)
-        {
-            string n1 = m.Driver1?.Name ?? "BYE";
-            string n2 = m.Driver2?.Name ?? "BYE";
-            return $"M{m.MatchId}: {n1} vs {n2}";
-        }
     }
 }
