@@ -26,8 +26,8 @@ namespace RCDragManagerProd.Controllers
                     return;
                 }
 
-                var mainMatches = _engine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
-                var lbMatches = _losersEngine?.GetMatches() ?? Enumerable.Empty<EngineMatch>();
+                var mainMatches = _engine != null ? EngineGetMatches(_engine) : Enumerable.Empty<EngineMatch>();
+                var lbMatches = _losersEngine != null ? EngineGetMatches(_losersEngine) : Enumerable.Empty<EngineMatch>();
                 var allMatches = mainMatches.Concat(lbMatches);
                 var seenMatchIds = new HashSet<int>();
                 int beforeCount = 0;
@@ -63,6 +63,9 @@ namespace RCDragManagerProd.Controllers
 
                 if (string.IsNullOrWhiteSpace(_session.RaceType) && _engine != null)
                 {
+
+                    _session.RaceType = _engine.GetType().Name;
+
                     var roundOrder = _engine.GetRoundOrder() ?? Array.Empty<string>();
                     if (roundOrder.Any(r => RoundLabels.Normalize(r).StartsWith("RR", StringComparison.OrdinalIgnoreCase)))
                         _session.RaceType = "Round Robin";
@@ -70,6 +73,7 @@ namespace RCDragManagerProd.Controllers
                         _session.RaceType = "Losers Bracket";
                     else
                         _session.RaceType = "Finals";
+
                 }
 
                 if (_session.Drivers == null && _drivers != null)

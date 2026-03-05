@@ -34,19 +34,20 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log($"[FINALS] Using auto wildcard (no LB): {lbChampion.Name}");
                 _buybackChampionOverride = null;
             }
-            else if (_losersEngine is RandomEngineAdapter adapter)
+            else
             {
-                lbChampion = adapter.GetWinner();
+                if (_losersEngine == null)
+                {
+                    Logger.Log("❌ Cannot inject finals — no losers bracket and no wildcard override set");
+                    return;
+                }
+
+                lbChampion = TryResolveEngineChampion(_losersEngine, "LB");
                 if (lbChampion == null)
                 {
                     Logger.Log("❌ Cannot inject finals — Losers bracket champion not found");
                     return;
                 }
-            }
-            else
-            {
-                Logger.Log("❌ Cannot inject finals — no losers bracket and no wildcard override set");
-                return;
             }
 
             _session.RaceType = "Finals";
@@ -58,12 +59,12 @@ namespace RCDragManagerProd.Controllers
             finalists.Add(lbChampion);
             Logger.Log($"[PRO] Final-4 = {string.Join(", ", finalists.Select(d => d.Name))}");
 
-            var proAdapter = new ProLadderEngineAdapter();
-            proAdapter.LoadDrivers(finalists);
-            proAdapter.GenerateBracket();
+            IRaceEngine proAdapter = new ProLadderEngineAdapter();
+            EngineLoadDrivers(proAdapter, finalists);
+            EngineGenerateBracket(proAdapter);
             _engine = proAdapter;
 
-            var finalMatches = proAdapter.GetMatches();
+            var finalMatches = EngineGetMatches(_engine);
             Logger.Log($"[PRO] Matches generated: {finalMatches.Count}");
             foreach (var match in finalMatches)
             {
@@ -136,12 +137,12 @@ namespace RCDragManagerProd.Controllers
             var finalists = new List<Driver>(_rrTop3);
             Logger.Log($"[PRO] Final-3 = {string.Join(", ", finalists.Select(d => d.Name))}");
 
-            var proAdapter = new ProLadderEngineAdapter();
-            proAdapter.LoadDrivers(finalists);
-            proAdapter.GenerateBracket();
+            IRaceEngine proAdapter = new ProLadderEngineAdapter();
+            EngineLoadDrivers(proAdapter, finalists);
+            EngineGenerateBracket(proAdapter);
             _engine = proAdapter;
 
-            var finalMatches = proAdapter.GetMatches();
+            var finalMatches = EngineGetMatches(_engine);
             Logger.Log($"[PRO] Matches generated: {finalMatches.Count}");
             foreach (var match in finalMatches)
             {
@@ -191,14 +192,14 @@ namespace RCDragManagerProd.Controllers
             var pro = new ProLadderEngineAdapter();
             _engine = pro;
 
-            _engine.LoadDrivers(rankedDrivers);
+            EngineLoadDrivers(_engine, rankedDrivers);
             Logger.Log("[FINALS][QMDRA] Drivers loaded into ProLadder engine.");
 
-            _engine.GenerateBracket();
+            EngineGenerateBracket(_engine);
             Logger.Log("[FINALS][QMDRA] ProLadder bracket generated.");
 
             // Reveal FIRST round only (do NOT hardcode round name)
-            var firstRound = _engine.GetRoundOrder().FirstOrDefault();
+            var firstRound = EngineGetRoundOrder(_engine).FirstOrDefault();
             if (string.IsNullOrEmpty(firstRound))
             {
                 Logger.Log("⛔ InjectFinalsAllAdvance failed — no rounds returned from ProLadder.");
@@ -212,6 +213,28 @@ namespace RCDragManagerProd.Controllers
             PushFullRefresh();
             PushNextMatch();
             PushAdvanceState();
+        }
+
+        private Driver TryResolveEngineChampion(IRaceEngine engine, string roundHint)
+        {
+            if (engine == null) return null;
+
+            var matches = EngineGetMatches(engine, round: roundHint).ToList();
+            if (matches.Count == 0) return null;
+
+            var final = matches.FirstOrDefault(m =>
+                            string.Equals(RoundLabels.Normalize(m.RoundLabel), "F", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(RoundLabels.Normalize(m.RoundLabel), "LB-F", StringComparison.OrdinalIgnoreCase))
+                        ?? matches.OrderBy(m => RoundLabels.CompareKey(m.RoundLabel ?? string.Empty))
+                                 .ThenBy(m => m.MatchId)
+                                 .LastOrDefault();
+
+            if (final == null) return null;
+
+            if (!final.HasResult && !EngineHasWinner(engine, final.MatchId, final.RoundLabel))
+                return null;
+
+            return _matchResult.GetWinner(final.MatchId);
         }
 
     }

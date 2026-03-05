@@ -83,8 +83,20 @@ namespace RCDragManagerProd.RaceEngines
                 return;
             }
 
+            if (!_engine.TryGetMatch(matchId, out var left, out var right, out var round))
+            {
+                Logger.Log($"[RR-ADAPTER] Reject SetWinner(M{matchId}) → match not found.");
+                return;
+            }
+
+            if ((left == null || left.Id != winner.Id) && (right == null || right.Id != winner.Id))
+            {
+                Logger.Log($"[RR-ADAPTER] Reject SetWinner(M{matchId}) → winner '{winner.Name}' not in match ({left?.Name ?? "BYE"} vs {right?.Name ?? "BYE"}).");
+                return;
+            }
+
             _engine.SetWinner(matchId, winner);
-            Logger.Log($"[RR-ADAPTER] Winner set for M{matchId} → {winner.Name}");
+            Logger.Log($"[RR-ADAPTER] Winner set for M{matchId} ({round}) → {winner.Name}");
         }
 
         public void SetWinner(int matchId, Driver winner) => SubmitWinner(matchId, winner);

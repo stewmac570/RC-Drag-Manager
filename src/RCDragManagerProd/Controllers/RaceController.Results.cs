@@ -20,13 +20,18 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
+
+            var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
+            if (match == null)
+=======
             if (!_engine.TryGetMatch(matchId, out var match))
+
             {
                 Logger.Log($"[WINNER] Reject — match {matchId} not found.");
                 return;
             }
 
-            if (_engine.HasWinner(matchId))
+            if (EngineHasWinner(_engine, matchId, match.RoundLabel))
             {
                 Logger.Log($"[WINNER] Reject — match {matchId} already has a winner.");
                 return;
@@ -46,8 +51,12 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log($"[WINNER] M{matchId} {match.RoundLabel}: {winner.Name} over {(loser?.Name ?? "BYE")}");
 
+
+            EngineSetWinner(_engine, matchId, winner, match.RoundLabel);
+=======
             Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={winner?.Name ?? "null"}, loser={loser?.Name ?? "BYE"})");
             _engine.SubmitWinner(matchId, winner);
+
             _matchResult.SetWinner(matchId, winner, loser);
 
             _winners.Add(new WinnerRow
@@ -66,7 +75,10 @@ namespace RCDragManagerProd.Controllers
 
             // Per-round RR scoring once a full RR round is resolved
             if (_engine is RoundRobinEngineAdapter rr)
+            {
+                Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only completed-round scorecard.");
                 TryLogCompletedRound(rr);
+            }
         }
 
         public Driver GetWinner(int matchId) => _results.GetWinner(matchId);
@@ -81,8 +93,9 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log("❌ Engine is not RoundRobinEngineAdapter — buyback not available.");
                 return new List<Driver>();
             }
+            Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only buyback ranking methods.");
 
-            var rrMatches = rr.GetMatches() ?? new List<EngineMatch>();
+            var rrMatches = EngineGetMatches(_engine) ?? new List<EngineMatch>();
             var allDrivers = rrMatches
                 .SelectMany(m => new[] { m.Driver1, m.Driver2 })
                 .Where(d => d != null)
@@ -95,6 +108,7 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log($"📊 RR roster from matches: {allDrivers.Count} → [{string.Join(", ", allDrivers.Select(d => d.Name))}]");
 
+            Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
             var top3 = (_rrTop3 != null && _rrTop3.Count == 3) ? _rrTop3 : rr.GetTopRankedDrivers(3);
             Logger.Log($"🥇 Top-3: [{string.Join(", ", top3.Select(d => d.Name))}]");
 
@@ -113,7 +127,12 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
+
+            var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
+            if (match == null)
+=======
             if (!_engine.TryGetMatch(matchId, out var match))
+
             {
                 Logger.Log($"[CTRL][EDIT] M{matchId} not found.");
                 return false;
@@ -136,8 +155,12 @@ namespace RCDragManagerProd.Controllers
                 return false;
             }
 
+
+            EngineSetWinner(_engine, matchId, newWinner, match.RoundLabel);
+=======
             Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={newWinner?.Name ?? "null"}, loser={newLoser?.Name ?? "BYE"})");
             _engine.SubmitWinner(matchId, newWinner);
+
             _matchResult.SetWinner(matchId, newWinner, newLoser);
             Logger.Log($"[CTRL][EDIT] SetWinner applied: M{matchId}, winner='{newWinner.Name}', loser='{newLoser?.Name ?? "BYE"}'");
 
