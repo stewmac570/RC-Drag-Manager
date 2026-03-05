@@ -1,15 +1,8 @@
 ﻿// RaceController.Logging.cs
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;            // still used for a couple of info popups
 
-using RCDragManagerProd.Domain;
-using RCDragManagerProd.ViewModels;
 using RCDragManagerProd.RaceEngines;
-using RCDragManagerProd.RandomMode;
 using RCDragManagerProd.RoundRobinMode;
-using RCDragManagerProd.UI.Forms;
 using RCDragManagerProd.Logging;
 
 namespace RCDragManagerProd.Controllers
