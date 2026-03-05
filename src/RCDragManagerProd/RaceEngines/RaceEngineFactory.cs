@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using RCDragManagerProd.Domain;
-using RCDragManagerProd.ViewModels;    // only if returning VM rows
 using RCDragManagerProd.Logging;      // Logger
 
 
@@ -38,7 +37,7 @@ namespace RCDragManagerProd.RaceEngines
 
                 default:
                     Logger.Log($"[ENGINE FACTORY] Unknown race type '{cleanType}'");
-                    throw new ArgumentException($"Unknown race type “{raceType}”.", nameof(raceType));
+                    throw new ArgumentException($"Unknown race type \"{raceType}\".", nameof(raceType));
             }
         }
     }
