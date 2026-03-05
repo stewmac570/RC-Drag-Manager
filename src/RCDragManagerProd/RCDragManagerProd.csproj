@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="Controllers\LaneFairnessManager.cs" />
     <Compile Include="Controllers\RaceController.Logging.cs" />
+    <Compile Include="Controllers\RaceController.EngineCalls.cs" />
     <Compile Include="Controllers\RaceController.Persistence.cs" />
     <Compile Include="Controllers\RaceController.Results.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Core.cs" />

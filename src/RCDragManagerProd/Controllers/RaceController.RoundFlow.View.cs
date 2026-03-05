@@ -110,29 +110,18 @@ namespace RCDragManagerProd.Controllers
             {
                 AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
             }
-            else if (_engine is RoundRobinEngineAdapter rrLive)
+            else if (_engine != null)
             {
-                AppendFrom(rrLive.GetMatches(), rrLive.GetRoundOrder(), "RR-live", filterByRevealed: true);
-            }
-            // 2) Randomized — show only revealed rounds
-            else if (_engine is RandomEngineAdapter rndLive)
-            {
-                AppendFrom(rndLive.GetMatches(), rndLive.GetRoundOrder(), "Random-live", filterByRevealed: true);
+                AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
             }
 
             // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
-            if (_losersEngine != null)
+            if (_losersEngine != null && !ReferenceEquals(_engine, _losersEngine))
             {
                 bool filterLb;
                 filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
 
-                AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
-            }
-
-            // 4) Finals (Pro Ladder) — only revealed (SF, then F)
-            if (_engine is ProLadderEngineAdapter pro)
-            {
-                AppendFrom(pro.GetMatches(), pro.GetRoundOrder(), "Finals(Pro)", filterByRevealed: true);
+                AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
             }
 
             int displayNo = 1;
@@ -170,7 +159,7 @@ namespace RCDragManagerProd.Controllers
             {
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
-                var list = _engine.GetMatches()
+                var list = EngineGetMatches(_engine)
                                   .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
                                   .OrderBy(m => m.MatchId)
                                   .Take(count)
@@ -225,7 +214,7 @@ namespace RCDragManagerProd.Controllers
             string active;
             active = null;
 
-            foreach (var r in _engine.GetRoundOrder())
+            foreach (var r in EngineGetRoundOrder(_engine))
             {
                 if (_revealedRounds.Contains(r))
                 {
