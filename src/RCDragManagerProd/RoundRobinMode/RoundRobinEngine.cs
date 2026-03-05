@@ -195,8 +195,42 @@ namespace RCDragManagerProd.RoundRobinMode
                           .ToList();
         }
 
+        public bool TryGetMatch(int matchId, out Driver driver1, out Driver driver2, out string roundLabel)
+        {
+            var match = matches.FirstOrDefault(m => m.MatchId == matchId);
+            if (match.MatchId == 0)
+            {
+                driver1 = null;
+                driver2 = null;
+                roundLabel = null;
+                return false;
+            }
+
+            driver1 = match.Driver1;
+            driver2 = match.Driver2;
+            roundLabel = match.RoundLabel;
+            return true;
+        }
+
         public void SetWinner(int matchId, Driver winner, Driver loser = null)
-            => results.SetWinner(matchId, winner, loser);
+        {
+            if (winner == null)
+            {
+                results.SetWinner(matchId, winner, loser);
+                return;
+            }
+
+            if (TryGetMatch(matchId, out var left, out var right, out _))
+            {
+                if (loser == null)
+                {
+                    if (left != null && left.Id == winner.Id) loser = right;
+                    else if (right != null && right.Id == winner.Id) loser = left;
+                }
+            }
+
+            results.SetWinner(matchId, winner, loser);
+        }
 
         public bool HasWinner(int matchId) => results.HasResult(matchId);
         public Driver GetWinner(int matchId) => results.GetWinner(matchId);

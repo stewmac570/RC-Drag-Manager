@@ -16,8 +16,8 @@ namespace RCDragManagerProd.UI.Forms
     {
         private void HandleWinnerClick(bool firstOption, object tag)
         {
-            int matchId;
-            matchId = 0;
+            int matchId = 0;
+            int taggedMatchId = 0;
 
             if (tag == null)
             {
@@ -27,22 +27,37 @@ namespace RCDragManagerProd.UI.Forms
 
             if (tag is int)
             {
-                matchId = (int)tag;
+                taggedMatchId = (int)tag;
             }
             else if (tag is long)
             {
-                matchId = (int)(long)tag;
+                taggedMatchId = (int)(long)tag;
             }
             else
             {
                 string s;
                 s = tag.ToString();
 
-                if (!int.TryParse(s, out matchId))
+                if (!int.TryParse(s, out taggedMatchId))
                 {
                     Logger.Log("[UI][WINNER] HandleWinnerClick: tag not int: '" + s + "'");
                     return;
                 }
+            }
+
+            matchId = taggedMatchId;
+            if (_currentWinnerButtonContext != null)
+            {
+                if (_currentWinnerButtonContext.MatchId != taggedMatchId)
+                {
+                    Logger.Log("[UI][WINNER][MAP-WARN] Tag/context mismatch. " +
+                               "TagM=" + taggedMatchId + " ContextM=" + _currentWinnerButtonContext.MatchId +
+                               " ContextPairing='" + (_currentWinnerButtonContext.LeftName ?? "BYE") +
+                               " vs " + (_currentWinnerButtonContext.RightName ?? "BYE") + "'. " +
+                               "Using context MatchId.");
+                }
+
+                matchId = _currentWinnerButtonContext.MatchId;
             }
 
             Logger.Log("[UI][WINNER] HandleWinnerClick start: firstOption(UI-left?)=" + firstOption + " matchId=" + matchId +

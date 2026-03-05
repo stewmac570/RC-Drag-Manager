@@ -19,6 +19,7 @@ namespace RCDragManagerProd.UI.Forms
         private RaceSessionRepository sessionRepository = new RaceSessionRepository(Program.ConnectionString);
         private readonly RaceController _controller;
         private bool _finalsPopupShown;
+        private WinnerButtonContext _currentWinnerButtonContext;
 
         public Form1(RaceController controller)
         {
@@ -89,6 +90,14 @@ namespace RCDragManagerProd.UI.Forms
         {
             public int MatchId { get; set; }
             public int? DriverId { get; set; }
+        }
+
+        private sealed class WinnerButtonContext
+        {
+            public int MatchId { get; set; }
+            public string RoundLabel { get; set; }
+            public string LeftName { get; set; }
+            public string RightName { get; set; }
         }
 
     }

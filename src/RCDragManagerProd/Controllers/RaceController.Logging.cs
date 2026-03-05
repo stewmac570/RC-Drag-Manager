@@ -25,8 +25,8 @@ namespace RCDragManagerProd.Controllers
         // Log per-completed-round standings while in RR
         private void TryLogCompletedRound(RoundRobinEngineAdapter rr)
         {
-            var rounds = rr.GetRoundOrder().ToList();
-            var matches = rr.GetMatches().ToList();
+            var rounds = EngineGetRoundOrder(_engine).ToList();
+            var matches = EngineGetMatches(_engine).ToList();
 
             foreach (var r in rounds)
             {

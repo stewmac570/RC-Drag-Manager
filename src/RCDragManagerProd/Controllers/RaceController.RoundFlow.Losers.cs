@@ -48,10 +48,10 @@ namespace RCDragManagerProd.Controllers
 
             _session.PairingHistory ??= new HashSet<(int, int)>();
 
-            if ((_rrMatchesSnapshot == null || _rrRoundOrderSnapshot == null) && _engine is RoundRobinEngineAdapter rrSnap)
+            if ((_rrMatchesSnapshot == null || _rrRoundOrderSnapshot == null) && _engine != null)
             {
-                _rrMatchesSnapshot = rrSnap.GetMatches().ToList();
-                _rrRoundOrderSnapshot = rrSnap.GetRoundOrder().ToList();
+                _rrMatchesSnapshot = EngineGetMatches(_engine).ToList();
+                _rrRoundOrderSnapshot = EngineGetRoundOrder(_engine).ToList();
                 Logger.Log($"[RR] Fallback snapshot saved in StartLosersBracket: matches={_rrMatchesSnapshot.Count}, rounds={_rrRoundOrderSnapshot.Count}");
             }
 
@@ -69,7 +69,8 @@ namespace RCDragManagerProd.Controllers
             }
 
             var lbEngine = new RandomEngineAdapter();
-            lbEngine.LoadDrivers(_session.BuybackDrivers);
+            EngineLoadDrivers(lbEngine, _session.BuybackDrivers, "LB-R1");
+            Logger.Log("[CTRL][ENGINE-CAST] Using RandomEngineAdapter for LB-only InjectMatches.");
             lbEngine.InjectMatches(lbMatches);
             Logger.Log($"🛠️ Injected LB matches into RandomEngineAdapter (drivers={_session.BuybackDrivers.Count})");
 

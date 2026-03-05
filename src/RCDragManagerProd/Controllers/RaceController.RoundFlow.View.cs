@@ -112,16 +112,24 @@ namespace RCDragManagerProd.Controllers
             }
             else if (_engine != null)
             {
+
+                AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
+=======
                 AppendFrom(_engine.GetMatches(), _engine.GetRoundOrder(), "Engine-live", filterByRevealed: true);
+
             }
 
             // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
-            if (_losersEngine != null)
+            if (_losersEngine != null && !ReferenceEquals(_engine, _losersEngine))
             {
                 bool filterLb;
                 filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
 
+
+                AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
+=======
                 AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
+
             }
 
             int displayNo = 1;
@@ -159,7 +167,7 @@ namespace RCDragManagerProd.Controllers
             {
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
-                var list = _engine.GetMatches()
+                var list = EngineGetMatches(_engine)
                                   .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
                                   .OrderBy(m => m.MatchId)
                                   .Take(count)
@@ -214,7 +222,7 @@ namespace RCDragManagerProd.Controllers
             string active;
             active = null;
 
-            foreach (var r in _engine.GetRoundOrder())
+            foreach (var r in EngineGetRoundOrder(_engine))
             {
                 if (_revealedRounds.Contains(r))
                 {

@@ -125,6 +125,8 @@ namespace RCDragManagerProd.UI.Forms
 
                 if (row == null)
                 {
+                    _currentWinnerButtonContext = null;
+
                     lblNext.AutoSize = false;
                     lblNext.TextAlign = ContentAlignment.MiddleCenter;
                     lblNext.Text = "No match ready";
@@ -163,6 +165,13 @@ namespace RCDragManagerProd.UI.Forms
 
                 btnWinner1.Tag = row.MatchId;
                 btnWinner2.Tag = row.MatchId;
+                _currentWinnerButtonContext = new WinnerButtonContext
+                {
+                    MatchId = row.MatchId,
+                    RoundLabel = current?.RoundLabel ?? row.RoundLabel,
+                    LeftName = currentLeft,
+                    RightName = currentRight
+                };
 
                 // Grey out / disable BYE buttons (so clicking does nothing because you can't click it)
                 bool leftIsBye;
