@@ -112,7 +112,11 @@ namespace RCDragManagerProd.Controllers
             }
             else if (_engine != null)
             {
+
                 AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
+=======
+                AppendFrom(_engine.GetMatches(), _engine.GetRoundOrder(), "Engine-live", filterByRevealed: true);
+
             }
 
             // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
@@ -121,7 +125,11 @@ namespace RCDragManagerProd.Controllers
                 bool filterLb;
                 filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
 
+
                 AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
+=======
+                AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
+
             }
 
             int displayNo = 1;

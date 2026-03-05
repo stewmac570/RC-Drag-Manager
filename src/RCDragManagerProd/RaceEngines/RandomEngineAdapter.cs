@@ -30,6 +30,7 @@ namespace RCDragManagerProd.RaceEngines
         // ── IRaceEngine ───────────────────────────────────────────────
         public void LoadDrivers(List<Driver> drivers)
         {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.LoadDrivers(count={drivers?.Count ?? 0})");
             _byeCount.Clear();
             _lastByeRecipient = null;
 
@@ -39,6 +40,7 @@ namespace RCDragManagerProd.RaceEngines
 
         public void GenerateBracket()
         {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GenerateBracket()");
             _engine.GenerateBracket();
             Logger.Log("[RND] GenerateBracket → underlying engine produced initial rounds.");
             RecomputeByeCountsFromSchedule();
@@ -46,6 +48,7 @@ namespace RCDragManagerProd.RaceEngines
 
         public void Reset()
         {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.Reset()");
             _engine.Reset();
             _byeCount.Clear();
             _lastByeRecipient = null;
@@ -54,6 +57,7 @@ namespace RCDragManagerProd.RaceEngines
 
         public IReadOnlyList<EngineMatch> GetMatches()
         {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetMatches()");
             // Project engine's match objects to the IRaceEngine surface model
             var src = _engine.GetMatches() ?? new List<RandomMatch>();
             var list = new List<EngineMatch>(src.Count);
@@ -73,21 +77,90 @@ namespace RCDragManagerProd.RaceEngines
             return list;
         }
 
-        public IReadOnlyList<string> GetRoundOrder() =>
-            _engine.GetRoundOrder()
-                   .Select(RoundLabels.Normalize)
-                   .Distinct(StringComparer.OrdinalIgnoreCase)
-                   .OrderBy(x => RoundLabels.CompareKey(x))
-                   .ToList();
-
-        public void SetWinner(int matchId, Driver winner)
+        public IReadOnlyList<string> GetRoundOrder()
         {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetRoundOrder()");
+            return _engine.GetRoundOrder()
+                          .Select(RoundLabels.Normalize)
+                          .Distinct(StringComparer.OrdinalIgnoreCase)
+                          .OrderBy(x => RoundLabels.CompareKey(x))
+                          .ToList();
+        }
+
+        public void SubmitWinner(int matchId, Driver winner)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.SubmitWinner(matchId={matchId}, winnerId={winner?.Id}, winner='{winner?.Name ?? "null"}')");
             if (winner == null || IsBye(winner))
                 throw new InvalidOperationException("Cannot set BYE as a match winner.");
             _engine.SetWinner(matchId, winner);
         }
 
-        public bool HasWinner(int matchId) => _engine.HasWinner(matchId);
+        public void SetWinner(int matchId, Driver winner) => SubmitWinner(matchId, winner);
+
+        public bool HasWinner(int matchId)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.HasWinner(matchId={matchId})");
+            return _engine.HasWinner(matchId);
+        }
+
+        public Driver GetWinner(int matchId)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetWinner(matchId={matchId})");
+            return _engine.GetWinner(matchId);
+        }
+
+        public Driver GetLoser(int matchId)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetLoser(matchId={matchId})");
+            return _engine.GetLoser(matchId);
+        }
+
+        public bool IsComplete
+        {
+            get
+            {
+                Logger.Log($"[ENGINE-API] {GetType().Name}.IsComplete");
+                return _engine.IsTournamentComplete();
+            }
+        }
+
+        public Driver GetChampion()
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetChampion()");
+            return GetWinner();
+        }
+
+        public Driver GetRunnerUp()
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetRunnerUp()");
+            var all = (_engine.GetMatches() ?? new List<RandomMatch>()).ToList();
+            if (all.Count == 0) return null;
+
+            var final = all.FirstOrDefault(m =>
+                string.Equals(RoundLabels.Normalize(m.RoundLabel), "F", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(RoundLabels.Normalize(m.RoundLabel), "LB-F", StringComparison.OrdinalIgnoreCase))
+                ?? all.OrderBy(m => m.MatchId).LastOrDefault();
+
+            if (final == null || !_engine.HasWinner(final.MatchId)) return null;
+            return _engine.GetLoser(final.MatchId);
+        }
+
+        public IReadOnlyList<EngineMatch> GetRoundMatches(string roundLabel)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.GetRoundMatches(roundLabel='{roundLabel}')");
+            var normalized = RoundLabels.Normalize(roundLabel);
+            return GetMatches()
+                .Where(m => string.Equals(RoundLabels.Normalize(m.RoundLabel), normalized, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(m => m.MatchId)
+                .ToList();
+        }
+
+        public bool TryGetMatch(int matchId, out EngineMatch match)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.TryGetMatch(matchId={matchId})");
+            match = GetMatches().FirstOrDefault(m => m.MatchId == matchId);
+            return match != null;
+        }
 
         // ── extras used by controller flow ────────────────────────────
         public void InjectMatches(List<RandomMatch> matches)
@@ -293,7 +366,7 @@ namespace RCDragManagerProd.RaceEngines
             return 1;
         }
 
-        private static bool IsBye(Driver d)
+        public bool IsBye(Driver d)
         {
             return ByePolicy.IsBye(d);
         }
