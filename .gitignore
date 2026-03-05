@@ -48,3 +48,7 @@ Desktop.ini
 
 Installer/Payload/
 Installer/output/
+
+# build artifacts
+*.binlog
+build.binlog
