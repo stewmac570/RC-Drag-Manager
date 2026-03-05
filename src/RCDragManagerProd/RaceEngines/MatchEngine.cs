@@ -60,11 +60,6 @@ namespace RCDragManagerProd.RaceEngines
             return Results.IsTournamentComplete(bracketMatches);
         }
 
-        public void AdvanceToNextRound()
-        {
-            // Nothing needed here anymore.
-        }
-
 public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
 {
     var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
