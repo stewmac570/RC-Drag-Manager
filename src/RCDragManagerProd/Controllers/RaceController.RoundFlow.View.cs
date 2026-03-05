@@ -1,4 +1,4 @@
-ï»¿// RaceController.RoundFlow.View.cs
+// RaceController.RoundFlow.View.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +60,7 @@ namespace RCDragManagerProd.Controllers
             var rows = new List<PairingRow>();
 
             Logger.Log(
-                "[ROWS] BUILD v2 â€” snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
+                "[ROWS] BUILD v2 — snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
                 "snapshotRounds=" + (_rrRoundOrderSnapshot?.Count.ToString() ?? "null") + ", " +
                 "engine=" + (_engine?.GetType().Name ?? "null") + ", losersEngine=" + (_losersEngine?.GetType().Name ?? "null") + ", " +
                 "revealed=[" + string.Join(",", _revealedRounds) + "]");
@@ -102,34 +102,26 @@ namespace RCDragManagerProd.Controllers
                     }
                 }
 
-                Logger.Log("[ROWS] AppendFrom(" + tag + ") â†’ added " + (rows.Count - before) + " items. Total=" + rows.Count);
+                Logger.Log("[ROWS] AppendFrom(" + tag + ") ? added " + (rows.Count - before) + " items. Total=" + rows.Count);
             }
 
-            // 1) Round Robin â€” show ALL rounds if we have a snapshot; otherwise only revealed
+            // 1) Round Robin — show ALL rounds if we have a snapshot; otherwise only revealed
             if (_rrMatchesSnapshot != null && _rrRoundOrderSnapshot != null)
             {
                 AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
             }
             else if (_engine != null)
             {
-
                 AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
-=======
-                AppendFrom(_engine.GetMatches(), _engine.GetRoundOrder(), "Engine-live", filterByRevealed: true);
-
             }
 
-            // 3) Losers Bracket â€” during Finals show all LB rounds; otherwise only revealed
+            // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
             if (_losersEngine != null && !ReferenceEquals(_engine, _losersEngine))
             {
                 bool filterLb;
                 filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
 
-
                 AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
-=======
-                AppendFrom(_losersEngine.GetMatches(), _losersEngine.GetRoundOrder(), "Losers", filterByRevealed: filterLb);
-
             }
 
             int displayNo = 1;
@@ -142,7 +134,7 @@ namespace RCDragManagerProd.Controllers
                 }
             }
 
-            Logger.Log("[ROWS] BuiltCurrentBracketRows â†’ items=" + rows.Count + ", matches(numbered)=" + (displayNo - 1));
+            Logger.Log("[ROWS] BuiltCurrentBracketRows ? items=" + rows.Count + ", matches(numbered)=" + (displayNo - 1));
             return rows;
         }
 
@@ -177,7 +169,7 @@ namespace RCDragManagerProd.Controllers
                 string peek;
                 peek = string.Join(", ", list.Select(m => BuildMatchDisplayText(m)));
 
-                Logger.Log("[CTRL][PEEK] Upcoming count=" + list.Count + ", take=" + count + " â†’ [" + peek + "]");
+                Logger.Log("[CTRL][PEEK] Upcoming count=" + list.Count + ", take=" + count + " ? [" + peek + "]");
 
                 return list;
             }
@@ -206,13 +198,13 @@ namespace RCDragManagerProd.Controllers
             onDeck = BuildMatchDisplayText(list[1]);
             onDeck = onDeck.Substring(onDeck.IndexOf(':') + 1).Trim();
 
-            if (list.Count == 2) return "On Deck â€” " + onDeck;
+            if (list.Count == 2) return "On Deck — " + onDeck;
 
             string inTheHole;
             inTheHole = BuildMatchDisplayText(list[2]);
             inTheHole = inTheHole.Substring(inTheHole.IndexOf(':') + 1).Trim();
 
-            return "On Deck â€” " + onDeck + " / In The Hole â€” " + inTheHole;
+            return "On Deck — " + onDeck + " / In The Hole — " + inTheHole;
         }
 
         public string GetActiveRoundLabel()
@@ -244,7 +236,7 @@ namespace RCDragManagerProd.Controllers
                  !string.IsNullOrEmpty(active) &&
                  string.Equals(m.RoundLabel, active, StringComparison.OrdinalIgnoreCase);
 
-            Logger.Log("[CTRL][EDIT] IsMatchInActiveRound(M" + matchId + ") â†’ " + ok);
+            Logger.Log("[CTRL][EDIT] IsMatchInActiveRound(M" + matchId + ") ? " + ok);
             return ok;
         }
     }

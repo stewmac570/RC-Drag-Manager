@@ -1,4 +1,4 @@
-﻿// RaceController.RoundFlow.Core.cs
+// RaceController.RoundFlow.Core.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace RCDragManagerProd.Controllers
 {
     public partial class RaceController
     {
-        // ────────── RR STANDINGS CACHE ──────────
+        // ---------- RR STANDINGS CACHE ----------
         private string _rrStandingsCardCache;
 
         public bool TryShowRoundRobinStandings()
@@ -26,16 +26,16 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(_rrStandingsCardCache))
                 return false;
 
-            ScrollableTextDialog.Show("Round Robin — Standings", _rrStandingsCardCache);
+            ScrollableTextDialog.Show("Round Robin � Standings", _rrStandingsCardCache);
             return true;
         }
 
-        // ──────────────────  PUBLIC API (CORE FLOW)  ──────────────────
+        // ------------------  PUBLIC API (CORE FLOW)  ------------------
         public void GenerateBracket(string raceType, List<Driver> drivers)
         {
             if (drivers == null || drivers.Count < 2)
             {
-                Logger.Log("⛔ Cannot generate bracket — provided driver list is invalid.");
+                Logger.Log("? Cannot generate bracket � provided driver list is invalid.");
                 return;
             }
 
@@ -44,11 +44,11 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(rt))
             {
                 rt = "Round Robin";
-                Logger.Log("[CTRL] raceType blank — defaulting to 'Round Robin'");
+                Logger.Log("[CTRL] raceType blank � defaulting to 'Round Robin'");
             }
             _session.RaceType = rt;
 
-            Logger.Log($"[CTRL][DEBUG] GenerateBracket inputs → raceTypeArg='{raceType}', rt='{rt}', session.RaceType='{_session.RaceType}', RRVariant='{_session.RoundRobinVariant}', N={_session.RoundsToRun}");
+            Logger.Log($"[CTRL][DEBUG] GenerateBracket inputs ? raceTypeArg='{raceType}', rt='{rt}', session.RaceType='{_session.RaceType}', RRVariant='{_session.RoundRobinVariant}', N={_session.RoundsToRun}");
 
 
             _drivers = drivers;
@@ -66,11 +66,11 @@ namespace RCDragManagerProd.Controllers
 
                 if (_drivers.Count < 3 || _drivers.Count > 32)
                 {
-                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3–32)");
+                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3�32)");
                     try
                     {
                         MessageBox.Show(
-                            "Pro Ladder supports 3–32 drivers. Please adjust the driver count.",
+                            "Pro Ladder supports 3�32 drivers. Please adjust the driver count.",
                             "Invalid Driver Count",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
@@ -119,13 +119,13 @@ namespace RCDragManagerProd.Controllers
 
                     Logger.Log("[EngineCall] " + _engine.GetType().Name + " SetRoundsToRun matchId=- round=-");
                     rrAdapter.SetRoundsToRun(nRounds);
-                    Logger.Log($"[ENGINE][RR] QMDRA active → SetRoundsToRun({nRounds})");
+                    Logger.Log($"[ENGINE][RR] QMDRA active ? SetRoundsToRun({nRounds})");
                 }
                 else
                 {
                     Logger.Log("[EngineCall] " + _engine.GetType().Name + " SetRoundsToRun matchId=- round=-");
                     rrAdapter.SetRoundsToRun(3);
-                    Logger.Log($"[ENGINE][RR] Standard RR → SetRoundsToRun(3)");
+                    Logger.Log($"[ENGINE][RR] Standard RR ? SetRoundsToRun(3)");
                 }
             }
 
@@ -138,7 +138,7 @@ namespace RCDragManagerProd.Controllers
             var roundOrder = EngineGetRoundOrder(_engine);
             if (roundOrder == null || roundOrder.Count == 0)
             {
-                Logger.Log("⛔ Bracket generated with no rounds — aborting reveal state update.");
+                Logger.Log("? Bracket generated with no rounds � aborting reveal state update.");
                 CanAdvanceChanged?.Invoke(false);
                 CanPickWinnerChanged?.Invoke(false);
                 NextMatchReady?.Invoke(null);
@@ -160,7 +160,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (_session?.Drivers == null || _session.Drivers.Count < 2)
             {
-                Logger.Log("⛔ Cannot generate bracket — session driver list is invalid.");
+                Logger.Log("? Cannot generate bracket � session driver list is invalid.");
                 return;
             }
 
@@ -173,7 +173,7 @@ namespace RCDragManagerProd.Controllers
 
             if (_engine == null)
             {
-                Logger.Log("⛔ AdvanceRound aborted — engine is null");
+                Logger.Log("? AdvanceRound aborted � engine is null");
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
@@ -181,7 +181,7 @@ namespace RCDragManagerProd.Controllers
             var next = EngineGetRoundOrder(_engine).FirstOrDefault(r => !_revealedRounds.Contains(r));
             if (string.IsNullOrEmpty(next))
             {
-                Logger.Log("ℹ️  No further rounds to reveal on current engine.");
+                Logger.Log("??  No further rounds to reveal on current engine.");
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
@@ -199,7 +199,7 @@ namespace RCDragManagerProd.Controllers
             Logger.Log("[FORM1] AdvanceRound() completed");
         }
 
-        // ────────────────  INTERNAL HELPERS (CORE FLOW)  ────────────────
+        // ----------------  INTERNAL HELPERS (CORE FLOW)  ----------------
         private void PushFullRefresh()
         {
             var rows = BuildCurrentBracketRows();
@@ -247,7 +247,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (_revealedRounds.Count == 0)
             {
-                Logger.Log("[DEBUG] PushAdvanceState: no rounds revealed — cannot advance");
+                Logger.Log("[DEBUG] PushAdvanceState: no rounds revealed � cannot advance");
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
@@ -264,7 +264,7 @@ namespace RCDragManagerProd.Controllers
 
             CanAdvanceChanged?.Invoke(canAdvance);
 
-            // ── RR → Buyback or Auto-Advance to Finals ─────────────────────
+            // -- RR ? Buyback or Auto-Advance to Finals ---------------------
             if (_engine is RoundRobinEngineAdapter rr)
             {
                 Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only progression rules.");
@@ -294,7 +294,7 @@ namespace RCDragManagerProd.Controllers
                     bool allVisibleResolvedQ = visibleMatchesQ.All(m => m.HasResult);
                     bool roundsReached = _revealedRounds.Count >= n;
 
-                    Logger.Log($"[RR][QMDRA] Check → Revealed={_revealedRounds.Count}, N={n}, roundsReached={roundsReached}, visibleMatches={visibleMatchesQ.Count}, allVisibleResolved={allVisibleResolvedQ}");
+                    Logger.Log($"[RR][QMDRA] Check ? Revealed={_revealedRounds.Count}, N={n}, roundsReached={roundsReached}, visibleMatches={visibleMatchesQ.Count}, allVisibleResolved={allVisibleResolvedQ}");
 
                     if (roundsReached && allVisibleResolvedQ)
                     {
@@ -303,7 +303,7 @@ namespace RCDragManagerProd.Controllers
                         {
                             var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                             _rrStandingsCardCache = card;
-                            ScrollableTextDialog.Show("Round Robin — Standings", card);
+                            ScrollableTextDialog.Show("Round Robin � Standings", card);
                         }
                         catch (Exception ex)
                         {
@@ -317,14 +317,14 @@ namespace RCDragManagerProd.Controllers
                         Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
                         var rankedAll = rr.GetTopRankedDrivers(totalDrivers);
 
-                        Logger.Log($"[RR][QMDRA] COMPLETE → Advancing ALL drivers to finals. RankedCount={rankedAll.Count}, SessionDrivers={totalDrivers}");
+                        Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing ALL drivers to finals. RankedCount={rankedAll.Count}, SessionDrivers={totalDrivers}");
                         Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
 
                         InjectFinalsAllAdvance(rankedAll);
                         return;
                     }
 
-                    // Not complete yet → normal flow continues (no buyback in QMDRA ever)
+                    // Not complete yet ? normal flow continues (no buyback in QMDRA ever)
                 }
 
                 // ---------------------------------------------------------
@@ -354,7 +354,7 @@ namespace RCDragManagerProd.Controllers
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                         _rrStandingsCardCache = card;
-                        ScrollableTextDialog.Show("Round Robin — Standings", card);
+                        ScrollableTextDialog.Show("Round Robin � Standings", card);
                     }
                     catch (Exception ex)
                     {
@@ -369,7 +369,7 @@ namespace RCDragManagerProd.Controllers
                         return; // wait for user action
                     }
 
-                    // Not enough for buyback → auto-advance to Finals with wildcard
+                    // Not enough for buyback ? auto-advance to Finals with wildcard
                     Driver wildcard = null;
                     if (eligible.Count == 1)
                         wildcard = eligible[0];
@@ -382,7 +382,7 @@ namespace RCDragManagerProd.Controllers
 
                     if (wildcard == null)
                     {
-                        Logger.Log("❌ Auto-advance failed — could not determine wildcard finalist.");
+                        Logger.Log("? Auto-advance failed � could not determine wildcard finalist.");
                         return;
                     }
 
@@ -403,41 +403,36 @@ namespace RCDragManagerProd.Controllers
                 }
             }
 
-            // ── Losers Bracket complete → gate Finals ─────────────────────
+            // -- Losers Bracket complete ? gate Finals ---------------------
             if (_inLosersPhase && _losersEngine != null)
             {
-
                 bool isLbComplete = EngineGetMatches(_losersEngine).All(m => EngineHasWinner(_losersEngine, m.MatchId, m.RoundLabel));
-=======
-                Logger.Log($"[ENGINE-CALL] {_losersEngine.GetType().Name}.IsComplete");
-                bool isLbComplete = _losersEngine.IsComplete;
-
                 Logger.Log($"[DEBUG] PushAdvanceState (LB): inLosersPhase={_inLosersPhase}, resolvedLB={isLbComplete}");
 
                 if (isLbComplete)
                 {
-                    Logger.Log("✅ Losers bracket complete.");
+                    Logger.Log("? Losers bracket complete.");
                     _inLosersPhase = false;
 
                     _finalsPending = true;
                     CanStartFinalsChanged?.Invoke(true);
-                    Logger.Log("🟢 Finals pending — waiting for 'Generate Bracket' to seed finals.");
+                    Logger.Log("?? Finals pending � waiting for 'Generate Bracket' to seed finals.");
                     return;
                 }
             }
 
-            // ── Legacy fallback (if LB Final manually checked) ────────────
+            // -- Legacy fallback (if LB Final manually checked) ------------
             if (_session.RaceType == "Losers Bracket" && _revealedRounds.Any(r => string.Equals(RoundLabels.Normalize(r), "LB-F", StringComparison.OrdinalIgnoreCase)))
             {
                 var finalMatch = EngineGetMatches(_engine).LastOrDefault();
                 if (finalMatch != null && finalMatch.HasResult)
                 {
-                    Logger.Log("🧩 LB Final match resolved — injecting Final-4 bracket (fallback)...");
+                    Logger.Log("?? LB Final match resolved � injecting Final-4 bracket (fallback)...");
                     InjectFinal4Bracket();
                 }
             }
 
-            // ── Finals wrap-up — emit summary once ────────────────────────
+            // -- Finals wrap-up � emit summary once ------------------------
             if (!_tournamentClosed && string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase))
             {
                 var all = EngineGetMatches(_engine).OrderBy(m => m.MatchId).ToList();
@@ -447,7 +442,7 @@ namespace RCDragManagerProd.Controllers
                 if (final != null && final.HasResult)
                 {
                     var winner = _matchResult.GetWinner(final.MatchId);
-                    Logger.Log($"[FINALS] Summary lookup → winner={(winner != null ? winner.Name : "null")} for M{final.MatchId}");
+                    Logger.Log($"[FINALS] Summary lookup ? winner={(winner != null ? winner.Name : "null")} for M{final.MatchId}");
 
                     Driver runnerUp = null;
                     if (winner != null)
@@ -474,7 +469,7 @@ namespace RCDragManagerProd.Controllers
                         CompletedAt = DateTime.Now
                     };
 
-                    Logger.Log($"🏆 Tournament complete — Winner: {winner?.Name}, Runner-Up: {runnerUp?.Name}");
+                    Logger.Log($"?? Tournament complete � Winner: {winner?.Name}, Runner-Up: {runnerUp?.Name}");
                     _tournamentClosed = true;
 
                     CanPickWinnerChanged?.Invoke(false);
@@ -485,7 +480,7 @@ namespace RCDragManagerProd.Controllers
             }
         }
 
-        // ────────────────  CORE HELPERS (SHARED)  ────────────────
+        // ----------------  CORE HELPERS (SHARED)  ----------------
         private static PairingRow ToPairingRow(EngineMatch m) => new PairingRow
         {
             MatchId = m.MatchId,
@@ -505,19 +500,14 @@ namespace RCDragManagerProd.Controllers
         {
             if (_engine == null)
             {
-                Logger.Log($"[LOOKUP] GetMatch({matchId}) called while engine=null — returning null");
+                Logger.Log($"[LOOKUP] GetMatch({matchId}) called while engine=null � returning null");
                 return null;
             }
 
-
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
-=======
-            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.TryGetMatch(matchId={matchId})");
-            _engine.TryGetMatch(matchId, out var match);
-
             Logger.Log(match != null
-                ? $"[LOOKUP] GetMatch({matchId}) → Round={match.RoundLabel}"
-                : $"[LOOKUP] GetMatch({matchId}) → NOT FOUND");
+                ? $"[LOOKUP] GetMatch({matchId}) ? Round={match.RoundLabel}"
+                : $"[LOOKUP] GetMatch({matchId}) ? NOT FOUND");
             return match;
         }
     }

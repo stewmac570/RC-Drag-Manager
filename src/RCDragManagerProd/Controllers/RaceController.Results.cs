@@ -1,4 +1,4 @@
-﻿// RaceController.Results.cs
+// RaceController.Results.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,30 +20,26 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
-
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
             if (match == null)
-=======
-            if (!_engine.TryGetMatch(matchId, out var match))
-
             {
-                Logger.Log($"[WINNER] Reject — match {matchId} not found.");
+                Logger.Log($"[WINNER] Reject � match {matchId} not found.");
                 return;
             }
 
             if (EngineHasWinner(_engine, matchId, match.RoundLabel))
             {
-                Logger.Log($"[WINNER] Reject — match {matchId} already has a winner.");
+                Logger.Log($"[WINNER] Reject � match {matchId} already has a winner.");
                 return;
             }
 
             var winner = firstOption ? match.Driver1 : match.Driver2;
             var loser = firstOption ? match.Driver2 : match.Driver1;
 
-            // Universal block — no BYE as winner
+            // Universal block � no BYE as winner
             if (ByePolicy.IsBye(winner) || string.Equals(winner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[WINNER] Reject — cannot select BYE as winner for M{matchId}.");
+                Logger.Log($"[WINNER] Reject � cannot select BYE as winner for M{matchId}.");
                 return;
             }
             if (ByePolicy.IsBye(loser))
@@ -51,12 +47,7 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log($"[WINNER] M{matchId} {match.RoundLabel}: {winner.Name} over {(loser?.Name ?? "BYE")}");
 
-
             EngineSetWinner(_engine, matchId, winner, match.RoundLabel);
-=======
-            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={winner?.Name ?? "null"}, loser={loser?.Name ?? "BYE"})");
-            _engine.SubmitWinner(matchId, winner);
-
             _matchResult.SetWinner(matchId, winner, loser);
 
             _winners.Add(new WinnerRow
@@ -86,11 +77,11 @@ namespace RCDragManagerProd.Controllers
 
         public List<Driver> GetEligibleBuybackDrivers()
         {
-            Logger.Log("📥 Starting Round Robin buyback eligibility check...");
+            Logger.Log("?? Starting Round Robin buyback eligibility check...");
 
             if (_engine is not RoundRobinEngineAdapter rr)
             {
-                Logger.Log("❌ Engine is not RoundRobinEngineAdapter — buyback not available.");
+                Logger.Log("? Engine is not RoundRobinEngineAdapter � buyback not available.");
                 return new List<Driver>();
             }
             Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only buyback ranking methods.");
@@ -106,19 +97,19 @@ namespace RCDragManagerProd.Controllers
             if (allDrivers.Count == 0 && _session?.Drivers != null)
                 allDrivers = _session.Drivers.ToList();
 
-            Logger.Log($"📊 RR roster from matches: {allDrivers.Count} → [{string.Join(", ", allDrivers.Select(d => d.Name))}]");
+            Logger.Log($"?? RR roster from matches: {allDrivers.Count} ? [{string.Join(", ", allDrivers.Select(d => d.Name))}]");
 
             Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
             var top3 = (_rrTop3 != null && _rrTop3.Count == 3) ? _rrTop3 : rr.GetTopRankedDrivers(3);
-            Logger.Log($"🥇 Top-3: [{string.Join(", ", top3.Select(d => d.Name))}]");
+            Logger.Log($"?? Top-3: [{string.Join(", ", top3.Select(d => d.Name))}]");
 
             var top3Ids = new HashSet<int>(top3.Select(d => d.Id));
 
             var eligible = allDrivers.Where(d => !top3Ids.Contains(d.Id)).ToList();
-            Logger.Log($"✅ Buyback-eligible count: {eligible.Count} → [{string.Join(", ", eligible.Select(d => d.Name))}]");
+            Logger.Log($"? Buyback-eligible count: {eligible.Count} ? [{string.Join(", ", eligible.Select(d => d.Name))}]");
 
             if (eligible.Count < 2)
-                Logger.Log("⚠️ Only 1 or 0 eligible drivers — Losers Bracket cannot be created.");
+                Logger.Log("?? Only 1 or 0 eligible drivers � Losers Bracket cannot be created.");
 
             return eligible;
         }
@@ -127,12 +118,8 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
-
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
             if (match == null)
-=======
-            if (!_engine.TryGetMatch(matchId, out var match))
-
             {
                 Logger.Log($"[CTRL][EDIT] M{matchId} not found.");
                 return false;
@@ -142,7 +129,7 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrEmpty(active) ||
                 !string.Equals(match.RoundLabel, active, StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[CTRL][EDIT] Reject edit — M{matchId} is in '{match.RoundLabel}', active='{active}'.");
+                Logger.Log($"[CTRL][EDIT] Reject edit � M{matchId} is in '{match.RoundLabel}', active='{active}'.");
                 return false;
             }
 
@@ -151,16 +138,11 @@ namespace RCDragManagerProd.Controllers
 
             if (ByePolicy.IsBye(newWinner) || string.Equals(newWinner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[CTRL][EDIT] Reject edit — cannot set BYE as winner (M{matchId}).");
+                Logger.Log($"[CTRL][EDIT] Reject edit � cannot set BYE as winner (M{matchId}).");
                 return false;
             }
 
-
             EngineSetWinner(_engine, matchId, newWinner, match.RoundLabel);
-=======
-            Logger.Log($"[ENGINE-CALL] {_engine.GetType().Name}.SubmitWinner(M{matchId}, winner={newWinner?.Name ?? "null"}, loser={newLoser?.Name ?? "BYE"})");
-            _engine.SubmitWinner(matchId, newWinner);
-
             _matchResult.SetWinner(matchId, newWinner, newLoser);
             Logger.Log($"[CTRL][EDIT] SetWinner applied: M{matchId}, winner='{newWinner.Name}', loser='{newLoser?.Name ?? "BYE"}'");
 
@@ -181,7 +163,7 @@ namespace RCDragManagerProd.Controllers
                 });
             }
 
-            Logger.Log($"[CTRL][EDIT] Override: M{matchId} ({match.RoundLabel}) → {newWinner.Name} over {(newLoser?.Name ?? "BYE")}.");
+            Logger.Log($"[CTRL][EDIT] Override: M{matchId} ({match.RoundLabel}) ? {newWinner.Name} over {(newLoser?.Name ?? "BYE")}.");
 
             WinnersUpdated?.Invoke(_winners);
             PushNextMatch();
