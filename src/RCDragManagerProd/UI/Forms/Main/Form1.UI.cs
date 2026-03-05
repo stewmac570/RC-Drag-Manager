@@ -40,12 +40,6 @@ namespace RCDragManagerProd.UI.Forms
             Logger.Log($"[UI] Driver list updated ({drivers.Count}); Generate Bracket {(canGenerate ? "ENABLED" : "disabled")}.");
         }
 
-        private int GetGlobalRoundOrder(string roundLabel)
-        {
-            return RoundLabels.Compare(roundLabel, "R1");
-        }
-
-
         private string GetFullRoundLabel(string label)
         {
             return RoundLabels.Normalize(label);
