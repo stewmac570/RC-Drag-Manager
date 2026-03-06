@@ -133,7 +133,6 @@ namespace RCDragManagerProd.RoundRobinMode
                         roundPairs[i] = (roundPairs[i].B, roundPairs[i].A);
                 }
 
-                int matchNoInRound = 1;
                 foreach (var (A, B) in roundPairs)
                 {
                     bool isByePair = (A == null || B == null);
@@ -166,8 +165,6 @@ namespace RCDragManagerProd.RoundRobinMode
                         matches.Add((d1Out, d2Out, $"RR{round}", matchIdCounter++));
                         Log($"[RR]   M{matchIdCounter - 1:000}: {SafeName(d1Out)} vs {SafeName(d2Out)}");
                     }
-
-                    matchNoInRound++;
                 }
 
                 // Next round rotation

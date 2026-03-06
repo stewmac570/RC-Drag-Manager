@@ -60,12 +60,12 @@ namespace RCDragManagerProd.RaceEngines
             return Results.IsTournamentComplete(bracketMatches);
         }
 
-public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
-{
-    var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
-    var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
-    return (d1, d2);
-}
+        public (Driver, Driver) ResolveDriversForMatch(ProLadder.LadderMatch match)
+        {
+            var d1 = ResolveDriver(match.Seed1, match.FromMatch1);
+            var d2 = ResolveDriver(match.Seed2, match.FromMatch2);
+            return (d1, d2);
+        }
 
         
 
