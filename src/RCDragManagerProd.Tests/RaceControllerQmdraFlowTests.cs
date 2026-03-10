@@ -15,28 +15,11 @@ namespace RCDragManagerProd.Tests;
 public class RaceControllerQmdraFlowTests
 {
     [TestMethod]
-    public void QmdraCompletion_UsesInjectedStandingsDialogService_WithoutModalUi()
-    {
-        var drivers = TestDriverFactory.CreateRoundRobinPack(4);
-        var session = CreateQmdraSession(roundsToRun: 1);
-        var dialog = new CaptureStandingsDialogService();
-        var controller = CreateController(session, dialog);
-
-        controller.GenerateBracket("Round Robin", drivers);
-        ResolveVisibleMatches(controller);
-
-        Assert.AreEqual(1, dialog.ShowCallCount);
-        StringAssert.Contains(dialog.LastTitle!, "Round Robin");
-        Assert.IsTrue(controller.TryShowRoundRobinStandings());
-        Assert.AreEqual(2, dialog.ShowCallCount);
-    }
-
-    [TestMethod]
     public void Qmdra_InitializesRoundRobinFlow_WithoutBuybackSignals()
     {
         var drivers = TestDriverFactory.CreateRoundRobinPack(4);
         var session = CreateQmdraSession(roundsToRun: 1);
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
 
         var canOfferBuybackSignals = new List<bool>();
         controller.CanOfferBuybackChanged += value => canOfferBuybackSignals.Add(value);
@@ -56,7 +39,7 @@ public class RaceControllerQmdraFlowTests
     public void Qmdra_WaitsForConfiguredRoundCount_BeforeFinalsTransition()
     {
         var session = CreateQmdraSession(roundsToRun: 2);
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
 
         ResolveVisibleMatches(controller);
@@ -78,7 +61,7 @@ public class RaceControllerQmdraFlowTests
     {
         var drivers = TestDriverFactory.CreateRoundRobinPack(4);
         var session = CreateQmdraSession(roundsToRun: 1);
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         RaceController.RaceSummary? completion = null;
         controller.TournamentCompleted += summary => completion = summary;
 
@@ -130,22 +113,5 @@ public class RaceControllerQmdraFlowTests
 
         Assert.IsNotNull(method);
         method!.Invoke(controller, new object[] { rankedDrivers });
-    }
-
-    private static RaceController CreateController(RaceSession session, IStandingsDialogService? dialog = null)
-    {
-        return new RaceController(session, dialog ?? new NoOpStandingsDialogService());
-    }
-
-    private sealed class CaptureStandingsDialogService : IStandingsDialogService
-    {
-        public int ShowCallCount { get; private set; }
-        public string? LastTitle { get; private set; }
-
-        public void Show(string title, string content)
-        {
-            ShowCallCount++;
-            LastTitle = title;
-        }
     }
 }
