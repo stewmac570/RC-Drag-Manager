@@ -158,6 +158,27 @@ public class RaceControllerFlowTests
         Assert.IsNotNull(finalMatches[0].Driver2);
     }
 
+    [TestMethod]
+    public void SubmitWinner_DuplicateSubmission_DoesNotOverwriteExistingWinner()
+    {
+        var session = CreateSession("Pro Ladder");
+        var controller = new RaceController(session);
+        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderByePack());
+
+        var targetMatch = controller.PeekUpcomingMatches(10)
+            .First(m => m.Driver1 != null && m.Driver2 != null);
+
+        controller.SubmitWinner(targetMatch.MatchId, firstOption: true);
+        var originalWinner = controller.GetWinner(targetMatch.MatchId);
+
+        controller.SubmitWinner(targetMatch.MatchId, firstOption: false);
+        var winnerAfterDuplicateSubmit = controller.GetWinner(targetMatch.MatchId);
+
+        Assert.IsNotNull(originalWinner);
+        Assert.IsNotNull(winnerAfterDuplicateSubmit);
+        Assert.AreEqual(originalWinner!.Id, winnerAfterDuplicateSubmit!.Id);
+    }
+
     private static RaceSession CreateSession(string raceType)
     {
         return new RaceSession
