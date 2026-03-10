@@ -16,7 +16,7 @@ public class RaceControllerFlowTests
     public void GenerateBracket_WithProLadderPack_StartsControllerFlow()
     {
         var session = CreateSession("Pro Ladder");
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
 
         IReadOnlyList<PairingRow>? latestRows = null;
         PairingRow? latestNextMatch = null;
@@ -37,7 +37,7 @@ public class RaceControllerFlowTests
     public void SubmitWinner_TracksResults_AndEnablesRoundAdvanceAfterVisibleRound()
     {
         var session = CreateSession("Pro Ladder");
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
 
         var advanceSignals = new List<bool>();
@@ -65,7 +65,7 @@ public class RaceControllerFlowTests
     public void AdvanceRound_AfterCurrentRoundResolved_RevealsNextRound()
     {
         var session = CreateSession("Pro Ladder");
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
 
         foreach (var match in controller.PeekUpcomingMatches(10))
@@ -90,7 +90,7 @@ public class RaceControllerFlowTests
     public void Reset_ClearsControllerState_AndDisablesProgressSignals()
     {
         var session = CreateSession("Pro Ladder");
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
 
         bool? canAdvance = null;
@@ -115,7 +115,7 @@ public class RaceControllerFlowTests
     public void ProLadderFiveDriverFlow_ResolvesByeMatches_AndAdvancesRounds()
     {
         var session = CreateSession("Pro Ladder");
-        var controller = CreateController(session);
+        var controller = new RaceController(session);
         controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderByePack());
 
         Assert.AreEqual("R1", controller.GetActiveRoundLabel());
@@ -167,10 +167,5 @@ public class RaceControllerFlowTests
             RaceType = raceType,
             ClassType = "Heads Up"
         };
-    }
-
-    private static RaceController CreateController(RaceSession session)
-    {
-        return new RaceController(session, new NoOpStandingsDialogService());
     }
 }
