@@ -34,6 +34,14 @@
 - Step 6 (verification): if no automated tests exist for the change area, use targeted manual scenario verification defined by QA matrix/data docs.
 - Step 7 (logs): validate relevant markers in `%APPDATA%\RC_Drag_Manager\app.log` when flow-level behavior is changed.
 
+### Canonical local commands (current harness baseline)
+- Build command (local baseline validation):
+  - `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"`
+- Full-suite automated test command (headless local baseline):
+  - `dotnet test src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj -m:1 --logger "console;verbosity=minimal"`
+- `-m:1` is currently recommended for local reliability/headless stability.
+- These commands reflect the current harness baseline and may be updated if harness/tooling evolves.
+
 ## 4. Required Inputs Before A Change
 - Relevant QA docs for strategy, matrix scenario IDs, test data packs, and logging markers.
 - Impacted source files and neighboring flow files (especially controller partials and engine adapters).
@@ -99,5 +107,5 @@ Codex should not recommend merge until these are addressed:
   - merge recommendation reason.
 
 ## Needs confirmation
-- Which build command should be the canonical default for this repo in QA runs (solution-level vs project-level) should be fixed in a later QA execution guide.
+- If local/CI environments diverge in behavior, confirm whether command flags should vary by environment while keeping these local defaults.
 - Automated harness scripts are future-state; current repo process remains build + targeted manual/log verification.

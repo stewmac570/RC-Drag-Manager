@@ -113,12 +113,20 @@ Prioritize high-value logic that is already testable without full UI automation:
 6. Run tests, capture baseline pass/fail status, and map to QA matrix IDs.
 7. Expand coverage incrementally (QMDRA/losers/finals/save-load depth) after baseline is stable.
 
+## 8a. Canonical Local Commands (Current Baseline)
+- Build command (local):
+  - `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"`
+- Full-suite test command (local harness baseline):
+  - `dotnet test src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj -m:1 --logger "console;verbosity=minimal"`
+- `-m:1` is currently recommended for local reliability/headless stability.
+- These commands represent the current automated harness baseline and should be revisited if test runner/tooling behavior changes.
+
 ## 9. Merge Recommendation For This Planning Branch
 - Merge now.
 - Reason: this planning guide is complete, source-backed, and prepares a low-risk bootstrap path without introducing code or project structure changes.
 
 ## Needs confirmation
 - Confirm final framework/package choice (MSTest v2 vs alternative) before implementation branch starts.
-- Confirm canonical solution and command entrypoint for QA runs (`RCDragManagerProd.sln` recommended).
+- Confirm whether CI should mirror these exact local commands/flags or use environment-specific wrappers.
 - Confirm deterministic strategy for randomized flows (state-only assertions vs seeded seams).
 - Confirm test-database strategy for persistence tests (temporary SQLite file path conventions).
