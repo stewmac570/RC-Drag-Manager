@@ -35,10 +35,12 @@
 - Step 7 (logs): validate relevant markers in `%APPDATA%\RC_Drag_Manager\app.log` when flow-level behavior is changed.
 
 ### Canonical local commands (current harness baseline)
-- Build command (local baseline validation):
-  - `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"`
+- Build command (preferred local baseline validation):
+  - `dotnet build RCDragManagerProd.sln -c Debug`
 - Full-suite automated test command (headless local baseline):
   - `dotnet test src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj -m:1 --logger "console;verbosity=minimal"`
+- `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"` may work in some developer environments, but should not be treated as the only assumed local build command.
+- `dotnet build` is the safer default guidance for Codex/local shell use unless a branch or task explicitly confirms a different requirement.
 - `-m:1` is currently recommended for local reliability/headless stability.
 - These commands reflect the current harness baseline and may be updated if harness/tooling evolves.
 
