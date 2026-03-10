@@ -111,6 +111,53 @@ public class RaceControllerFlowTests
         Assert.IsNull(nextMatch);
     }
 
+    [TestMethod]
+    public void ProLadderFiveDriverFlow_ResolvesByeMatches_AndAdvancesRounds()
+    {
+        var session = CreateSession("Pro Ladder");
+        var controller = new RaceController(session);
+        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderByePack());
+
+        Assert.AreEqual("R1", controller.GetActiveRoundLabel());
+
+        var r1Matches = controller.PeekUpcomingMatches(10).ToList();
+        Assert.AreEqual(3, r1Matches.Count);
+        Assert.AreEqual(1, r1Matches.Count(m => m.Driver1 == null || m.Driver2 == null));
+
+        var advanceSignals = new List<bool>();
+        controller.CanAdvanceChanged += canAdvance => advanceSignals.Add(canAdvance);
+
+        foreach (var match in r1Matches)
+        {
+            controller.SubmitWinner(match.MatchId, firstOption: match.Driver1 != null);
+            Assert.IsNotNull(controller.GetWinner(match.MatchId));
+        }
+
+        Assert.AreEqual(true, advanceSignals.LastOrDefault());
+
+        controller.AdvanceRound();
+        Assert.AreEqual("SF", controller.GetActiveRoundLabel());
+
+        var sfMatches = controller.PeekUpcomingMatches(10).ToList();
+        Assert.AreEqual(2, sfMatches.Count);
+        Assert.AreEqual(1, sfMatches.Count(m => m.Driver1 == null || m.Driver2 == null));
+
+        foreach (var match in sfMatches)
+        {
+            controller.SubmitWinner(match.MatchId, firstOption: match.Driver1 != null);
+        }
+
+        Assert.AreEqual(true, advanceSignals.LastOrDefault());
+
+        controller.AdvanceRound();
+        Assert.AreEqual("F", controller.GetActiveRoundLabel());
+
+        var finalMatches = controller.PeekUpcomingMatches(10).ToList();
+        Assert.AreEqual(1, finalMatches.Count);
+        Assert.IsNotNull(finalMatches[0].Driver1);
+        Assert.IsNotNull(finalMatches[0].Driver2);
+    }
+
     private static RaceSession CreateSession(string raceType)
     {
         return new RaceSession
