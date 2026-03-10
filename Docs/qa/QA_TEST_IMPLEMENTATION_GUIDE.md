@@ -114,10 +114,12 @@ Prioritize high-value logic that is already testable without full UI automation:
 7. Expand coverage incrementally (QMDRA/losers/finals/save-load depth) after baseline is stable.
 
 ## 8a. Canonical Local Commands (Current Baseline)
-- Build command (local):
-  - `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"`
+- Build command (preferred local default):
+  - `dotnet build RCDragManagerProd.sln -c Debug`
 - Full-suite test command (local harness baseline):
   - `dotnet test src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj -m:1 --logger "console;verbosity=minimal"`
+- `MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU"` may still work in some developer environments, but it is environment-dependent.
+- For Codex/local shell workflows, use `dotnet build` as the safer default unless a branch/task explicitly verifies a different build path.
 - `-m:1` is currently recommended for local reliability/headless stability.
 - These commands represent the current automated harness baseline and should be revisited if test runner/tooling behavior changes.
 
