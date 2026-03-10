@@ -84,6 +84,60 @@ public class RaceControllerQmdraFlowTests
         }
     }
 
+    [TestMethod]
+    public void Qmdra_AfterConfiguredRounds_FinalsFlow_CompletesTournamentSummary()
+    {
+        var session = CreateQmdraSession(roundsToRun: 1);
+        var controller = CreateController(session);
+        RaceController.RaceSummary? completion = null;
+        controller.TournamentCompleted += summary => completion = summary;
+
+        controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
+
+        ResolveVisibleMatches(controller); // Completes RR and auto-injects Finals.
+        Assert.AreEqual("Finals", session.RaceType);
+        Assert.AreEqual("SF", controller.GetActiveRoundLabel());
+
+        ResolveVisibleMatches(controller); // Resolve SF
+        controller.AdvanceRound();         // Reveal F
+        Assert.AreEqual("F", controller.GetActiveRoundLabel());
+
+        ResolveVisibleMatches(controller); // Resolve final
+
+        Assert.IsNotNull(completion);
+        Assert.AreEqual("Finals (Pro Ladder)", completion!.Bracket);
+        Assert.IsNotNull(completion.Winner);
+        Assert.IsNotNull(completion.RunnerUp);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(completion.Winner.Name));
+        Assert.IsFalse(string.IsNullOrWhiteSpace(completion.RunnerUp.Name));
+    }
+
+    [TestMethod]
+    public void Qmdra_Completion_DoesNotAdvanceFurther_AndDoesNotFireDuplicateTournamentCompleted()
+    {
+        var session = CreateQmdraSession(roundsToRun: 1);
+        var controller = CreateController(session);
+        var completionCount = 0;
+        controller.TournamentCompleted += _ => completionCount++;
+
+        controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
+
+        ResolveVisibleMatches(controller); // RR complete -> finals injected
+        ResolveVisibleMatches(controller); // SF complete
+        controller.AdvanceRound();         // Reveal F
+        ResolveVisibleMatches(controller); // F complete -> tournament complete
+
+        var activeAtCompletion = controller.GetActiveRoundLabel();
+        Assert.AreEqual(1, completionCount);
+        Assert.AreEqual(0, controller.PeekUpcomingMatches(10).Count);
+
+        controller.AdvanceRound();
+
+        Assert.AreEqual(1, completionCount);
+        Assert.AreEqual(activeAtCompletion, controller.GetActiveRoundLabel());
+        Assert.AreEqual(0, controller.PeekUpcomingMatches(10).Count);
+    }
+
     private static void ResolveVisibleMatches(RaceController controller)
     {
         foreach (var match in controller.PeekUpcomingMatches(20).ToList())
