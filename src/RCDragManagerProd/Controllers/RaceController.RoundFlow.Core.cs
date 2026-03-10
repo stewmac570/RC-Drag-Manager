@@ -26,7 +26,7 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(_rrStandingsCardCache))
                 return false;
 
-            ScrollableTextDialog.Show("Round Robin — Standings", _rrStandingsCardCache);
+            _standingsDialogService.Show("Round Robin — Standings", _rrStandingsCardCache);
             return true;
         }
 
@@ -303,7 +303,7 @@ namespace RCDragManagerProd.Controllers
                         {
                             var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                             _rrStandingsCardCache = card;
-                            ScrollableTextDialog.Show("Round Robin — Standings", card);
+                            _standingsDialogService.Show("Round Robin — Standings", card);
                         }
                         catch (Exception ex)
                         {
@@ -354,7 +354,7 @@ namespace RCDragManagerProd.Controllers
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                         _rrStandingsCardCache = card;
-                        ScrollableTextDialog.Show("Round Robin — Standings", card);
+                        _standingsDialogService.Show("Round Robin — Standings", card);
                     }
                     catch (Exception ex)
                     {
