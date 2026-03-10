@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="MSTest" Version="4.0.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.5" />
+    <PackageReference Include="Stub.System.Data.SQLite.Core.NetFramework" Version="1.0.119.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +20,12 @@
   <ItemGroup>
     <ProjectReference Include="..\RCDragManagerProd\RCDragManagerProd.csproj" />
   </ItemGroup>
+
+  <Target Name="CopySqliteInteropForTestHost" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(TargetDir)x64\SQLite.Interop.dll"
+      DestinationFiles="$(TargetDir)SQLite.Interop.dll"
+      Condition="Exists('$(TargetDir)x64\\SQLite.Interop.dll')" />
+  </Target>
 
 </Project>
