@@ -12,6 +12,7 @@ namespace RCDragManagerProd.Controllers
     {
         // ────────────────────  STATE  ────────────────────
         private readonly RaceSession _session;
+        private readonly IStandingsDialogService _standingsDialogService;
 
         private IRaceEngine _engine;
         private IRaceEngine _losersEngine;
@@ -71,9 +72,10 @@ namespace RCDragManagerProd.Controllers
         private List<string> _rrRoundOrderSnapshot;
 
         // ────────────────────  CTOR  ────────────────────
-        public RaceController(RaceSession session)
+        public RaceController(RaceSession session, IStandingsDialogService standingsDialogService = null)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            _standingsDialogService = standingsDialogService ?? new ScrollableStandingsDialogService();
         }
     }
 }

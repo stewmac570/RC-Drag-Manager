@@ -102,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\IStandingsDialogService.cs" />
     <Compile Include="Controllers\LaneFairnessManager.cs" />
     <Compile Include="Controllers\RaceController.Logging.cs" />
     <Compile Include="Controllers\RaceController.EngineCalls.cs" />
