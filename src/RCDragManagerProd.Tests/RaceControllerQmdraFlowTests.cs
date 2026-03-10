@@ -19,7 +19,7 @@ public class RaceControllerQmdraFlowTests
     {
         var drivers = TestDriverFactory.CreateRoundRobinPack(4);
         var session = CreateQmdraSession(roundsToRun: 1);
-        var controller = new RaceController(session);
+        var controller = CreateController(session);
 
         var canOfferBuybackSignals = new List<bool>();
         controller.CanOfferBuybackChanged += value => canOfferBuybackSignals.Add(value);
@@ -39,7 +39,7 @@ public class RaceControllerQmdraFlowTests
     public void Qmdra_WaitsForConfiguredRoundCount_BeforeFinalsTransition()
     {
         var session = CreateQmdraSession(roundsToRun: 2);
-        var controller = new RaceController(session);
+        var controller = CreateController(session);
         controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
 
         ResolveVisibleMatches(controller);
@@ -61,7 +61,7 @@ public class RaceControllerQmdraFlowTests
     {
         var drivers = TestDriverFactory.CreateRoundRobinPack(4);
         var session = CreateQmdraSession(roundsToRun: 1);
-        var controller = new RaceController(session);
+        var controller = CreateController(session);
         RaceController.RaceSummary? completion = null;
         controller.TournamentCompleted += summary => completion = summary;
 
@@ -113,5 +113,10 @@ public class RaceControllerQmdraFlowTests
 
         Assert.IsNotNull(method);
         method!.Invoke(controller, new object[] { rankedDrivers });
+    }
+
+    private static RaceController CreateController(RaceSession session)
+    {
+        return new RaceController(session, new NoOpStandingsDialogService());
     }
 }
