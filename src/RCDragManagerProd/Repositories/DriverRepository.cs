@@ -214,16 +214,75 @@ WHERE Id = @Id";
                             cmd.ExecuteNonQuery();
                         }
 
-                        using (var delCmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection, tx))
+                        var existingCarIds = new HashSet<int>();
+                        using (var getExisting = new SQLiteCommand("SELECT CarID FROM Cars WHERE DriverId = @DriverId", connection, tx))
                         {
-                            delCmd.Parameters.AddWithValue("@DriverId", driver.Id);
-                            delCmd.ExecuteNonQuery();
+                            getExisting.Parameters.AddWithValue("@DriverId", driver.Id);
+                            using (var reader = getExisting.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                    existingCarIds.Add(Convert.ToInt32(reader["CarID"]));
+                            }
                         }
 
+                        var keptCarIds = new HashSet<int>();
                         if (driver.Cars != null)
                         {
                             foreach (var car in driver.Cars)
-                                AddCar(car, driver.Id, connection, tx);
+                            {
+                                if (car.CarID > 0 && existingCarIds.Contains(car.CarID))
+                                {
+                                    using (var updateCarCmd = new SQLiteCommand(@"
+UPDATE Cars SET
+    CarName = @CarName,
+    ClassType = @ClassType,
+    DefaultDialIn = @DefaultDialIn
+WHERE CarID = @CarID AND DriverId = @DriverId", connection, tx))
+                                    {
+                                        updateCarCmd.Parameters.AddWithValue("@CarID", car.CarID);
+                                        updateCarCmd.Parameters.AddWithValue("@DriverId", driver.Id);
+                                        updateCarCmd.Parameters.AddWithValue("@CarName", car.CarName ?? string.Empty);
+                                        updateCarCmd.Parameters.AddWithValue("@ClassType", car.ClassType ?? string.Empty);
+                                        updateCarCmd.Parameters.AddWithValue("@DefaultDialIn", (object)car.DefaultDialIn ?? DBNull.Value);
+                                        updateCarCmd.ExecuteNonQuery();
+                                    }
+
+                                    keptCarIds.Add(car.CarID);
+                                }
+                                else
+                                {
+                                    const string insertSql = @"
+INSERT INTO Cars (DriverId, CarName, ClassType, DefaultDialIn)
+VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);
+SELECT last_insert_rowid();";
+
+                                    using (var insertCarCmd = new SQLiteCommand(insertSql, connection, tx))
+                                    {
+                                        insertCarCmd.Parameters.AddWithValue("@DriverId", driver.Id);
+                                        insertCarCmd.Parameters.AddWithValue("@CarName", car.CarName ?? string.Empty);
+                                        insertCarCmd.Parameters.AddWithValue("@ClassType", car.ClassType ?? string.Empty);
+                                        insertCarCmd.Parameters.AddWithValue("@DefaultDialIn", (object)car.DefaultDialIn ?? DBNull.Value);
+                                        car.CarID = Convert.ToInt32(insertCarCmd.ExecuteScalar());
+                                    }
+
+                                    keptCarIds.Add(car.CarID);
+                                }
+                            }
+                        }
+
+                        foreach (var existingCarId in existingCarIds)
+                        {
+                            if (keptCarIds.Contains(existingCarId)) continue;
+
+                            using (var deleteCarCmd = new SQLiteCommand(
+                                "DELETE FROM Cars WHERE DriverId = @DriverId AND CarID = @CarID",
+                                connection,
+                                tx))
+                            {
+                                deleteCarCmd.Parameters.AddWithValue("@DriverId", driver.Id);
+                                deleteCarCmd.Parameters.AddWithValue("@CarID", existingCarId);
+                                deleteCarCmd.ExecuteNonQuery();
+                            }
                         }
 
                         tx.Commit();
