@@ -164,6 +164,7 @@ namespace RCDragManagerProd.UI.Forms
                 repository.UpdateDriver(selectedDriver);
                 Logger.Log($"[CARS] Updated car for driver #{selectedDriver.Id}.");
 
+                LoadDrivers();
                 ShowDriverDetails(selectedDriver.Id);
             }
         }

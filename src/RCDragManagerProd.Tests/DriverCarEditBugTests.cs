@@ -63,6 +63,28 @@ public class DriverCarEditBugTests
             "Bug repro: car edit changed CarID, which can break ID-based propagation across views/workflows.");
     }
 
+    [TestMethod]
+    public void EditCarName_UpdateDriver_GetAllDriversReflectsUpdatedCarName()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new DriverRepository(db.ConnectionString);
+
+        var driver = CreateDriverWithSingleCar("Casey Reed", "Race Car A");
+        repository.AddDriver(driver);
+
+        var loaded = repository.GetDriverById(driver.Id);
+        Assert.IsNotNull(loaded);
+        loaded!.Cars[0].CarName = "Race Car A (Edited)";
+        repository.UpdateDriver(loaded);
+
+        var allDrivers = repository.GetAllDrivers();
+        var edited = allDrivers.Single(d => d.Id == driver.Id);
+
+        Assert.AreEqual(1, edited.Cars.Count);
+        Assert.AreEqual("Race Car A (Edited)", edited.Cars[0].CarName);
+    }
+
     private static Driver CreateDriverWithSingleCar(string driverName, string carName)
     {
         return new Driver
