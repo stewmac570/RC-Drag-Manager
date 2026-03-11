@@ -91,7 +91,9 @@ namespace RCDragManagerProd.UI.Forms
                 foreach (var car in selectedDriver.Cars)
                 {
                     var dial = car.DefaultDialIn?.ToString("0.000") ?? "-";
-                    AddDetail("Car", $"{car.CarName} - {car.ClassType} - {dial}");
+                    var item = new ListViewItem("Car") { Tag = car.CarID };
+                    item.SubItems.Add($"{car.CarName} - {car.ClassType} - {dial}");
+                    lvDriverDetails.Items.Add(item);
                 }
             }
 

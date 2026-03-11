@@ -9,6 +9,30 @@ using RCDragManagerProd.Logging;
 
 namespace RCDragManagerProd.UI.Forms
 {
+    public static class DriverManagerCarEditFlow
+    {
+        public static bool TryApplyEditedCar(
+            Driver selectedDriver,
+            IReadOnlyList<int> displayedCarIds,
+            int selectedDisplayCarIndex,
+            Car editedValues)
+        {
+            if (selectedDriver == null || editedValues == null) return false;
+            if (selectedDriver.Cars == null || selectedDriver.Cars.Count == 0) return false;
+            if (displayedCarIds == null || selectedDisplayCarIndex < 0 || selectedDisplayCarIndex >= displayedCarIds.Count)
+                return false;
+
+            var selectedCarId = displayedCarIds[selectedDisplayCarIndex];
+            var targetCar = selectedDriver.Cars.FirstOrDefault(c => c.CarID == selectedCarId);
+            if (targetCar == null) return false;
+
+            targetCar.CarName = editedValues.CarName;
+            targetCar.ClassType = editedValues.ClassType;
+            targetCar.DefaultDialIn = editedValues.DefaultDialIn;
+            return true;
+        }
+    }
+
     public partial class DriverManagerForm
     {
         private void lstDrivers_SelectedIndexChanged(object sender, EventArgs e)
@@ -134,32 +158,64 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            int rowIndex = lvDriverDetails.Items.IndexOf(lvDriverDetails.SelectedItems[0]);
-            int headerIndex = -1;
-            for (int i = 0; i < lvDriverDetails.Items.Count; i++)
+            var displayedCarIds = new List<int>();
+            foreach (ListViewItem item in lvDriverDetails.Items)
             {
-                if (lvDriverDetails.Items[i].Text == "--- Cars ---")
+                if (item.Text == "Car" && item.Tag is int id && id > 0)
+                    displayedCarIds.Add(id);
+            }
+
+            var selectedItem = lvDriverDetails.SelectedItems[0];
+            var selectedCarIdFromTag = selectedItem.Tag is int taggedId ? taggedId : 0;
+            var selectedDisplayCarIndex = selectedCarIdFromTag > 0 ? displayedCarIds.IndexOf(selectedCarIdFromTag) : -1;
+
+            if (selectedDisplayCarIndex < 0)
+            {
+                int rowIndex = lvDriverDetails.Items.IndexOf(selectedItem);
+                int headerIndex = -1;
+                for (int i = 0; i < lvDriverDetails.Items.Count; i++)
                 {
-                    headerIndex = i;
-                    break;
+                    if (lvDriverDetails.Items[i].Text == "--- Cars ---")
+                    {
+                        headerIndex = i;
+                        break;
+                    }
+                }
+
+                var fallbackIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
+                if (fallbackIndex >= 0 && fallbackIndex < selectedDriver.Cars.Count)
+                {
+                    displayedCarIds = selectedDriver.Cars.Select(c => c.CarID).ToList();
+                    selectedDisplayCarIndex = fallbackIndex;
                 }
             }
 
-            int carIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
-            if (carIndex < 0 || carIndex >= selectedDriver.Cars.Count)
+            if (selectedDisplayCarIndex < 0 || selectedDisplayCarIndex >= displayedCarIds.Count)
             {
                 MessageBox.Show("Could not match selected car.");
                 return;
             }
 
-            var car = selectedDriver.Cars[carIndex];
-            using (var dlg = new AddCarDialog(car))
+            var currentCar = selectedDriver.Cars.FirstOrDefault(c => c.CarID == displayedCarIds[selectedDisplayCarIndex]);
+            if (currentCar == null)
+            {
+                MessageBox.Show("Could not match selected car.");
+                return;
+            }
+
+            using (var dlg = new AddCarDialog(currentCar))
             {
                 if (dlg.ShowDialog() != DialogResult.OK) return;
 
-                car.CarName = dlg.NewCar.CarName;
-                car.ClassType = dlg.NewCar.ClassType;
-                car.DefaultDialIn = dlg.NewCar.DefaultDialIn;
+                if (!DriverManagerCarEditFlow.TryApplyEditedCar(
+                    selectedDriver,
+                    displayedCarIds,
+                    selectedDisplayCarIndex,
+                    dlg.NewCar))
+                {
+                    MessageBox.Show("Could not apply car edit.");
+                    return;
+                }
 
                 repository.UpdateDriver(selectedDriver);
                 Logger.Log($"[CARS] Updated car for driver #{selectedDriver.Id}.");
