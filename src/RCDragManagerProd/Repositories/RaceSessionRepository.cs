@@ -53,15 +53,15 @@ namespace RCDragManagerProd.Repositories
         }
 
         // ---------- SAVE ----------
-        public int SaveSession(object session)
+        public int SaveSession(RaceSession session)
         {
             if (session == null) throw new ArgumentNullException(nameof(session));
             Logger.Log("[DB][SessionRepo] SaveSession()");
 
-            string eventName = GetStringProp(session, "EventName", "(event)");
-            string classType = GetStringProp(session, "ClassType", "");
-            string raceType = GetStringProp(session, "RaceType", "");
-            DateTime eventDate = GetDateTimeProp(session, "EventDate", DateTime.Now);
+            string eventName = session.EventName ?? "(event)";
+            string classType = session.ClassType ?? "";
+            string raceType = session.RaceType ?? "";
+            DateTime eventDate = session.EventDate != default ? session.EventDate : DateTime.Now;
 
             string json = JsonSerializer.Serialize(session, new JsonSerializerOptions
             {
@@ -84,10 +84,10 @@ SELECT last_insert_rowid();";
                     {
                         using (var cmd = new SQLiteCommand(sql, cn, tx))
                         {
-                            cmd.Parameters.AddWithValue("@EventName", eventName ?? "");
+                            cmd.Parameters.AddWithValue("@EventName", eventName);
                             cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                            cmd.Parameters.AddWithValue("@ClassType", classType ?? "");
-                            cmd.Parameters.AddWithValue("@RaceType", raceType ?? "");
+                            cmd.Parameters.AddWithValue("@ClassType", classType);
+                            cmd.Parameters.AddWithValue("@RaceType", raceType);
                             cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
 
                             newId = Convert.ToInt32(cmd.ExecuteScalar());
@@ -105,7 +105,7 @@ SELECT last_insert_rowid();";
                 }
             }
 
-            TrySetIntProp(session, "Id", newId);
+            session.Id = newId;
             Logger.Log($"[DB][SessionRepo] SaveSession → Id={newId}");
             return newId;
         }
@@ -208,42 +208,5 @@ ORDER BY datetime(EventDate) DESC";
             Logger.Log("[DB][SessionRepo] DeleteSession → OK");
         }
 
-        // ---------- helpers ----------
-        private static string GetStringProp(object obj, string name, string fallback)
-        {
-            try
-            {
-                var pi = obj.GetType().GetProperty(name);
-                if (pi == null) return fallback;
-                var val = pi.GetValue(obj);
-                return val?.ToString() ?? fallback;
-            }
-            catch { return fallback; }
-        }
-
-        private static DateTime GetDateTimeProp(object obj, string name, DateTime fallback)
-        {
-            try
-            {
-                var pi = obj.GetType().GetProperty(name);
-                if (pi == null) return fallback;
-                var val = pi.GetValue(obj);
-                if (val is DateTime dt) return dt;
-                if (val is string s && DateTime.TryParse(s, out var p)) return p;
-                return fallback;
-            }
-            catch { return fallback; }
-        }
-
-        private static void TrySetIntProp(object obj, string name, int value)
-        {
-            try
-            {
-                var pi = obj.GetType().GetProperty(name);
-                if (pi == null || !pi.CanWrite) return;
-                if (pi.PropertyType == typeof(int)) pi.SetValue(obj, value, null);
-            }
-            catch { /* ignore */ }
-        }
     }
 }
