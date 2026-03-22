@@ -57,6 +57,31 @@ namespace RCDragManagerProd.RandomMode
                     continue;
                 }
 
+                // Rematch avoidance: if p1 and p2 already met, try swapping p2 with a later candidate
+                if (p1 != null && p2 != null && history.Contains(Norm(p1.Id, p2.Id)))
+                {
+                    int swapIdx = -1;
+                    for (int j = i + 2; j < pool.Count; j++)
+                    {
+                        if (pool[j] != null && !history.Contains(Norm(p1.Id, pool[j].Id)))
+                        {
+                            swapIdx = j;
+                            break;
+                        }
+                    }
+                    if (swapIdx >= 0)
+                    {
+                        Logger.Log($"[LB-BUILD] Rematch avoidance: swapping pool[{i + 1}] ({p2.Name}) with pool[{swapIdx}] ({pool[swapIdx].Name})");
+                        pool[i + 1] = pool[swapIdx];
+                        pool[swapIdx] = p2;
+                        p2 = pool[i + 1];
+                    }
+                    else
+                    {
+                        Logger.Log($"[LB-BUILD] Rematch avoidance: no alternate found for {p1.Name} vs {p2.Name} — accepting rematch");
+                    }
+                }
+
                 var matchId = id++;
                 r1MatchIds.Add(matchId);
 
