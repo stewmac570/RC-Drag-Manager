@@ -26,7 +26,7 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(_rrStandingsCardCache))
                 return false;
 
-            _standingsDialogService.Show("Round Robin — Standings", _rrStandingsCardCache);
+            _standingsDialogService.Show("Round Robin ï¿½ Standings", _rrStandingsCardCache);
             return true;
         }
 
@@ -35,7 +35,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (drivers == null || drivers.Count < 2)
             {
-                Logger.Log("? Cannot generate bracket — provided driver list is invalid.");
+                Logger.Log("? Cannot generate bracket ï¿½ provided driver list is invalid.");
                 return;
             }
 
@@ -44,7 +44,7 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(rt))
             {
                 rt = "Round Robin";
-                Logger.Log("[CTRL] raceType blank — defaulting to 'Round Robin'");
+                Logger.Log("[CTRL] raceType blank ï¿½ defaulting to 'Round Robin'");
             }
             _session.RaceType = rt;
 
@@ -66,11 +66,11 @@ namespace RCDragManagerProd.Controllers
 
                 if (_drivers.Count < 3 || _drivers.Count > 32)
                 {
-                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3–32)");
+                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3ï¿½32)");
                     try
                     {
                         MessageBox.Show(
-                            "Pro Ladder supports 3–32 drivers. Please adjust the driver count.",
+                            "Pro Ladder supports 3ï¿½32 drivers. Please adjust the driver count.",
                             "Invalid Driver Count",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
@@ -138,7 +138,7 @@ namespace RCDragManagerProd.Controllers
             var roundOrder = EngineGetRoundOrder(_engine);
             if (roundOrder == null || roundOrder.Count == 0)
             {
-                Logger.Log("? Bracket generated with no rounds — aborting reveal state update.");
+                Logger.Log("? Bracket generated with no rounds ï¿½ aborting reveal state update.");
                 CanAdvanceChanged?.Invoke(false);
                 CanPickWinnerChanged?.Invoke(false);
                 NextMatchReady?.Invoke(null);
@@ -161,7 +161,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (_session?.Drivers == null || _session.Drivers.Count < 2)
             {
-                Logger.Log("? Cannot generate bracket — session driver list is invalid.");
+                Logger.Log("? Cannot generate bracket ï¿½ session driver list is invalid.");
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace RCDragManagerProd.Controllers
 
             if (_engine == null)
             {
-                Logger.Log("? AdvanceRound aborted — engine is null");
+                Logger.Log("? AdvanceRound aborted ï¿½ engine is null");
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
@@ -249,7 +249,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (_revealedRounds.Count == 0)
             {
-                Logger.Log("[DEBUG] PushAdvanceState: no rounds revealed — cannot advance");
+                Logger.Log("[DEBUG] PushAdvanceState: no rounds revealed ï¿½ cannot advance");
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
@@ -305,7 +305,7 @@ namespace RCDragManagerProd.Controllers
                         {
                             var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                             _rrStandingsCardCache = card;
-                            _standingsDialogService.Show("Round Robin — Standings", card);
+                            _standingsDialogService.Show("Round Robin ï¿½ Standings", card);
                         }
                         catch (Exception ex)
                         {
@@ -356,7 +356,7 @@ namespace RCDragManagerProd.Controllers
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                         _rrStandingsCardCache = card;
-                        _standingsDialogService.Show("Round Robin — Standings", card);
+                        _standingsDialogService.Show("Round Robin ï¿½ Standings", card);
                     }
                     catch (Exception ex)
                     {
@@ -384,7 +384,7 @@ namespace RCDragManagerProd.Controllers
 
                     if (wildcard == null)
                     {
-                        Logger.Log("? Auto-advance failed — could not determine wildcard finalist.");
+                        Logger.Log("? Auto-advance failed ï¿½ could not determine wildcard finalist.");
                         return;
                     }
 
@@ -418,7 +418,7 @@ namespace RCDragManagerProd.Controllers
 
                     _finalsPending = true;
                     CanStartFinalsChanged?.Invoke(true);
-                    Logger.Log("?? Finals pending — waiting for 'Generate Bracket' to seed finals.");
+                    Logger.Log("?? Finals pending ï¿½ waiting for 'Generate Bracket' to seed finals.");
                     return;
                 }
             }
@@ -429,12 +429,12 @@ namespace RCDragManagerProd.Controllers
                 var finalMatch = EngineGetMatches(_engine).LastOrDefault();
                 if (finalMatch != null && finalMatch.HasResult)
                 {
-                    Logger.Log("?? LB Final match resolved — injecting Final-4 bracket (fallback)...");
+                    Logger.Log("?? LB Final match resolved ï¿½ injecting Final-4 bracket (fallback)...");
                     InjectFinal4Bracket();
                 }
             }
 
-            // -- Finals wrap-up — emit summary once ------------------------
+            // -- Finals wrap-up ï¿½ emit summary once ------------------------
             if (!_tournamentClosed && string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase))
             {
                 var all = EngineGetMatches(_engine).OrderBy(m => m.MatchId).ToList();
@@ -468,10 +468,11 @@ namespace RCDragManagerProd.Controllers
                         RunnerUp = runnerUp,
                         TotalDrivers = _session?.Drivers?.Count ?? 0,
                         TotalMatches = all.Count,
-                        CompletedAt = DateTime.Now
+                        CompletedAt = DateTime.Now,
+                        MatchResults = _matchResult.GetAllResults()
                     };
 
-                    Logger.Log($"?? Tournament complete — Winner: {winner?.Name}, Runner-Up: {runnerUp?.Name}");
+                    Logger.Log($"?? Tournament complete ï¿½ Winner: {winner?.Name}, Runner-Up: {runnerUp?.Name}");
                     _tournamentClosed = true;
 
                     CanPickWinnerChanged?.Invoke(false);
@@ -502,7 +503,7 @@ namespace RCDragManagerProd.Controllers
         {
             if (_engine == null)
             {
-                Logger.Log($"[LOOKUP] GetMatch({matchId}) called while engine=null — returning null");
+                Logger.Log($"[LOOKUP] GetMatch({matchId}) called while engine=null ï¿½ returning null");
                 return null;
             }
 

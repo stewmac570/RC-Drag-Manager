@@ -111,6 +111,15 @@ namespace RCDragManagerProd.UI.Forms
                         Logger.Log($"[STATS] +EventsWon → #{wdb.Id} {wdb.Name}: {wdb.EventsWon}");
                     }
                 }
+
+                if (summary.MatchResults != null)
+                {
+                    foreach (var (wId, lId) in summary.MatchResults)
+                    {
+                        repo.IncrementWinsAndLosses(wId, lId);
+                        Logger.Log($"[STATS] +TotalWins/TotalLosses → winner={wId}, loser={lId}");
+                    }
+                }
             }
             catch (Exception ex)
             {
