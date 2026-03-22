@@ -281,8 +281,9 @@ namespace RCDragManagerProd.RoundRobinMode
             return matches
                 .Where(m => results.HasResult(m.MatchId))
                 .Select(m => results.GetWinner(m.MatchId))
-                .GroupBy(d => d)
-                .Select(g => (Driver: g.Key, Wins: g.Count()))
+                .Where(d => d != null)
+                .GroupBy(d => d.Id)
+                .Select(g => (Driver: g.First(), Wins: g.Count()))
                 .OrderByDescending(x => x.Wins)
                 .ToList();
         }
