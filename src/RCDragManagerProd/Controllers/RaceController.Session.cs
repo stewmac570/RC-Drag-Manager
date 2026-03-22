@@ -25,6 +25,14 @@ namespace RCDragManagerProd.Controllers
             _revealedRounds.Clear();
             _winners.Clear();
 
+            _matchResult.Clear();
+            _rrMatchesSnapshot = null;
+            _rrRoundOrderSnapshot = null;
+            _rrTop3 = null;
+            _buybackChampionOverride = null;
+            _rrStandingsCardCache = null;
+            _rrLoggedRounds.Clear();
+
             laneFairness.Reset();
 
             if (_session != null) _session.RaceType = string.Empty;
