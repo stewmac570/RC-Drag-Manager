@@ -151,6 +151,7 @@ namespace RCDragManagerProd.Controllers
 
             _winners.Clear();
             PushFullRefresh();
+            QueueLiveUpdate("GenerateBracket");
         }
 
 
@@ -195,6 +196,7 @@ namespace RCDragManagerProd.Controllers
 
             PushNextMatch();
             PushAdvanceState();
+            QueueLiveUpdate("AdvanceRound");
 
             Logger.Log("[FORM1] AdvanceRound() completed");
         }
