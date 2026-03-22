@@ -307,7 +307,8 @@ namespace RCDragManagerProd.RoundRobinMode
             var ranked = ranker.Rank(GetResults(), drivers, results);
 
             return ranked.Take(count)
-                         .Select(r => drivers.First(d => d.Id == r.DriverId))
+                         .Select(r => drivers.FirstOrDefault(d => d.Id == r.DriverId))
+                         .Where(d => d != null)
                          .ToList();
         }
 
