@@ -138,6 +138,7 @@ namespace RCDragManagerProd.RoundRobinMode
                 // BYE: award BYE points to the winner only
                 if (isBye && winnerId != null)
                 {
+                    if (!stats.ContainsKey(winnerId.Value)) continue;
                     stats[winnerId.Value].Points += pts.Bye;
                     Logger.Log($"[RR-PTS] Match {m.MatchId} BYE → {wName} gains {pts.Bye:0.00} points");
                     continue;
@@ -146,6 +147,7 @@ namespace RCDragManagerProd.RoundRobinMode
                 // Normal resolved match
                 if (winnerId != null && loserId != 0)
                 {
+                    if (!stats.ContainsKey(winnerId.Value) || !stats.ContainsKey(loserId)) continue;
                     var w = stats[winnerId.Value];
                     var l = stats[loserId];
 
