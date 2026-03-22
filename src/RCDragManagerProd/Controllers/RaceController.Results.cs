@@ -1,4 +1,4 @@
-// RaceController.Results.cs
+ï»¿// RaceController.Results.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,23 +23,23 @@ namespace RCDragManagerProd.Controllers
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
             if (match == null)
             {
-                Logger.Log($"[WINNER] Reject — match {matchId} not found.");
+                Logger.Log($"[WINNER] Reject â€” match {matchId} not found.");
                 return;
             }
 
             if (EngineHasWinner(_engine, matchId, match.RoundLabel))
             {
-                Logger.Log($"[WINNER] Reject — match {matchId} already has a winner.");
+                Logger.Log($"[WINNER] Reject â€” match {matchId} already has a winner.");
                 return;
             }
 
             var winner = firstOption ? match.Driver1 : match.Driver2;
             var loser = firstOption ? match.Driver2 : match.Driver1;
 
-            // Universal block — no BYE as winner
+            // Universal block â€” no BYE as winner
             if (ByePolicy.IsBye(winner) || string.Equals(winner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[WINNER] Reject — cannot select BYE as winner for M{matchId}.");
+                Logger.Log($"[WINNER] Reject â€” cannot select BYE as winner for M{matchId}.");
                 return;
             }
             if (ByePolicy.IsBye(loser))
@@ -70,6 +70,7 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only completed-round scorecard.");
                 TryLogCompletedRound(rr);
             }
+            QueueLiveUpdate("SubmitWinner");
         }
 
         public Driver GetWinner(int matchId) => _results.GetWinner(matchId);
@@ -81,7 +82,7 @@ namespace RCDragManagerProd.Controllers
 
             if (_engine is not RoundRobinEngineAdapter rr)
             {
-                Logger.Log("? Engine is not RoundRobinEngineAdapter — buyback not available.");
+                Logger.Log("? Engine is not RoundRobinEngineAdapter â€” buyback not available.");
                 return new List<Driver>();
             }
             Logger.Log("[CTRL][ENGINE-CAST] Using RoundRobinEngineAdapter for RR-only buyback ranking methods.");
@@ -109,7 +110,7 @@ namespace RCDragManagerProd.Controllers
             Logger.Log($"? Buyback-eligible count: {eligible.Count} ? [{string.Join(", ", eligible.Select(d => d.Name))}]");
 
             if (eligible.Count < 2)
-                Logger.Log("?? Only 1 or 0 eligible drivers — Losers Bracket cannot be created.");
+                Logger.Log("?? Only 1 or 0 eligible drivers â€” Losers Bracket cannot be created.");
 
             return eligible;
         }
@@ -129,7 +130,7 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrEmpty(active) ||
                 !string.Equals(match.RoundLabel, active, StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[CTRL][EDIT] Reject edit — M{matchId} is in '{match.RoundLabel}', active='{active}'.");
+                Logger.Log($"[CTRL][EDIT] Reject edit â€” M{matchId} is in '{match.RoundLabel}', active='{active}'.");
                 return false;
             }
 
@@ -138,7 +139,7 @@ namespace RCDragManagerProd.Controllers
 
             if (ByePolicy.IsBye(newWinner) || string.Equals(newWinner?.Name?.Trim(), "BYE", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log($"[CTRL][EDIT] Reject edit — cannot set BYE as winner (M{matchId}).");
+                Logger.Log($"[CTRL][EDIT] Reject edit â€” cannot set BYE as winner (M{matchId}).");
                 return false;
             }
 
