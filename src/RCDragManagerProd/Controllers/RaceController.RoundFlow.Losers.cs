@@ -42,7 +42,6 @@ namespace RCDragManagerProd.Controllers
             Logger.Log($"📦 Starting Losers Bracket… drivers={_session.BuybackDrivers.Count} [{buyNames}]");
             Logger.Log($"[STATE] Before LB start → engine={_engine?.GetType().Name ?? "null"}, losersEngine={_losersEngine?.GetType().Name ?? "null"}, rrSnapshotMatches={_rrMatchesSnapshot?.Count.ToString() ?? "null"}, rrSnapshotRounds={_rrRoundOrderSnapshot?.Count.ToString() ?? "null"}");
 
-            _session.PairingHistory ??= new HashSet<(int, int)>();
 
             if ((_rrMatchesSnapshot == null || _rrRoundOrderSnapshot == null) && _engine != null)
             {

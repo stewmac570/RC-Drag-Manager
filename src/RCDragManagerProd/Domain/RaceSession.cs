@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using RCDragManagerProd.Logging;  // Assuming you have a logging utility    
+using System.Linq;
+using System.Text.Json.Serialization;
+using RCDragManagerProd.Logging;  // Assuming you have a logging utility
 using RCDragManagerProd.RandomMode;  // Assuming this is where your domain models are defined
 
 namespace RCDragManagerProd.Domain
@@ -24,7 +26,16 @@ namespace RCDragManagerProd.Domain
         public int? RoundsToRun { get; set; }
 
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
-        public HashSet<(int, int)> PairingHistory { get; set; } = new HashSet<(int, int)>();
+
+        // Serializable backing store for PairingHistory (System.Text.Json cannot handle ValueTuple)
+        public List<int[]> PairingHistoryRaw { get; set; } = new List<int[]>();
+
+        [JsonIgnore]
+        public HashSet<(int, int)> PairingHistory
+        {
+            get => new HashSet<(int, int)>(PairingHistoryRaw.Select(a => (a[0], a[1])));
+            set => PairingHistoryRaw = value.Select(t => new[] { t.Item1, t.Item2 }).ToList();
+        }
         public List<MatchResultSave> SavedResults { get; set; } = new List<MatchResultSave>();
         public List<string> SavedRevealedRounds { get; set; } = new List<string>();
         public List<RoundRobinMatch> RoundRobinMatches { get; set; } = new List<RoundRobinMatch>();
