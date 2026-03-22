@@ -96,6 +96,10 @@ namespace RCDragManagerProd.UI.Forms
                                 repo.UpdateDriver(db);
                                 Logger.Log($"[STATS] +EventsEntered → #{db.Id} {db.Name}: {db.EventsEntered}");
                             }
+                            else
+                            {
+                                Logger.Log($"[STATS] +EventsEntered skipped — driver Id={d.Id} ('{d.Name}') not found in DB (quick/local session)");
+                            }
                         }
                     }
                 }
@@ -109,6 +113,10 @@ namespace RCDragManagerProd.UI.Forms
                         wdb.EventsWon += 1;
                         repo.UpdateDriver(wdb);
                         Logger.Log($"[STATS] +EventsWon → #{wdb.Id} {wdb.Name}: {wdb.EventsWon}");
+                    }
+                    else
+                    {
+                        Logger.Log($"[STATS] +EventsWon skipped — winner Id={winnerId} ('{summary.Winner?.Name}') not found in DB (quick/local session)");
                     }
                 }
 
@@ -368,6 +376,10 @@ namespace RCDragManagerProd.UI.Forms
                                 db.EventsWon = repo.ComputeEventsWonFromSavedSessions(d.Id);
                                 repo.UpdateDriver(db);
                                 Logger.Log($"[STATS] Recompute EventsWon → #{db.Id} {db.Name}: {db.EventsWon}");
+                            }
+                            else
+                            {
+                                Logger.Log($"[STATS] Recompute EventsWon skipped — driver Id={d.Id} ('{d.Name}') not found in DB (quick/local session)");
                             }
                         }
                     }
