@@ -78,7 +78,9 @@ namespace RCDragManagerProd.Controllers
 
             _revealedRounds.Clear();
             foreach (var r in preserveLb) _revealedRounds.Add(r);
-            _revealedRounds.Add("SF");
+            var firstRound = EngineGetRoundOrder(_engine).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstRound))
+                _revealedRounds.Add(firstRound);
 
             Logger.Log($"🎯 Final-4 revealedRounds set to: {string.Join(",", _revealedRounds)} (Final will be revealed on Next Round)");
 
@@ -150,7 +152,9 @@ namespace RCDragManagerProd.Controllers
             }
 
             _revealedRounds.Clear();
-            _revealedRounds.Add("SF");
+            var firstRoundNoBuyback = EngineGetRoundOrder(_engine).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstRoundNoBuyback))
+                _revealedRounds.Add(firstRoundNoBuyback);
             Logger.Log($"🎯 [FINALS][NOBUYBACK] Revealed rounds set to: {string.Join(",", _revealedRounds)}");
 
             var rows = BuildCurrentBracketRows();
