@@ -592,8 +592,16 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
             return map;
         }
 
+        private static readonly HashSet<string> _allowedStatColumns = new HashSet<string>
+        {
+            "TotalWins", "TotalLosses", "EventsEntered", "EventsWon"
+        };
+
         private void ExecuteStatIncrement(int driverId, string columnName, int delta)
         {
+            if (!_allowedStatColumns.Contains(columnName))
+                throw new ArgumentException($"'{columnName}' is not a permitted stat column.", nameof(columnName));
+
             using (var connection = Open())
             using (var command = connection.CreateCommand())
             {
