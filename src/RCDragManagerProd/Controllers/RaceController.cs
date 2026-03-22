@@ -62,6 +62,7 @@ namespace RCDragManagerProd.Controllers
             public int TotalDrivers { get; set; }
             public int TotalMatches { get; set; }
             public DateTime CompletedAt { get; set; }
+            public IReadOnlyList<(int WinnerId, int LoserId)> MatchResults { get; set; }
         }
 
         public event Action<RaceSummary> TournamentCompleted;

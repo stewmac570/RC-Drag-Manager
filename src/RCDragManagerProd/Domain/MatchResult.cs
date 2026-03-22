@@ -77,6 +77,14 @@ namespace RCDragManagerProd.Domain
             return pairs;
         }
 
+        public IReadOnlyList<(int WinnerId, int LoserId)> GetAllResults()
+        {
+            return results.Values
+                .Where(r => r.Winner?.Id > 0 && r.Loser?.Id > 0)
+                .Select(r => (r.Winner.Id, r.Loser.Id))
+                .ToList();
+        }
+
         public void Clear()
         {
             results.Clear();
