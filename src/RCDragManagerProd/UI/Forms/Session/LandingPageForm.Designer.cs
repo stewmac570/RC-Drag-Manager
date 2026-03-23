@@ -14,6 +14,7 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnLoadEvent;
         private Button btnDriverLists;
         private Button btnSettings;
+        private Button btnNewMultiClassEvent;
         private Button btnExit;
         private PictureBox logoBox;
         private Label lblVersion;
@@ -32,6 +33,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnLoadEvent = new Button();
             this.btnDriverLists = new Button();
             this.btnSettings = new Button();
+            this.btnNewMultiClassEvent = new Button();
             this.btnExit = new Button();
             this.lblVersion = new Label();
             this.logoBox = new PictureBox();
@@ -87,6 +89,13 @@ namespace RCDragManagerProd.UI.Forms
             this.btnSettings.Text = "Settings";
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             this.Controls.Add(this.btnSettings);
+
+            // btnNewMultiClassEvent
+            this.btnNewMultiClassEvent.Location = new System.Drawing.Point(40, 430);
+            this.btnNewMultiClassEvent.Size = new System.Drawing.Size(200, 50);
+            this.btnNewMultiClassEvent.Text = "New Multi-Class Event";
+            this.btnNewMultiClassEvent.Click += new System.EventHandler(this.btnNewMultiClassEvent_Click);
+            this.Controls.Add(this.btnNewMultiClassEvent);
 
             // btnExit
             this.btnExit.Location = new System.Drawing.Point(750, 500);
