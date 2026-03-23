@@ -197,11 +197,13 @@
       <DependentUpon>BuybackDriverSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Domain\Car.cs" />
+    <Compile Include="Domain\MultiClassEvent.cs" />
     <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
     <Compile Include="Integration\LiveApiClient.cs" />
     <Compile Include="Integration\LiveRaceUpdateDto.cs" />
     <Compile Include="Repositories\DatabaseInitializer.cs" />
+    <Compile Include="Repositories\MultiClassEventRepository.cs" />
     <Compile Include="UI\Forms\Drivers\DriverManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,11 +236,29 @@
     <Compile Include="UI\Forms\Main\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Forms\Main\MultiClassRaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\MultiClassRaceForm.Designer.cs">
+      <DependentUpon>MultiClassRaceForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Forms\Session\LandingPageForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Forms\Session\LandingPageForm.Designer.cs">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Forms\Session\MultiClassConfigDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\MultiClassConfigDialog.Designer.cs">
+      <DependentUpon>MultiClassConfigDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Forms\Session\MultiClassSetupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Session\MultiClassSetupForm.Designer.cs">
+      <DependentUpon>MultiClassSetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\Forms\Session\LoadSessionForm.cs">
       <SubType>Form</SubType>
@@ -253,6 +273,7 @@
     <Compile Include="Helpers\MatchLookupHelper.cs" />
     <Compile Include="Domain\MatchResult.cs" />
     <Compile Include="Controllers\RaceController.cs" />
+    <Compile Include="Controllers\RaceController.MultiClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Domain\ProLadder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -272,6 +293,7 @@
     <Compile Include="UI\Forms\Session\SessionSetupForm.UI.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ViewModels\MultiClassEventSummary.cs" />
     <Compile Include="ViewModels\RaceSessionSummary.cs" />
     <Compile Include="RandomMode\RandomBracket.cs" />
     <Compile Include="RandomMode\RandomMatch.cs" />

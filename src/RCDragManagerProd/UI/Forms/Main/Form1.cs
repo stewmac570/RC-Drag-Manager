@@ -21,6 +21,13 @@ namespace RCDragManagerProd.UI.Forms
         private bool _finalsPopupShown;
         private WinnerButtonContext _currentWinnerButtonContext;
 
+        /// <summary>
+        /// When true, Form1 is embedded inside MultiClassRaceForm.
+        /// Suppresses the buyback MessageBox and TournamentCompleted stats/popup
+        /// so MultiClassRaceForm can coordinate those across all classes.
+        /// </summary>
+        public bool IsHostedMode { get; set; }
+
         public Form1(RaceController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));

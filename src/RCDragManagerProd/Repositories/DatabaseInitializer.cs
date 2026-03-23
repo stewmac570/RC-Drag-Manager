@@ -58,6 +58,17 @@ CREATE TABLE IF NOT EXISTS RaceSessions
 );
 CREATE INDEX IF NOT EXISTS IX_RaceSessions_EventDate ON RaceSessions(EventDate);";
             Exec(cn, createRaceSessions);
+
+            // --- MultiClassEvents ----------------------------------------------
+            const string createMultiClassEvents = @"
+CREATE TABLE IF NOT EXISTS MultiClassEvents (
+    Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    EventName   TEXT,
+    EventDate   TEXT,
+    ClassCount  INTEGER,
+    EventData   TEXT
+);";
+            Exec(cn, createMultiClassEvents);
         }
 
         private static void Exec(SQLiteConnection cn, string sql)

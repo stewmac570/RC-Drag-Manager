@@ -91,6 +91,23 @@ namespace RCDragManagerProd.UI.Forms
         }
 
 
+        private void btnNewMultiClassEvent_Click(object sender, EventArgs e)
+        {
+            Logger.Log("[MULTI] Opening Multi-Class Event setup…");
+            var setup = new MultiClassSetupForm(_connStr);
+            if (setup.ShowDialog() == DialogResult.OK)
+            {
+                var multiEvent = setup.MultiClassEventResult;
+                Logger.Log($"[MULTI] Setup complete: '{multiEvent.EventName}', {multiEvent.ClassSessions.Count} class(es)");
+                var form = new MultiClassRaceForm(multiEvent, _connStr);
+                form.Show();
+            }
+            else
+            {
+                Logger.Log("[MULTI] Multi-class setup cancelled.");
+            }
+        }
+
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();

@@ -31,7 +31,7 @@ namespace RCDragManagerProd.UI.Forms
 
             Logger.Log($"UI: Generate Losers Bracket button {(enabled ? "enabled" : "disabled")}.");
 
-            if (enabled)
+            if (enabled && !IsHostedMode)
             {
                 MessageBox.Show(
                     "Round-Robin complete.\nClick 'Buy Back' to add drivers to the Losers Bracket.",
@@ -64,6 +64,9 @@ namespace RCDragManagerProd.UI.Forms
         private void OnTournamentCompleted(RaceController.RaceSummary summary)
         {
             if (InvokeRequired) { BeginInvoke(new Action<RaceController.RaceSummary>(OnTournamentCompleted), summary); return; }
+
+            // In hosted mode MultiClassRaceForm handles stats and the completion popup.
+            if (IsHostedMode) return;
 
             var winnerName = summary.Winner?.Name ?? "N/A";
             var runnerUp = summary.RunnerUp?.Name ?? "N/A";

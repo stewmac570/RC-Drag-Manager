@@ -1,0 +1,299 @@
+// UI/Forms/Main/MultiClassRaceForm.cs
+// Phase 5 — Multi-Class Race Console
+//
+// Architecture: Option B (Hosted Form1 instances).
+// Each class tab embeds a Form1 instance configured with IsHostedMode = true.
+// MultiClassRaceForm handles the LB gate, stats writing, and combined summary.
+// Form1's buyback MessageBox and TournamentCompleted stats/popup are suppressed
+// in hosted mode so MultiClassRaceForm can coordinate across all classes.
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using RCDragManagerProd.Controllers;
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
+using RCDragManagerProd.Repositories;
+
+namespace RCDragManagerProd.UI.Forms
+{
+    public partial class MultiClassRaceForm : Form
+    {
+        private readonly MultiClassEvent _multiEvent;
+        private readonly string _connectionString;
+        private readonly MultiClassEventRepository _multiClassRepo;
+        private readonly List<RaceController> _controllers;
+        private readonly List<Form1> _classRaceForms;
+        private readonly HashSet<int> _rrCompleteClassIndexes = new HashSet<int>();
+        private readonly HashSet<int> _completedClassIndexes = new HashSet<int>();
+        private readonly Dictionary<int, RaceController.RaceSummary> _raceSummaries =
+            new Dictionary<int, RaceController.RaceSummary>();
+
+        // ── Construction ──────────────────────────────────────────────────────
+
+        public MultiClassRaceForm(MultiClassEvent multiEvent, string connectionString)
+        {
+            InitializeComponent();
+
+            _multiEvent = multiEvent ?? throw new ArgumentNullException(nameof(multiEvent));
+            _connectionString = connectionString;
+            _multiClassRepo = new MultiClassEventRepository(connectionString);
+            _controllers = new List<RaceController>();
+            _classRaceForms = new List<Form1>();
+
+            Text = $"Multi-Class Event: {multiEvent.EventName}";
+
+            foreach (var session in multiEvent.ClassSessions)
+            {
+                var controller = new RaceController(session);
+                _controllers.Add(controller);
+                SubscribeToController(controller, _controllers.Count - 1);
+            }
+
+            BuildTabs();
+        }
+
+        private void SubscribeToController(RaceController controller, int classIndex)
+        {
+            controller.CanOfferBuybackChanged += (enabled) =>
+            {
+                if (enabled)
+                    BeginInvokeIfNeeded(CheckAndReleaseRrGate);
+            };
+
+            controller.TournamentCompleted += (summary) =>
+                BeginInvokeIfNeeded(() => OnClassTournamentCompleted(classIndex, summary));
+
+            controller.CanAdvanceChanged += (_) => BeginInvokeIfNeeded(UpdateAllTabStates);
+            controller.WinnersUpdated += (_) => BeginInvokeIfNeeded(UpdateAllTabStates);
+            controller.BracketRedrawn += (_) => BeginInvokeIfNeeded(UpdateAllTabStates);
+        }
+
+        private void BeginInvokeIfNeeded(Action action)
+        {
+            if (!IsHandleCreated) return;
+            if (InvokeRequired)
+                BeginInvoke(action);
+            else
+                action();
+        }
+
+        private void BuildTabs()
+        {
+            tabControl.TabPages.Clear();
+            _classRaceForms.Clear();
+
+            for (int i = 0; i < _controllers.Count; i++)
+            {
+                var session = _multiEvent.ClassSessions[i];
+                var tab = new TabPage(session.ClassType);
+
+                var form1 = new Form1(_controllers[i]);
+                form1.IsHostedMode = true;
+                form1.TopLevel = false;
+                form1.FormBorderStyle = FormBorderStyle.None;
+                form1.Dock = DockStyle.Fill;
+
+                tab.Controls.Add(form1);
+                form1.Show();
+
+                tabControl.TabPages.Add(tab);
+                _classRaceForms.Add(form1);
+            }
+
+            UpdateAllTabStates();
+        }
+
+        // ── Tab state ─────────────────────────────────────────────────────────
+
+        private void UpdateAllTabStates()
+        {
+            for (int i = 0; i < tabControl.TabPages.Count; i++)
+                UpdateTabState(i);
+        }
+
+        private void UpdateTabState(int classIndex)
+        {
+            if (classIndex < 0 || classIndex >= tabControl.TabPages.Count) return;
+
+            var tab = tabControl.TabPages[classIndex];
+            var controller = _controllers[classIndex];
+
+            if (_completedClassIndexes.Contains(classIndex))
+            {
+                tab.BackColor = Color.LightGray;
+            }
+            else if (_rrCompleteClassIndexes.Contains(classIndex))
+            {
+                tab.BackColor = Color.LightGreen;
+            }
+            else if (controller.HasBracketStarted && controller.HasPendingMatchesInCurrentRound())
+            {
+                tab.BackColor = Color.Orange;
+            }
+            else
+            {
+                tab.BackColor = SystemColors.Control;
+            }
+        }
+
+        // ── Tab switching enforcement ──────────────────────────────────────────
+
+        private void tabControl_Selecting(object sender, TabControlCancelEventArgs e)
+        {
+            if (e.TabPageIndex == tabControl.SelectedIndex) return;
+
+            var activeController = _controllers[tabControl.SelectedIndex];
+            if (activeController.HasBracketStarted && activeController.HasPendingMatchesInCurrentRound())
+            {
+                e.Cancel = true;
+                lblStatus.Text = "Complete all matches before switching class.";
+            }
+            else
+            {
+                lblStatus.Text = string.Empty;
+            }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblStatus.Text = string.Empty;
+            UpdateAllTabStates();
+        }
+
+        // ── LB gate ───────────────────────────────────────────────────────────
+
+        private void CheckAndReleaseRrGate()
+        {
+            _rrCompleteClassIndexes.Clear();
+            for (int i = 0; i < _controllers.Count; i++)
+            {
+                if (_controllers[i].IsRrComplete())
+                    _rrCompleteClassIndexes.Add(i);
+            }
+
+            UpdateAllTabStates();
+
+            Logger.Log($"[MultiClass] RR gate check: {_rrCompleteClassIndexes.Count}/{_controllers.Count} complete");
+
+            if (_controllers.Count > 0 && _rrCompleteClassIndexes.Count == _controllers.Count)
+            {
+                Logger.Log("[MultiClass] All classes completed RR — releasing LB gate");
+                MessageBox.Show(
+                    "All classes have completed Round Robin.\n" +
+                    "The Buy-Back phase is now open for all classes.\n\n" +
+                    "Switch to each class tab to run buy-backs.",
+                    "Buy-Back Phase Ready — All Classes",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+        }
+
+        // ── Tournament completion ──────────────────────────────────────────────
+
+        private void OnClassTournamentCompleted(int classIndex, RaceController.RaceSummary summary)
+        {
+            _raceSummaries[classIndex] = summary;
+
+            // Write win/loss stats
+            try
+            {
+                var repo = new DriverRepository(_connectionString);
+
+                if (summary.MatchResults != null)
+                {
+                    foreach (var (wId, lId) in summary.MatchResults)
+                    {
+                        repo.IncrementWinsAndLosses(wId, lId);
+                        Logger.Log($"[MultiClass][STATS] +Wins/Losses → winner={wId}, loser={lId}");
+                    }
+                }
+
+                var winnerId = summary.Winner?.Id ?? 0;
+                if (winnerId > 0)
+                {
+                    repo.IncrementEventsWon(winnerId);
+                    Logger.Log($"[MultiClass][STATS] +EventsWon → #{winnerId} {summary.Winner?.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[MultiClass][STATS][ERROR] {ex}");
+            }
+
+            // Per-class completion popup
+            var className = _multiEvent.ClassSessions[classIndex].ClassType;
+            var winnerName = summary.Winner?.Name ?? "N/A";
+            var runnerUpName = summary.RunnerUp?.Name ?? "N/A";
+            Logger.Log($"[MultiClass] Class '{className}' complete — winner={winnerName}, runner-up={runnerUpName}");
+
+            MessageBox.Show(
+                $"Class: {className}\nWinner: {winnerName}\nRunner-up: {runnerUpName}",
+                "Class Complete",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            _completedClassIndexes.Add(classIndex);
+            UpdateTabState(classIndex);
+
+            if (_completedClassIndexes.Count == _controllers.Count)
+                ShowCombinedEventSummary();
+        }
+
+        private void ShowCombinedEventSummary()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("═══════════════════════════════");
+            sb.AppendLine($"  {_multiEvent.EventName} — {_multiEvent.EventDate:yyyy-MM-dd}");
+            sb.AppendLine("  FINAL RESULTS");
+            sb.AppendLine("═══════════════════════════════");
+            sb.AppendLine();
+
+            for (int i = 0; i < _controllers.Count; i++)
+            {
+                var className = _multiEvent.ClassSessions[i].ClassType;
+                sb.AppendLine($"  {className}");
+                sb.AppendLine($"  {new string('─', className.Length)}");
+
+                if (_raceSummaries.TryGetValue(i, out var s))
+                {
+                    sb.AppendLine($"  Champion:   {s.Winner?.Name ?? "N/A"}");
+                    sb.AppendLine($"  Runner-Up:  {s.RunnerUp?.Name ?? "N/A"}");
+                }
+                else
+                {
+                    sb.AppendLine("  (no result recorded)");
+                }
+
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("═══════════════════════════════");
+
+            Logger.Log("[MultiClass] Showing combined event summary");
+            ScrollableTextDialog.Show("Event Complete — Final Results", sb.ToString());
+        }
+
+        // ── Save ──────────────────────────────────────────────────────────────
+
+        private void btnSaveEvent_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                foreach (var controller in _controllers)
+                    controller.SaveSession();
+
+                _multiClassRepo.SaveEvent(_multiEvent);
+                lblSaveStatus.Text = "Event saved.";
+                Logger.Log("[MultiClass] Event saved successfully");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[MultiClass][SAVE][ERROR] {ex}");
+                lblSaveStatus.Text = "Save failed — see log.";
+            }
+        }
+    }
+}
