@@ -1,0 +1,196 @@
+using System;
+using System.Collections.Generic;
+using System.Data.SQLite;
+using System.IO;
+using System.Text.Json;
+using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
+using RCDragManagerProd.ViewModels;
+
+namespace RCDragManagerProd.Repositories
+{
+    public sealed class MultiClassEventRepository
+    {
+        private readonly string _connStr;
+
+        public MultiClassEventRepository(string connectionOrPath)
+        {
+            if (string.IsNullOrWhiteSpace(connectionOrPath))
+                throw new ArgumentNullException(nameof(connectionOrPath));
+
+            _connStr = NormalizeConnString(connectionOrPath);
+            Logger.Log($"[DB][MultiClassEventRepo] ctor | conn='{_connStr}'");
+        }
+
+        private static string NormalizeConnString(string input)
+        {
+            if (input.IndexOf('=') >= 0 &&
+                input.IndexOf("Data Source", StringComparison.OrdinalIgnoreCase) >= 0)
+                return input;
+
+            string path = input;
+            if (!Path.IsPathRooted(path))
+            {
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string folder = Path.Combine(appData, "RC_Drag_Manager");
+                Directory.CreateDirectory(folder);
+                path = Path.Combine(folder, path);
+            }
+            Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
+            return $"Data Source={path};Version=3;";
+        }
+
+        private SQLiteConnection Open()
+        {
+            var cn = new SQLiteConnection(_connStr);
+            cn.Open();
+            return cn;
+        }
+
+        // ---------- SAVE ----------
+        public void SaveEvent(MultiClassEvent evt)
+        {
+            if (evt == null) throw new ArgumentNullException(nameof(evt));
+            Logger.Log("[DB][MultiClassEventRepo] SaveEvent()");
+
+            string eventName = evt.EventName ?? "(event)";
+            DateTime eventDate = evt.EventDate != default ? evt.EventDate : DateTime.Now;
+            int classCount = evt.ClassSessions?.Count ?? 0;
+
+            string json = JsonSerializer.Serialize(evt, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            });
+
+            const string sql = @"
+INSERT INTO MultiClassEvents (EventName, EventDate, ClassCount, EventData)
+VALUES (@EventName, @EventDate, @ClassCount, @EventData);
+SELECT last_insert_rowid();";
+
+            using (var cn = Open())
+            using (var tx = cn.BeginTransaction())
+            {
+                Logger.Log("[TX] BEGIN SaveEvent");
+                try
+                {
+                    using (var cmd = new SQLiteCommand(sql, cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@EventName", eventName);
+                        cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                        cmd.Parameters.AddWithValue("@ClassCount", classCount);
+                        cmd.Parameters.AddWithValue("@EventData", json ?? "{}");
+
+                        evt.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+
+                    tx.Commit();
+                    Logger.Log("[TX] COMMIT SaveEvent");
+                }
+                catch (Exception ex)
+                {
+                    try { tx.Rollback(); } catch { }
+                    Logger.Log($"[TX] ROLLBACK SaveEvent: {ex}");
+                    throw;
+                }
+            }
+
+            Logger.Log($"[DB][MultiClassEventRepo] SaveEvent → Id={evt.Id}");
+        }
+
+        // ---------- LIST ----------
+        public List<MultiClassEventSummary> GetAllEvents()
+        {
+            Logger.Log("[DB][MultiClassEventRepo] GetAllEvents()");
+            var list = new List<MultiClassEventSummary>();
+
+            const string sql = @"
+SELECT Id, EventName, EventDate, ClassCount
+FROM MultiClassEvents
+ORDER BY datetime(EventDate) DESC";
+
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand(sql, cn))
+            using (var rd = cmd.ExecuteReader())
+            {
+                while (rd.Read())
+                {
+                    list.Add(new MultiClassEventSummary
+                    {
+                        Id = rd.GetInt32(0),
+                        EventName = rd.IsDBNull(1) ? "" : rd.GetString(1),
+                        EventDate = rd.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(rd.GetString(2)),
+                        ClassCount = rd.IsDBNull(3) ? 0 : rd.GetInt32(3)
+                    });
+                }
+            }
+
+            Logger.Log($"[DB][MultiClassEventRepo] GetAllEvents → {list.Count} rows");
+            return list;
+        }
+
+        // ---------- LOAD ----------
+        public MultiClassEvent LoadEvent(int id)
+        {
+            Logger.Log($"[DB][MultiClassEventRepo] LoadEvent(id={id})");
+
+            const string sql = "SELECT EventData FROM MultiClassEvents WHERE Id = @Id";
+
+            using (var cn = Open())
+            using (var cmd = new SQLiteCommand(sql, cn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                var json = cmd.ExecuteScalar() as string;
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    Logger.Log("[DB][MultiClassEventRepo][WARN] No JSON event data found");
+                    return null;
+                }
+
+                try
+                {
+                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var multiEvent = JsonSerializer.Deserialize<MultiClassEvent>(json, opts);
+                    Logger.Log("[DB][MultiClassEventRepo] LoadEvent → OK");
+                    return multiEvent;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"[DB][MultiClassEventRepo][ERROR] Deserialize failed: {ex}");
+                    return null;
+                }
+            }
+        }
+
+        // ---------- DELETE ----------
+        public void DeleteEvent(int id)
+        {
+            Logger.Log($"[DB][MultiClassEventRepo] DeleteEvent(id={id})");
+            using (var cn = Open())
+            using (var tx = cn.BeginTransaction())
+            {
+                Logger.Log("[DB][MultiClassEventRepo][TX] DeleteEvent begin");
+                try
+                {
+                    using (var cmd = new SQLiteCommand("DELETE FROM MultiClassEvents WHERE Id = @Id", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tx.Commit();
+                    Logger.Log("[DB][MultiClassEventRepo][TX] DeleteEvent commit");
+                }
+                catch (Exception ex)
+                {
+                    try { tx.Rollback(); } catch { }
+                    Logger.Log($"[DB][MultiClassEventRepo][TX][ERROR] DeleteEvent rollback: {ex}");
+                    throw;
+                }
+            }
+
+            Logger.Log("[DB][MultiClassEventRepo] DeleteEvent → OK");
+        }
+    }
+}
