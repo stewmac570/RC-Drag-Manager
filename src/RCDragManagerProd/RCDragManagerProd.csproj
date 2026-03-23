@@ -267,6 +267,7 @@
     <Compile Include="Helpers\MatchLookupHelper.cs" />
     <Compile Include="Domain\MatchResult.cs" />
     <Compile Include="Controllers\RaceController.cs" />
+    <Compile Include="Controllers\RaceController.MultiClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Domain\ProLadder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
