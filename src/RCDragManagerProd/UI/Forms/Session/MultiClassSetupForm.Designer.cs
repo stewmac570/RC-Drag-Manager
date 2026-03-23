@@ -7,6 +7,8 @@ namespace RCDragManagerProd.UI.Forms
     {
         private System.ComponentModel.IContainer components = null;
 
+        private Label lblTitle;
+        private GroupBox grpEventDetails;
         private Label lblEventName;
         private TextBox txtEventName;
         private Label lblEventDate;
@@ -29,30 +31,50 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.Text = "New Multi-Class Event";
-            this.ClientSize = new Size(700, 480);
+            this.ClientSize = new Size(900, 600);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.MaximizeBox = false;
 
-            // Event name
-            lblEventName = new Label { Text = "Event Name:", Location = new Point(20, 20), AutoSize = true };
-            txtEventName = new TextBox { Location = new Point(115, 17), Width = 280 };
+            // Title label
+            lblTitle = new Label
+            {
+                Text = "New Multi-Class Event",
+                Font = new Font("Segoe UI", 14F, FontStyle.Bold),
+                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                Location = new Point(0, 10),
+                Size = new Size(900, 40)
+            };
 
-            // Event date
-            lblEventDate = new Label { Text = "Event Date:", Location = new Point(420, 20), AutoSize = true };
+            // Event details group
+            grpEventDetails = new GroupBox
+            {
+                Text = "Event Details",
+                Location = new Point(20, 60),
+                Size = new Size(860, 80)
+            };
+
+            lblEventName = new Label { Text = "Event Name:", Location = new Point(20, 30), AutoSize = true };
+            txtEventName = new TextBox { Location = new Point(115, 27), Width = 280 };
+            lblEventDate = new Label { Text = "Event Date:", Location = new Point(420, 30), AutoSize = true };
             dtpEventDate = new DateTimePicker
             {
-                Location = new Point(505, 17),
+                Location = new Point(505, 27),
                 Width = 170,
                 Format = DateTimePickerFormat.Short
             };
+            grpEventDetails.Controls.AddRange(new Control[]
+            {
+                lblEventName, txtEventName,
+                lblEventDate, dtpEventDate
+            });
 
             // Class list
-            lblClasses = new Label { Text = "Classes:", Location = new Point(20, 60), AutoSize = true };
+            lblClasses = new Label { Text = "Classes:", Location = new Point(20, 155), AutoSize = true };
             lvClasses = new ListView
             {
-                Location = new Point(20, 82),
-                Size = new Size(540, 300),
+                Location = new Point(20, 175),
+                Size = new Size(730, 270),
                 View = View.Details,
                 FullRowSelect = true,
                 MultiSelect = false
@@ -63,18 +85,18 @@ namespace RCDragManagerProd.UI.Forms
             lvClasses.Columns.Add("Drivers", 80);
 
             // Class management buttons (stacked to the right of the list)
-            btnAddClass = new Button { Text = "Add Class", Location = new Point(575, 82), Size = new Size(105, 32) };
-            btnEditClass = new Button { Text = "Edit Class", Location = new Point(575, 124), Size = new Size(105, 32) };
-            btnRemoveClass = new Button { Text = "Remove Class", Location = new Point(575, 166), Size = new Size(105, 32) };
+            btnAddClass    = new Button { Text = "Add Class",    Location = new Point(762, 175), Size = new Size(110, 32) };
+            btnEditClass   = new Button { Text = "Edit Class",   Location = new Point(762, 217), Size = new Size(110, 32) };
+            btnRemoveClass = new Button { Text = "Remove Class", Location = new Point(762, 259), Size = new Size(110, 32) };
 
             // Bottom buttons
-            btnStartRace = new Button { Text = "Start Race", Location = new Point(490, 430), Size = new Size(100, 32) };
-            btnCancel = new Button { Text = "Cancel", Location = new Point(600, 430), Size = new Size(80, 32) };
+            btnStartRace = new Button { Text = "Start Race", Location = new Point(570, 540), Size = new Size(140, 40) };
+            btnCancel    = new Button { Text = "Cancel",     Location = new Point(720, 540), Size = new Size(140, 40) };
 
             Controls.AddRange(new Control[]
             {
-                lblEventName, txtEventName,
-                lblEventDate, dtpEventDate,
+                lblTitle,
+                grpEventDetails,
                 lblClasses, lvClasses,
                 btnAddClass, btnEditClass, btnRemoveClass,
                 btnStartRace, btnCancel
