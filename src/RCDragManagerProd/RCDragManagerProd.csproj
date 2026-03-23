@@ -236,6 +236,12 @@
     <Compile Include="UI\Forms\Main\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Forms\Main\MultiClassRaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\Main\MultiClassRaceForm.Designer.cs">
+      <DependentUpon>MultiClassRaceForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Forms\Session\LandingPageForm.cs">
       <SubType>Form</SubType>
     </Compile>
