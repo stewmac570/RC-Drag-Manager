@@ -14,6 +14,7 @@ namespace RCDragManagerProd.UI.Forms
         private RadioButton rbQmdra;
         private Label lblRoundsToRun;
         private NumericUpDown nudRoundsToRun;
+        private Button btnAddNewDriver;
         private Label lblDrivers;
         private ListView lvDrivers;
         private Label lblDialInOverride;
@@ -31,7 +32,7 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.Text = "Class Configuration";
-            this.ClientSize = new Size(640, 530);
+            this.ClientSize = new Size(900, 600);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.StartPosition = FormStartPosition.CenterParent;
             this.MaximizeBox = false;
@@ -57,33 +58,40 @@ namespace RCDragManagerProd.UI.Forms
             };
             grpVariant.Controls.AddRange(new Control[] { rbStandard, rbQmdra, lblRoundsToRun, nudRoundsToRun });
 
+            // Add New Driver button
+            btnAddNewDriver = new Button { Text = "Add New Driver", Location = new Point(20, 115), Size = new Size(140, 30) };
+
+            // Filter controls are created dynamically in CreateFilterControls()
+
             // Driver list
-            lblDrivers = new Label { Text = "Drivers (check to include):", Location = new Point(20, 130), AutoSize = true };
+            lblDrivers = new Label { Text = "Drivers (check to include):", Location = new Point(20, 150), AutoSize = true };
             lvDrivers = new ListView
             {
-                Location = new Point(20, 152),
-                Size = new Size(600, 260),
+                Location = new Point(20, 170),
+                Size = new Size(860, 280),
                 View = View.Details,
                 FullRowSelect = true,
                 CheckBoxes = true
             };
-            lvDrivers.Columns.Add("Driver", 155);
-            lvDrivers.Columns.Add("Car", 140);
-            lvDrivers.Columns.Add("Default Dial-In", 115);
+            lvDrivers.Columns.Add("Driver", 200);
+            lvDrivers.Columns.Add("Car", 200);
+            lvDrivers.Columns.Add("Class Type", 150);
+            lvDrivers.Columns.Add("Dial-In", 100);
             lvDrivers.Columns.Add("Override Dial-In", 115);
 
             // Dial-in override editor
-            lblDialInOverride = new Label { Text = "Override Dial-In:", Location = new Point(20, 427), AutoSize = true };
-            txtDialInOverride = new TextBox { Location = new Point(135, 424), Width = 110, Enabled = false };
+            lblDialInOverride = new Label { Text = "Override Dial-In:", Location = new Point(20, 460), AutoSize = true };
+            txtDialInOverride = new TextBox { Location = new Point(145, 457), Width = 110, Enabled = false };
 
             // Buttons
-            btnOk = new Button { Text = "OK", Location = new Point(440, 483), Size = new Size(85, 30) };
-            btnCancel = new Button { Text = "Cancel", Location = new Point(535, 483), Size = new Size(85, 30) };
+            btnOk     = new Button { Text = "OK",     Location = new Point(690, 548), Size = new Size(85, 30) };
+            btnCancel = new Button { Text = "Cancel",  Location = new Point(790, 548), Size = new Size(85, 30) };
 
             Controls.AddRange(new Control[]
             {
                 lblClassName, txtClassName,
                 grpVariant,
+                btnAddNewDriver,
                 lblDrivers, lvDrivers,
                 lblDialInOverride, txtDialInOverride,
                 btnOk, btnCancel

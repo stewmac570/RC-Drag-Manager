@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
@@ -22,8 +23,14 @@ namespace RCDragManagerProd.UI.Forms
     public partial class MultiClassConfigDialog : Form
     {
         private readonly DriverRepository _driverRepo;
-        private readonly List<Driver> _allDrivers;
+        private List<Driver> _allDrivers = new List<Driver>();
         private readonly Dictionary<int, double?> _dialInOverrides = new Dictionary<int, double?>();
+        private readonly HashSet<int> _checkedDriverIds = new HashSet<int>();
+        private bool _suppressRosterEvents = false;
+
+        private ComboBox cmbFilterCar;
+        private ComboBox cmbFilterClass;
+        private ComboBox cmbFilterState;
 
         public string ClassName { get; private set; }
         public string Variant { get; private set; }
@@ -36,9 +43,10 @@ namespace RCDragManagerProd.UI.Forms
             InitializeComponent();
 
             _driverRepo = new DriverRepository(connectionString);
-            _allDrivers = _driverRepo.GetAllDrivers();
 
-            PopulateDriverList(existing);
+            CreateFilterControls();
+            FillFilterCombos();         // populates combos + _allDrivers; triggers FilterChanged → PopulateDriverList(null)
+            PopulateDriverList(existing); // seeds _checkedDriverIds from existing; rebuilds list
 
             if (existing != null)
                 LoadExistingValues(existing);
@@ -46,50 +54,174 @@ namespace RCDragManagerProd.UI.Forms
             rbStandard.CheckedChanged += RbVariant_CheckedChanged;
             rbQmdra.CheckedChanged += RbVariant_CheckedChanged;
             lvDrivers.SelectedIndexChanged += LvDrivers_SelectedIndexChanged;
+            lvDrivers.ItemChecked += LvDrivers_ItemChecked;
             txtDialInOverride.Leave += TxtDialInOverride_Leave;
             btnOk.Click += BtnOk_Click;
             btnCancel.Click += BtnCancel_Click;
+            btnAddNewDriver.Click += BtnAddNewDriver_Click;
 
             UpdateRoundsVisibility();
         }
 
-        // ── Driver list ──────────────────────────────────────────────────────
+        // ── Filter controls ───────────────────────────────────────────────────
+
+        private void CreateFilterControls()
+        {
+            int comboW = 120, labelToBox = 4, groupGap = 12;
+            int y = btnAddNewDriver.Top;
+            int x = btnAddNewDriver.Right + 8;
+
+            int carLblW   = TextRenderer.MeasureText("Car:",   this.Font).Width;
+            int classLblW = TextRenderer.MeasureText("Class:", this.Font).Width;
+            int stateLblW = TextRenderer.MeasureText("State:", this.Font).Width;
+
+            var lblCar = new Label { Text = "Car:", AutoSize = true, Left = x, Top = y + 6 };
+            Controls.Add(lblCar); lblCar.BringToFront();
+            cmbFilterCar = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Left = lblCar.Left + carLblW + labelToBox,
+                Top = y + 2,
+                Width = comboW
+            };
+            Controls.Add(cmbFilterCar); cmbFilterCar.BringToFront();
+
+            int nextX = cmbFilterCar.Left + comboW + groupGap;
+            var lblClass = new Label { Text = "Class:", AutoSize = true, Left = nextX, Top = y + 6 };
+            Controls.Add(lblClass); lblClass.BringToFront();
+            cmbFilterClass = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Left = lblClass.Left + classLblW + labelToBox,
+                Top = y + 2,
+                Width = comboW
+            };
+            Controls.Add(cmbFilterClass); cmbFilterClass.BringToFront();
+
+            nextX = cmbFilterClass.Left + comboW + groupGap;
+            var lblState = new Label { Text = "State:", AutoSize = true, Left = nextX, Top = y + 6 };
+            Controls.Add(lblState); lblState.BringToFront();
+            cmbFilterState = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Left = lblState.Left + stateLblW + labelToBox,
+                Top = y + 2,
+                Width = comboW
+            };
+            Controls.Add(cmbFilterState); cmbFilterState.BringToFront();
+
+            cmbFilterCar.SelectedIndexChanged   += FilterChanged;
+            cmbFilterClass.SelectedIndexChanged += FilterChanged;
+            cmbFilterState.SelectedIndexChanged += FilterChanged;
+
+            // State column (index 5) added programmatically here
+            if (lvDrivers.Columns.Count == 5)
+                lvDrivers.Columns.Add("State", 70, HorizontalAlignment.Left);
+        }
+
+        private void FillFilterCombos()
+        {
+            _allDrivers = _driverRepo.GetAllDrivers() ?? new List<Driver>();
+
+            var carNames = _allDrivers
+                .SelectMany(d => d.Cars ?? new List<Car>())
+                .Select(c => c.CarName)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
+
+            cmbFilterCar.Items.Clear();
+            cmbFilterCar.Items.Add("(All)");
+            foreach (var n in carNames) cmbFilterCar.Items.Add(n);
+            cmbFilterCar.SelectedIndex = 0;
+
+            cmbFilterClass.Items.Clear();
+            cmbFilterClass.Items.AddRange(new object[] { "(All)", "Heads Up", "Bracket", "Dial In" });
+            cmbFilterClass.SelectedIndex = 0;
+
+            var states = _allDrivers
+                .Select(d => d.State)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
+
+            cmbFilterState.Items.Clear();
+            cmbFilterState.Items.Add("(All)");
+            foreach (var s in states) cmbFilterState.Items.Add(s);
+            cmbFilterState.SelectedIndex = 0;
+        }
+
+        private void FilterChanged(object sender, EventArgs e)
+        {
+            PopulateDriverList(null);
+        }
+
+        // ── Driver list ───────────────────────────────────────────────────────
 
         private void PopulateDriverList(MultiClassConfigDialogValues existing)
         {
-            lvDrivers.Items.Clear();
-
-            HashSet<int> enteredIds = null;
-            Dictionary<int, double?> existingDialIns = null;
-            if (existing?.DriverEntries != null)
+            if (existing != null)
             {
-                enteredIds = new HashSet<int>(existing.DriverEntries.Select(e => e.DriverID));
-                existingDialIns = existing.DriverEntries
-                    .Where(e => e.DialIn.HasValue)
-                    .ToDictionary(e => e.DriverID, e => e.DialIn);
+                _checkedDriverIds.Clear();
+                foreach (var entry in existing.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                {
+                    _checkedDriverIds.Add(entry.DriverID);
+                    if (entry.DialIn.HasValue)
+                        _dialInOverrides[entry.DriverID] = entry.DialIn;
+                }
             }
 
-            foreach (var driver in _allDrivers)
+            string carFilter   = cmbFilterCar?.SelectedItem?.ToString()   ?? "(All)";
+            string classFilter = cmbFilterClass?.SelectedItem?.ToString() ?? "(All)";
+            string stateFilter = cmbFilterState?.SelectedItem?.ToString() ?? "(All)";
+
+            _suppressRosterEvents = true;
+            lvDrivers.BeginUpdate();
+            try
             {
-                var car = driver.Cars.FirstOrDefault();
-                double? defaultDialIn = car?.DefaultDialIn;
-
-                var item = new ListViewItem(driver.Name);
-                item.SubItems.Add(car?.CarName ?? "");
-                item.SubItems.Add(defaultDialIn.HasValue ? defaultDialIn.Value.ToString("F3") : "");
-                item.SubItems.Add(""); // override column — filled below if editing
-                item.Tag = driver.Id;
-                lvDrivers.Items.Add(item);
-
-                if (enteredIds != null && enteredIds.Contains(driver.Id))
+                lvDrivers.Items.Clear();
+                foreach (var driver in _allDrivers)
                 {
-                    item.Checked = true;
-                    if (existingDialIns != null && existingDialIns.TryGetValue(driver.Id, out var dialIn))
-                    {
-                        _dialInOverrides[driver.Id] = dialIn;
-                        item.SubItems[3].Text = dialIn.Value.ToString("F3");
-                    }
+                    if (stateFilter != "(All)" &&
+                        !string.Equals(driver.State ?? "", stateFilter, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    var car = driver.Cars?.FirstOrDefault();
+
+                    if (classFilter != "(All)" &&
+                        !string.Equals(car?.ClassType ?? "", classFilter, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (carFilter != "(All)" &&
+                        !string.Equals(car?.CarName ?? "", carFilter, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    double? defaultDialIn = car?.DefaultDialIn;
+
+                    var item = new ListViewItem(driver.Name);
+                    item.SubItems.Add(car?.CarName ?? "");
+                    item.SubItems.Add(car?.ClassType ?? "");
+                    item.SubItems.Add(defaultDialIn.HasValue ? defaultDialIn.Value.ToString("F3") : "");
+
+                    // SubItems[4] = Override Dial-In
+                    string overrideText = _dialInOverrides.TryGetValue(driver.Id, out var ov) && ov.HasValue
+                        ? ov.Value.ToString("F3") : "";
+                    item.SubItems.Add(overrideText);
+
+                    // SubItems[5] = State
+                    item.SubItems.Add(driver.State ?? "");
+
+                    item.Tag = driver.Id;
+                    item.Checked = _checkedDriverIds.Contains(driver.Id);
+                    lvDrivers.Items.Add(item);
                 }
+            }
+            finally
+            {
+                lvDrivers.EndUpdate();
+                _suppressRosterEvents = false;
             }
         }
 
@@ -106,6 +238,45 @@ namespace RCDragManagerProd.UI.Forms
             {
                 rbStandard.Checked = true;
             }
+        }
+
+        // ── ItemChecked — persistent source of truth ──────────────────────────
+
+        private void LvDrivers_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (_suppressRosterEvents) return;
+            if (e.Item?.Tag is int driverId)
+            {
+                if (e.Item.Checked) _checkedDriverIds.Add(driverId);
+                else _checkedDriverIds.Remove(driverId);
+            }
+        }
+
+        // ── Add New Driver ────────────────────────────────────────────────────
+
+        private void BtnAddNewDriver_Click(object sender, EventArgs e)
+        {
+            using (var addDialog = new AddDriverAndCarDialog())
+            {
+                if (addDialog.ShowDialog() != DialogResult.OK) return;
+
+                var newDriver = new Driver { Name = addDialog.DriverName, Cars = new List<Car>() };
+                _driverRepo.AddDriver(newDriver);
+
+                var insertedDriver = _driverRepo.GetAllDrivers()
+                    .First(d => d.Name == newDriver.Name);
+
+                var newCar = new Car
+                {
+                    CarName = addDialog.CarName,
+                    ClassType = addDialog.ClassType,
+                    DefaultDialIn = addDialog.DialIn
+                };
+                _driverRepo.AddCar(insertedDriver.Id, newCar);
+            }
+
+            FillFilterCombos();
+            PopulateDriverList(null);
         }
 
         // ── Variant radio buttons ─────────────────────────────────────────────
@@ -151,12 +322,12 @@ namespace RCDragManagerProd.UI.Forms
             if (string.IsNullOrEmpty(text))
             {
                 _dialInOverrides.Remove(driverId);
-                item.SubItems[3].Text = "";
+                item.SubItems[4].Text = "";
             }
             else if (double.TryParse(text, out double val))
             {
                 _dialInOverrides[driverId] = val;
-                item.SubItems[3].Text = val.ToString("F3");
+                item.SubItems[4].Text = val.ToString("F3");
             }
         }
 
@@ -177,23 +348,24 @@ namespace RCDragManagerProd.UI.Forms
             RoundsToRun = rbQmdra.Checked ? (int?)Convert.ToInt32(nudRoundsToRun.Value) : null;
 
             BuiltDriverEntries = new List<RaceSessionDriverEntry>();
-            foreach (ListViewItem item in lvDrivers.CheckedItems)
+            foreach (var driverId in _checkedDriverIds)
             {
-                int driverId = (int)item.Tag;
-                var driver = _allDrivers.First(d => d.Id == driverId);
-                var car = driver.Cars.FirstOrDefault();
+                var driver = _allDrivers.FirstOrDefault(d => d.Id == driverId);
+                if (driver == null) continue;
+
+                var car = driver.Cars?.FirstOrDefault();
                 double? dialIn = _dialInOverrides.TryGetValue(driverId, out var overrideVal)
                     ? overrideVal
                     : car?.DefaultDialIn;
 
                 BuiltDriverEntries.Add(new RaceSessionDriverEntry
                 {
-                    DriverID = driver.Id,
+                    DriverID   = driver.Id,
                     DriverName = driver.Name,
-                    CarID = car?.CarID ?? 0,
-                    CarName = car?.CarName ?? "",
-                    ClassType = ClassName,
-                    DialIn = dialIn
+                    CarID      = car?.CarID ?? 0,
+                    CarName    = car?.CarName ?? "",
+                    ClassType  = ClassName,
+                    DialIn     = dialIn
                 });
             }
 
