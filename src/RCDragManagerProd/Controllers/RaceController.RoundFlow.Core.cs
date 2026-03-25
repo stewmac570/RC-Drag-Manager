@@ -260,13 +260,21 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
+            // Auto-resolve any BYE matches in the current filter window before looking
+            // for the next real match.  This keeps the "all resolved" checks in
+            // PushAdvanceState consistent — BYE matches are never left unresolved.
+            AutoResolveByes();
+
             // In RR active-round mode, only the active round can supply the next match.
             // In all other modes, use _revealedRounds as before.
+            // BYE matches are excluded — they should be auto-resolved, not surfaced to the director.
             var next = EngineGetMatches(_engine)
                               .Where(m => (_activeRound != null
                                                ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
                                                : _revealedRounds.Contains(m.RoundLabel))
-                                          && !m.HasResult)
+                                          && !m.HasResult
+                                          && !ByePolicy.IsBye(m.Driver1)
+                                          && !ByePolicy.IsBye(m.Driver2))
                               .OrderBy(m => m.MatchId)
                               .FirstOrDefault();
 
@@ -547,6 +555,53 @@ namespace RCDragManagerProd.Controllers
                     TournamentCompleted?.Invoke(summary);
                 }
             }
+        }
+
+        // ----------------  BYE AUTO-RESOLUTION  ----------------
+        /// <summary>
+        /// Silently resolves all unresolved BYE matches in the currently active filter
+        /// window (active round in RR mode; revealed rounds otherwise).  Called at the
+        /// top of PushNextMatch so that PushAdvanceState's "all-resolved" checks always
+        /// see BYE matches as resolved.  BYE matches are never surfaced to the director.
+        /// </summary>
+        private void AutoResolveByes()
+        {
+            if (_engine == null) return;
+
+            bool anyResolved = false;
+
+            var byeMatches = EngineGetMatches(_engine)
+                .Where(m => !m.HasResult
+                            && (ByePolicy.IsBye(m.Driver1) || ByePolicy.IsBye(m.Driver2))
+                            && (_activeRound != null
+                                ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
+                                : _revealedRounds.Contains(m.RoundLabel)))
+                .ToList();
+
+            foreach (var m in byeMatches)
+            {
+                var realWinner = ByePolicy.IsBye(m.Driver1) ? m.Driver2 : m.Driver1;
+                if (realWinner == null || ByePolicy.IsBye(realWinner))
+                {
+                    Logger.Log($"[BYE] Skipping double-BYE match M{m.MatchId} ({m.RoundLabel})");
+                    continue;
+                }
+
+                EngineSetWinner(_engine, m.MatchId, realWinner, m.RoundLabel);
+                _matchResult.SetWinner(m.MatchId, realWinner, null);
+                _winners.Add(new WinnerRow
+                {
+                    MatchId    = m.MatchId,
+                    RoundLabel = m.RoundLabel,
+                    Winner     = realWinner.Name,
+                    Loser      = "BYE"
+                });
+                Logger.Log($"[BYE] Auto-resolved M{m.MatchId} ({m.RoundLabel}): {realWinner.Name} wins by BYE");
+                anyResolved = true;
+            }
+
+            if (anyResolved)
+                WinnersUpdated?.Invoke(_winners);
         }
 
         // ----------------  CORE HELPERS (SHARED)  ----------------

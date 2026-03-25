@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.Tests.Helpers;
 
 namespace RCDragManagerProd.Tests;
@@ -189,13 +190,63 @@ public class RaceControllerRRStandardFlowTests
             "RaceSummary must have a non-null Winner");
         Assert.IsFalse(string.IsNullOrWhiteSpace(completion.Winner.Name),
             "Winner must have a non-empty name");
+
+        // ── Post-event: bracket display ordering assertion ───────────────────
+        // After the tournament, BuildCurrentBracketRows must return headers in
+        // chronological race order: RR rounds, then LB rounds, then Finals rounds.
+        // This guards against the CompareKey bug that placed LB (key 400+) after
+        // Finals (SF=290, F=299).
+        var finalBracket = controller.BuildCurrentBracketRows();
+        var finalHeaders = finalBracket
+            .Where(r => r.IsHeader)
+            .Select(r => r.RoundLabel ?? "")
+            .Distinct()
+            .ToList();
+
+        // The last RR header must come before the first LB header.
+        var rrHeaders  = finalHeaders.Where(h => h.StartsWith("RR", StringComparison.OrdinalIgnoreCase)).ToList();
+        var lbHeaders  = finalHeaders.Where(h => h.StartsWith("LB", StringComparison.OrdinalIgnoreCase)).ToList();
+        var sfHeaders  = finalHeaders.Where(h => string.Equals(h, "SF", StringComparison.OrdinalIgnoreCase)).ToList();
+        var fHeaders   = finalHeaders.Where(h => string.Equals(h, "F",  StringComparison.OrdinalIgnoreCase)).ToList();
+
+        Assert.IsTrue(rrHeaders.Count >= 1, "Bracket must contain at least one RR header");
+        Assert.IsTrue(lbHeaders.Count >= 1, "Bracket must contain at least one LB header");
+        Assert.IsTrue(sfHeaders.Count + fHeaders.Count >= 1, "Bracket must contain at least one Finals header (SF or F)");
+
+        int lastRrIndex   = finalHeaders.Select((h, i) => (h, i)).Last(x => x.h.StartsWith("RR", StringComparison.OrdinalIgnoreCase)).i;
+        int firstLbIndex  = finalHeaders.Select((h, i) => (h, i)).First(x => x.h.StartsWith("LB", StringComparison.OrdinalIgnoreCase)).i;
+        int firstSFOrFIdx = finalHeaders.Select((h, i) => (h, i))
+            .First(x => string.Equals(x.h, "SF", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(x.h, "F",  StringComparison.OrdinalIgnoreCase)).i;
+
+        Assert.IsTrue(lastRrIndex < firstLbIndex,
+            $"All RR headers must precede all LB headers in bracket. Headers: [{string.Join(", ", finalHeaders)}]");
+        Assert.IsTrue(firstLbIndex < firstSFOrFIdx,
+            $"All LB headers must precede Finals headers (SF/F) in bracket. Headers: [{string.Join(", ", finalHeaders)}]");
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
 
     private static void ResolveVisibleMatches(RaceController controller)
     {
-        foreach (var match in controller.PeekUpcomingMatches(20).ToList())
+        var peek = controller.PeekUpcomingMatches(20).ToList();
+        AssertNoBye(peek);
+        foreach (var match in peek)
             controller.SubmitWinner(match.MatchId, firstOption: true);
+    }
+
+    /// <summary>
+    /// Asserts that no match in the list has a BYE driver.
+    /// BYE matches must be filtered out of PeekUpcomingMatches before reaching the director.
+    /// </summary>
+    private static void AssertNoBye(IReadOnlyList<EngineMatch> matches)
+    {
+        foreach (var m in matches)
+        {
+            Assert.IsFalse(
+                ByePolicy.IsBye(m.Driver1) || ByePolicy.IsBye(m.Driver2),
+                $"PeekUpcomingMatches returned a BYE match: M{m.MatchId} " +
+                $"({m.Driver1?.Name ?? "null"} vs {m.Driver2?.Name ?? "null"})");
+        }
     }
 }

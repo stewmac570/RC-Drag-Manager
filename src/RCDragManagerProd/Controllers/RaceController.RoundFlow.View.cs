@@ -105,23 +105,35 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log("[ROWS] AppendFrom(" + tag + ") ? added " + (rows.Count - before) + " items. Total=" + rows.Count);
             }
 
-            // 1) Round Robin � show ALL rounds if we have a snapshot; otherwise only revealed
+            // ── Phase A: Round Robin ─────────────────────────────────────────────
+            // Show RR snapshot if captured (post-RR transition), else show live RR engine.
+            // The live path uses _revealedRounds (insertion order = chronological race order)
+            // rather than EngineGetRoundOrder so display order matches the race schedule.
             if (_rrMatchesSnapshot != null && _rrRoundOrderSnapshot != null)
             {
                 AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
             }
             else if (_engine != null)
             {
-                AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
+                // Use _revealedRounds for ordering — insertion order is the correct display order.
+                AppendFrom(EngineGetMatches(_engine), _revealedRounds, "Main-live", filterByRevealed: true);
             }
 
-            // 3) Losers Bracket � during Finals show all LB rounds; otherwise only revealed
-            if (_losersEngine != null && !ReferenceEquals(_engine, _losersEngine))
+            // ── Phase B: Losers Bracket ──────────────────────────────────────────
+            // Always rendered AFTER RR and BEFORE Finals so display order is chronological.
+            // During Finals show all LB rounds (unfiltered); otherwise only revealed rounds.
+            if (_losersEngine != null)
             {
-                bool filterLb;
-                filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
-
+                bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
                 AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
+            }
+
+            // ── Phase C: Finals engine ───────────────────────────────────────────
+            // Once we have an RR snapshot AND the current engine is a separate Finals
+            // engine (not the LB adapter), show those matches after LB.
+            if (_rrMatchesSnapshot != null && _engine != null && !ReferenceEquals(_engine, _losersEngine))
+            {
+                AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Finals-live", filterByRevealed: true);
             }
 
             int displayNo = 1;
@@ -160,11 +172,14 @@ namespace RCDragManagerProd.Controllers
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
                 // In RR active-round mode, show upcoming matches for the active round only.
+                // BYE matches are excluded — they should be auto-resolved, not shown in On Deck.
                 var list = EngineGetMatches(_engine)
                                   .Where(m => (_activeRound != null
                                                    ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
                                                    : _revealedRounds.Contains(m.RoundLabel))
-                                              && !m.HasResult)
+                                              && !m.HasResult
+                                              && !ByePolicy.IsBye(m.Driver1)
+                                              && !ByePolicy.IsBye(m.Driver2))
                                   .OrderBy(m => m.MatchId)
                                   .Take(count)
                                   .ToList();

@@ -19,7 +19,9 @@ namespace RCDragManagerProd.Controllers
         private bool _inLosersPhase;
 
         private List<Driver> _drivers;
-        private readonly HashSet<string> _revealedRounds = new();
+        // List (not HashSet) so insertion order is preserved for display ordering.
+        // Rounds are added in chronological race order: RR → LB → Finals.
+        private readonly List<string> _revealedRounds = new();
         private readonly List<WinnerRow> _winners = new();
 
         public RaceSession Session => _session;
