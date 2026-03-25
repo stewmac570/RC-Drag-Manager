@@ -194,6 +194,35 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
+            if (_activeRound != null)
+            {
+                // RR pre-reveal mode: advance the active round instead of revealing a new one.
+                // All rounds are already in _revealedRounds (full schedule visible from day 1).
+                var orderedRounds = EngineGetRoundOrder(_engine).ToList();
+                int idx = orderedRounds.IndexOf(_activeRound);
+                if (idx >= 0 && idx + 1 < orderedRounds.Count)
+                {
+                    _activeRound = orderedRounds[idx + 1];
+                    Logger.Log($"[RR] AdvanceRound: _activeRound advanced to '{_activeRound}'");
+                }
+                else
+                {
+                    _activeRound = null;
+                    Logger.Log("[RR] AdvanceRound: past final RR round — _activeRound=null");
+                }
+
+                var rrRows = BuildCurrentBracketRows();
+                BracketRedrawn?.Invoke(rrRows);
+                Logger.Log($"[ROUND] Redrawn after RR active-round advance (active='{_activeRound ?? "null"}') with {rrRows.Count} rows");
+
+                PushNextMatch();
+                PushAdvanceState();
+                QueueLiveUpdate("AdvanceRound");
+                Logger.Log("[FORM1] AdvanceRound() completed (RR active-round path)");
+                return;
+            }
+
+            // Non-RR path: reveal the next round label.
             var next = EngineGetRoundOrder(_engine).FirstOrDefault(r => !_revealedRounds.Contains(r));
             if (string.IsNullOrEmpty(next))
             {
