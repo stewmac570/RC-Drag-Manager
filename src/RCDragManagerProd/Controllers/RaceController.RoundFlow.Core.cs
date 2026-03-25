@@ -303,15 +303,32 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
-            var visibleMatches = EngineGetMatches(_engine)
-                                        .Where(m => _revealedRounds.Contains(m.RoundLabel))
-                                        .ToList();
-
-            bool allVisibleResolved = visibleMatches.All(m => m.HasResult);
-            bool moreRoundsExist = EngineGetRoundOrder(_engine).Any(r => !_revealedRounds.Contains(r));
-            bool canAdvance = allVisibleResolved && moreRoundsExist;
-
-            Logger.Log($"[DEBUG] PushAdvanceState: visible={visibleMatches.Count}, resolved={visibleMatches.Count(m => m.HasResult)}, moreRoundsExist={moreRoundsExist}, canAdvance={canAdvance}");
+            bool canAdvance;
+            if (_activeRound != null)
+            {
+                // RR pre-reveal mode: "Generate Next Round" enables when the active round is
+                // fully resolved AND there is a subsequent round to advance to.
+                var activeMatches = EngineGetMatches(_engine)
+                    .Where(m => string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                bool allActiveResolved = activeMatches.Count > 0 && activeMatches.All(m => m.HasResult);
+                var roundOrderList = EngineGetRoundOrder(_engine).ToList();
+                int activeIdx = roundOrderList.IndexOf(_activeRound);
+                bool nextRoundExists = activeIdx >= 0 && activeIdx + 1 < roundOrderList.Count;
+                canAdvance = allActiveResolved && nextRoundExists;
+                Logger.Log($"[DEBUG] PushAdvanceState (RR active-round): activeRound='{_activeRound}', activeMatches={activeMatches.Count}, resolved={activeMatches.Count(m => m.HasResult)}, nextRoundExists={nextRoundExists}, canAdvance={canAdvance}");
+            }
+            else
+            {
+                // Non-RR path (or RR after last round is done): original revealed-round logic.
+                var visibleMatches = EngineGetMatches(_engine)
+                    .Where(m => _revealedRounds.Contains(m.RoundLabel))
+                    .ToList();
+                bool allVisibleResolved = visibleMatches.All(m => m.HasResult);
+                bool moreRoundsExist = EngineGetRoundOrder(_engine).Any(r => !_revealedRounds.Contains(r));
+                canAdvance = allVisibleResolved && moreRoundsExist;
+                Logger.Log($"[DEBUG] PushAdvanceState: visible={visibleMatches.Count}, resolved={visibleMatches.Count(m => m.HasResult)}, moreRoundsExist={moreRoundsExist}, canAdvance={canAdvance}");
+            }
 
             CanAdvanceChanged?.Invoke(canAdvance);
 
