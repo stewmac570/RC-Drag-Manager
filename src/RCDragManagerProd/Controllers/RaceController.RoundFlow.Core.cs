@@ -260,8 +260,13 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
+            // In RR active-round mode, only the active round can supply the next match.
+            // In all other modes, use _revealedRounds as before.
             var next = EngineGetMatches(_engine)
-                              .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
+                              .Where(m => (_activeRound != null
+                                               ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
+                                               : _revealedRounds.Contains(m.RoundLabel))
+                                          && !m.HasResult)
                               .OrderBy(m => m.MatchId)
                               .FirstOrDefault();
 
