@@ -114,26 +114,21 @@ public class RaceControllerFlowTests
     [TestMethod]
     public void ProLadderFiveDriverFlow_ResolvesByeMatches_AndAdvancesRounds()
     {
-        // BEHAVIOR CHANGE (fix/rr-display-ordering-and-bye-leak):
-        // AutoResolveByes() is now called inside PushNextMatch() so BYE matches are
-        // silently resolved as soon as a round is entered.  PeekUpcomingMatches() no
-        // longer returns BYE matches — they have already been resolved.
-        //
         // For a 5-driver Pro Ladder:
-        //   R1:  3 engine matches (2 real + 1 BYE).  BYE auto-resolved → peek returns 2.
-        //   SF:  2 engine matches (1 real + 1 BYE).  BYE auto-resolved → peek returns 1.
-        //   F:   1 engine match  (2 real drivers).   peek returns 1.
+        //   R1:  3 engine matches (2 real + 1 BYE).  BYE appears in On Deck; director runs it.
+        //   SF:  2 engine matches (1 real + 1 BYE).  BYE appears in On Deck; director runs it.
+        //   F:   1 engine match  (2 real drivers).
         var session = CreateSession("Pro Ladder");
         var controller = new RaceController(session);
         controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderByePack());
 
         Assert.AreEqual("R1", controller.GetActiveRoundLabel());
 
-        // BYE match is auto-resolved; only real matches returned.
+        // BYE match surfaces normally — director sees it and confirms it.
         var r1Matches = controller.PeekUpcomingMatches(10).ToList();
-        Assert.AreEqual(2, r1Matches.Count, "R1: only 2 non-BYE matches should be visible after BYE auto-resolution");
-        Assert.AreEqual(0, r1Matches.Count(m => m.Driver1 == null || m.Driver2 == null),
-            "R1: PeekUpcomingMatches must not return BYE matches");
+        Assert.AreEqual(3, r1Matches.Count, "R1: all 3 matches (2 real + 1 BYE) must be visible");
+        Assert.AreEqual(1, r1Matches.Count(m => m.Driver1 == null || m.Driver2 == null),
+            "R1: exactly 1 BYE match must appear in PeekUpcomingMatches");
 
         var advanceSignals = new List<bool>();
         controller.CanAdvanceChanged += canAdvance => advanceSignals.Add(canAdvance);
@@ -144,17 +139,17 @@ public class RaceControllerFlowTests
             Assert.IsNotNull(controller.GetWinner(match.MatchId));
         }
 
-        // All 3 R1 matches are resolved (2 real + 1 auto-BYE) → advance enabled.
+        // All 3 R1 matches resolved (2 real + 1 BYE) → advance enabled.
         Assert.AreEqual(true, advanceSignals.LastOrDefault());
 
         controller.AdvanceRound();
         Assert.AreEqual("SF", controller.GetActiveRoundLabel());
 
-        // BYE SF match auto-resolved; only 1 real SF match visible.
+        // SF has 2 matches (1 real + 1 BYE); both surface for the director.
         var sfMatches = controller.PeekUpcomingMatches(10).ToList();
-        Assert.AreEqual(1, sfMatches.Count, "SF: only 1 non-BYE match should be visible after BYE auto-resolution");
-        Assert.AreEqual(0, sfMatches.Count(m => m.Driver1 == null || m.Driver2 == null),
-            "SF: PeekUpcomingMatches must not return BYE matches");
+        Assert.AreEqual(2, sfMatches.Count, "SF: all 2 matches (1 real + 1 BYE) must be visible");
+        Assert.AreEqual(1, sfMatches.Count(m => m.Driver1 == null || m.Driver2 == null),
+            "SF: exactly 1 BYE match must appear in PeekUpcomingMatches");
 
         foreach (var match in sfMatches)
         {
