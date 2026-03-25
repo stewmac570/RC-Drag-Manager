@@ -23,6 +23,7 @@ namespace RCDragManagerProd.Controllers
             _tournamentClosed = false;
 
             _revealedRounds.Clear();
+            _activeRound = null;
             _winners.Clear();
 
             _matchResult.Clear();
