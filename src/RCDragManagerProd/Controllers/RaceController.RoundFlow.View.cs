@@ -172,14 +172,11 @@ namespace RCDragManagerProd.Controllers
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
                 // In RR active-round mode, show upcoming matches for the active round only.
-                // BYE matches are excluded — they should be auto-resolved, not shown in On Deck.
                 var list = EngineGetMatches(_engine)
                                   .Where(m => (_activeRound != null
                                                    ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
                                                    : _revealedRounds.Contains(m.RoundLabel))
-                                              && !m.HasResult
-                                              && !ByePolicy.IsBye(m.Driver1)
-                                              && !ByePolicy.IsBye(m.Driver2))
+                                              && !m.HasResult)
                                   .OrderBy(m => m.MatchId)
                                   .Take(count)
                                   .ToList();

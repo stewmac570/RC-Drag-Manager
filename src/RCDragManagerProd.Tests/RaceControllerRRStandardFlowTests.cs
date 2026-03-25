@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
-using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.Tests.Helpers;
 
 namespace RCDragManagerProd.Tests;
@@ -230,23 +229,7 @@ public class RaceControllerRRStandardFlowTests
     private static void ResolveVisibleMatches(RaceController controller)
     {
         var peek = controller.PeekUpcomingMatches(20).ToList();
-        AssertNoBye(peek);
         foreach (var match in peek)
             controller.SubmitWinner(match.MatchId, firstOption: true);
-    }
-
-    /// <summary>
-    /// Asserts that no match in the list has a BYE driver.
-    /// BYE matches must be filtered out of PeekUpcomingMatches before reaching the director.
-    /// </summary>
-    private static void AssertNoBye(IReadOnlyList<EngineMatch> matches)
-    {
-        foreach (var m in matches)
-        {
-            Assert.IsFalse(
-                ByePolicy.IsBye(m.Driver1) || ByePolicy.IsBye(m.Driver2),
-                $"PeekUpcomingMatches returned a BYE match: M{m.MatchId} " +
-                $"({m.Driver1?.Name ?? "null"} vs {m.Driver2?.Name ?? "null"})");
-        }
     }
 }
