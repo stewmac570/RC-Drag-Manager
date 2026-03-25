@@ -27,6 +27,14 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
+            // Gate: in RR active-round mode, only accept results for the active round.
+            if (_activeRound != null &&
+                !string.Equals(match.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Log($"[WINNER] Reject — M{matchId} round '{match.RoundLabel}' is not the active round '{_activeRound}'.");
+                return;
+            }
+
             if (EngineHasWinner(_engine, matchId, match.RoundLabel))
             {
                 Logger.Log($"[WINNER] Reject — match {matchId} already has a winner.");
