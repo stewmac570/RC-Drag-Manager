@@ -271,11 +271,12 @@ namespace RCDragManagerProd.UI.Forms
                     return;
                 }
 
-                var ordered = rows
-                    .OrderBy(w => RoundLabels.CompareKey(w.RoundLabel ?? string.Empty))
-                    .ThenBy(w => w.MatchId)
-                    .ToList();
-                Logger.Log("[RoundOrdering] Applied canonical ordering");
+                // Preserve insertion order — _winners is append-only and accumulates
+                // in chronological race order (RR → LB → Finals).  Sorting by CompareKey
+                // would place LB rounds (key 400+) after Finals (SF=290, F=299), which is
+                // wrong for the Standard RR flow.
+                var ordered = rows.ToList();
+                Logger.Log("[RoundOrdering] Using insertion order (chronological race order)");
 
                 string currentHeader = null;
                 int displayNo = 1;
