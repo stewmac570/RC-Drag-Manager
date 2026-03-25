@@ -33,6 +33,11 @@ namespace RCDragManagerProd.Controllers
 
         private Driver _buybackChampionOverride;
 
+        // Active round for RR: gates winner input to only the current pace-gated round.
+        // null = non-RR mode (or pre-bracket). Set to first label on RR bracket generation,
+        // advanced by AdvanceRound(), cleared when transitioning to Finals.
+        private string _activeRound = null;
+
         // Per-round RR logging guard
         private readonly HashSet<string> _rrLoggedRounds = new HashSet<string>();
 

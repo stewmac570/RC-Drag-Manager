@@ -60,7 +60,7 @@ namespace RCDragManagerProd.Controllers
             var rows = new List<PairingRow>();
 
             Logger.Log(
-                "[ROWS] BUILD v2 — snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
+                "[ROWS] BUILD v2 ï¿½ snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
                 "snapshotRounds=" + (_rrRoundOrderSnapshot?.Count.ToString() ?? "null") + ", " +
                 "engine=" + (_engine?.GetType().Name ?? "null") + ", losersEngine=" + (_losersEngine?.GetType().Name ?? "null") + ", " +
                 "revealed=[" + string.Join(",", _revealedRounds) + "]");
@@ -105,7 +105,7 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log("[ROWS] AppendFrom(" + tag + ") ? added " + (rows.Count - before) + " items. Total=" + rows.Count);
             }
 
-            // 1) Round Robin — show ALL rounds if we have a snapshot; otherwise only revealed
+            // 1) Round Robin ï¿½ show ALL rounds if we have a snapshot; otherwise only revealed
             if (_rrMatchesSnapshot != null && _rrRoundOrderSnapshot != null)
             {
                 AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
@@ -115,7 +115,7 @@ namespace RCDragManagerProd.Controllers
                 AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Main-live", filterByRevealed: true);
             }
 
-            // 3) Losers Bracket — during Finals show all LB rounds; otherwise only revealed
+            // 3) Losers Bracket ï¿½ during Finals show all LB rounds; otherwise only revealed
             if (_losersEngine != null && !ReferenceEquals(_engine, _losersEngine))
             {
                 bool filterLb;
@@ -159,8 +159,12 @@ namespace RCDragManagerProd.Controllers
             {
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
+                // In RR active-round mode, show upcoming matches for the active round only.
                 var list = EngineGetMatches(_engine)
-                                  .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
+                                  .Where(m => (_activeRound != null
+                                                   ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
+                                                   : _revealedRounds.Contains(m.RoundLabel))
+                                              && !m.HasResult)
                                   .OrderBy(m => m.MatchId)
                                   .Take(count)
                                   .ToList();
@@ -198,28 +202,32 @@ namespace RCDragManagerProd.Controllers
             onDeck = BuildMatchDisplayText(list[1]);
             onDeck = onDeck.Substring(onDeck.IndexOf(':') + 1).Trim();
 
-            if (list.Count == 2) return "On Deck — " + onDeck;
+            if (list.Count == 2) return "On Deck ï¿½ " + onDeck;
 
             string inTheHole;
             inTheHole = BuildMatchDisplayText(list[2]);
             inTheHole = inTheHole.Substring(inTheHole.IndexOf(':') + 1).Trim();
 
-            return "On Deck — " + onDeck + " / In The Hole — " + inTheHole;
+            return "On Deck ï¿½ " + onDeck + " / In The Hole ï¿½ " + inTheHole;
         }
 
         public string GetActiveRoundLabel()
         {
             EnsureReady();
 
-            string active;
-            active = null;
+            // In RR mode, _activeRound tracks the pace-gated round explicitly.
+            if (_activeRound != null)
+            {
+                Logger.Log("[CTRL][EDIT] Active round (explicit RR) = '" + _activeRound + "'");
+                return _activeRound;
+            }
 
+            // Non-RR fallback: last revealed round (rounds revealed one at a time).
+            string active = null;
             foreach (var r in EngineGetRoundOrder(_engine))
             {
                 if (_revealedRounds.Contains(r))
-                {
                     active = r;   // last revealed
-                }
             }
 
             Logger.Log("[CTRL][EDIT] Active round = '" + (active ?? "null") + "'");

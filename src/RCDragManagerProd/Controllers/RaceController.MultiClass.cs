@@ -7,15 +7,20 @@ namespace RCDragManagerProd.Controllers
     {
         /// <summary>
         /// Returns true if there are unresolved non-BYE matches in the currently
-        /// revealed round. Used by MultiClassRaceForm to enforce tab switching.
+        /// active round. In RR mode (all rounds pre-revealed) uses _activeRound so
+        /// only the pace-gated round is checked, not future rounds.
+        /// Used by MultiClassRaceForm to enforce tab switching.
         /// </summary>
         public bool HasPendingMatchesInCurrentRound()
         {
-            var visibleMatches = EngineGetMatches(_engine)
-                .Where(m => _revealedRounds.Contains(m.RoundLabel))
+            // Use _activeRound when set (RR pre-reveal mode); fall back to _revealedRounds.
+            var currentMatches = EngineGetMatches(_engine)
+                .Where(m => _activeRound != null
+                                ? string.Equals(m.RoundLabel, _activeRound, System.StringComparison.OrdinalIgnoreCase)
+                                : _revealedRounds.Contains(m.RoundLabel))
                 .ToList();
 
-            return visibleMatches.Any(m =>
+            return currentMatches.Any(m =>
                 !ByePolicy.IsBye(m.Driver1) &&
                 !ByePolicy.IsBye(m.Driver2) &&
                 !_matchResult.HasResult(m.MatchId));

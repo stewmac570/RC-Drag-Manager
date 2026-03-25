@@ -52,6 +52,7 @@ namespace RCDragManagerProd.Controllers
 
             _session.RaceType = "Finals";
             _inLosersPhase = false;
+            _activeRound = null;   // RR active-round gate no longer applies in Finals
             Logger.Log("[FINALS] Session race type set to 'Finals' (LB phase cleared).");
 
             var finalists = new List<Driver>(4);
@@ -133,6 +134,7 @@ namespace RCDragManagerProd.Controllers
             _inLosersPhase = false;
             _session.RaceType = "Finals";
             _finalsPending = false;
+            _activeRound = null;   // RR active-round gate cleared on Finals injection
             CanStartFinalsChanged?.Invoke(false);
             Logger.Log("[FINALS][NOBUYBACK] Session race type set to 'Finals'. LB phase cleared. Finals gate lowered.");
 
@@ -187,6 +189,7 @@ namespace RCDragManagerProd.Controllers
             _session.RaceType = "Finals";
             _inLosersPhase = false;
             _finalsPending = false;
+            _activeRound = null;   // RR active-round gate cleared on Finals injection
 
             // Reset state
             _revealedRounds.Clear();

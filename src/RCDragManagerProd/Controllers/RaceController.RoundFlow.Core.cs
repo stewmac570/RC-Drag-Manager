@@ -149,7 +149,20 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            _revealedRounds.Add(roundOrder[0]);
+            if (string.Equals(rt, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            {
+                // Pre-reveal all RR rounds upfront so the full schedule is visible immediately.
+                // Winner input is gated by _activeRound, not by _revealedRounds.
+                foreach (var r in roundOrder)
+                    _revealedRounds.Add(r);
+                _activeRound = roundOrder[0];
+                Logger.Log($"[RR] Pre-revealed {roundOrder.Count} rounds. _activeRound='{_activeRound}'. Rounds=[{string.Join(",", roundOrder)}]");
+            }
+            else
+            {
+                _revealedRounds.Add(roundOrder[0]);
+                // _activeRound stays null for non-RR modes
+            }
 
             _winners.Clear();
             PushFullRefresh();
@@ -181,6 +194,35 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
+            if (_activeRound != null)
+            {
+                // RR pre-reveal mode: advance the active round instead of revealing a new one.
+                // All rounds are already in _revealedRounds (full schedule visible from day 1).
+                var orderedRounds = EngineGetRoundOrder(_engine).ToList();
+                int idx = orderedRounds.IndexOf(_activeRound);
+                if (idx >= 0 && idx + 1 < orderedRounds.Count)
+                {
+                    _activeRound = orderedRounds[idx + 1];
+                    Logger.Log($"[RR] AdvanceRound: _activeRound advanced to '{_activeRound}'");
+                }
+                else
+                {
+                    _activeRound = null;
+                    Logger.Log("[RR] AdvanceRound: past final RR round — _activeRound=null");
+                }
+
+                var rrRows = BuildCurrentBracketRows();
+                BracketRedrawn?.Invoke(rrRows);
+                Logger.Log($"[ROUND] Redrawn after RR active-round advance (active='{_activeRound ?? "null"}') with {rrRows.Count} rows");
+
+                PushNextMatch();
+                PushAdvanceState();
+                QueueLiveUpdate("AdvanceRound");
+                Logger.Log("[FORM1] AdvanceRound() completed (RR active-round path)");
+                return;
+            }
+
+            // Non-RR path: reveal the next round label.
             var next = EngineGetRoundOrder(_engine).FirstOrDefault(r => !_revealedRounds.Contains(r));
             if (string.IsNullOrEmpty(next))
             {
@@ -218,8 +260,13 @@ namespace RCDragManagerProd.Controllers
         {
             EnsureReady();
 
+            // In RR active-round mode, only the active round can supply the next match.
+            // In all other modes, use _revealedRounds as before.
             var next = EngineGetMatches(_engine)
-                              .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
+                              .Where(m => (_activeRound != null
+                                               ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
+                                               : _revealedRounds.Contains(m.RoundLabel))
+                                          && !m.HasResult)
                               .OrderBy(m => m.MatchId)
                               .FirstOrDefault();
 
@@ -256,15 +303,32 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
-            var visibleMatches = EngineGetMatches(_engine)
-                                        .Where(m => _revealedRounds.Contains(m.RoundLabel))
-                                        .ToList();
-
-            bool allVisibleResolved = visibleMatches.All(m => m.HasResult);
-            bool moreRoundsExist = EngineGetRoundOrder(_engine).Any(r => !_revealedRounds.Contains(r));
-            bool canAdvance = allVisibleResolved && moreRoundsExist;
-
-            Logger.Log($"[DEBUG] PushAdvanceState: visible={visibleMatches.Count}, resolved={visibleMatches.Count(m => m.HasResult)}, moreRoundsExist={moreRoundsExist}, canAdvance={canAdvance}");
+            bool canAdvance;
+            if (_activeRound != null)
+            {
+                // RR pre-reveal mode: "Generate Next Round" enables when the active round is
+                // fully resolved AND there is a subsequent round to advance to.
+                var activeMatches = EngineGetMatches(_engine)
+                    .Where(m => string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                bool allActiveResolved = activeMatches.Count > 0 && activeMatches.All(m => m.HasResult);
+                var roundOrderList = EngineGetRoundOrder(_engine).ToList();
+                int activeIdx = roundOrderList.IndexOf(_activeRound);
+                bool nextRoundExists = activeIdx >= 0 && activeIdx + 1 < roundOrderList.Count;
+                canAdvance = allActiveResolved && nextRoundExists;
+                Logger.Log($"[DEBUG] PushAdvanceState (RR active-round): activeRound='{_activeRound}', activeMatches={activeMatches.Count}, resolved={activeMatches.Count(m => m.HasResult)}, nextRoundExists={nextRoundExists}, canAdvance={canAdvance}");
+            }
+            else
+            {
+                // Non-RR path (or RR after last round is done): original revealed-round logic.
+                var visibleMatches = EngineGetMatches(_engine)
+                    .Where(m => _revealedRounds.Contains(m.RoundLabel))
+                    .ToList();
+                bool allVisibleResolved = visibleMatches.All(m => m.HasResult);
+                bool moreRoundsExist = EngineGetRoundOrder(_engine).Any(r => !_revealedRounds.Contains(r));
+                canAdvance = allVisibleResolved && moreRoundsExist;
+                Logger.Log($"[DEBUG] PushAdvanceState: visible={visibleMatches.Count}, resolved={visibleMatches.Count(m => m.HasResult)}, moreRoundsExist={moreRoundsExist}, canAdvance={canAdvance}");
+            }
 
             CanAdvanceChanged?.Invoke(canAdvance);
 
