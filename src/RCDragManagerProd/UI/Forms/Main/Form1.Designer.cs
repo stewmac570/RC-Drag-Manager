@@ -28,7 +28,16 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnWinner2;
         private Button btnEditDriver;
         private Button btnSetQualTime;
-        private Label lblNext;
+        private Label lblCurrentRaceLabel;
+        private Label lblVs0;
+        private Label lblOnDeck;
+        private Label lblOnDeckD1;
+        private Label lblVs1;
+        private Label lblOnDeckD2;
+        private Label lblInTheHole;
+        private Label lblInHoleD1;
+        private Label lblVs2;
+        private Label lblInHoleD2;
         private Label lblDriversHeader;
         private Label lblPairingsHeader;
         private Label lblWinnersHeader;
@@ -64,7 +73,16 @@ namespace RCDragManagerProd.UI.Forms
             this.btnWinner2 = new System.Windows.Forms.Button();
             this.btnEditDriver = new System.Windows.Forms.Button();
             this.btnSetQualTime = new System.Windows.Forms.Button();
-            this.lblNext = new System.Windows.Forms.Label();
+            this.lblCurrentRaceLabel = new System.Windows.Forms.Label();
+            this.lblVs0 = new System.Windows.Forms.Label();
+            this.lblOnDeck = new System.Windows.Forms.Label();
+            this.lblOnDeckD1 = new System.Windows.Forms.Label();
+            this.lblVs1 = new System.Windows.Forms.Label();
+            this.lblOnDeckD2 = new System.Windows.Forms.Label();
+            this.lblInTheHole = new System.Windows.Forms.Label();
+            this.lblInHoleD1 = new System.Windows.Forms.Label();
+            this.lblVs2 = new System.Windows.Forms.Label();
+            this.lblInHoleD2 = new System.Windows.Forms.Label();
             this.lblDriversHeader = new System.Windows.Forms.Label();
             this.lblPairingsHeader = new System.Windows.Forms.Label();
             this.lblWinnersHeader = new System.Windows.Forms.Label();
@@ -197,23 +215,23 @@ namespace RCDragManagerProd.UI.Forms
             this.colDriver2.Width = 160;
             // 
             // btnWinner1
-            // 
+            //
             this.btnWinner1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btnWinner1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnWinner1.Location = new System.Drawing.Point(485, 485);
+            this.btnWinner1.Location = new System.Drawing.Point(601, 483);
             this.btnWinner1.Name = "btnWinner1";
-            this.btnWinner1.Size = new System.Drawing.Size(200, 45);
+            this.btnWinner1.Size = new System.Drawing.Size(200, 38);
             this.btnWinner1.TabIndex = 17;
             this.btnWinner1.Text = "—";
             this.btnWinner1.Click += new System.EventHandler(this.btnWinner1_Click);
-            // 
+            //
             // btnWinner2
-            // 
+            //
             this.btnWinner2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btnWinner2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnWinner2.Location = new System.Drawing.Point(704, 485);
+            this.btnWinner2.Location = new System.Drawing.Point(835, 483);
             this.btnWinner2.Name = "btnWinner2";
-            this.btnWinner2.Size = new System.Drawing.Size(194, 45);
+            this.btnWinner2.Size = new System.Drawing.Size(200, 38);
             this.btnWinner2.TabIndex = 18;
             this.btnWinner2.Text = "—";
             this.btnWinner2.Click += new System.EventHandler(this.btnWinner2_Click);
@@ -240,16 +258,126 @@ namespace RCDragManagerProd.UI.Forms
             this.btnSetQualTime.Text = "Set Time";
             this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
             // 
-            // lblNext
-            // 
-            this.lblNext.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.lblNext.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNext.Location = new System.Drawing.Point(485, 537);
-            this.lblNext.Name = "lblNext";
-            this.lblNext.Size = new System.Drawing.Size(413, 64);
-            this.lblNext.TabIndex = 19;
-            this.lblNext.Text = "Up Next: --";
-            this.lblNext.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // lblCurrentRaceLabel — left-hand row label for "Current race"
+            //
+            this.lblCurrentRaceLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblCurrentRaceLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCurrentRaceLabel.Location = new System.Drawing.Point(485, 483);
+            this.lblCurrentRaceLabel.Name = "lblCurrentRaceLabel";
+            this.lblCurrentRaceLabel.Size = new System.Drawing.Size(112, 38);
+            this.lblCurrentRaceLabel.TabIndex = 30;
+            this.lblCurrentRaceLabel.Text = "Current race";
+            this.lblCurrentRaceLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblVs0 — "vs" separator in the Current race row
+            //
+            this.lblVs0.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVs0.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblVs0.Location = new System.Drawing.Point(805, 483);
+            this.lblVs0.Name = "lblVs0";
+            this.lblVs0.Size = new System.Drawing.Size(26, 38);
+            this.lblVs0.TabIndex = 31;
+            this.lblVs0.Text = "vs";
+            this.lblVs0.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblOnDeck — left-hand row label for "On deck"
+            //
+            this.lblOnDeck.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeck.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblOnDeck.Location = new System.Drawing.Point(485, 525);
+            this.lblOnDeck.Name = "lblOnDeck";
+            this.lblOnDeck.Size = new System.Drawing.Size(112, 30);
+            this.lblOnDeck.TabIndex = 32;
+            this.lblOnDeck.Text = "On deck";
+            this.lblOnDeck.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblOnDeckD1 — left driver display for On deck row
+            //
+            this.lblOnDeckD1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeckD1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblOnDeckD1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.lblOnDeckD1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblOnDeckD1.Location = new System.Drawing.Point(601, 525);
+            this.lblOnDeckD1.Name = "lblOnDeckD1";
+            this.lblOnDeckD1.Size = new System.Drawing.Size(200, 30);
+            this.lblOnDeckD1.TabIndex = 33;
+            this.lblOnDeckD1.Text = "—";
+            this.lblOnDeckD1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblVs1 — "vs" separator in the On deck row
+            //
+            this.lblVs1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVs1.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblVs1.Location = new System.Drawing.Point(805, 525);
+            this.lblVs1.Name = "lblVs1";
+            this.lblVs1.Size = new System.Drawing.Size(26, 30);
+            this.lblVs1.TabIndex = 34;
+            this.lblVs1.Text = "vs";
+            this.lblVs1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblOnDeckD2 — right driver display for On deck row
+            //
+            this.lblOnDeckD2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeckD2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblOnDeckD2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.lblOnDeckD2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblOnDeckD2.Location = new System.Drawing.Point(835, 525);
+            this.lblOnDeckD2.Name = "lblOnDeckD2";
+            this.lblOnDeckD2.Size = new System.Drawing.Size(200, 30);
+            this.lblOnDeckD2.TabIndex = 35;
+            this.lblOnDeckD2.Text = "—";
+            this.lblOnDeckD2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblInTheHole — left-hand row label for "In the hole"
+            //
+            this.lblInTheHole.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInTheHole.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInTheHole.Location = new System.Drawing.Point(485, 559);
+            this.lblInTheHole.Name = "lblInTheHole";
+            this.lblInTheHole.Size = new System.Drawing.Size(112, 30);
+            this.lblInTheHole.TabIndex = 36;
+            this.lblInTheHole.Text = "In the hole";
+            this.lblInTheHole.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblInHoleD1 — left driver display for In the hole row
+            //
+            this.lblInHoleD1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInHoleD1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblInHoleD1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.lblInHoleD1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInHoleD1.Location = new System.Drawing.Point(601, 559);
+            this.lblInHoleD1.Name = "lblInHoleD1";
+            this.lblInHoleD1.Size = new System.Drawing.Size(200, 30);
+            this.lblInHoleD1.TabIndex = 37;
+            this.lblInHoleD1.Text = "—";
+            this.lblInHoleD1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblVs2 — "vs" separator in the In the hole row
+            //
+            this.lblVs2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVs2.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblVs2.Location = new System.Drawing.Point(805, 559);
+            this.lblVs2.Name = "lblVs2";
+            this.lblVs2.Size = new System.Drawing.Size(26, 30);
+            this.lblVs2.TabIndex = 38;
+            this.lblVs2.Text = "vs";
+            this.lblVs2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            //
+            // lblInHoleD2 — right driver display for In the hole row
+            //
+            this.lblInHoleD2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInHoleD2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblInHoleD2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.lblInHoleD2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInHoleD2.Location = new System.Drawing.Point(835, 559);
+            this.lblInHoleD2.Name = "lblInHoleD2";
+            this.lblInHoleD2.Size = new System.Drawing.Size(200, 30);
+            this.lblInHoleD2.TabIndex = 39;
+            this.lblInHoleD2.Text = "—";
+            this.lblInHoleD2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblDriversHeader
             // 
@@ -430,9 +558,18 @@ namespace RCDragManagerProd.UI.Forms
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnGenerateBracket);
             this.Controls.Add(this.btnNextRound);
+            this.Controls.Add(this.lblCurrentRaceLabel);
             this.Controls.Add(this.btnWinner1);
+            this.Controls.Add(this.lblVs0);
             this.Controls.Add(this.btnWinner2);
-            this.Controls.Add(this.lblNext);
+            this.Controls.Add(this.lblOnDeck);
+            this.Controls.Add(this.lblOnDeckD1);
+            this.Controls.Add(this.lblVs1);
+            this.Controls.Add(this.lblOnDeckD2);
+            this.Controls.Add(this.lblInTheHole);
+            this.Controls.Add(this.lblInHoleD1);
+            this.Controls.Add(this.lblVs2);
+            this.Controls.Add(this.lblInHoleD2);
             this.Controls.Add(this.btnEditResult);
             this.Controls.Add(this.btnStandings);
             this.Controls.Add(this.btnGenerateLosersBracket);

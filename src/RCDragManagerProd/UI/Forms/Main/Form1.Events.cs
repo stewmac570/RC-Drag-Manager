@@ -327,7 +327,7 @@ namespace RCDragManagerProd.UI.Forms
 
             lvPairings.Items.Clear();
             lvWinners.Items.Clear();
-            lblNext.Text = "";
+            UpdateRaceQueuePanel(null);
 
             btnGenerateBracket.Enabled = true;
             btnNextRound.Enabled = false;
