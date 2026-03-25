@@ -149,7 +149,20 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            _revealedRounds.Add(roundOrder[0]);
+            if (string.Equals(rt, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            {
+                // Pre-reveal all RR rounds upfront so the full schedule is visible immediately.
+                // Winner input is gated by _activeRound, not by _revealedRounds.
+                foreach (var r in roundOrder)
+                    _revealedRounds.Add(r);
+                _activeRound = roundOrder[0];
+                Logger.Log($"[RR] Pre-revealed {roundOrder.Count} rounds. _activeRound='{_activeRound}'. Rounds=[{string.Join(",", roundOrder)}]");
+            }
+            else
+            {
+                _revealedRounds.Add(roundOrder[0]);
+                // _activeRound stays null for non-RR modes
+            }
 
             _winners.Clear();
             PushFullRefresh();
