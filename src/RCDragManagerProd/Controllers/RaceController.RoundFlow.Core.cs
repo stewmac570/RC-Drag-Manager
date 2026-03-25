@@ -262,11 +262,14 @@ namespace RCDragManagerProd.Controllers
 
             // In RR active-round mode, only the active round can supply the next match.
             // In all other modes, use _revealedRounds as before.
+            // BYE matches are excluded — they should be auto-resolved, not surfaced to the director.
             var next = EngineGetMatches(_engine)
                               .Where(m => (_activeRound != null
                                                ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
                                                : _revealedRounds.Contains(m.RoundLabel))
-                                          && !m.HasResult)
+                                          && !m.HasResult
+                                          && !ByePolicy.IsBye(m.Driver1)
+                                          && !ByePolicy.IsBye(m.Driver2))
                               .OrderBy(m => m.MatchId)
                               .FirstOrDefault();
 
