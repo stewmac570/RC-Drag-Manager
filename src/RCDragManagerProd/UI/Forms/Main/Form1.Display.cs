@@ -104,19 +104,6 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
-        private string FormatMatchForNextLaneAdjusted(EngineMatch m)
-        {
-            if (m == null) return "M?: BYE vs BYE";
-
-            string left;
-            string right;
-
-            // This must exist on RaceController as internal/public
-            _controller.GetLaneAdjustedNames(m, out left, out right);
-
-            return "M" + m.MatchId + ": " + left + " vs " + right;
-        }
-
         private void OnNextMatchReady(PairingRow row)
         {
             try
@@ -127,10 +114,6 @@ namespace RCDragManagerProd.UI.Forms
                 {
                     _currentWinnerButtonContext = null;
 
-                    lblNext.AutoSize = false;
-                    lblNext.TextAlign = ContentAlignment.MiddleCenter;
-                    lblNext.Text = "No match ready";
-
                     btnWinner1.Text = "—";
                     btnWinner2.Text = "—";
                     btnWinner1.Tag = null;
@@ -139,6 +122,7 @@ namespace RCDragManagerProd.UI.Forms
                     btnWinner1.Enabled = false;
                     btnWinner2.Enabled = false;
 
+                    UpdateRaceQueuePanel(null);
                     Logger.Log("[UI][NEXT] No current match.");
                     return;
                 }
@@ -188,37 +172,7 @@ namespace RCDragManagerProd.UI.Forms
                 Logger.Log("[UI][NEXT] Buttons: leftIsBye=" + leftIsBye + " rightIsBye=" + rightIsBye +
                            " leftEnabled=" + btnWinner1.Enabled + " rightEnabled=" + btnWinner2.Enabled);
 
-
-                var upcoming = _controller.PeekUpcomingMatches(3)
-                                          .Where(m => m.MatchId != row.MatchId)
-                                          .Take(2)
-                                          .ToList();
-
-                lblNext.AutoSize = false;
-                lblNext.TextAlign = ContentAlignment.MiddleCenter;
-
-                string text;
-                if (upcoming.Count == 0)
-                {
-                    text = currentLeft + " vs " + currentRight;
-                }
-                else if (upcoming.Count == 1)
-                {
-                    text = "On Deck — " + FormatMatchForNextLaneAdjusted(upcoming[0]);
-                }
-                else
-                {
-                    text = "On Deck — " + FormatMatchForNextLaneAdjusted(upcoming[0]) +
-                           Environment.NewLine +
-                           "In The Hole — " + FormatMatchForNextLaneAdjusted(upcoming[1]);
-                }
-
-                lblNext.Text = text;
-
-                Logger.Log(
-                    "[UI][NEXT] Current=M" + row.MatchId + ":" + currentLeft + " vs " + currentRight +
-                    " | Label='" + text.Replace(Environment.NewLine, " / ") + "'"
-                );
+                UpdateRaceQueuePanel(row);
             }
             catch (Exception ex)
             {
@@ -245,6 +199,56 @@ namespace RCDragManagerProd.UI.Forms
                 btn.ForeColor = SystemColors.ControlText;
                 btn.UseVisualStyleBackColor = true;
                 btn.FlatStyle = FlatStyle.Standard;
+            }
+        }
+
+        // ── Race Queue Panel ─────────────────────────────────────────────────────
+
+        private void UpdateRaceQueuePanel(PairingRow currentRow)
+        {
+            var upcoming = _controller.PeekUpcomingMatches(3)
+                .Where(m => currentRow == null || m.MatchId != currentRow.MatchId)
+                .Take(2)
+                .ToList();
+
+            var onDeckMatch   = upcoming.Count > 0 ? upcoming[0] : null;
+            var inHoleMatch   = upcoming.Count > 1 ? upcoming[1] : null;
+
+            SetQueueRowDisplay(lblOnDeckD1, lblOnDeckD2, onDeckMatch);
+            SetQueueRowDisplay(lblInHoleD1, lblInHoleD2, inHoleMatch);
+
+            Logger.Log("[UI][QUEUE] OnDeck=" + (onDeckMatch != null ? "M" + onDeckMatch.MatchId : "—") +
+                       " InHole=" + (inHoleMatch != null ? "M" + inHoleMatch.MatchId : "—"));
+        }
+
+        private void SetQueueRowDisplay(Label d1Label, Label d2Label, EngineMatch match)
+        {
+            if (match == null)
+            {
+                SetQueueLabel(d1Label, "—", false);
+                SetQueueLabel(d2Label, "—", false);
+                return;
+            }
+
+            string left, right;
+            _controller.GetLaneAdjustedNames(match, out left, out right);
+
+            SetQueueLabel(d1Label, string.IsNullOrWhiteSpace(left)  ? "BYE" : left,  IsByeName(left));
+            SetQueueLabel(d2Label, string.IsNullOrWhiteSpace(right) ? "BYE" : right, IsByeName(right));
+        }
+
+        private void SetQueueLabel(Label lbl, string text, bool isBye)
+        {
+            lbl.Text = text;
+            if (isBye)
+            {
+                lbl.ForeColor = SystemColors.GrayText;
+                lbl.Font = new Font(lbl.Font.FontFamily, lbl.Font.Size, FontStyle.Italic);
+            }
+            else
+            {
+                lbl.ForeColor = SystemColors.ControlText;
+                lbl.Font = new Font(lbl.Font.FontFamily, lbl.Font.Size, FontStyle.Regular);
             }
         }
 
