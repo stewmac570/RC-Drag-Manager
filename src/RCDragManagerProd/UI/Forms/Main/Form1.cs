@@ -28,6 +28,13 @@ namespace RCDragManagerProd.UI.Forms
         /// </summary>
         public bool IsHostedMode { get; set; }
 
+        /// <summary>
+        /// Set by MultiClassRaceForm so that btnSaveAndClose also persists the
+        /// parent multi-class event record. Null in standalone (non-hosted) mode.
+        /// </summary>
+        internal MultiClassEvent _multiClassEvent;
+        internal MultiClassEventRepository _multiClassEventRepo;
+
         public Form1(RaceController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));

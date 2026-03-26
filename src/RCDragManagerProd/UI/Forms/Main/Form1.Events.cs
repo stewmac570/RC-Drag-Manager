@@ -364,6 +364,19 @@ namespace RCDragManagerProd.UI.Forms
             _controller.SaveSession();
             sessionRepository.SaveSession(currentSession);
 
+            if (_multiClassEventRepo != null && _multiClassEvent != null)
+            {
+                try
+                {
+                    _multiClassEventRepo.SaveEvent(_multiClassEvent);
+                    Logger.Log("[SAVE] Multi-class event record saved.");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"[SAVE][ERROR] Multi-class event save failed: {ex}");
+                }
+            }
+
             try
             {
                 var repo = new DriverRepository(Program.ConnectionString);

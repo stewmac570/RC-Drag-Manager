@@ -6,8 +6,6 @@ namespace RCDragManagerProd.UI.Forms
 
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.Panel pnlBottom;
-        private System.Windows.Forms.Button btnSaveEvent;
-        private System.Windows.Forms.Label lblSaveStatus;
         private System.Windows.Forms.Label lblStatus;
 
         protected override void Dispose(bool disposing)
@@ -21,8 +19,6 @@ namespace RCDragManagerProd.UI.Forms
         {
             this.tabControl = new System.Windows.Forms.TabControl();
             this.pnlBottom = new System.Windows.Forms.Panel();
-            this.btnSaveEvent = new System.Windows.Forms.Button();
-            this.lblSaveStatus = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
             this.pnlBottom.SuspendLayout();
             this.SuspendLayout();
@@ -40,30 +36,11 @@ namespace RCDragManagerProd.UI.Forms
                 new System.EventHandler(this.tabControl_SelectedIndexChanged);
 
             // pnlBottom
-            this.pnlBottom.Controls.Add(this.btnSaveEvent);
-            this.pnlBottom.Controls.Add(this.lblSaveStatus);
             this.pnlBottom.Controls.Add(this.lblStatus);
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBottom.Height = 40;
             this.pnlBottom.Name = "pnlBottom";
             this.pnlBottom.TabIndex = 1;
-
-            // btnSaveEvent
-            this.btnSaveEvent.Location = new System.Drawing.Point(8, 7);
-            this.btnSaveEvent.Name = "btnSaveEvent";
-            this.btnSaveEvent.Size = new System.Drawing.Size(100, 26);
-            this.btnSaveEvent.TabIndex = 0;
-            this.btnSaveEvent.Text = "Save Event";
-            this.btnSaveEvent.UseVisualStyleBackColor = true;
-            this.btnSaveEvent.Click += new System.EventHandler(this.btnSaveEvent_Click);
-
-            // lblSaveStatus
-            this.lblSaveStatus.AutoSize = true;
-            this.lblSaveStatus.Location = new System.Drawing.Point(116, 13);
-            this.lblSaveStatus.Name = "lblSaveStatus";
-            this.lblSaveStatus.Size = new System.Drawing.Size(0, 13);
-            this.lblSaveStatus.TabIndex = 1;
-            this.lblSaveStatus.Text = "";
 
             // lblStatus
             this.lblStatus.Anchor = System.Windows.Forms.AnchorStyles.Top

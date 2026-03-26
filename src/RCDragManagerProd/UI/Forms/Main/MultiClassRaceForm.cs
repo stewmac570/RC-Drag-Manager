@@ -92,6 +92,8 @@ namespace RCDragManagerProd.UI.Forms
 
                 var form1 = new Form1(_controllers[i]);
                 form1.IsHostedMode = true;
+                form1._multiClassEvent = _multiEvent;
+                form1._multiClassEventRepo = _multiClassRepo;
                 form1.TopLevel = false;
                 form1.FormBorderStyle = FormBorderStyle.None;
                 form1.Dock = DockStyle.Fill;
@@ -276,24 +278,5 @@ namespace RCDragManagerProd.UI.Forms
             ScrollableTextDialog.Show("Event Complete — Final Results", sb.ToString());
         }
 
-        // ── Save ──────────────────────────────────────────────────────────────
-
-        private void btnSaveEvent_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                foreach (var controller in _controllers)
-                    controller.SaveSession();
-
-                _multiClassRepo.SaveEvent(_multiEvent);
-                lblSaveStatus.Text = "Event saved.";
-                Logger.Log("[MultiClass] Event saved successfully");
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"[MultiClass][SAVE][ERROR] {ex}");
-                lblSaveStatus.Text = "Save failed — see log.";
-            }
-        }
     }
 }
