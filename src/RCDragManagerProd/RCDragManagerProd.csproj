@@ -329,6 +329,9 @@
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\Forms\Main\MultiClassRaceForm.resx">
+      <DependentUpon>MultiClassRaceForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\Forms\Session\LandingPageForm.resx">
       <DependentUpon>LandingPageForm.cs</DependentUpon>
     </EmbeddedResource>
