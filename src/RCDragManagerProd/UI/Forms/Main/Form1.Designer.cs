@@ -426,7 +426,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEditResult.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEditResult.Location = new System.Drawing.Point(1076, 50);
+            this.btnEditResult.Location = new System.Drawing.Point(1076, 75);
             this.btnEditResult.Name = "btnEditResult";
             this.btnEditResult.Size = new System.Drawing.Size(100, 45);
             this.btnEditResult.TabIndex = 20;
