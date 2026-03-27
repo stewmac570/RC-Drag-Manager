@@ -132,7 +132,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnGenerateBracket
             // 
-            this.btnGenerateBracket.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btnGenerateBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnGenerateBracket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGenerateBracket.Location = new System.Drawing.Point(485, 434);
             this.btnGenerateBracket.Name = "btnGenerateBracket";
@@ -143,7 +143,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnNextRound
             // 
-            this.btnNextRound.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btnNextRound.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnNextRound.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnNextRound.Location = new System.Drawing.Point(704, 434);
             this.btnNextRound.Name = "btnNextRound";
@@ -182,8 +182,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lvPairings
             // 
-            this.lvPairings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.lvPairings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lvPairings.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colMatch,
             this.colDriver1,
@@ -216,7 +216,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnWinner1
             //
-            this.btnWinner1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btnWinner1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnWinner1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnWinner1.Location = new System.Drawing.Point(485, 483);
             this.btnWinner1.Name = "btnWinner1";
@@ -227,7 +227,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // btnWinner2
             //
-            this.btnWinner2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btnWinner2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnWinner2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnWinner2.Location = new System.Drawing.Point(704, 483);
             this.btnWinner2.Name = "btnWinner2";
@@ -260,7 +260,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lblCurrentRaceLabel — left-hand row label for "Current race"
             //
-            this.lblCurrentRaceLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblCurrentRaceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblCurrentRaceLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCurrentRaceLabel.Location = new System.Drawing.Point(375, 483);
             this.lblCurrentRaceLabel.Name = "lblCurrentRaceLabel";
@@ -271,7 +271,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblVs0 — "vs" separator in the Current race row
             //
-            this.lblVs0.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs0.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblVs0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVs0.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblVs0.Location = new System.Drawing.Point(689, 483);
@@ -283,7 +283,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblOnDeck — left-hand row label for "On deck"
             //
-            this.lblOnDeck.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblOnDeck.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblOnDeck.Location = new System.Drawing.Point(375, 527);
             this.lblOnDeck.Name = "lblOnDeck";
@@ -294,7 +294,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblOnDeckD1 — left driver display for On deck row
             //
-            this.lblOnDeckD1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeckD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblOnDeckD1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblOnDeckD1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.lblOnDeckD1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -307,7 +307,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblVs1 — "vs" separator in the On deck row
             //
-            this.lblVs1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblVs1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVs1.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblVs1.Location = new System.Drawing.Point(689, 527);
@@ -319,7 +319,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblOnDeckD2 — right driver display for On deck row
             //
-            this.lblOnDeckD2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblOnDeckD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblOnDeckD2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblOnDeckD2.BackColor = System.Drawing.Color.WhiteSmoke;
             this.lblOnDeckD2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -332,7 +332,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblInTheHole — left-hand row label for "In the hole"
             //
-            this.lblInTheHole.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInTheHole.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblInTheHole.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblInTheHole.Location = new System.Drawing.Point(375, 565);
             this.lblInTheHole.Name = "lblInTheHole";
@@ -343,7 +343,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblInHoleD1 — left driver display for In the hole row
             //
-            this.lblInHoleD1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInHoleD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblInHoleD1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblInHoleD1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.lblInHoleD1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -356,7 +356,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblVs2 — "vs" separator in the In the hole row
             //
-            this.lblVs2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblVs2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblVs2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVs2.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblVs2.Location = new System.Drawing.Point(689, 565);
@@ -368,7 +368,7 @@ namespace RCDragManagerProd.UI.Forms
             //
             // lblInHoleD2 — right driver display for In the hole row
             //
-            this.lblInHoleD2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.lblInHoleD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblInHoleD2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblInHoleD2.BackColor = System.Drawing.Color.WhiteSmoke;
             this.lblInHoleD2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -413,9 +413,9 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnReset
             // 
-            this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnReset.Location = new System.Drawing.Point(1076, 101);
+            this.btnReset.Location = new System.Drawing.Point(1076, 126);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(100, 45);
             this.btnReset.TabIndex = 14;
@@ -424,9 +424,9 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnEditResult
             // 
-            this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEditResult.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEditResult.Location = new System.Drawing.Point(1076, 50);
+            this.btnEditResult.Location = new System.Drawing.Point(1076, 75);
             this.btnEditResult.Name = "btnEditResult";
             this.btnEditResult.Size = new System.Drawing.Size(100, 45);
             this.btnEditResult.TabIndex = 20;
@@ -458,8 +458,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lvWinners
             // 
-            this.lvWinners.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvWinners.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lvWinners.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colMatchWin,
             this.colLoser,
@@ -515,10 +515,10 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnStandings
             // 
-            this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStandings.Enabled = false;
             this.btnStandings.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
-            this.btnStandings.Location = new System.Drawing.Point(1076, 152);
+            this.btnStandings.Location = new System.Drawing.Point(1076, 177);
             this.btnStandings.Name = "btnStandings";
             this.btnStandings.Size = new System.Drawing.Size(100, 45);
             this.btnStandings.TabIndex = 23;
@@ -527,10 +527,10 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnGenerateLosersBracket
             // 
-            this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGenerateLosersBracket.Enabled = false;
             this.btnGenerateLosersBracket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 203);
+            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 228);
             this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
             this.btnGenerateLosersBracket.Size = new System.Drawing.Size(100, 45);
             this.btnGenerateLosersBracket.TabIndex = 21;
