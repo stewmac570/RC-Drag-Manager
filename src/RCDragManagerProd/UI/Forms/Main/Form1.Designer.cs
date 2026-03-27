@@ -415,7 +415,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnReset.Location = new System.Drawing.Point(1076, 101);
+            this.btnReset.Location = new System.Drawing.Point(1076, 126);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(100, 45);
             this.btnReset.TabIndex = 14;
@@ -426,7 +426,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEditResult.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEditResult.Location = new System.Drawing.Point(1076, 50);
+            this.btnEditResult.Location = new System.Drawing.Point(1076, 75);
             this.btnEditResult.Name = "btnEditResult";
             this.btnEditResult.Size = new System.Drawing.Size(100, 45);
             this.btnEditResult.TabIndex = 20;
@@ -518,7 +518,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStandings.Enabled = false;
             this.btnStandings.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
-            this.btnStandings.Location = new System.Drawing.Point(1076, 152);
+            this.btnStandings.Location = new System.Drawing.Point(1076, 177);
             this.btnStandings.Name = "btnStandings";
             this.btnStandings.Size = new System.Drawing.Size(100, 45);
             this.btnStandings.TabIndex = 23;
@@ -530,7 +530,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGenerateLosersBracket.Enabled = false;
             this.btnGenerateLosersBracket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 203);
+            this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 228);
             this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
             this.btnGenerateLosersBracket.Size = new System.Drawing.Size(100, 45);
             this.btnGenerateLosersBracket.TabIndex = 21;
