@@ -8,8 +8,6 @@ using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 using RCDragManagerProd.Config;
 
-//git hub test
-
 namespace RCDragManagerProd
 {
     internal static class Program
