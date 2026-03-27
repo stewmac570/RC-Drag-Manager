@@ -413,7 +413,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnReset
             // 
-            this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnReset.Location = new System.Drawing.Point(1076, 101);
             this.btnReset.Name = "btnReset";
@@ -424,7 +424,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnEditResult
             // 
-            this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnEditResult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEditResult.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEditResult.Location = new System.Drawing.Point(1076, 50);
             this.btnEditResult.Name = "btnEditResult";
@@ -458,8 +458,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lvWinners
             // 
-            this.lvWinners.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvWinners.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lvWinners.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colMatchWin,
             this.colLoser,
@@ -515,7 +515,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnStandings
             // 
-            this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStandings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStandings.Enabled = false;
             this.btnStandings.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.btnStandings.Location = new System.Drawing.Point(1076, 152);
@@ -527,7 +527,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnGenerateLosersBracket
             // 
-            this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGenerateLosersBracket.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGenerateLosersBracket.Enabled = false;
             this.btnGenerateLosersBracket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGenerateLosersBracket.Location = new System.Drawing.Point(1076, 203);
