@@ -239,8 +239,7 @@ public class DriverRepositoryStatIncrementTests
         repo.IncrementEventsEntered(driver.Id);
         repo.IncrementEventsWon(driver.Id);
 
-        // If we reached this line, all four calls completed without exception.
-        Assert.IsTrue(true, "All four Increment* methods completed without exception");
+        // Reaching this line proves all four calls completed without exception.
     }
 
     // ── ExecuteStatIncrement whitelist rejection ──────────────────────────────
@@ -249,8 +248,8 @@ public class DriverRepositoryStatIncrementTests
     public void ExecuteStatIncrement_ThrowsArgumentException_ForColumnNotInWhitelist()
     {
         // ExecuteStatIncrement is private; call it via reflection.
-        // Reflection wraps thrown exceptions in TargetInvocationException,
-        // so we unwrap InnerException to find the ArgumentException.
+        // Reflection wraps thrown exceptions in TargetInvocationException, so the lambda
+        // catches TIE and rethrows the inner ArgumentException for Assert.ThrowsException.
         using var db = new TemporarySqliteDb();
         DatabaseInitializer.InitializeDatabase(db.ConnectionString);
         var repo = new DriverRepository(db.ConnectionString);
@@ -263,11 +262,12 @@ public class DriverRepositoryStatIncrementTests
             ?? throw new MissingMethodException(nameof(DriverRepository), "ExecuteStatIncrement");
 
         // Try a column name that is not in the whitelist.
-        var tie = Assert.ThrowsException<TargetInvocationException>(() =>
-            method.Invoke(repo, new object[] { driver.Id, "Name", 1 }));
-
-        Assert.IsInstanceOfType(tie.InnerException, typeof(ArgumentException),
-            "ExecuteStatIncrement must throw ArgumentException for a column not in the whitelist");
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            try { method.Invoke(repo, new object[] { driver.Id, "Name", 1 }); }
+            catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
+            { throw argEx; }
+        }, "ExecuteStatIncrement must throw ArgumentException for a column not in the whitelist");
     }
 
     [TestMethod]
@@ -288,11 +288,12 @@ public class DriverRepositoryStatIncrementTests
 
         const string injected = "TotalWins; DROP TABLE Drivers; --";
 
-        var tie = Assert.ThrowsException<TargetInvocationException>(() =>
-            method.Invoke(repo, new object[] { driver.Id, injected, 1 }));
-
-        Assert.IsInstanceOfType(tie.InnerException, typeof(ArgumentException),
-            "ExecuteStatIncrement must throw ArgumentException for a SQL-injection-style column name");
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            try { method.Invoke(repo, new object[] { driver.Id, injected, 1 }); }
+            catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
+            { throw argEx; }
+        }, "ExecuteStatIncrement must throw ArgumentException for a SQL-injection-style column name");
 
         // The Drivers table must still exist — the injection never reached the database.
         var allDrivers = repo.GetAllDrivers();
@@ -314,11 +315,12 @@ public class DriverRepositoryStatIncrementTests
             BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new MissingMethodException(nameof(DriverRepository), "ExecuteStatIncrement");
 
-        var tie = Assert.ThrowsException<TargetInvocationException>(() =>
-            method.Invoke(repo, new object[] { driver.Id, string.Empty, 1 }));
-
-        Assert.IsInstanceOfType(tie.InnerException, typeof(ArgumentException),
-            "ExecuteStatIncrement must throw ArgumentException for an empty column name");
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            try { method.Invoke(repo, new object[] { driver.Id, string.Empty, 1 }); }
+            catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
+            { throw argEx; }
+        }, "ExecuteStatIncrement must throw ArgumentException for an empty column name");
     }
 
     // ── TemporarySqliteDb ─────────────────────────────────────────────────────
