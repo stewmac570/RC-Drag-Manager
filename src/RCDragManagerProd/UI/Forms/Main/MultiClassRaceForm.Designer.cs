@@ -48,8 +48,8 @@ namespace RCDragManagerProd.UI.Forms
             this.ClientSize = new System.Drawing.Size(1200, 790);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.lblStatus);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.MaximizeBox = true;
             this.MinimumSize = new System.Drawing.Size(900, 600);
             this.Name = "MultiClassRaceForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
