@@ -4,6 +4,8 @@ using System.Configuration;
 using System.Linq;
 using RCDragManagerProd.Integration;
 using RCDragManagerProd.Logging;
+using RCDragManagerProd.RaceEngines;
+using RCDragManagerProd.RoundRobinMode;
 using RCDragManagerProd.ViewModels;
 
 namespace RCDragManagerProd.Controllers
@@ -45,23 +47,70 @@ namespace RCDragManagerProd.Controllers
                 nextUp = leftName + " vs " + rightName;
             }
 
-            var rows = BuildCurrentBracketRows() ?? Array.Empty<PairingRow>();
-            var matches = rows
-                .Where(r => !r.IsHeader)
-                .Select(r => new LiveMatchDto
+            // Collect all engine matches across phases (mirrors BuildCurrentBracketRows)
+            var allMatches = new List<EngineMatch>();
+
+            if (_rrMatchesSnapshot != null)
+            {
+                allMatches.AddRange(_rrMatchesSnapshot);
+            }
+            else if (_engine != null)
+            {
+                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
+            }
+
+            if (_losersEngine != null)
+            {
+                bool filterLb = !string.Equals(_session.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+                var lbAll = EngineGetMatches(_losersEngine);
+                allMatches.AddRange(filterLb ? lbAll.Where(m => _revealedRounds.Contains(m.RoundLabel)) : lbAll);
+            }
+
+            if (_rrMatchesSnapshot != null && _engine != null && !ReferenceEquals(_engine, _losersEngine))
+            {
+                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
+            }
+
+            var matches = allMatches
+                .Select(m => new LiveMatchDto
                 {
-                    Driver1 = string.IsNullOrWhiteSpace(r.Driver1) ? "BYE" : r.Driver1,
-                    Driver2 = string.IsNullOrWhiteSpace(r.Driver2) ? "BYE" : r.Driver2
+                    RoundLabel = m.RoundLabel,
+                    Driver1 = m.Driver1?.Name ?? "BYE",
+                    Driver2 = m.Driver2?.Name ?? "BYE",
+                    WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null
                 })
                 .ToList();
+
+            var winners = allMatches
+                .Where(m => _matchResult.HasResult(m.MatchId))
+                .Select(m => new LiveWinnerDto
+                {
+                    RoundLabel = m.RoundLabel,
+                    WinnerName = _matchResult.GetWinner(m.MatchId)?.Name,
+                    LoserName = _matchResult.GetLoser(m.MatchId)?.Name
+                })
+                .Where(w => w.WinnerName != null && w.LoserName != null)
+                .ToList();
+
+            string rrStandings = null;
+            if (string.Equals(_session.RaceType, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            {
+                var rr = _engine as RoundRobinEngineAdapter;
+                if (rr != null)
+                    rrStandings = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
+            }
 
             return new LiveRaceUpdateDto
             {
                 EventName = eventName,
                 EventDate = eventDate,
+                ClassType = _session.ClassType,
+                RaceType = _session.RaceType,
                 CurrentRound = currentRound,
                 NextUp = nextUp,
-                Matches = matches
+                Matches = matches,
+                Winners = winners,
+                RRStandings = rrStandings
             };
         }
 
