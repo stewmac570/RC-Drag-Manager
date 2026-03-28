@@ -262,7 +262,7 @@ public class DriverRepositoryStatIncrementTests
             ?? throw new MissingMethodException(nameof(DriverRepository), "ExecuteStatIncrement");
 
         // Try a column name that is not in the whitelist.
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             try { method.Invoke(repo, new object[] { driver.Id, "Name", 1 }); }
             catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
@@ -288,7 +288,7 @@ public class DriverRepositoryStatIncrementTests
 
         const string injected = "TotalWins; DROP TABLE Drivers; --";
 
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             try { method.Invoke(repo, new object[] { driver.Id, injected, 1 }); }
             catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
@@ -315,7 +315,7 @@ public class DriverRepositoryStatIncrementTests
             BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new MissingMethodException(nameof(DriverRepository), "ExecuteStatIncrement");
 
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             try { method.Invoke(repo, new object[] { driver.Id, string.Empty, 1 }); }
             catch (TargetInvocationException e) when (e.InnerException is ArgumentException argEx)
