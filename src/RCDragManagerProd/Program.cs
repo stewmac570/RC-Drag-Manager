@@ -8,6 +8,8 @@ using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 using RCDragManagerProd.Config;
 
+//claude agent test
+
 namespace RCDragManagerProd
 {
     internal static class Program
