@@ -225,7 +225,7 @@ public class RaceControllerResetTests
             "HasBracketStarted must be true after a second GenerateBracket() call");
 
         var matches = controller.PeekUpcomingMatches(10);
-        Assert.IsTrue(matches.Count > 0,
+        Assert.AreNotEqual(0, matches.Count,
             "Second GenerateBracket() must produce at least one visible match");
 
         // 4 drivers → Pro Ladder → R1 has 2 matches
