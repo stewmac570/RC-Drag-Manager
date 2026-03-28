@@ -102,7 +102,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // txtName
             // 
-            this.txtName.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.txtName.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtName.Location = new System.Drawing.Point(20, 75);
             this.txtName.Name = "txtName";
@@ -111,7 +111,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // txtTime
             // 
-            this.txtTime.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.txtTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.txtTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtTime.Location = new System.Drawing.Point(20, 113);
             this.txtTime.Name = "txtTime";
@@ -121,7 +121,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnAddDriver
             // 
-            this.btnAddDriver.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnAddDriver.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.btnAddDriver.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAddDriver.Location = new System.Drawing.Point(224, 73);
             this.btnAddDriver.Name = "btnAddDriver";
@@ -154,7 +154,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lvDrivers
             // 
-            this.lvDrivers.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.lvDrivers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.lvDrivers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName,
             this.colTime});
@@ -238,7 +239,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnEditDriver
             // 
-            this.btnEditDriver.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnEditDriver.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnEditDriver.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEditDriver.Location = new System.Drawing.Point(219, 434);
             this.btnEditDriver.Name = "btnEditDriver";
@@ -249,7 +250,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // btnSetQualTime
             // 
-            this.btnSetQualTime.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnSetQualTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.btnSetQualTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSetQualTime.Location = new System.Drawing.Point(224, 109);
             this.btnSetQualTime.Name = "btnSetQualTime";
@@ -381,7 +382,7 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // lblDriversHeader
             // 
-            this.lblDriversHeader.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.lblDriversHeader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.lblDriversHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblDriversHeader.Location = new System.Drawing.Point(16, 50);
             this.lblDriversHeader.Name = "lblDriversHeader";
