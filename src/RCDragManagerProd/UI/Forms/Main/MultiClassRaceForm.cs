@@ -52,6 +52,8 @@ namespace RCDragManagerProd.UI.Forms
                 SubscribeToController(controller, _controllers.Count - 1);
             }
 
+            tabControl.DrawItem += TabControl_DrawItem;
+
             BuildTabs();
         }
 
@@ -109,6 +111,26 @@ namespace RCDragManagerProd.UI.Forms
         }
 
         // ── Tab state ─────────────────────────────────────────────────────────
+
+        private void TabControl_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var tab = tabControl.TabPages[e.Index];
+            var backColor = tab.BackColor == Color.Empty || tab.BackColor == Color.Transparent
+                ? SystemColors.Control
+                : tab.BackColor;
+
+            using (var brush = new SolidBrush(backColor))
+                e.Graphics.FillRectangle(brush, e.Bounds);
+
+            var textColor = Color.Black;
+            TextRenderer.DrawText(
+                e.Graphics,
+                tab.Text,
+                e.Font,
+                e.Bounds,
+                textColor,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
 
         private void UpdateAllTabStates()
         {
