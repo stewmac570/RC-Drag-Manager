@@ -52,6 +52,8 @@ namespace RCDragManagerProd.UI.Forms
                 SubscribeToController(controller, _controllers.Count - 1);
             }
 
+            tabControl.DrawItem += TabControl_DrawItem;
+
             BuildTabs();
         }
 
@@ -110,6 +112,26 @@ namespace RCDragManagerProd.UI.Forms
 
         // ── Tab state ─────────────────────────────────────────────────────────
 
+        private void TabControl_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var tab = tabControl.TabPages[e.Index];
+            var backColor = tab.BackColor == Color.Empty || tab.BackColor == Color.Transparent
+                ? SystemColors.Control
+                : tab.BackColor;
+
+            using (var brush = new SolidBrush(backColor))
+                e.Graphics.FillRectangle(brush, e.Bounds);
+
+            var textColor = Color.Black;
+            TextRenderer.DrawText(
+                e.Graphics,
+                tab.Text,
+                e.Font,
+                e.Bounds,
+                textColor,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+
         private void UpdateAllTabStates()
         {
             for (int i = 0; i < tabControl.TabPages.Count; i++)
@@ -123,22 +145,45 @@ namespace RCDragManagerProd.UI.Forms
             var tab = tabControl.TabPages[classIndex];
             var controller = _controllers[classIndex];
 
+            // Determine which class index is "next in sequence" —
+            // the lowest index where the bracket has started and the current round has pending matches
+            int nextActiveIndex = -1;
+            for (int i = 0; i < _controllers.Count; i++)
+            {
+                if (_completedClassIndexes.Contains(i)) continue;
+                if (_rrCompleteClassIndexes.Contains(i)) continue;
+                if (_controllers[i].HasBracketStarted && _controllers[i].HasPendingMatchesInCurrentRound())
+                {
+                    nextActiveIndex = i;
+                    break;
+                }
+            }
+
+            Color color;
+
             if (_completedClassIndexes.Contains(classIndex))
             {
-                tab.BackColor = Color.LightGray;
+                color = Color.LightGray;
             }
             else if (_rrCompleteClassIndexes.Contains(classIndex))
             {
-                tab.BackColor = Color.LightGreen;
+                color = Color.Orange;
             }
-            else if (controller.HasBracketStarted && controller.HasPendingMatchesInCurrentRound())
+            else if (classIndex == nextActiveIndex)
             {
-                tab.BackColor = Color.Orange;
+                color = Color.LightGreen;
+            }
+            else if (controller.HasBracketStarted && !controller.HasPendingMatchesInCurrentRound())
+            {
+                color = Color.SteelBlue;
             }
             else
             {
-                tab.BackColor = SystemColors.Control;
+                color = SystemColors.Control;
             }
+
+            tab.BackColor = color;
+            tabControl.Invalidate();
         }
 
         // ── Tab switching enforcement ──────────────────────────────────────────
