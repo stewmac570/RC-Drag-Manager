@@ -30,6 +30,7 @@ namespace RCDragManagerProd.UI.Forms
         private readonly HashSet<int> _completedClassIndexes = new HashSet<int>();
         private readonly Dictionary<int, RaceController.RaceSummary> _raceSummaries =
             new Dictionary<int, RaceController.RaceSummary>();
+        private readonly Dictionary<int, Color> _tabColors = new Dictionary<int, Color>();
 
         // ── Construction ──────────────────────────────────────────────────────
 
@@ -114,21 +115,19 @@ namespace RCDragManagerProd.UI.Forms
 
         private void TabControl_DrawItem(object sender, DrawItemEventArgs e)
         {
-            var tab = tabControl.TabPages[e.Index];
-            var backColor = tab.BackColor == Color.Empty || tab.BackColor == Color.Transparent
-                ? SystemColors.Control
-                : tab.BackColor;
+            _tabColors.TryGetValue(e.Index, out Color backColor);
+            if (backColor == Color.Empty) backColor = SystemColors.Control;
 
             using (var brush = new SolidBrush(backColor))
                 e.Graphics.FillRectangle(brush, e.Bounds);
 
-            var textColor = Color.Black;
+            var tab = tabControl.TabPages[e.Index];
             TextRenderer.DrawText(
                 e.Graphics,
                 tab.Text,
                 e.Font,
                 e.Bounds,
-                textColor,
+                Color.Black,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
 
@@ -142,11 +141,8 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (classIndex < 0 || classIndex >= tabControl.TabPages.Count) return;
 
-            var tab = tabControl.TabPages[classIndex];
             var controller = _controllers[classIndex];
 
-            // Determine which class index is "next in sequence" —
-            // the lowest index where the bracket has started and the current round has pending matches
             int nextActiveIndex = -1;
             for (int i = 0; i < _controllers.Count; i++)
             {
@@ -162,27 +158,17 @@ namespace RCDragManagerProd.UI.Forms
             Color color;
 
             if (_completedClassIndexes.Contains(classIndex))
-            {
                 color = Color.LightGray;
-            }
             else if (_rrCompleteClassIndexes.Contains(classIndex))
-            {
                 color = Color.Orange;
-            }
             else if (classIndex == nextActiveIndex)
-            {
                 color = Color.LightGreen;
-            }
             else if (controller.HasBracketStarted && !controller.HasPendingMatchesInCurrentRound())
-            {
                 color = Color.SteelBlue;
-            }
             else
-            {
                 color = SystemColors.Control;
-            }
 
-            tab.BackColor = color;
+            _tabColors[classIndex] = color;
             tabControl.Invalidate();
         }
 
