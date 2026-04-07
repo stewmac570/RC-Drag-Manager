@@ -27,6 +27,7 @@ namespace RCDragManagerProd.UI.Forms
         /// so MultiClassRaceForm can coordinate those across all classes.
         /// </summary>
         public bool IsHostedMode { get; set; }
+        public event EventHandler HostedSaveAndCloseCompleted;
 
         /// <summary>
         /// Set by MultiClassRaceForm so that btnSaveAndClose also persists the

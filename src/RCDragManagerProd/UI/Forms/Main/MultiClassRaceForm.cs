@@ -102,6 +102,7 @@ namespace RCDragManagerProd.UI.Forms
                 form1.Dock = DockStyle.Fill;
 
                 tab.Controls.Add(form1);
+                form1.HostedSaveAndCloseCompleted += OnHostedSaveAndCloseCompleted;
                 form1.Show();
 
                 tabControl.TabPages.Add(tab);
@@ -109,6 +110,11 @@ namespace RCDragManagerProd.UI.Forms
             }
 
             UpdateAllTabStates();
+        }
+
+        private void OnHostedSaveAndCloseCompleted(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         // ── Tab state ─────────────────────────────────────────────────────────
