@@ -407,7 +407,10 @@ namespace RCDragManagerProd.UI.Forms
             }
 
             MessageBox.Show("Race session saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            Close();
+            if (IsHostedMode)
+                HostedSaveAndCloseCompleted?.Invoke(this, EventArgs.Empty);
+            else
+                Close();
         }
 
         // Designer stubs
