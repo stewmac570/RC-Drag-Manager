@@ -57,7 +57,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Left = 12,
                 Top = 78,
-                Width = 400,
+                Width = 300,
                 Text = "Enable Live Broadcast to stewmacrc.com",
                 Checked = AppSettings.LiveBroadcastEnabled
             };
@@ -66,8 +66,8 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Name = "btnOpenLiveView",
                 Text = "Open Live View",
-                Left = 230,
-                Top = 78,
+                Left = 12,
+                Top = 106,
                 Width = 200
             };
 
