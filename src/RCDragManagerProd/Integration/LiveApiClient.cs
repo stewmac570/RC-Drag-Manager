@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using RCDragManagerProd.Config;
 using RCDragManagerProd.Logging;
 
 namespace RCDragManagerProd.Integration
@@ -29,9 +30,7 @@ namespace RCDragManagerProd.Integration
             await SendGate.WaitAsync().ConfigureAwait(false);
             try
             {
-                var enabledValue = ConfigurationManager.AppSettings["LiveUpdateEnabled"];
-                if (!string.IsNullOrWhiteSpace(enabledValue) &&
-                    enabledValue.Equals("false", StringComparison.OrdinalIgnoreCase))
+                if (!AppSettings.LiveBroadcastEnabled)
                 {
                     Logger.Log("[LIVE][FAIL] Live updates disabled by config.");
                     return;

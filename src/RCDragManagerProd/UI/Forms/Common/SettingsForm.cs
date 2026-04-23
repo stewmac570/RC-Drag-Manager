@@ -11,8 +11,8 @@ namespace RCDragManagerProd.UI.Forms
         private const string ProductionLiveViewUrl = "https://stewmacrc.com";
 
         private readonly CheckBox _chkLogging;
+        private readonly CheckBox _chkLiveBroadcast;
         private readonly TextBox _txtPath;
-        private readonly Button _btnStartLocalLiveServer;
         private readonly Button _btnOpenLiveView;
         private readonly Button _btnOk;
         private readonly Button _btnCancel;
@@ -53,22 +53,21 @@ namespace RCDragManagerProd.UI.Forms
                 Text = AppSettings.LogFilePath
             };
 
-            _btnStartLocalLiveServer = new Button
+            _chkLiveBroadcast = new CheckBox
             {
-                Name = "btnStartLocalLiveServer",
-                Text = "Test Local Server (DEV ONLY)",
                 Left = 12,
                 Top = 78,
-                Width = 200,
-                Enabled = false
+                Width = 300,
+                Text = "Enable Live Broadcast to stewmacrc.com",
+                Checked = AppSettings.LiveBroadcastEnabled
             };
 
             _btnOpenLiveView = new Button
             {
                 Name = "btnOpenLiveView",
                 Text = "Open Live View",
-                Left = 230,
-                Top = 78,
+                Left = 12,
+                Top = 106,
                 Width = 200
             };
 
@@ -80,7 +79,7 @@ namespace RCDragManagerProd.UI.Forms
                 _chkLogging,
                 lblPath,
                 _txtPath,
-                _btnStartLocalLiveServer,
+                _chkLiveBroadcast,
                 _btnOpenLiveView,
                 _btnOk,
                 _btnCancel
@@ -88,24 +87,15 @@ namespace RCDragManagerProd.UI.Forms
 
             AcceptButton = _btnOk;
             CancelButton = _btnCancel;
-            _btnStartLocalLiveServer.Click += btnStartLocalLiveServer_Click;
             _btnOpenLiveView.Click += btnOpenLiveView_Click;
 
             _btnOk.Click += (_, __) =>
             {
                 AppSettings.EnableLogging = _chkLogging.Checked;
+                AppSettings.LiveBroadcastEnabled = _chkLiveBroadcast.Checked;
                 if (AppSettings.EnableLogging) Logger.Log("[SETTINGS] Logging enabled.");
                 Close();
             };
-        }
-
-        private void btnStartLocalLiveServer_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show(this,
-                "Local server start is disabled in production builds.",
-                "DEV ONLY",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
         }
 
         private void btnOpenLiveView_Click(object sender, EventArgs e)

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
+using RCDragManagerProd.Config;
 using RCDragManagerProd.Integration;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.RaceEngines;
@@ -118,8 +118,7 @@ namespace RCDragManagerProd.Controllers
         {
             try
             {
-                var enabledText = ConfigurationManager.AppSettings["LiveUpdateEnabled"];
-                if (bool.TryParse(enabledText, out var enabled) && !enabled)
+                if (!AppSettings.LiveBroadcastEnabled)
                 {
                     Logger.Log("[LIVE][SKIP] reason=" + reason + " disabled=true");
                     return;
