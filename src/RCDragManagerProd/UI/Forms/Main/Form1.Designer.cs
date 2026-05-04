@@ -463,8 +463,8 @@ namespace RCDragManagerProd.UI.Forms
             | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lvWinners.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colMatchWin,
-            this.colLoser,
-            this.colWinner});
+            this.colWinner,
+            this.colLoser});
             this.lvWinners.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lvWinners.FullRowSelect = true;
             this.lvWinners.HideSelection = false;
