@@ -32,6 +32,7 @@ namespace RCDragManagerProd.RoundRobinMode
             var totals = new Dictionary<int, double>();
             var wins = new Dictionary<int, int>();
             var losses = new Dictionary<int, int>();
+            var byes = new Dictionary<int, int>();
             var defeated = new Dictionary<int, HashSet<int>>();
 
             Action<int> ensure = id =>
@@ -40,6 +41,7 @@ namespace RCDragManagerProd.RoundRobinMode
                 if (!totals.ContainsKey(id)) totals[id] = 0;
                 if (!wins.ContainsKey(id)) wins[id] = 0;
                 if (!losses.ContainsKey(id)) losses[id] = 0;
+                if (!byes.ContainsKey(id)) byes[id] = 0;
                 if (!defeated.ContainsKey(id)) defeated[id] = new HashSet<int>();
             };
 
@@ -66,6 +68,7 @@ namespace RCDragManagerProd.RoundRobinMode
                     ensure(w.Id);
                     addLine(w.Id, new Line { RoundLabel = m.RoundLabel, Outcome = "BYE", Points = p.Bye, Opponent = "BYE", OpponentId = null });
                     totals[w.Id] += p.Bye;
+                    byes[w.Id] += 1;
                     continue;
                 }
 
@@ -139,14 +142,11 @@ namespace RCDragManagerProd.RoundRobinMode
                 }
             }
 
-            // Build popup with CompositeScore that encodes tie-breaks numerically
+            // Build popup with per-driver detail and tiebreaker explanations
             var sb = new StringBuilder();
-            sb.AppendLine("Round Robin — Standings");
-            sb.AppendLine($"Schedule: RR1(W=4 L=1 BYE=2), RR2(W=3.5 L=0.75 BYE=1.5), RR3(W=3 L=0.5 BYE=1)");
-            sb.AppendLine($"Composite = Pts"
-                + $" + Wins×{WEIGHT_WINS:0.####}"
-                + $" + H2H×{WEIGHT_H2H:0.####}"
-                + $" + SoS×{WEIGHT_SOS:0.######}");
+            sb.AppendLine("Round Robin — Detailed Scorecard");
+            sb.AppendLine($"Scoring: RR1(W=4 L=1 BYE=2), RR2(W=3.5 L=0.75 BYE=1.5), RR3(W=3 L=0.5 BYE=1)");
+            sb.AppendLine("Tiebreakers: (1) Head-to-head  (2) Opponent Strength (SoS = sum of opponents' final points)");
             sb.AppendLine();
 
             var ordered = drivers
@@ -161,31 +161,38 @@ namespace RCDragManagerProd.RoundRobinMode
                 totals.TryGetValue(d.Id, out var tp);
                 wins.TryGetValue(d.Id, out var w);
                 losses.TryGetValue(d.Id, out var l);
+                byes.TryGetValue(d.Id, out var byeCount);
                 var s = sos.TryGetValue(d.Id, out var sVal) ? sVal : 0.0;
                 var h = h2hScore.TryGetValue(d.Id, out var hVal) ? hVal : 0;
 
                 double comp = tp + (w * WEIGHT_WINS) + (h * WEIGHT_H2H) + (s * WEIGHT_SOS);
 
                 var name = idToName.TryGetValue(d.Id, out var nm) ? nm : (d.Name ?? d.Id.ToString());
-                sb.AppendLine($"#{rank++} {name} — Score={comp:0.000000}  (Pts={tp:0.00}, W={w}, H2H={h}, SoS={s:0.00})");
-
+                sb.AppendLine($"#{rank++} {name}");
+                sb.AppendLine($"   Total: {tp:0.00} pts  |  W={w}  L={l}  BYE={byeCount}  |  SoS={s:0.00}  [rank score={comp:0.000000}]");
 
                 if (lines.TryGetValue(d.Id, out var lnz))
                 {
                     foreach (var ln in lnz.OrderBy(x => RoundLabels.CompareKey(x.RoundLabel)))
-                        sb.AppendLine($"   {ln.RoundLabel}: {ln.Outcome}(+{ln.Points:0.00}) vs {ln.Opponent}");
+                        sb.AppendLine($"   {ln.RoundLabel}: {ln.Outcome} (+{ln.Points:0.00}) vs {ln.Opponent}");
+
+                    var sosDetails = lnz
+                        .Where(x => x.OpponentId.HasValue)
+                        .OrderBy(x => RoundLabels.CompareKey(x.RoundLabel))
+                        .Select(x =>
+                        {
+                            totals.TryGetValue(x.OpponentId.Value, out var oppPts);
+                            return $"{x.Opponent}={oppPts:0.00}";
+                        })
+                        .ToList();
+                    if (sosDetails.Count > 0)
+                        sb.AppendLine($"   SoS: {string.Join(" + ", sosDetails)} = {s:0.00}");
                 }
 
-                if (defeated.TryGetValue(d.Id, out var def) && def.Count > 0)
-                {
-                    var names = def.Select(id => idToName.TryGetValue(id, out var nm) ? nm : id.ToString());
-                    sb.AppendLine($"   Defeated: {string.Join(", ", names)}");
-                }
                 sb.AppendLine();
             }
 
-            // Quick tie notes (optional – keeps your old explanation)
-            sb.AppendLine("Tie-break notes (display Composite encodes these):");
+            bool anyTie = false;
             for (int i = 0; i < ordered.Count - 1; i++)
             {
                 var a = ordered[i];
@@ -197,7 +204,24 @@ namespace RCDragManagerProd.RoundRobinMode
                 wins.TryGetValue(b.Id, out var bw);
 
                 if (Math.Abs(at - bt) < 1e-9 && aw == bw)
-                    sb.AppendLine($"  {idToName[a.Id]} vs {idToName[b.Id]} → H2H={(h2hScore[a.Id] - h2hScore[b.Id])}, SoS={(sos[a.Id] - sos[b.Id]):0.00}");
+                {
+                    if (!anyTie) { sb.AppendLine("Tiebreaker resolutions:"); anyTie = true; }
+
+                    var aName = idToName[a.Id];
+                    var bName = idToName[b.Id];
+
+                    if (h2hScore[a.Id] != h2hScore[b.Id])
+                    {
+                        var h2hWinner = HeadToHead(results, matches, a.Id, b.Id, idToName);
+                        sb.AppendLine($"  {aName} vs {bName} — tied on {at:0.00} pts, {aw} wins");
+                        sb.AppendLine($"    Resolved by head-to-head: {h2hWinner} won the direct match");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"  {aName} vs {bName} — tied on {at:0.00} pts, {aw} wins, H2H even");
+                        sb.AppendLine($"    Resolved by opponent strength: {aName}={sos[a.Id]:0.00} pts vs {bName}={sos[b.Id]:0.00} pts");
+                    }
+                }
             }
 
             return sb.ToString().TrimEnd();
