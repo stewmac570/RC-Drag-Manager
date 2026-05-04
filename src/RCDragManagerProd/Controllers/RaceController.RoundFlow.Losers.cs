@@ -17,9 +17,22 @@ namespace RCDragManagerProd.Controllers
         {
             Logger.Log("📦 GenerateLosersBracket wrapper called…");
 
-            if (selectedDrivers == null || selectedDrivers.Count < 2)
+            if (selectedDrivers == null || selectedDrivers.Count == 0)
             {
-                Logger.Log("⚠️  Cannot generate LB — <2 drivers selected");
+                Logger.Log("⚠️  Cannot generate LB — no drivers selected");
+                return;
+            }
+
+            if (selectedDrivers.Count == 1)
+            {
+                // Single buyback driver: skip LB entirely and promote direct to Finals
+                var single = selectedDrivers[0];
+                Logger.Log($"[LB] Single buyback driver '{single.Name}' — skipping LB, promoting direct to Finals.");
+                _session.BuybackDrivers = new List<Driver>(selectedDrivers);
+                _buybackChampionOverride = single;
+                _finalsPending = true;
+                CanStartFinalsChanged?.Invoke(true);
+                Logger.Log("[LB] Finals gate raised — single LB representative ready.");
                 return;
             }
 
