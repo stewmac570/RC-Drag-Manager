@@ -89,6 +89,8 @@ namespace RCDragManagerProd.Controllers
 
             PushAdvanceState();
             Logger.Log("[LB] Advance state evaluated after LB R1 reveal.");
+
+            QueueLiveUpdate("StartLosersBracket");
         }
     }
 }

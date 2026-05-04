@@ -94,6 +94,8 @@ namespace RCDragManagerProd.Controllers
 
             PushAdvanceState();
             Logger.Log("[FINALS] Advance state evaluated after SF reveal (F gated).");
+
+            QueueLiveUpdate("InjectFinal4Bracket");
         }
 
         public void StartFinals()
@@ -168,6 +170,8 @@ namespace RCDragManagerProd.Controllers
 
             PushAdvanceState();
             Logger.Log("[FINALS][NOBUYBACK] Advance state evaluated.");
+
+            QueueLiveUpdate("StartFinalsTop3NoBuyback");
         }
         // ─────────────────────────────────────────────────────────────
         // QMDRA Finals Injection — ALL drivers advance (no buyback)
@@ -220,6 +224,8 @@ namespace RCDragManagerProd.Controllers
             PushFullRefresh();
             PushNextMatch();
             PushAdvanceState();
+
+            QueueLiveUpdate("InjectFinalsAllAdvance");
         }
 
         private Driver TryResolveEngineChampion(IRaceEngine engine, string roundHint)
