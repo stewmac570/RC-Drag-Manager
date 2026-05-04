@@ -43,6 +43,9 @@ namespace RCDragManagerProd.UI.Forms
 
             btnEditResult.Click += btnEditResult_Click;
 
+            btnWinner1.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right) ShowEditDialInForButton(isLeft: true); };
+            btnWinner2.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right) ShowEditDialInForButton(isLeft: false); };
+
             currentSession = _controller.Session;
 
             lblEventTitle.Text = currentSession != null
@@ -83,6 +86,8 @@ namespace RCDragManagerProd.UI.Forms
             _controller.CanOfferBuybackChanged += OnCanOfferBuybackChanged;
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
+
+            _controller.StartDialInPolling();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -99,6 +104,8 @@ namespace RCDragManagerProd.UI.Forms
             }
             catch { }
 
+            _controller.StopDialInPolling();
+
             base.OnFormClosed(e);
         }
         private sealed class WinnerButtonContext
@@ -107,6 +114,8 @@ namespace RCDragManagerProd.UI.Forms
             public string RoundLabel { get; set; }
             public string LeftName { get; set; }
             public string RightName { get; set; }
+            public int LeftDriverId { get; set; }
+            public int RightDriverId { get; set; }
         }
 
     }

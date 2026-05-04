@@ -133,9 +133,13 @@ namespace RCDragManagerProd.UI.Forms
                 string currentLeft;
                 string currentRight;
 
+                int leftDriverId = 0, rightDriverId = 0;
                 if (current != null)
                 {
                     _controller.GetLaneAdjustedNames(current, out currentLeft, out currentRight);
+                    bool swapped = currentLeft != (current.Driver1?.Name ?? "BYE");
+                    leftDriverId  = (swapped ? current.Driver2 : current.Driver1)?.Id ?? 0;
+                    rightDriverId = (swapped ? current.Driver1 : current.Driver2)?.Id ?? 0;
                 }
                 else
                 {
@@ -144,8 +148,11 @@ namespace RCDragManagerProd.UI.Forms
                     currentRight = string.IsNullOrWhiteSpace(row.Driver2) ? "BYE" : row.Driver2;
                 }
 
-                btnWinner1.Text = currentLeft;
-                btnWinner2.Text = currentRight;
+                double? leftDialIn  = leftDriverId  > 0 ? _controller.GetDriverDialIn(leftDriverId)  : null;
+                double? rightDialIn = rightDriverId > 0 ? _controller.GetDriverDialIn(rightDriverId) : null;
+
+                btnWinner1.Text = currentLeft  + FormatDialIn(leftDialIn);
+                btnWinner2.Text = currentRight + FormatDialIn(rightDialIn);
 
                 btnWinner1.Tag = row.MatchId;
                 btnWinner2.Tag = row.MatchId;
@@ -154,7 +161,9 @@ namespace RCDragManagerProd.UI.Forms
                     MatchId = row.MatchId,
                     RoundLabel = current?.RoundLabel ?? row.RoundLabel,
                     LeftName = currentLeft,
-                    RightName = currentRight
+                    RightName = currentRight,
+                    LeftDriverId  = leftDriverId,
+                    RightDriverId = rightDriverId
                 };
 
                 // Grey out / disable BYE buttons (so clicking does nothing because you can't click it)
@@ -250,6 +259,12 @@ namespace RCDragManagerProd.UI.Forms
                 lbl.ForeColor = SystemColors.ControlText;
                 lbl.Font = new Font(lbl.Font.FontFamily, lbl.Font.Size, FontStyle.Regular);
             }
+        }
+
+        private static string FormatDialIn(double? dialIn)
+        {
+            if (dialIn == null) return string.Empty;
+            return " [" + dialIn.Value.ToString("F3") + "]";
         }
 
         private void OnWinnersUpdated(IReadOnlyList<WinnerRow> rows)

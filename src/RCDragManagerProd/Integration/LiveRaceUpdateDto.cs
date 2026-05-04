@@ -13,6 +13,7 @@ namespace RCDragManagerProd.Integration
         public string RRStandings { get; set; }
         public List<LiveMatchDto> Matches { get; set; }
         public List<LiveWinnerDto> Winners { get; set; }
+        public bool DialInLocked { get; set; }
     }
 
     public class LiveMatchDto
@@ -23,6 +24,8 @@ namespace RCDragManagerProd.Integration
         public string LeftDriver { get; set; }
         public string RightDriver { get; set; }
         public string WinnerName { get; set; }
+        public double? LeftDriverDialIn { get; set; }
+        public double? RightDriverDialIn { get; set; }
     }
 
     public class LiveWinnerDto
