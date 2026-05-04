@@ -72,12 +72,18 @@ namespace RCDragManagerProd.Controllers
             }
 
             var matches = allMatches
-                .Select(m => new LiveMatchDto
+                .Select(m =>
                 {
-                    RoundLabel = m.RoundLabel,
-                    Driver1 = m.Driver1?.Name ?? "BYE",
-                    Driver2 = m.Driver2?.Name ?? "BYE",
-                    WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null
+                    GetLaneAdjustedNames(m, out var leftName, out var rightName);
+                    return new LiveMatchDto
+                    {
+                        RoundLabel = m.RoundLabel,
+                        Driver1 = m.Driver1?.Name ?? "BYE",
+                        Driver2 = m.Driver2?.Name ?? "BYE",
+                        LeftDriver = leftName,
+                        RightDriver = rightName,
+                        WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null
+                    };
                 })
                 .ToList();
 

@@ -20,6 +20,8 @@ namespace RCDragManagerProd.Integration
         public string RoundLabel { get; set; }
         public string Driver1 { get; set; }
         public string Driver2 { get; set; }
+        public string LeftDriver { get; set; }
+        public string RightDriver { get; set; }
         public string WinnerName { get; set; }
     }
 
