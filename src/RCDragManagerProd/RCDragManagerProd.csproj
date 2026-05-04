@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="Controllers\IStandingsDialogService.cs" />
     <Compile Include="Controllers\LaneFairnessManager.cs" />
+    <Compile Include="Controllers\RaceController.DialIn.cs" />
     <Compile Include="Controllers\RaceController.LiveUpdate.cs" />
     <Compile Include="Controllers\RaceController.Logging.cs" />
     <Compile Include="Controllers\RaceController.EngineCalls.cs" />

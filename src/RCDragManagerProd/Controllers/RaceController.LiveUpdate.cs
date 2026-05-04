@@ -75,6 +75,9 @@ namespace RCDragManagerProd.Controllers
                 .Select(m =>
                 {
                     GetLaneAdjustedNames(m, out var leftName, out var rightName);
+                    bool swapped = leftName != (m.Driver1?.Name ?? "BYE");
+                    var leftDriver  = swapped ? m.Driver2 : m.Driver1;
+                    var rightDriver = swapped ? m.Driver1 : m.Driver2;
                     return new LiveMatchDto
                     {
                         RoundLabel = m.RoundLabel,
@@ -82,7 +85,9 @@ namespace RCDragManagerProd.Controllers
                         Driver2 = m.Driver2?.Name ?? "BYE",
                         LeftDriver = leftName,
                         RightDriver = rightName,
-                        WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null
+                        WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null,
+                        LeftDriverDialIn  = GetDriverDialIn(leftDriver?.Id ?? -1),
+                        RightDriverDialIn = GetDriverDialIn(rightDriver?.Id ?? -1)
                     };
                 })
                 .ToList();
@@ -116,7 +121,8 @@ namespace RCDragManagerProd.Controllers
                 NextUp = nextUp,
                 Matches = matches,
                 Winners = winners,
-                RRStandings = rrStandings
+                RRStandings = rrStandings,
+                DialInLocked = _dialInLocked
             };
         }
 

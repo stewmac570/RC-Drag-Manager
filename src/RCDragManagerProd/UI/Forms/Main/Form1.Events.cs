@@ -20,6 +20,8 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (InvokeRequired) { BeginInvoke(new Action<bool>(OnCanAdvanceChanged), canAdvance); return; }
             btnNextRound.Enabled = canAdvance;
+            if (canAdvance)
+                _controller.UnlockDialIn();
             Logger.Log($"UI: Generate Next Round button {(canAdvance ? "enabled" : "disabled")}.");
         }
 
@@ -307,6 +309,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 btnNextRound.Enabled = false;
                 Logger.Log("[FORM1] Generate Next Round clicked");
+                _controller.LockDialIn();
                 _controller.AdvanceRound();
             }
             catch (Exception ex)
@@ -556,6 +559,100 @@ namespace RCDragManagerProd.UI.Forms
                     "Edit Match Result", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void ShowEditDialInForButton(bool isLeft)
+        {
+            if (_currentWinnerButtonContext == null) return;
+            string name    = isLeft ? _currentWinnerButtonContext.LeftName  : _currentWinnerButtonContext.RightName;
+            int driverId   = isLeft ? _currentWinnerButtonContext.LeftDriverId : _currentWinnerButtonContext.RightDriverId;
+            if (IsByeName(name) || driverId <= 0) return;
+
+            double? current = _controller.GetDriverDialIn(driverId);
+            ShowEditDialInDialog(driverId, name, current);
+        }
+
+        private void ShowEditDialInDialog(int driverId, string driverName, double? currentDialIn)
+        {
+            using (var dlg = new Form())
+            {
+                dlg.Text = $"Edit Dial-In — {driverName}";
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ClientSize = new Size(320, 120);
+                dlg.MinimizeBox = false;
+                dlg.MaximizeBox = false;
+
+                var lbl = new Label
+                {
+                    Text = "Dial-in (seconds):",
+                    AutoSize = true,
+                    Location = new Point(16, 18)
+                };
+
+                var txt = new TextBox
+                {
+                    Text = currentDialIn?.ToString("F3") ?? string.Empty,
+                    Location = new Point(16, 40),
+                    Width = 140
+                };
+                txt.SelectAll();
+
+                var btnOk = new Button
+                {
+                    Text = "OK",
+                    Location = new Point(16, 78),
+                    Size = new Size(70, 26),
+                    DialogResult = DialogResult.OK
+                };
+
+                var btnClear = new Button
+                {
+                    Text = "Clear",
+                    Location = new Point(92, 78),
+                    Size = new Size(64, 26)
+                };
+                btnClear.Click += (_, __) => txt.Clear();
+
+                var btnCancel = new Button
+                {
+                    Text = "Cancel",
+                    Location = new Point(224, 78),
+                    Size = new Size(80, 26),
+                    DialogResult = DialogResult.Cancel
+                };
+
+                dlg.AcceptButton = btnOk;
+                dlg.CancelButton = btnCancel;
+                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnClear, btnCancel });
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                double? newDialIn = null;
+                string val = txt.Text.Trim();
+                if (!string.IsNullOrEmpty(val))
+                {
+                    if (!double.TryParse(val, System.Globalization.NumberStyles.Any,
+                                         System.Globalization.CultureInfo.InvariantCulture, out double parsed))
+                    {
+                        MessageBox.Show("Invalid value — enter a number or leave blank to clear.",
+                            "Invalid Dial-In", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    newDialIn = parsed;
+                }
+
+                _controller.UpdateDriverDialIn(driverId, newDialIn);
+
+                // Refresh the winner button text
+                if (_currentWinnerButtonContext != null)
+                {
+                    double? ld = _controller.GetDriverDialIn(_currentWinnerButtonContext.LeftDriverId);
+                    double? rd = _controller.GetDriverDialIn(_currentWinnerButtonContext.RightDriverId);
+                    btnWinner1.Text = _currentWinnerButtonContext.LeftName  + FormatDialIn(ld);
+                    btnWinner2.Text = _currentWinnerButtonContext.RightName + FormatDialIn(rd);
+                }
+            }
+        }
+
         private void btnStandings_Click(object sender, EventArgs e)
         {
             try

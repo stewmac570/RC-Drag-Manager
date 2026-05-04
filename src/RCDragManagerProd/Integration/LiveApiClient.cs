@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net.Http;
 using System.Text;
@@ -12,7 +13,8 @@ namespace RCDragManagerProd.Integration
 {
     public sealed class LiveApiClient
     {
-        private const string LiveUpdateUrl = "https://stewmacrc.com/api/update";
+        private const string LiveUpdateUrl  = "https://stewmacrc.com/api/update";
+        private const string DialInPollUrl  = "https://stewmacrc.com/api/dialin";
 
         private static readonly HttpClient Http = new HttpClient
         {
@@ -82,6 +84,36 @@ namespace RCDragManagerProd.Integration
             finally
             {
                 SendGate.Release();
+            }
+        }
+
+        public async Task<Dictionary<string, double?>> GetDialInUpdatesAsync()
+        {
+            try
+            {
+                var apiKey = ConfigurationManager.AppSettings["ApiKey"];
+                if (string.IsNullOrWhiteSpace(apiKey)) return null;
+
+                using (var req = new HttpRequestMessage(HttpMethod.Get, DialInPollUrl))
+                {
+                    req.Headers.Add("X-API-KEY", apiKey);
+                    using (var resp = await Http.SendAsync(req).ConfigureAwait(false))
+                    {
+                        if (!resp.IsSuccessStatusCode)
+                        {
+                            Logger.Log("[DIALIN][POLL] Status=" + (int)resp.StatusCode);
+                            return null;
+                        }
+                        var body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        return JsonSerializer.Deserialize<Dictionary<string, double?>>(body,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[DIALIN][POLL][ERROR] " + ex.Message);
+                return null;
             }
         }
     }
