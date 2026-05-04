@@ -177,6 +177,7 @@ namespace RCDragManagerProd.Controllers
             WinnersUpdated?.Invoke(_winners);
             PushNextMatch();
             PushAdvanceState();
+            QueueLiveUpdate("EditWinner");
             return true;
         }
     }
