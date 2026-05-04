@@ -451,24 +451,35 @@ namespace RCDragManagerProd.UI.Forms
 
                     var selectedDrivers = dlg.SelectedDrivers;
 
-                    if (selectedDrivers == null || selectedDrivers.Count < 2)
+                    if (selectedDrivers == null || selectedDrivers.Count == 0)
                     {
-                        MessageBox.Show("At least two drivers must be selected.", "Invalid Selection",
+                        MessageBox.Show("At least one driver must be selected.", "Invalid Selection",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        Logger.Log($"⚠️ [LB] Invalid buyback selection — {selectedDrivers?.Count ?? 0} drivers selected.");
+                        Logger.Log("⚠️ [LB] Invalid buyback selection — no drivers selected.");
                         return;
                     }
 
                     Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
 
-                    _controller.SetBuybackDrivers(selectedDrivers);
+                    if (selectedDrivers.Count == 1)
+                    {
+                        // Single buyback: skip LB entirely, promote direct to Finals.
+                        // GenerateLosersBracket sets _buybackChampionOverride + fires CanStartFinalsChanged(true),
+                        // which enables btnGenerateBracket via OnCanStartFinalsChanged.
+                        _controller.GenerateLosersBracket(selectedDrivers);
+                        Logger.Log("[UI] Single buyback driver — LB skipped, Finals gate raised.");
+                    }
+                    else
+                    {
+                        _controller.SetBuybackDrivers(selectedDrivers);
 
-                    btnGenerateBracket.Enabled = true;
+                        btnGenerateBracket.Enabled = true;
 
-                    btnGenerateLosersBracket.Enabled = true;
-                    btnGenerateLosersBracket.Text = "Edit Buybacks";
+                        btnGenerateLosersBracket.Enabled = true;
+                        btnGenerateLosersBracket.Text = "Edit Buybacks";
 
-                    Logger.Log("[UI] Buybacks stored. 'Generate Bracket' enabled; 'Buy Back' stays enabled for edits until LB is generated.");
+                        Logger.Log("[UI] Buybacks stored. 'Generate Bracket' enabled; 'Buy Back' stays enabled for edits until LB is generated.");
+                    }
                 }
             }
             catch (Exception ex)
