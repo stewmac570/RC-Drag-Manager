@@ -262,8 +262,8 @@ namespace RCDragManagerProd.UI.Forms
                 {
                     lvWinners.View = View.Details;
                     lvWinners.Columns.Add("M#", 45, HorizontalAlignment.Left);
-                    lvWinners.Columns.Add("Loser", 170, HorizontalAlignment.Left);
                     lvWinners.Columns.Add("Winner", 170, HorizontalAlignment.Left);
+                    lvWinners.Columns.Add("Loser", 170, HorizontalAlignment.Left);
                 }
 
                 lvWinners.BeginUpdate();
@@ -303,8 +303,8 @@ namespace RCDragManagerProd.UI.Forms
                     }
 
                     var item = new ListViewItem($"M{displayNo++}");
-                    item.SubItems.Add(w.Loser ?? string.Empty);
                     item.SubItems.Add(w.Winner ?? string.Empty);
+                    item.SubItems.Add(w.Loser ?? string.Empty);
                     item.Tag = w.MatchId;
                     lvWinners.Items.Add(item);
 
