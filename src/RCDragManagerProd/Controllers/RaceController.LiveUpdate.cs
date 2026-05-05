@@ -113,6 +113,7 @@ namespace RCDragManagerProd.Controllers
 
             return new LiveRaceUpdateDto
             {
+                EventId = _session.EventId.ToString("N"),
                 EventName = eventName,
                 EventDate = eventDate,
                 ClassType = _session.ClassType,

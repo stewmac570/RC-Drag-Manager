@@ -10,6 +10,7 @@ namespace RCDragManagerProd.Domain
     public class RaceSession
     {
         public int Id { get; set; }
+        public Guid EventId { get; set; }
         public string EventName { get; set; }
         public DateTime EventDate { get; set; }
         public string RaceType { get; set; }
@@ -46,6 +47,7 @@ namespace RCDragManagerProd.Domain
 
         public RaceSession()
         {
+            EventId = Guid.NewGuid();
             DriverEntries = new List<RaceSessionDriverEntry>();
             Logger.Log("[DEBUG] RaceSession ctor – Lists initialised.");
 

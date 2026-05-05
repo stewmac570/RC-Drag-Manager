@@ -4,6 +4,7 @@ namespace RCDragManagerProd.Integration
 {
     public class LiveRaceUpdateDto
     {
+        public string EventId { get; set; }
         public string EventName { get; set; }
         public string EventDate { get; set; }
         public string ClassType { get; set; }
