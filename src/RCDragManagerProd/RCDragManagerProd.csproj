@@ -122,6 +122,7 @@
     <Compile Include="Controllers\RaceController.RoundFlow.Losers.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.View.cs" />
     <Compile Include="Controllers\RaceController.Session.cs" />
+    <Compile Include="Controllers\RaceController.Stats.cs" />
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L03.cs" />
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L04.cs" />
     <Compile Include="Domain\Ladders\ProLadder.Ladders.L05.cs" />

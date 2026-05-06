@@ -8,7 +8,6 @@ using System.Linq;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
-using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
 {
@@ -273,63 +272,18 @@ namespace RCDragManagerProd.UI.Forms
 
         private void UpdateDriverStats(Driver winner, Driver loser)
         {
-            try
+            if (IsByeName(winner?.Name) || IsByeName(loser?.Name))
             {
-                if (winner == null || loser == null)
-                {
-                    Logger.Log("[STATS] Skip: winner/loser null.");
-                    return;
-                }
-
-                if (IsByeName(winner.Name) || IsByeName(loser.Name))
-                {
-                    Logger.Log("[STATS] Skip: BYE in matchup.");
-                    return;
-                }
-
-                var repo = new DriverRepository(Program.ConnectionString);
-                var wdb = repo.GetDriverById(winner.Id);
-                var ldb = repo.GetDriverById(loser.Id);
-
-                if (wdb == null || ldb == null)
-                {
-                    Logger.Log($"[STATS] Skip: DB lookup failed (winnerId={winner.Id}->{(wdb != null)}, loserId={loser.Id}->{(ldb != null)}).");
-                    return;
-                }
-
-                wdb.TotalWins += 1;
-                ldb.TotalLosses += 1;
-                repo.UpdateDriver(wdb);
-                repo.UpdateDriver(ldb);
-
-                Logger.Log($"[STATS] +Win {wdb.Name} / +Loss {ldb.Name}  (W={wdb.TotalWins}, L={ldb.TotalLosses})");
+                Logger.Log("[STATS] Skip: BYE in matchup.");
+                return;
             }
-            catch (Exception ex)
-            {
-                Logger.Log($"[STATS][ERROR] UpdateDriverStats failed: {ex}");
-            }
+
+            _controller.PersistMatchStats(winner, loser, Program.ConnectionString);
         }
 
         private void BumpEventWon(Driver winner)
         {
-            try
-            {
-                if (winner == null) return;
-
-                var repo = new DriverRepository(Program.ConnectionString);
-                var db = repo.GetDriverById(winner.Id);
-
-                if (db != null)
-                {
-                    db.EventsWon += 1;
-                    repo.UpdateDriver(db);
-                    Logger.Log($"[STATS] +EventsWon (Final) → #{db.Id} {db.Name}: {db.EventsWon}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"[STATS][ERROR] BumpEventWon failed: {ex}");
-            }
+            _controller.PersistEventWon(winner, Program.ConnectionString);
         }
     }
 }
