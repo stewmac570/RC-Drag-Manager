@@ -57,8 +57,9 @@ namespace RCDragManagerProd.Integration
                     req.Headers.Add("X-API-KEY", apiKey);
                     req.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                    Logger.Log("[LIVE][SEND][JSON] " + json);
-                    Logger.Log("[LIVE][SEND] POST " + LiveUpdateUrl);
+                    if (AppSettings.LiveBroadcastDebugLogging)
+                        Logger.Log("[LIVE][SEND][JSON] " + json);
+                    Logger.Log($"[LIVE][SEND] eventId={dto?.EventId} class={dto?.ClassType} round={dto?.CurrentRound} matches={dto?.Matches?.Count ?? 0} POST {LiveUpdateUrl}");
                     using (var resp = await Http.SendAsync(req).ConfigureAwait(false))
                     {
                         if (resp.IsSuccessStatusCode)
