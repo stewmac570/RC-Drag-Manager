@@ -46,6 +46,7 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnSaveAndClose;
         private Button btnStandings;
         private Button btnGenerateLosersBracket;
+        private Button btnShowQRCode;
         private Label lblRaceType;
         private ComboBox cmbRaceType;
 
@@ -98,6 +99,7 @@ namespace RCDragManagerProd.UI.Forms
             this.cmbRaceType = new System.Windows.Forms.ComboBox();
             this.btnStandings = new System.Windows.Forms.Button();
             this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
+            this.btnShowQRCode = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtName
@@ -537,7 +539,18 @@ namespace RCDragManagerProd.UI.Forms
             this.btnGenerateLosersBracket.TabIndex = 21;
             this.btnGenerateLosersBracket.Text = "Buy Back";
             this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
-            // 
+            //
+            // btnShowQRCode
+            //
+            this.btnShowQRCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnShowQRCode.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnShowQRCode.Location = new System.Drawing.Point(1076, 279);
+            this.btnShowQRCode.Name = "btnShowQRCode";
+            this.btnShowQRCode.Size = new System.Drawing.Size(100, 45);
+            this.btnShowQRCode.TabIndex = 24;
+            this.btnShowQRCode.Text = "Show QR Code";
+            this.btnShowQRCode.Click += new System.EventHandler(this.btnShowQRCode_Click);
+            //
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -574,6 +587,7 @@ namespace RCDragManagerProd.UI.Forms
             this.Controls.Add(this.btnEditResult);
             this.Controls.Add(this.btnStandings);
             this.Controls.Add(this.btnGenerateLosersBracket);
+            this.Controls.Add(this.btnShowQRCode);
             this.Controls.Add(this.btnSaveAndClose);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;

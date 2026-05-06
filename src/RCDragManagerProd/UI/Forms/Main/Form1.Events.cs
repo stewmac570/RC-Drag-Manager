@@ -678,5 +678,13 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
+        private void btnShowQRCode_Click(object sender, EventArgs e)
+        {
+            using (var dialog = new QRCodeDialog())
+            {
+                dialog.ShowDialog(this);
+            }
+        }
+
     }
 }
