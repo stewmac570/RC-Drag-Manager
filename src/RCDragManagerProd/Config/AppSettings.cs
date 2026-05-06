@@ -16,6 +16,7 @@ namespace RCDragManagerProd.Config
                 false;
 #endif
             public bool LiveBroadcastEnabled { get; set; } = false;
+            public bool LiveBroadcastDebugLogging { get; set; } = false;
         }
 
         private static readonly string AppFolder =
@@ -70,6 +71,12 @@ namespace RCDragManagerProd.Config
         {
             get => _model.LiveBroadcastEnabled;
             set { _model.LiveBroadcastEnabled = value; Save(); }
+        }
+
+        public static bool LiveBroadcastDebugLogging
+        {
+            get => _model.LiveBroadcastDebugLogging;
+            set { _model.LiveBroadcastDebugLogging = value; Save(); }
         }
 
         public static string LogFilePath
