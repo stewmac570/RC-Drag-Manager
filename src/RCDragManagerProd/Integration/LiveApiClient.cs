@@ -87,14 +87,15 @@ namespace RCDragManagerProd.Integration
             }
         }
 
-        public async Task<Dictionary<string, double?>> GetDialInUpdatesAsync()
+        public async Task<Dictionary<string, double?>> GetDialInUpdatesAsync(string eventId)
         {
             try
             {
                 var apiKey = ConfigurationManager.AppSettings["ApiKey"];
                 if (string.IsNullOrWhiteSpace(apiKey)) return null;
 
-                using (var req = new HttpRequestMessage(HttpMethod.Get, DialInPollUrl))
+                var url = DialInPollUrl + "?eventId=" + Uri.EscapeDataString(eventId ?? string.Empty);
+                using (var req = new HttpRequestMessage(HttpMethod.Get, url))
                 {
                     req.Headers.Add("X-API-KEY", apiKey);
                     using (var resp = await Http.SendAsync(req).ConfigureAwait(false))
