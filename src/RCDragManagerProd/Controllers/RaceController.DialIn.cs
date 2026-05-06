@@ -78,14 +78,13 @@ namespace RCDragManagerProd.Controllers
                 foreach (var kv in updates)
                 {
                     if (_session?.DriverEntries == null) break;
-                    var entry = _session.DriverEntries.FirstOrDefault(
-                        e => string.Equals(e.DriverName, kv.Key, StringComparison.OrdinalIgnoreCase));
+                    var entry = _session.DriverEntries.FirstOrDefault(e => e.DriverID == kv.Key);
                     if (entry == null) continue;
 
                     if (entry.DialIn != kv.Value)
                     {
                         entry.DialIn = kv.Value;
-                        Logger.Log($"[DIALIN][POLL] Applied {kv.Key} dialIn={kv.Value?.ToString("F3") ?? "null"}");
+                        Logger.Log($"[DIALIN][POLL] Applied driverId={kv.Key} dialIn={kv.Value?.ToString("F3") ?? "null"}");
                         changed = true;
                     }
                 }

@@ -87,7 +87,7 @@ namespace RCDragManagerProd.Integration
             }
         }
 
-        public async Task<Dictionary<string, double?>> GetDialInUpdatesAsync(string eventId)
+        public async Task<Dictionary<int, double?>> GetDialInUpdatesAsync(string eventId)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace RCDragManagerProd.Integration
                             return null;
                         }
                         var body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        return JsonSerializer.Deserialize<Dictionary<string, double?>>(body,
+                        return JsonSerializer.Deserialize<Dictionary<int, double?>>(body,
                             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     }
                 }

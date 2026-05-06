@@ -24,6 +24,8 @@ namespace RCDragManagerProd.Integration
         public string Driver2 { get; set; }
         public string LeftDriver { get; set; }
         public string RightDriver { get; set; }
+        public int LeftDriverId { get; set; }
+        public int RightDriverId { get; set; }
         public string WinnerName { get; set; }
         public double? LeftDriverDialIn { get; set; }
         public double? RightDriverDialIn { get; set; }
