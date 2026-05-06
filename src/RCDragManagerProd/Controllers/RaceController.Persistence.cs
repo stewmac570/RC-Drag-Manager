@@ -63,11 +63,11 @@ namespace RCDragManagerProd.Controllers
 
                     var roundOrder = _engine.GetRoundOrder() ?? Array.Empty<string>();
                     if (roundOrder.Any(r => RoundLabels.Normalize(r).StartsWith("RR", StringComparison.OrdinalIgnoreCase)))
-                        _session.RaceType = "Round Robin";
+                        _session.RaceType = RaceTypes.RoundRobin;
                     else if (roundOrder.Any(r => RoundLabels.Normalize(r).StartsWith("LB-", StringComparison.OrdinalIgnoreCase)))
-                        _session.RaceType = "Losers Bracket";
+                        _session.RaceType = RaceTypes.LosersBracket;
                     else
-                        _session.RaceType = "Finals";
+                        _session.RaceType = RaceTypes.Finals;
 
                 }
 

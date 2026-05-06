@@ -43,7 +43,7 @@ namespace RCDragManagerProd.Controllers
             var rt = (raceType ?? _session?.RaceType ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(rt))
             {
-                rt = "Round Robin";
+                rt = RaceTypes.RoundRobin;
                 Logger.Log("[CTRL] raceType blank � defaulting to 'Round Robin'");
             }
             _session.RaceType = rt;
@@ -149,7 +149,7 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            if (string.Equals(rt, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(rt, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
             {
                 // Pre-reveal all RR rounds upfront so the full schedule is visible immediately.
                 // Winner input is gated by _activeRound, not by _revealedRounds.
@@ -490,7 +490,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             // -- Legacy fallback (if LB Final manually checked) ------------
-            if (_session.RaceType == "Losers Bracket" && _revealedRounds.Any(r => string.Equals(RoundLabels.Normalize(r), "LB-F", StringComparison.OrdinalIgnoreCase)))
+            if (_session.RaceType == RaceTypes.LosersBracket && _revealedRounds.Any(r => string.Equals(RoundLabels.Normalize(r), "LB-F", StringComparison.OrdinalIgnoreCase)))
             {
                 var finalMatch = EngineGetMatches(_engine).LastOrDefault();
                 if (finalMatch != null && finalMatch.HasResult)
@@ -501,7 +501,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             // -- Finals wrap-up � emit summary once ------------------------
-            if (!_tournamentClosed && string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase))
+            if (!_tournamentClosed && string.Equals(_session?.RaceType, RaceTypes.Finals, StringComparison.OrdinalIgnoreCase))
             {
                 var all = EngineGetMatches(_engine).OrderBy(m => m.MatchId).ToList();
                 var final = all.FirstOrDefault(m => string.Equals(m.RoundLabel, "F", StringComparison.OrdinalIgnoreCase))

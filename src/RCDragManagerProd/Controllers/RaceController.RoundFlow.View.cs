@@ -91,7 +91,7 @@ namespace RCDragManagerProd.Controllers
             // Phase B: Losers bracket — all rounds in Finals, revealed rounds otherwise
             if (_losersEngine != null)
             {
-                bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+                bool filterLb = !string.Equals(_session?.RaceType, RaceTypes.Finals, StringComparison.OrdinalIgnoreCase);
                 var lbAll = EngineGetMatches(_losersEngine);
                 allMatches.AddRange(filterLb ? lbAll.Where(m => _revealedRounds.Contains(m.RoundLabel)) : lbAll);
             }
@@ -174,7 +174,7 @@ namespace RCDragManagerProd.Controllers
             // During Finals show all LB rounds (unfiltered); otherwise only revealed rounds.
             if (_losersEngine != null)
             {
-                bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+                bool filterLb = !string.Equals(_session?.RaceType, RaceTypes.Finals, StringComparison.OrdinalIgnoreCase);
                 AppendFrom(EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
             }
 

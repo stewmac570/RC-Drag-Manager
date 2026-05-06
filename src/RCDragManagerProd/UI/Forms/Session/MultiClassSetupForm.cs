@@ -169,7 +169,7 @@ namespace RCDragManagerProd.UI.Forms
                 {
                     EventName = MultiClassEventResult.EventName,
                     EventDate = MultiClassEventResult.EventDate,
-                    RaceType = "Round Robin",
+                    RaceType = RaceTypes.RoundRobin,
                     ClassType = cc.ClassName,
                     RoundRobinVariant = cc.Variant,
                     RoundsToRun = cc.RoundsToRun,

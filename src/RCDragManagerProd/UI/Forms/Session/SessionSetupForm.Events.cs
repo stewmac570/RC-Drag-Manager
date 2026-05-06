@@ -103,7 +103,7 @@ namespace RCDragManagerProd.UI.Forms
         private void UpdateRoundRobinUiState()
         {
             var raceType = cmbRaceType?.SelectedItem?.ToString() ?? string.Empty;
-            var isRR = string.Equals(raceType, "Round Robin", StringComparison.OrdinalIgnoreCase);
+            var isRR = string.Equals(raceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
 
             // show/hide RR controls
             if (lblRRVariant != null) lblRRVariant.Visible = isRR;
@@ -180,7 +180,7 @@ namespace RCDragManagerProd.UI.Forms
             int? rrRoundsToRun = null;
 
             string selectedRaceType = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
-            if (string.Equals(selectedRaceType, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(selectedRaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
             {
                 rrVariant = cmbRRVariant?.SelectedItem?.ToString() ?? "Standard";
 

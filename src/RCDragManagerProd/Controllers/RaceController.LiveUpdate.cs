@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RCDragManagerProd.Config;
+using RCDragManagerProd.Domain;
 using RCDragManagerProd.Integration;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.RaceEngines;
@@ -82,7 +83,7 @@ namespace RCDragManagerProd.Controllers
                 .ToList();
 
             string rrStandings = null;
-            if (string.Equals(_session.RaceType, "Round Robin", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_session.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
             {
                 var rr = _engine as RoundRobinEngineAdapter;
                 if (rr != null)
