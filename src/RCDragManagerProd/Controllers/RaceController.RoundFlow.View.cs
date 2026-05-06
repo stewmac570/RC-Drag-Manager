@@ -46,6 +46,26 @@ namespace RCDragManagerProd.Controllers
             }
         }
 
+        internal void GetLaneAdjustedDrivers(EngineMatch m, out Driver leftDriver, out Driver rightDriver)
+        {
+            leftDriver = m.Driver1;
+            rightDriver = m.Driver2;
+
+            if (m.Driver1 == null || m.Driver2 == null) return;
+
+            int a = Math.Min(m.Driver1.Id, m.Driver2.Id);
+            int b = Math.Max(m.Driver1.Id, m.Driver2.Id);
+            string laneKey = m.RoundLabel + "|M" + m.MatchId + "|" + a + "-" + b;
+
+            bool swap = laneFairness.ShouldSwap(laneKey, m.Driver1.Id, m.Driver2.Id);
+
+            if (swap)
+            {
+                leftDriver = m.Driver2;
+                rightDriver = m.Driver1;
+            }
+        }
+
         private string BuildMatchDisplayText(EngineMatch m)
         {
             string l;

@@ -75,9 +75,7 @@ namespace RCDragManagerProd.Controllers
                 .Select(m =>
                 {
                     GetLaneAdjustedNames(m, out var leftName, out var rightName);
-                    bool swapped = leftName != (m.Driver1?.Name ?? "BYE");
-                    var leftDriver  = swapped ? m.Driver2 : m.Driver1;
-                    var rightDriver = swapped ? m.Driver1 : m.Driver2;
+                    GetLaneAdjustedDrivers(m, out var leftDriver, out var rightDriver);
                     return new LiveMatchDto
                     {
                         RoundLabel = m.RoundLabel,
