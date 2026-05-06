@@ -46,6 +46,9 @@ namespace RCDragManagerProd.UI.Forms
             btnWinner1.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right) ShowEditDialInForButton(isLeft: true); };
             btnWinner2.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right) ShowEditDialInForButton(isLeft: false); };
 
+            lvPairings.SizeChanged += (s, e) => ResizePairingsColumns();
+            lvWinners.SizeChanged += (s, e) => ResizeWinnersColumns();
+
             currentSession = _controller.Session;
 
             lblEventTitle.Text = currentSession != null

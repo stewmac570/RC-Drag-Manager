@@ -37,9 +37,9 @@ namespace RCDragManagerProd.UI.Forms
             // 
             this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblStatus.ForeColor = System.Drawing.Color.DarkRed;
-            this.lblStatus.Location = new System.Drawing.Point(1500, 13);
+            this.lblStatus.Location = new System.Drawing.Point(808, 13);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(692, 16);
+            this.lblStatus.Size = new System.Drawing.Size(384, 16);
             this.lblStatus.TabIndex = 2;
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
