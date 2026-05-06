@@ -48,5 +48,27 @@ namespace RCDragManagerProd.UI.Forms
         private static bool IsByeName(string name)
             => string.Equals((name ?? "").Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
 
+        private void ResizePairingsColumns()
+        {
+            if (lvPairings.Columns.Count < 3) return;
+            const int matchColWidth = 40;
+            int available = lvPairings.ClientSize.Width - matchColWidth;
+            if (available < 80) return;
+            colMatch.Width = matchColWidth;
+            colDriver1.Width = available / 2;
+            colDriver2.Width = available - available / 2;
+        }
+
+        private void ResizeWinnersColumns()
+        {
+            if (lvWinners.Columns.Count < 3) return;
+            const int matchColWidth = 40;
+            int available = lvWinners.ClientSize.Width - matchColWidth;
+            if (available < 80) return;
+            lvWinners.Columns[0].Width = matchColWidth;
+            lvWinners.Columns[1].Width = available / 2;
+            lvWinners.Columns[2].Width = available - available / 2;
+        }
+
     }
 }
