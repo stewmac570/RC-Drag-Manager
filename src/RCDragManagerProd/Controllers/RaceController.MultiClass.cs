@@ -33,7 +33,7 @@ namespace RCDragManagerProd.Controllers
         /// </summary>
         public bool IsRrComplete()
         {
-            if (_session.RaceType != "Round Robin") return true;
+            if (_session.RaceType != RaceTypes.RoundRobin) return true;
 
             var allMatches = EngineGetMatches(_engine);
             return allMatches.All(m =>

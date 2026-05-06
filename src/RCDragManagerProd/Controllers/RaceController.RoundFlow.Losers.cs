@@ -85,7 +85,7 @@ namespace RCDragManagerProd.Controllers
             _losersEngine = lbEngine;
             _engine = lbEngine;
             _inLosersPhase = true;                 // key flag for finals injection
-            _session.RaceType = "Losers Bracket";
+            _session.RaceType = RaceTypes.LosersBracket;
             _activeRound = null;   // RR active-round gate does not apply in LB phase
             Logger.Log("[LB] Engine swapped to LB adapter; LB phase entered; session type='Losers Bracket'.");
 
