@@ -71,7 +71,7 @@ namespace RCDragManagerProd.Controllers
         {
             try
             {
-                var updates = await _liveApiClient.GetDialInUpdatesAsync().ConfigureAwait(false);
+                var updates = await _liveApiClient.GetDialInUpdatesAsync(_session?.EventId.ToString() ?? string.Empty).ConfigureAwait(false);
                 if (updates == null || updates.Count == 0) return;
 
                 bool changed = false;
