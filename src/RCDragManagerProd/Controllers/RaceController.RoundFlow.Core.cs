@@ -166,6 +166,8 @@ namespace RCDragManagerProd.Controllers
 
             _winners.Clear();
             PushFullRefresh();
+            var resetEventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Quick Session" : _session.EventName;
+            _ = _liveApiClient.ResetAsync(_session.EventId.ToString("N"), resetEventName);
             QueueLiveUpdate("GenerateBracket");
         }
 

@@ -14,6 +14,7 @@ namespace RCDragManagerProd.Integration
     public sealed class LiveApiClient
     {
         private const string LiveUpdateUrl  = "https://stewmacrc.com/api/update";
+        private const string LiveResetUrl   = "https://stewmacrc.com/api/reset";
         private const string DialInPollUrl  = "https://stewmacrc.com/api/dialin";
 
         private static readonly HttpClient Http = new HttpClient
@@ -81,6 +82,39 @@ namespace RCDragManagerProd.Integration
             catch (Exception ex)
             {
                 Logger.Log("[LIVE][FAIL] " + ex.Message);
+            }
+            finally
+            {
+                SendGate.Release();
+            }
+        }
+
+        public async Task ResetAsync(string eventId, string eventName)
+        {
+            await SendGate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (!AppSettings.LiveBroadcastEnabled) return;
+
+                var apiKey = ConfigurationManager.AppSettings["ApiKey"];
+                if (string.IsNullOrWhiteSpace(apiKey)) return;
+
+                var body = new { eventId, eventName };
+                var json = JsonSerializer.Serialize(body, JsonOptions);
+                using (var req = new HttpRequestMessage(HttpMethod.Post, LiveResetUrl))
+                {
+                    req.Headers.Add("X-API-KEY", apiKey);
+                    req.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                    Logger.Log($"[LIVE][RESET] eventId={eventId} eventName={eventName} POST {LiveResetUrl}");
+                    using (var resp = await Http.SendAsync(req).ConfigureAwait(false))
+                    {
+                        Logger.Log("[LIVE][RESET] Status=" + (int)resp.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[LIVE][RESET][FAIL] " + ex.Message);
             }
             finally
             {
