@@ -47,29 +47,7 @@ namespace RCDragManagerProd.Controllers
                 nextUp = leftName + " vs " + rightName;
             }
 
-            // Collect all engine matches across phases (mirrors BuildCurrentBracketRows)
-            var allMatches = new List<EngineMatch>();
-
-            if (_rrMatchesSnapshot != null)
-            {
-                allMatches.AddRange(_rrMatchesSnapshot);
-            }
-            else if (_engine != null)
-            {
-                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
-            }
-
-            if (_losersEngine != null)
-            {
-                bool filterLb = !string.Equals(_session.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
-                var lbAll = EngineGetMatches(_losersEngine);
-                allMatches.AddRange(filterLb ? lbAll.Where(m => _revealedRounds.Contains(m.RoundLabel)) : lbAll);
-            }
-
-            if (_rrMatchesSnapshot != null && _engine != null && !ReferenceEquals(_engine, _losersEngine))
-            {
-                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
-            }
+            var allMatches = CollectAllRevealedMatchesAcrossPhases();
 
             var matches = allMatches
                 .Select(m =>

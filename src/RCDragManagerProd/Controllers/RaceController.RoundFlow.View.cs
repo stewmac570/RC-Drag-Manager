@@ -75,26 +75,56 @@ namespace RCDragManagerProd.Controllers
             return "M" + m.MatchId + ":" + l + " vs " + r;
         }
 
+        // Single source of truth for collecting all visible engine matches across race phases.
+        // Both BuildCurrentBracketRows and BuildLiveRaceUpdateDto call this so phase changes
+        // only need to be made in one place.
+        internal List<EngineMatch> CollectAllRevealedMatchesAcrossPhases()
+        {
+            var allMatches = new List<EngineMatch>();
+
+            // Phase A: RR snapshot (post-transition) or live main engine
+            if (_rrMatchesSnapshot != null)
+                allMatches.AddRange(_rrMatchesSnapshot);
+            else if (_engine != null)
+                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
+
+            // Phase B: Losers bracket — all rounds in Finals, revealed rounds otherwise
+            if (_losersEngine != null)
+            {
+                bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
+                var lbAll = EngineGetMatches(_losersEngine);
+                allMatches.AddRange(filterLb ? lbAll.Where(m => _revealedRounds.Contains(m.RoundLabel)) : lbAll);
+            }
+
+            // Phase C: Finals engine (separate from LB adapter) — revealed rounds only
+            if (_rrMatchesSnapshot != null && _engine != null && !ReferenceEquals(_engine, _losersEngine))
+                allMatches.AddRange(EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel)));
+
+            return allMatches;
+        }
+
         public IReadOnlyList<PairingRow> BuildCurrentBracketRows()
         {
             var rows = new List<PairingRow>();
 
             Logger.Log(
-                "[ROWS] BUILD v2 � snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
+                "[ROWS] BUILD v2 → snapshotMatches=" + (_rrMatchesSnapshot?.Count.ToString() ?? "null") + ", " +
                 "snapshotRounds=" + (_rrRoundOrderSnapshot?.Count.ToString() ?? "null") + ", " +
                 "engine=" + (_engine?.GetType().Name ?? "null") + ", losersEngine=" + (_losersEngine?.GetType().Name ?? "null") + ", " +
                 "revealed=[" + string.Join(",", _revealedRounds) + "]");
 
-            void AppendFrom(IEnumerable<EngineMatch> matches, IEnumerable<string> roundOrder, string tag, bool filterByRevealed)
+            var allMatches = CollectAllRevealedMatchesAcrossPhases();
+
+            void AppendFrom(IEnumerable<string> roundOrder, string tag, bool filterByRevealed)
             {
-                if (matches == null || roundOrder == null)
+                if (roundOrder == null)
                 {
-                    Logger.Log("[ROWS] AppendFrom(" + tag + ") skipped (matches/roundOrder null)");
+                    Logger.Log("[ROWS] AppendFrom(" + tag + ") skipped (roundOrder null)");
                     return;
                 }
 
                 var before = rows.Count;
-                var mList = matches.ToList();
+                var mList = allMatches;
                 var rList = roundOrder.ToList();
 
                 foreach (var round in rList)
@@ -122,7 +152,7 @@ namespace RCDragManagerProd.Controllers
                     }
                 }
 
-                Logger.Log("[ROWS] AppendFrom(" + tag + ") ? added " + (rows.Count - before) + " items. Total=" + rows.Count);
+                Logger.Log("[ROWS] AppendFrom(" + tag + ") → added " + (rows.Count - before) + " items. Total=" + rows.Count);
             }
 
             // ── Phase A: Round Robin ─────────────────────────────────────────────
@@ -131,12 +161,12 @@ namespace RCDragManagerProd.Controllers
             // rather than EngineGetRoundOrder so display order matches the race schedule.
             if (_rrMatchesSnapshot != null && _rrRoundOrderSnapshot != null)
             {
-                AppendFrom(_rrMatchesSnapshot, _rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
+                AppendFrom(_rrRoundOrderSnapshot, "RR-snapshot", filterByRevealed: false);
             }
             else if (_engine != null)
             {
                 // Use _revealedRounds for ordering — insertion order is the correct display order.
-                AppendFrom(EngineGetMatches(_engine), _revealedRounds, "Main-live", filterByRevealed: true);
+                AppendFrom(_revealedRounds, "Main-live", filterByRevealed: true);
             }
 
             // ── Phase B: Losers Bracket ──────────────────────────────────────────
@@ -145,7 +175,7 @@ namespace RCDragManagerProd.Controllers
             if (_losersEngine != null)
             {
                 bool filterLb = !string.Equals(_session?.RaceType, "Finals", StringComparison.OrdinalIgnoreCase);
-                AppendFrom(EngineGetMatches(_losersEngine), EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
+                AppendFrom(EngineGetRoundOrder(_losersEngine), "Losers", filterByRevealed: filterLb);
             }
 
             // ── Phase C: Finals engine ───────────────────────────────────────────
@@ -153,7 +183,7 @@ namespace RCDragManagerProd.Controllers
             // engine (not the LB adapter), show those matches after LB.
             if (_rrMatchesSnapshot != null && _engine != null && !ReferenceEquals(_engine, _losersEngine))
             {
-                AppendFrom(EngineGetMatches(_engine), EngineGetRoundOrder(_engine), "Finals-live", filterByRevealed: true);
+                AppendFrom(EngineGetRoundOrder(_engine), "Finals-live", filterByRevealed: true);
             }
 
             int displayNo = 1;
