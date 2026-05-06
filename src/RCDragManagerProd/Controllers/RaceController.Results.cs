@@ -58,6 +58,9 @@ namespace RCDragManagerProd.Controllers
             EngineSetWinner(_engine, matchId, winner, match.RoundLabel);
             _matchResult.SetWinner(matchId, winner, loser);
 
+            if (_engine is RoundRobinEngineAdapter)
+                _rrStandingsCardCache = null;
+
             _winners.Add(new WinnerRow
             {
                 MatchId = matchId,
@@ -153,6 +156,10 @@ namespace RCDragManagerProd.Controllers
 
             EngineSetWinner(_engine, matchId, newWinner, match.RoundLabel);
             _matchResult.SetWinner(matchId, newWinner, newLoser);
+
+            if (_engine is RoundRobinEngineAdapter)
+                _rrStandingsCardCache = null;
+
             Logger.Log($"[CTRL][EDIT] SetWinner applied: M{matchId}, winner='{newWinner.Name}', loser='{newLoser?.Name ?? "BYE"}'");
 
             var row = _winners.FirstOrDefault(w => w.MatchId == matchId);

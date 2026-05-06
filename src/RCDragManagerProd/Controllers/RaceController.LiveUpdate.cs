@@ -108,7 +108,11 @@ namespace RCDragManagerProd.Controllers
             {
                 var rr = _engine as RoundRobinEngineAdapter;
                 if (rr != null)
-                    rrStandings = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
+                {
+                    if (_rrStandingsCardCache == null)
+                        _rrStandingsCardCache = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
+                    rrStandings = _rrStandingsCardCache;
+                }
             }
 
             return new LiveRaceUpdateDto
