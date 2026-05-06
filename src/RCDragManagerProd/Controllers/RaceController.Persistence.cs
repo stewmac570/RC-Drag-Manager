@@ -74,6 +74,20 @@ namespace RCDragManagerProd.Controllers
                 if (_session.Drivers == null && _drivers != null)
                     _session.Drivers = new List<Driver>(_drivers);
 
+                if (_drivers != null)
+                {
+                    _session.DriverEntries.Clear();
+                    foreach (var d in _drivers)
+                    {
+                        _session.DriverEntries.Add(new RaceSessionDriverEntry
+                        {
+                            DriverID = d.Id,
+                            DriverName = d.Name,
+                            QualifyingTime = d.QualTime
+                        });
+                    }
+                }
+
                 Logger.Log($"[SAVE] results={list.Count}, rounds={_session.SavedRevealedRounds.Count}, type='{_session.RaceType}'");
             }
             catch (Exception ex)

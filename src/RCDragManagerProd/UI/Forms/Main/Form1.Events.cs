@@ -2,7 +2,6 @@
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.RaceEngines;
-using RCDragManagerProd.Repositories;
 using RCDragManagerProd.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -84,60 +83,7 @@ namespace RCDragManagerProd.UI.Forms
             MessageBox.Show(msg, "Event Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Logger.Log("[UI] Event Complete acknowledged (OK). Session left intact.");
 
-            try
-            {
-                var repo = new DriverRepository(Program.ConnectionString);
-
-                if (drivers != null)
-                {
-                    foreach (var d in drivers)
-                    {
-                        if (d?.Id > 0)
-                        {
-                            var db = repo.GetDriverById(d.Id);
-                            if (db != null)
-                            {
-                                db.EventsEntered += 1;
-                                repo.UpdateDriver(db);
-                                Logger.Log($"[STATS] +EventsEntered → #{db.Id} {db.Name}: {db.EventsEntered}");
-                            }
-                            else
-                            {
-                                Logger.Log($"[STATS] +EventsEntered skipped — driver Id={d.Id} ('{d.Name}') not found in DB (quick/local session)");
-                            }
-                        }
-                    }
-                }
-
-                var winnerId = summary.Winner?.Id ?? 0;
-                if (winnerId > 0)
-                {
-                    var wdb = repo.GetDriverById(winnerId);
-                    if (wdb != null)
-                    {
-                        wdb.EventsWon += 1;
-                        repo.UpdateDriver(wdb);
-                        Logger.Log($"[STATS] +EventsWon → #{wdb.Id} {wdb.Name}: {wdb.EventsWon}");
-                    }
-                    else
-                    {
-                        Logger.Log($"[STATS] +EventsWon skipped — winner Id={winnerId} ('{summary.Winner?.Name}') not found in DB (quick/local session)");
-                    }
-                }
-
-                if (summary.MatchResults != null)
-                {
-                    foreach (var (wId, lId) in summary.MatchResults)
-                    {
-                        repo.IncrementWinsAndLosses(wId, lId);
-                        Logger.Log($"[STATS] +TotalWins/TotalLosses → winner={wId}, loser={lId}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"[STATS][ERROR] Failed to bump event stats: {ex}");
-            }
+            _controller.PersistTournamentStats(summary, drivers, Program.ConnectionString);
         }
 
         // === UI Button Handlers ===
@@ -352,18 +298,6 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            currentSession.DriverEntries.Clear();
-            foreach (var d in drivers)
-            {
-                var entry = new RaceSessionDriverEntry
-                {
-                    DriverID = d.Id,
-                    DriverName = d.Name,
-                    QualifyingTime = d.QualTime
-                };
-                currentSession.DriverEntries.Add(entry);
-            }
-
             _controller.SaveSession();
             sessionRepository.SaveSession(currentSession);
 
@@ -380,34 +314,7 @@ namespace RCDragManagerProd.UI.Forms
                 }
             }
 
-            try
-            {
-                var repo = new DriverRepository(Program.ConnectionString);
-                if (drivers != null)
-                {
-                    foreach (var d in drivers)
-                    {
-                        if (d?.Id > 0)
-                        {
-                            var db = repo.GetDriverById(d.Id);
-                            if (db != null)
-                            {
-                                db.EventsWon = repo.ComputeEventsWonFromSavedSessions(d.Id);
-                                repo.UpdateDriver(db);
-                                Logger.Log($"[STATS] Recompute EventsWon → #{db.Id} {db.Name}: {db.EventsWon}");
-                            }
-                            else
-                            {
-                                Logger.Log($"[STATS] Recompute EventsWon skipped — driver Id={d.Id} ('{d.Name}') not found in DB (quick/local session)");
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"[STATS][ERROR] Recompute EventsWon failed: {ex}");
-            }
+            _controller.RecomputeEventsWon(drivers, Program.ConnectionString);
 
             MessageBox.Show("Race session saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (IsHostedMode)
