@@ -9,26 +9,33 @@ namespace RCDragManagerProd.Controllers
 {
     public partial class RaceController
     {
-        private bool _dialInLocked = false;
+        private volatile bool _dialInLocked = false;
+        private volatile bool _dialInStopped = true;
         private Timer _dialInPollTimer;
+        private readonly object _dialInLock = new object();
 
         public bool DialInLocked => _dialInLocked;
 
         public double? GetDriverDialIn(int driverId)
         {
             if (_session == null) return null;
-            return _session.DriverEntries
-                ?.FirstOrDefault(e => e.DriverID == driverId)
-                ?.DialIn;
+            lock (_dialInLock)
+            {
+                return _session.DriverEntries
+                    ?.FirstOrDefault(e => e.DriverID == driverId)
+                    ?.DialIn;
+            }
         }
 
         public void UpdateDriverDialIn(int driverId, double? dialIn)
         {
             if (_session == null) return;
-            var entry = _session.DriverEntries?.FirstOrDefault(e => e.DriverID == driverId);
-            if (entry == null) return;
-
-            entry.DialIn = dialIn;
+            lock (_dialInLock)
+            {
+                var entry = _session.DriverEntries?.FirstOrDefault(e => e.DriverID == driverId);
+                if (entry == null) return;
+                entry.DialIn = dialIn;
+            }
             Logger.Log($"[DIALIN] Updated driverId={driverId} dialIn={dialIn?.ToString("F3") ?? "null"}");
             QueueLiveUpdate("dialin-edit");
         }
@@ -49,19 +56,25 @@ namespace RCDragManagerProd.Controllers
         {
             if (!AppSettings.LiveBroadcastEnabled) return;
             StopDialInPolling();
+            _dialInStopped = false;
             _dialInPollTimer = new Timer(_ => PollDialInUpdatesAsync(), null, 10000, 15000);
             Logger.Log("[DIALIN] Poll timer started");
         }
 
         public void StopDialInPolling()
         {
+            _dialInStopped = true;
             _dialInPollTimer?.Dispose();
             _dialInPollTimer = null;
+            // Drain any in-flight write that is holding or about to acquire _dialInLock.
+            // After this returns, any poll callback that hasn't yet locked will see _dialInStopped
+            // and exit without mutating DriverEntries.
+            lock (_dialInLock) { }
         }
 
         private void PollDialInUpdatesAsync()
         {
-            if (_dialInLocked) return;
+            if (_dialInLocked || _dialInStopped) return;
             if (!AppSettings.LiveBroadcastEnabled) return;
 
             _ = PollAndApplyAsync();
@@ -75,17 +88,21 @@ namespace RCDragManagerProd.Controllers
                 if (updates == null || updates.Count == 0) return;
 
                 bool changed = false;
-                foreach (var kv in updates)
+                lock (_dialInLock)
                 {
-                    if (_session?.DriverEntries == null) break;
-                    var entry = _session.DriverEntries.FirstOrDefault(e => e.DriverID == kv.Key);
-                    if (entry == null) continue;
-
-                    if (entry.DialIn != kv.Value)
+                    if (_dialInStopped) return;
+                    foreach (var kv in updates)
                     {
-                        entry.DialIn = kv.Value;
-                        Logger.Log($"[DIALIN][POLL] Applied driverId={kv.Key} dialIn={kv.Value?.ToString("F3") ?? "null"}");
-                        changed = true;
+                        if (_session?.DriverEntries == null) break;
+                        var entry = _session.DriverEntries.FirstOrDefault(e => e.DriverID == kv.Key);
+                        if (entry == null) continue;
+
+                        if (entry.DialIn != kv.Value)
+                        {
+                            entry.DialIn = kv.Value;
+                            Logger.Log($"[DIALIN][POLL] Applied driverId={kv.Key} dialIn={kv.Value?.ToString("F3") ?? "null"}");
+                            changed = true;
+                        }
                     }
                 }
 
