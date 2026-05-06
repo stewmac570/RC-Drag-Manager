@@ -83,6 +83,8 @@ namespace RCDragManagerProd.Controllers
                         Driver2 = m.Driver2?.Name ?? "BYE",
                         LeftDriver = leftName,
                         RightDriver = rightName,
+                        LeftDriverId = leftDriver?.Id ?? 0,
+                        RightDriverId = rightDriver?.Id ?? 0,
                         WinnerName = _matchResult.HasResult(m.MatchId) ? _matchResult.GetWinner(m.MatchId)?.Name : null,
                         LeftDriverDialIn  = GetDriverDialIn(leftDriver?.Id ?? -1),
                         RightDriverDialIn = GetDriverDialIn(rightDriver?.Id ?? -1)
