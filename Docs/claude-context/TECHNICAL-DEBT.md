@@ -89,7 +89,7 @@ Related to point 2: the architecture has no concept of "resume session". `LoadSe
 
 ### 9. Live Feed Integration Is Partially Wired
 
-`RaceController.LiveUpdate.cs` and `Integration/LiveApiClient.cs` implement an optional HTTP live feed push (sends current bracket state to a local server). It is gated by `App.config` key `LiveUpdateEnabled`. The integration exists but is not fully documented or formally part of the core flow. The spec is in `Docs/Live Feed Refresh Behaviour spec.md`.
+`RaceController.LiveUpdate.cs` and `Integration/LiveApiClient.cs` implement an optional HTTP live feed push (sends current bracket state to a local server). It is gated by `AppSettings.LiveBroadcastEnabled` (a JSON-persisted setting managed via the Settings dialog). The integration exists but is not fully documented or formally part of the core flow. The spec is in `Docs/Live Feed Refresh Behaviour spec.md`.
 
 **Impact:** If enabled accidentally it will attempt HTTP calls during every match resolution.
 
