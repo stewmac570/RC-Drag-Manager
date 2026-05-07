@@ -34,14 +34,6 @@ namespace RCDragManagerProd.UI.Forms
         // ✅ keep designer convenience
         public LandingForm() : this(Program.ConnectionString) { }
 
-        private void btnNewEvent_Click(object sender, EventArgs e)
-        {
-            Logger.Log("[QUICK] Launching Quick Session → RaceController(new RaceSession())");
-            var controller = new RaceController(new RaceSession());   // empty quick session
-            var mainForm = new Form1(controller);
-            mainForm.Show();
-        }
-
         private void btnCreateSession_Click(object sender, EventArgs e)
         {
             Logger.Log("[CREATE] Opening Create Session setup dialog…");
