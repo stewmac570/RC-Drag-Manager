@@ -58,8 +58,8 @@ namespace RCDragManagerProd.UI.Forms
                 Location = new Point(110, 52),
                 Width = 220
             };
-            cmbRaceType.Items.AddRange(new string[] { "Pro Ladder", "Random Draw", "Round Robin" });
-            cmbRaceType.SelectedIndex = 0;
+            cmbRaceType.Items.AddRange(new string[] { "Pro Ladder", "Round Robin", "Random Draw" });
+            cmbRaceType.SelectedIndex = 1;
 
             // Class type group
             grpClassType = new GroupBox { Text = "Class Type", Location = new Point(20, 84), Size = new Size(640, 62) };
