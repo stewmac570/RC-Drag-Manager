@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
@@ -429,8 +430,29 @@ namespace RCDragManagerProd.UI.Forms
                 FixedDialIn = null;
 
             bool isRR = string.Equals(RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
-            Variant     = isRR ? (rbQmdra.Checked ? "QMDRA" : "Standard") : null;
-            RoundsToRun = isRR && rbQmdra.Checked ? (int?)Convert.ToInt32(nudRoundsToRun.Value) : null;
+            Variant = isRR ? (rbQmdra.Checked ? "QMDRA" : "Standard") : null;
+
+            if (isRR && rbQmdra.Checked)
+            {
+                int n = (int)nudRoundsToRun.Value;
+                if (n <= 0)
+                {
+                    MessageBox.Show("Rounds To Run (N) is required for QMDRA and must be >= 1.",
+                        "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Logger.Log("[MULTICLASS][CFG][RR] BLOCKED OK → QMDRA missing/invalid N.");
+                    return;
+                }
+                RoundsToRun = n;
+            }
+            else
+            {
+                RoundsToRun = null;
+            }
+
+            if (isRR)
+            {
+                Logger.Log($"[MULTICLASS][CFG][RR] '{className}' → Variant='{Variant}', RoundsToRun={(RoundsToRun.HasValue ? RoundsToRun.Value.ToString() : "null")}");
+            }
 
             BuiltDriverEntries = new List<RaceSessionDriverEntry>();
             foreach (var driverId in _checkedDriverIds)

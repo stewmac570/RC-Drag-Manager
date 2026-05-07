@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
@@ -189,6 +190,11 @@ namespace RCDragManagerProd.UI.Forms
                     DriverEntries      = cc.DriverEntries
                 };
                 MultiClassEventResult.ClassSessions.Add(session);
+
+                if (isRR)
+                {
+                    Logger.Log($"[MULTICLASS][START][RR] Class '{cc.ClassName}' → Variant='{session.RoundRobinVariant}', RoundsToRun={(session.RoundsToRun.HasValue ? session.RoundsToRun.Value.ToString() : "null")}");
+                }
             }
 
             DialogResult = DialogResult.OK;
