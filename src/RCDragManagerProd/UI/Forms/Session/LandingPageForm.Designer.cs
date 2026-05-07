@@ -9,7 +9,6 @@ namespace RCDragManagerProd.UI.Forms
         private System.ComponentModel.IContainer components = null;
 
         private Label lblEventTitle;
-        private Button btnNewEvent;
         private Button btnCreateSession;
         private Button btnLoadEvent;
         private Button btnDriverLists;
@@ -28,7 +27,6 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.lblEventTitle = new Label();
-            this.btnNewEvent = new Button();
             this.btnCreateSession = new Button();
             this.btnLoadEvent = new Button();
             this.btnDriverLists = new Button();
@@ -54,13 +52,6 @@ namespace RCDragManagerProd.UI.Forms
             this.lblEventTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             this.lblEventTitle.TextAlign = ContentAlignment.MiddleCenter;
             this.Controls.Add(this.lblEventTitle);
-
-            // btnNewEvent (Quick Session)
-            this.btnNewEvent.Location = new System.Drawing.Point(40, 80);
-            this.btnNewEvent.Size = new System.Drawing.Size(200, 50);
-            this.btnNewEvent.Text = "Quick Session";
-            this.btnNewEvent.Click += new System.EventHandler(this.btnNewEvent_Click);
-            this.Controls.Add(this.btnNewEvent);
 
             // btnCreateSession (New Build)
             this.btnCreateSession.Location = new System.Drawing.Point(40, 150);
