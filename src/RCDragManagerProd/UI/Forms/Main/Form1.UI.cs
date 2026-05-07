@@ -30,6 +30,11 @@ namespace RCDragManagerProd.UI.Forms
                 var item = new ListViewItem(d.Name);
                 string timeText = d.QualTime.HasValue ? d.QualTime.Value.ToString("0.000") : "—";
                 item.SubItems.Add(timeText);
+
+                double? dialIn = _controller.GetDriverDialIn(d.Id);
+                string dialInText = dialIn.HasValue ? dialIn.Value.ToString("0.000") : "—";
+                item.SubItems.Add(dialInText);
+
                 lvDrivers.Items.Add(item);
             }
 
@@ -37,7 +42,16 @@ namespace RCDragManagerProd.UI.Forms
 
             bool canGenerate = drivers.Count >= 2 && !_controller.HasBracketStarted;
             btnGenerateBracket.Enabled = canGenerate;
+
+            UpdateDialInButtonEnabled();
+
             Logger.Log($"[UI] Driver list updated ({drivers.Count}); Generate Bracket {(canGenerate ? "ENABLED" : "disabled")}.");
+        }
+
+        private void UpdateDialInButtonEnabled()
+        {
+            if (btnSetDialIn == null) return;
+            btnSetDialIn.Enabled = drivers.Count > 0 && !_controller.DialInLocked;
         }
 
         private string GetFullRoundLabel(string label)

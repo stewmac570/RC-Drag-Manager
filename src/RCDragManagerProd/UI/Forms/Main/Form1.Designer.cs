@@ -16,6 +16,7 @@ namespace RCDragManagerProd.UI.Forms
         private ListView lvDrivers;
         private ColumnHeader colName;
         private ColumnHeader colTime;
+        private ColumnHeader colDialIn;
         private ListView lvWinners;
         private ColumnHeader colMatchWin;
         private ColumnHeader colLoser;
@@ -28,6 +29,7 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnWinner2;
         private Button btnEditDriver;
         private Button btnSetQualTime;
+        private Button btnSetDialIn;
         private Label lblCurrentRaceLabel;
         private Label lblVs0;
         private Label lblOnDeck;
@@ -66,6 +68,7 @@ namespace RCDragManagerProd.UI.Forms
             this.lvDrivers = new System.Windows.Forms.ListView();
             this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDialIn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lvPairings = new System.Windows.Forms.ListView();
             this.colMatch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colDriver1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -74,6 +77,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnWinner2 = new System.Windows.Forms.Button();
             this.btnEditDriver = new System.Windows.Forms.Button();
             this.btnSetQualTime = new System.Windows.Forms.Button();
+            this.btnSetDialIn = new System.Windows.Forms.Button();
             this.lblCurrentRaceLabel = new System.Windows.Forms.Label();
             this.lblVs0 = new System.Windows.Forms.Label();
             this.lblOnDeck = new System.Windows.Forms.Label();
@@ -160,7 +164,8 @@ namespace RCDragManagerProd.UI.Forms
             | System.Windows.Forms.AnchorStyles.Left)));
             this.lvDrivers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName,
-            this.colTime});
+            this.colTime,
+            this.colDialIn});
             this.lvDrivers.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lvDrivers.FullRowSelect = true;
             this.lvDrivers.HideSelection = false;
@@ -172,17 +177,22 @@ namespace RCDragManagerProd.UI.Forms
             this.lvDrivers.UseCompatibleStateImageBehavior = false;
             this.lvDrivers.View = System.Windows.Forms.View.Details;
             this.lvDrivers.SelectedIndexChanged += new System.EventHandler(this.lvDrivers_SelectedIndexChanged);
-            // 
+            //
             // colName
-            // 
+            //
             this.colName.Text = "Name";
-            this.colName.Width = 200;
-            // 
+            this.colName.Width = 150;
+            //
             // colTime
-            // 
+            //
             this.colTime.Text = "Qual Time";
-            this.colTime.Width = 100;
-            // 
+            this.colTime.Width = 70;
+            //
+            // colDialIn
+            //
+            this.colDialIn.Text = "Dial-In";
+            this.colDialIn.Width = 70;
+            //
             // lvPairings
             // 
             this.lvPairings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -260,7 +270,18 @@ namespace RCDragManagerProd.UI.Forms
             this.btnSetQualTime.TabIndex = 11;
             this.btnSetQualTime.Text = "Set Time";
             this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
-            // 
+            //
+            // btnSetDialIn
+            //
+            this.btnSetDialIn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSetDialIn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSetDialIn.Location = new System.Drawing.Point(115, 434);
+            this.btnSetDialIn.Name = "btnSetDialIn";
+            this.btnSetDialIn.Size = new System.Drawing.Size(100, 45);
+            this.btnSetDialIn.TabIndex = 25;
+            this.btnSetDialIn.Text = "Set Dial-In";
+            this.btnSetDialIn.Click += new System.EventHandler(this.btnSetDialIn_Click);
+            //
             // lblCurrentRaceLabel — left-hand row label for "Current race"
             //
             this.lblCurrentRaceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -567,6 +588,7 @@ namespace RCDragManagerProd.UI.Forms
             this.Controls.Add(this.lvDrivers);
             this.Controls.Add(this.btnEditDriver);
             this.Controls.Add(this.btnSetQualTime);
+            this.Controls.Add(this.btnSetDialIn);
             this.Controls.Add(this.lblWinnersHeader);
             this.Controls.Add(this.lvWinners);
             this.Controls.Add(this.btnReset);

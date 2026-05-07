@@ -21,6 +21,7 @@ namespace RCDragManagerProd.UI.Forms
             btnNextRound.Enabled = canAdvance;
             if (canAdvance)
                 _controller.UnlockDialIn();
+            UpdateDialInButtonEnabled();
             Logger.Log($"UI: Generate Next Round button {(canAdvance ? "enabled" : "disabled")}.");
         }
 
@@ -171,6 +172,35 @@ namespace RCDragManagerProd.UI.Forms
             }
         }
 
+        private void btnSetDialIn_Click(object sender, EventArgs e)
+        {
+            if (_controller.DialInLocked)
+            {
+                MessageBox.Show("Dial-ins are locked for the current round.\nThey will unlock when the next round is ready.",
+                    "Dial-In Locked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Logger.Log("[UI][DIALIN] Set Dial-In click ignored — dial-in is locked.");
+                return;
+            }
+
+            if (lvDrivers.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Select a driver to edit their dial-in time.",
+                    "Set Dial-In", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string selectedName = lvDrivers.SelectedItems[0].Text;
+            var driver = drivers.FirstOrDefault(d => d.Name == selectedName);
+            if (driver == null)
+            {
+                Logger.Log($"[UI][DIALIN] Selected driver '{selectedName}' not found in driver list.");
+                return;
+            }
+
+            double? current = _controller.GetDriverDialIn(driver.Id);
+            ShowEditDialInDialog(driver.Id, driver.Name, current);
+        }
+
         private void btnSetQualTime_Click(object sender, EventArgs e)
         {
             if (lvDrivers.SelectedItems.Count > 0)
@@ -256,6 +286,7 @@ namespace RCDragManagerProd.UI.Forms
                 btnNextRound.Enabled = false;
                 Logger.Log("[FORM1] Generate Next Round clicked");
                 _controller.LockDialIn();
+                UpdateDialInButtonEnabled();
                 _controller.AdvanceRound();
             }
             catch (Exception ex)
@@ -557,6 +588,33 @@ namespace RCDragManagerProd.UI.Forms
                     btnWinner1.Text = _currentWinnerButtonContext.LeftName  + FormatDialIn(ld);
                     btnWinner2.Text = _currentWinnerButtonContext.RightName + FormatDialIn(rd);
                 }
+
+                RefreshDialInColumn();
+            }
+        }
+
+        private void RefreshDialInColumn()
+        {
+            if (lvDrivers == null || lvDrivers.Columns.Count < 3) return;
+
+            lvDrivers.BeginUpdate();
+            try
+            {
+                foreach (ListViewItem item in lvDrivers.Items)
+                {
+                    var driver = drivers.FirstOrDefault(d => d.Name == item.Text);
+                    if (driver == null) continue;
+
+                    double? dialIn = _controller.GetDriverDialIn(driver.Id);
+                    string text = dialIn.HasValue ? dialIn.Value.ToString("0.000") : "—";
+
+                    while (item.SubItems.Count < 3) item.SubItems.Add(string.Empty);
+                    item.SubItems[2].Text = text;
+                }
+            }
+            finally
+            {
+                lvDrivers.EndUpdate();
             }
         }
 
