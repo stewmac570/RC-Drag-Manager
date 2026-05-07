@@ -18,6 +18,9 @@ namespace RCDragManagerProd.UI.Forms
         private class ClassConfig
         {
             public string ClassName { get; set; }
+            public string RaceType { get; set; }
+            public string ClassType { get; set; }
+            public double? FixedDialIn { get; set; }
             public string Variant { get; set; }
             public int? RoundsToRun { get; set; }
             public List<RaceSessionDriverEntry> DriverEntries { get; set; }
@@ -41,7 +44,6 @@ namespace RCDragManagerProd.UI.Forms
 
         private void AddClass(ClassConfig config)
         {
-            // Duplicate name check (case-insensitive)
             foreach (var existing in _classList)
             {
                 if (string.Equals(existing.ClassName, config.ClassName, StringComparison.OrdinalIgnoreCase))
@@ -71,7 +73,9 @@ namespace RCDragManagerProd.UI.Forms
             foreach (var cc in _classList)
             {
                 var item = new ListViewItem(cc.ClassName);
-                item.SubItems.Add(cc.Variant);
+                item.SubItems.Add(cc.RaceType ?? "");
+                item.SubItems.Add(cc.ClassType ?? "");
+                // Rounds (N) only meaningful for Round Robin QMDRA
                 item.SubItems.Add(cc.RoundsToRun.HasValue ? cc.RoundsToRun.Value.ToString() : "-");
                 item.SubItems.Add(cc.DriverEntries.Count.ToString());
                 lvClasses.Items.Add(item);
@@ -88,9 +92,12 @@ namespace RCDragManagerProd.UI.Forms
                 {
                     AddClass(new ClassConfig
                     {
-                        ClassName = dlg.ClassName,
-                        Variant = dlg.Variant,
-                        RoundsToRun = dlg.RoundsToRun,
+                        ClassName     = dlg.ClassName,
+                        RaceType      = dlg.RaceType,
+                        ClassType     = dlg.ClassType,
+                        FixedDialIn   = dlg.FixedDialIn,
+                        Variant       = dlg.Variant,
+                        RoundsToRun   = dlg.RoundsToRun,
                         DriverEntries = dlg.BuiltDriverEntries
                     });
                 }
@@ -105,9 +112,12 @@ namespace RCDragManagerProd.UI.Forms
 
             var existing = new MultiClassConfigDialogValues
             {
-                ClassName = cc.ClassName,
-                Variant = cc.Variant,
-                RoundsToRun = cc.RoundsToRun,
+                ClassName     = cc.ClassName,
+                RaceType      = cc.RaceType,
+                ClassType     = cc.ClassType,
+                FixedDialIn   = cc.FixedDialIn,
+                Variant       = cc.Variant,
+                RoundsToRun   = cc.RoundsToRun,
                 DriverEntries = cc.DriverEntries
             };
 
@@ -117,9 +127,12 @@ namespace RCDragManagerProd.UI.Forms
                 {
                     _classList[idx] = new ClassConfig
                     {
-                        ClassName = dlg.ClassName,
-                        Variant = dlg.Variant,
-                        RoundsToRun = dlg.RoundsToRun,
+                        ClassName     = dlg.ClassName,
+                        RaceType      = dlg.RaceType,
+                        ClassType     = dlg.ClassType,
+                        FixedDialIn   = dlg.FixedDialIn,
+                        Variant       = dlg.Variant,
+                        RoundsToRun   = dlg.RoundsToRun,
                         DriverEntries = dlg.BuiltDriverEntries
                     };
                     RefreshClassList();
@@ -134,7 +147,6 @@ namespace RCDragManagerProd.UI.Forms
 
         private void BtnStartRace_Click(object sender, EventArgs e)
         {
-            // Validate: every class must have at least one driver
             foreach (var cc in _classList)
             {
                 if (cc.DriverEntries.Count == 0)
@@ -147,7 +159,6 @@ namespace RCDragManagerProd.UI.Forms
                 }
             }
 
-            // Increment EventsEntered for each driver in each class they appear in
             foreach (var cc in _classList)
             {
                 foreach (var entry in cc.DriverEntries)
@@ -156,7 +167,6 @@ namespace RCDragManagerProd.UI.Forms
                 }
             }
 
-            // Build MultiClassEvent
             MultiClassEventResult = new MultiClassEvent
             {
                 EventName = txtEventName.Text.Trim(),
@@ -165,15 +175,18 @@ namespace RCDragManagerProd.UI.Forms
 
             foreach (var cc in _classList)
             {
+                bool isRR = string.Equals(cc.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
+
                 var session = new RaceSession
                 {
-                    EventName = MultiClassEventResult.EventName,
-                    EventDate = MultiClassEventResult.EventDate,
-                    RaceType = RaceTypes.RoundRobin,
-                    ClassType = cc.ClassName,
-                    RoundRobinVariant = cc.Variant,
-                    RoundsToRun = cc.RoundsToRun,
-                    DriverEntries = cc.DriverEntries
+                    EventName          = MultiClassEventResult.EventName,
+                    EventDate          = MultiClassEventResult.EventDate,
+                    RaceType           = cc.RaceType ?? RaceTypes.RoundRobin,
+                    ClassType          = cc.ClassName,
+                    FixedDialIn        = cc.FixedDialIn,
+                    RoundRobinVariant  = isRR ? cc.Variant : null,
+                    RoundsToRun        = isRR ? cc.RoundsToRun : null,
+                    DriverEntries      = cc.DriverEntries
                 };
                 MultiClassEventResult.ClassSessions.Add(session);
             }

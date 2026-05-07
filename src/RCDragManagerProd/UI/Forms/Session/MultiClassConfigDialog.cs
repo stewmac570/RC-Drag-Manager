@@ -15,6 +15,9 @@ namespace RCDragManagerProd.UI.Forms
     public class MultiClassConfigDialogValues
     {
         public string ClassName { get; set; }
+        public string RaceType { get; set; }
+        public string ClassType { get; set; }
+        public double? FixedDialIn { get; set; }
         public string Variant { get; set; }
         public int? RoundsToRun { get; set; }
         public List<RaceSessionDriverEntry> DriverEntries { get; set; }
@@ -33,6 +36,9 @@ namespace RCDragManagerProd.UI.Forms
         private ComboBox cmbFilterState;
 
         public string ClassName { get; private set; }
+        public string RaceType { get; private set; }
+        public string ClassType { get; private set; }
+        public double? FixedDialIn { get; private set; }
         public string Variant { get; private set; }
         public int? RoundsToRun { get; private set; }
         public List<RaceSessionDriverEntry> BuiltDriverEntries { get; private set; }
@@ -45,14 +51,18 @@ namespace RCDragManagerProd.UI.Forms
             _driverRepo = new DriverRepository(connectionString);
 
             CreateFilterControls();
-            FillFilterCombos();         // populates combos + _allDrivers; triggers FilterChanged → PopulateDriverList(null)
-            PopulateDriverList(existing); // seeds _checkedDriverIds from existing; rebuilds list
+            FillFilterCombos();
+            PopulateDriverList(existing);
 
             if (existing != null)
                 LoadExistingValues(existing);
 
+            cmbRaceType.SelectedIndexChanged += CmbRaceType_SelectedIndexChanged;
+            rbBracket.CheckedChanged += RbClassType_CheckedChanged;
+            rbHeadsUp.CheckedChanged += RbClassType_CheckedChanged;
+            rbDialIn.CheckedChanged  += RbClassType_CheckedChanged;
             rbStandard.CheckedChanged += RbVariant_CheckedChanged;
-            rbQmdra.CheckedChanged += RbVariant_CheckedChanged;
+            rbQmdra.CheckedChanged    += RbVariant_CheckedChanged;
             lvDrivers.SelectedIndexChanged += LvDrivers_SelectedIndexChanged;
             lvDrivers.ItemChecked += LvDrivers_ItemChecked;
             txtDialInOverride.Leave += TxtDialInOverride_Leave;
@@ -60,7 +70,8 @@ namespace RCDragManagerProd.UI.Forms
             btnCancel.Click += BtnCancel_Click;
             btnAddNewDriver.Click += BtnAddNewDriver_Click;
 
-            UpdateRoundsVisibility();
+            UpdateRaceTypeUi();
+            UpdateClassTypeUi();
         }
 
         // ── Filter controls ───────────────────────────────────────────────────
@@ -114,7 +125,6 @@ namespace RCDragManagerProd.UI.Forms
             cmbFilterClass.SelectedIndexChanged += FilterChanged;
             cmbFilterState.SelectedIndexChanged += FilterChanged;
 
-            // State column (index 5) added programmatically here
             if (lvDrivers.Columns.Count == 5)
                 lvDrivers.Columns.Add("State", 70, HorizontalAlignment.Left);
         }
@@ -205,12 +215,10 @@ namespace RCDragManagerProd.UI.Forms
                     item.SubItems.Add(car?.ClassType ?? "");
                     item.SubItems.Add(defaultDialIn.HasValue ? defaultDialIn.Value.ToString("F3") : "");
 
-                    // SubItems[4] = Override Dial-In
                     string overrideText = _dialInOverrides.TryGetValue(driver.Id, out var ov) && ov.HasValue
                         ? ov.Value.ToString("F3") : "";
                     item.SubItems.Add(overrideText);
 
-                    // SubItems[5] = State
                     item.SubItems.Add(driver.State ?? "");
 
                     item.Tag = driver.Id;
@@ -228,6 +236,31 @@ namespace RCDragManagerProd.UI.Forms
         private void LoadExistingValues(MultiClassConfigDialogValues existing)
         {
             txtClassName.Text = existing.ClassName ?? "";
+
+            // Race type
+            if (!string.IsNullOrEmpty(existing.RaceType))
+            {
+                int idx = cmbRaceType.Items.IndexOf(existing.RaceType);
+                if (idx >= 0) cmbRaceType.SelectedIndex = idx;
+            }
+
+            // Class type (Heads Up / Bracket Class / Dial-In)
+            if (string.Equals(existing.ClassType, "Bracket Class", StringComparison.OrdinalIgnoreCase))
+            {
+                rbBracket.Checked = true;
+                if (existing.FixedDialIn.HasValue)
+                    txtFixedDialIn.Text = existing.FixedDialIn.Value.ToString("F3");
+            }
+            else if (string.Equals(existing.ClassType, "Dial-In", StringComparison.OrdinalIgnoreCase))
+            {
+                rbDialIn.Checked = true;
+            }
+            else
+            {
+                rbHeadsUp.Checked = true;
+            }
+
+            // Round Robin variant
             if (string.Equals(existing.Variant, "QMDRA", StringComparison.OrdinalIgnoreCase))
             {
                 rbQmdra.Checked = true;
@@ -277,6 +310,43 @@ namespace RCDragManagerProd.UI.Forms
 
             FillFilterCombos();
             PopulateDriverList(null);
+        }
+
+        // ── Race type selection ───────────────────────────────────────────────
+
+        private void CmbRaceType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateRaceTypeUi();
+        }
+
+        private void UpdateRaceTypeUi()
+        {
+            bool isRR = string.Equals(
+                cmbRaceType.SelectedItem?.ToString(),
+                RaceTypes.RoundRobin,
+                StringComparison.OrdinalIgnoreCase);
+
+            grpVariant.Visible = isRR;
+
+            if (!isRR)
+            {
+                rbStandard.Checked = true;
+                nudRoundsToRun.Value = 3;
+            }
+        }
+
+        // ── Class type selection ──────────────────────────────────────────────
+
+        private void RbClassType_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateClassTypeUi();
+        }
+
+        private void UpdateClassTypeUi()
+        {
+            bool isBracket = rbBracket.Checked;
+            lblFixedDialIn.Visible = isBracket;
+            txtFixedDialIn.Visible = isBracket;
         }
 
         // ── Variant radio buttons ─────────────────────────────────────────────
@@ -344,8 +414,18 @@ namespace RCDragManagerProd.UI.Forms
             }
 
             ClassName = className;
-            Variant = rbQmdra.Checked ? "QMDRA" : "Standard";
-            RoundsToRun = rbQmdra.Checked ? (int?)Convert.ToInt32(nudRoundsToRun.Value) : null;
+            RaceType  = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
+            ClassType = rbHeadsUp.Checked ? "Heads Up" :
+                        rbBracket.Checked ? "Bracket Class" : "Dial-In";
+
+            if (rbBracket.Checked && double.TryParse(txtFixedDialIn.Text.Trim(), out double fd))
+                FixedDialIn = fd;
+            else
+                FixedDialIn = null;
+
+            bool isRR = string.Equals(RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
+            Variant     = isRR ? (rbQmdra.Checked ? "QMDRA" : "Standard") : null;
+            RoundsToRun = isRR && rbQmdra.Checked ? (int?)Convert.ToInt32(nudRoundsToRun.Value) : null;
 
             BuiltDriverEntries = new List<RaceSessionDriverEntry>();
             foreach (var driverId in _checkedDriverIds)
@@ -354,9 +434,16 @@ namespace RCDragManagerProd.UI.Forms
                 if (driver == null) continue;
 
                 var car = driver.Cars?.FirstOrDefault();
-                double? dialIn = _dialInOverrides.TryGetValue(driverId, out var overrideVal)
-                    ? overrideVal
-                    : car?.DefaultDialIn;
+
+                double? dialIn;
+                if (rbBracket.Checked)
+                    dialIn = FixedDialIn;
+                else if (rbHeadsUp.Checked)
+                    dialIn = null;
+                else
+                    dialIn = _dialInOverrides.TryGetValue(driverId, out var overrideVal)
+                        ? overrideVal
+                        : car?.DefaultDialIn;
 
                 BuiltDriverEntries.Add(new RaceSessionDriverEntry
                 {
