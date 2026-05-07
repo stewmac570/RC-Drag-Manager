@@ -79,10 +79,11 @@ namespace RCDragManagerProd.UI.Forms
                 FullRowSelect = true,
                 MultiSelect = false
             };
-            lvClasses.Columns.Add("Class Name", 180);
-            lvClasses.Columns.Add("Variant", 120);
-            lvClasses.Columns.Add("Rounds (N)", 90);
-            lvClasses.Columns.Add("Drivers", 80);
+            lvClasses.Columns.Add("Class Name", 150);
+            lvClasses.Columns.Add("Race Type", 120);
+            lvClasses.Columns.Add("Class Type", 100);
+            lvClasses.Columns.Add("Rounds (N)", 80);
+            lvClasses.Columns.Add("Drivers", 70);
 
             // Class management buttons (stacked to the right of the list)
             btnAddClass    = new Button { Text = "Add Class",    Location = new Point(762, 175), Size = new Size(110, 32) };
