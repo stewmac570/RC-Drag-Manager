@@ -175,10 +175,15 @@ namespace RCDragManagerProd.UI.Forms
             if (existing != null)
             {
                 _checkedDriverIds.Clear();
+                // Only treat saved DialIn values as per-driver overrides when the existing
+                // class was Dial-In. For Heads Up the DialIn is null; for Bracket Class it
+                // is the FixedDialIn applied to every driver — neither is a true override.
+                bool wasDialInClass = string.Equals(
+                    existing.ClassType, "Dial-In", StringComparison.OrdinalIgnoreCase);
                 foreach (var entry in existing.DriverEntries ?? new List<RaceSessionDriverEntry>())
                 {
                     _checkedDriverIds.Add(entry.DriverID);
-                    if (entry.DialIn.HasValue)
+                    if (wasDialInClass && entry.DialIn.HasValue)
                         _dialInOverrides[entry.DriverID] = entry.DialIn;
                 }
             }
