@@ -36,6 +36,8 @@ namespace RCDragManagerProd.UI.Forms
         private ComboBox cmbFilterClass;
         private ComboBox cmbFilterState;
 
+        private string _selectedRaceType = RaceTypes.RoundRobin;
+
         public string ClassName { get; private set; }
         public string RaceType { get; private set; }
         public string ClassType { get; private set; }
@@ -58,12 +60,12 @@ namespace RCDragManagerProd.UI.Forms
             if (existing != null)
                 LoadExistingValues(existing);
 
-            cmbRaceType.SelectedIndexChanged += CmbRaceType_SelectedIndexChanged;
+            WireRaceTypeCard(pnlCardProLadder);
+            WireRaceTypeCard(pnlCardRandomDraw);
+            WireRaceTypeCard(pnlCardRoundRobin);
             rbBracket.CheckedChanged += RbClassType_CheckedChanged;
             rbHeadsUp.CheckedChanged += RbClassType_CheckedChanged;
             rbDialIn.CheckedChanged  += RbClassType_CheckedChanged;
-            rbStandard.CheckedChanged += RbVariant_CheckedChanged;
-            rbQmdra.CheckedChanged    += RbVariant_CheckedChanged;
             lvDrivers.SelectedIndexChanged += LvDrivers_SelectedIndexChanged;
             lvDrivers.ItemChecked += LvDrivers_ItemChecked;
             txtDialInOverride.Leave += TxtDialInOverride_Leave;
@@ -71,7 +73,7 @@ namespace RCDragManagerProd.UI.Forms
             btnCancel.Click += BtnCancel_Click;
             btnAddNewDriver.Click += BtnAddNewDriver_Click;
 
-            UpdateRaceTypeUi();
+            SelectRaceTypeCard(_selectedRaceType);
             UpdateClassTypeUi();
         }
 
@@ -246,8 +248,7 @@ namespace RCDragManagerProd.UI.Forms
             // Race type
             if (!string.IsNullOrEmpty(existing.RaceType))
             {
-                int idx = cmbRaceType.Items.IndexOf(existing.RaceType);
-                if (idx >= 0) cmbRaceType.SelectedIndex = idx;
+                SelectRaceTypeCard(existing.RaceType);
             }
 
             // Class type (Heads Up / Bracket Class / Dial-In)
@@ -266,17 +267,10 @@ namespace RCDragManagerProd.UI.Forms
                 rbHeadsUp.Checked = true;
             }
 
-            // Round Robin variant
-            if (string.Equals(existing.Variant, "QMDRA", StringComparison.OrdinalIgnoreCase))
-            {
-                rbQmdra.Checked = true;
-                if (existing.RoundsToRun.HasValue)
-                    nudRoundsToRun.Value = existing.RoundsToRun.Value;
-            }
-            else
-            {
-                rbStandard.Checked = true;
-            }
+            // Round Robin variant: Standard → buyback checked, QMDRA → buyback unchecked
+            chkBuybackRace.Checked = !string.Equals(existing.Variant, "QMDRA", StringComparison.OrdinalIgnoreCase);
+            if (existing.RoundsToRun.HasValue)
+                nudRoundsToRun.Value = existing.RoundsToRun.Value;
         }
 
         // ── ItemChecked — persistent source of truth ──────────────────────────
@@ -318,26 +312,50 @@ namespace RCDragManagerProd.UI.Forms
             PopulateDriverList(null);
         }
 
-        // ── Race type selection ───────────────────────────────────────────────
+        // ── Race type selection (card-based) ──────────────────────────────────
 
-        private void CmbRaceType_SelectedIndexChanged(object sender, EventArgs e)
+        private void WireRaceTypeCard(Panel card)
         {
-            UpdateRaceTypeUi();
+            string raceType = (string)card.Tag;
+            EventHandler clickHandler = (s, e) => SelectRaceTypeCard(raceType);
+            card.Click += clickHandler;
+            foreach (Control child in card.Controls)
+                child.Click += clickHandler;
+            card.Paint += RaceCard_Paint;
         }
 
-        private void UpdateRaceTypeUi()
+        private void SelectRaceTypeCard(string raceType)
         {
-            bool isRR = string.Equals(
-                cmbRaceType.SelectedItem?.ToString(),
-                RaceTypes.RoundRobin,
-                StringComparison.OrdinalIgnoreCase);
+            _selectedRaceType = raceType;
 
-            grpVariant.Visible = isRR;
+            bool isRR = string.Equals(raceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
+            pnlRrConfig.Visible = isRR;
 
-            if (!isRR)
+            UpdateCardBackground(pnlCardProLadder);
+            UpdateCardBackground(pnlCardRandomDraw);
+            UpdateCardBackground(pnlCardRoundRobin);
+
+            pnlCardProLadder.Invalidate();
+            pnlCardRandomDraw.Invalidate();
+            pnlCardRoundRobin.Invalidate();
+        }
+
+        private void UpdateCardBackground(Panel card)
+        {
+            bool isSelected = string.Equals((string)card.Tag, _selectedRaceType, StringComparison.OrdinalIgnoreCase);
+            card.BackColor = isSelected ? Color.FromArgb(209, 250, 229) : Color.White;
+        }
+
+        private void RaceCard_Paint(object sender, PaintEventArgs e)
+        {
+            var p = (Panel)sender;
+            bool isSelected = string.Equals((string)p.Tag, _selectedRaceType, StringComparison.OrdinalIgnoreCase);
+            var color = isSelected ? Color.FromArgb(16, 185, 129) : Color.FromArgb(220, 220, 220);
+            int width = isSelected ? 2 : 1;
+            using (var pen = new Pen(color, width))
             {
-                rbStandard.Checked = true;
-                nudRoundsToRun.Value = 3;
+                var rect = new Rectangle(0, 0, p.Width - 1, p.Height - 1);
+                e.Graphics.DrawRectangle(pen, rect);
             }
         }
 
@@ -353,20 +371,6 @@ namespace RCDragManagerProd.UI.Forms
             bool isBracket = rbBracket.Checked;
             lblFixedDialIn.Visible = isBracket;
             txtFixedDialIn.Visible = isBracket;
-        }
-
-        // ── Variant radio buttons ─────────────────────────────────────────────
-
-        private void RbVariant_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateRoundsVisibility();
-        }
-
-        private void UpdateRoundsVisibility()
-        {
-            bool isQmdra = rbQmdra.Checked;
-            lblRoundsToRun.Visible = isQmdra;
-            nudRoundsToRun.Visible = isQmdra;
         }
 
         // ── Dial-in override editing ──────────────────────────────────────────
@@ -420,7 +424,7 @@ namespace RCDragManagerProd.UI.Forms
             }
 
             ClassName = className;
-            RaceType  = cmbRaceType.SelectedItem?.ToString() ?? "Pro Ladder";
+            RaceType  = _selectedRaceType ?? RaceTypes.RoundRobin;
             ClassType = rbHeadsUp.Checked ? "Heads Up" :
                         rbBracket.Checked ? "Bracket Class" : "Dial-In";
 
@@ -430,22 +434,25 @@ namespace RCDragManagerProd.UI.Forms
                 FixedDialIn = null;
 
             bool isRR = string.Equals(RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
-            Variant = isRR ? (rbQmdra.Checked ? "QMDRA" : "Standard") : null;
 
-            if (isRR && rbQmdra.Checked)
+            if (isRR)
             {
+                // Buyback checked → Standard variant; unchecked → QMDRA (all advance)
+                Variant = chkBuybackRace.Checked ? "Standard" : "QMDRA";
+
                 int n = (int)nudRoundsToRun.Value;
                 if (n <= 0)
                 {
-                    MessageBox.Show("Rounds To Run (N) is required for QMDRA and must be >= 1.",
+                    MessageBox.Show("Rounds must be at least 1.",
                         "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Logger.Log("[MULTICLASS][CFG][RR] BLOCKED OK → QMDRA missing/invalid N.");
+                    Logger.Log("[MULTICLASS][CFG][RR] BLOCKED OK → invalid Rounds.");
                     return;
                 }
                 RoundsToRun = n;
             }
             else
             {
+                Variant = null;
                 RoundsToRun = null;
             }
 
