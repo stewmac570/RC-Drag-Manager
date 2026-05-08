@@ -146,7 +146,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            // Single-class load
+            // Single-class load — wrap into a one-class MultiClassEvent and route through MultiClassRaceForm
             try
             {
                 if (lvSessions.SelectedItems.Count == 0)
@@ -168,7 +168,16 @@ namespace RCDragManagerProd.UI.Forms
                     return;
                 }
 
-                DialogResult = DialogResult.OK;
+                var wrapped = new MultiClassEvent
+                {
+                    EventName = LoadedSession.EventName,
+                    EventDate = LoadedSession.EventDate != default ? LoadedSession.EventDate : DateTime.Now,
+                    ClassSessions = new List<RaceSession> { LoadedSession }
+                };
+                Logger.Log($"[UI][LoadSession] Wrapping single-class session '{wrapped.EventName}' (raceType='{LoadedSession.RaceType}') into MultiClassRaceForm");
+
+                var form = new MultiClassRaceForm(wrapped, _connectionString);
+                form.Show();
                 Close();
             }
             catch (Exception ex)
