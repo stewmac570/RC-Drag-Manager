@@ -58,13 +58,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             using (var load = new LoadSessionForm(_connStr))
             {
-                if (load.ShowDialog() == DialogResult.OK)
-                {
-                    var loaded = load.LoadedSession;
-                    var controller = new RaceController(loaded);
-                    var mainForm = new Form1(controller);
-                    mainForm.Show();
-                }
+                load.ShowDialog();
             }
         }
 
