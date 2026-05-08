@@ -1,4 +1,4 @@
-﻿using System.Windows.Forms;
+using System.Windows.Forms;
 using System.Drawing;
 using RCDragManagerProd.Properties;
 
@@ -9,11 +9,10 @@ namespace RCDragManagerProd.UI.Forms
         private System.ComponentModel.IContainer components = null;
 
         private Label lblEventTitle;
-        private Button btnCreateSession;
+        private Button btnCreateRaceSession;
         private Button btnLoadEvent;
         private Button btnDriverLists;
         private Button btnSettings;
-        private Button btnNewMultiClassEvent;
         private Button btnExit;
         private PictureBox logoBox;
         private Label lblVersion;
@@ -27,11 +26,10 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.lblEventTitle = new Label();
-            this.btnCreateSession = new Button();
+            this.btnCreateRaceSession = new Button();
             this.btnLoadEvent = new Button();
             this.btnDriverLists = new Button();
             this.btnSettings = new Button();
-            this.btnNewMultiClassEvent = new Button();
             this.btnExit = new Button();
             this.lblVersion = new Label();
             this.logoBox = new PictureBox();
@@ -53,14 +51,14 @@ namespace RCDragManagerProd.UI.Forms
             this.lblEventTitle.TextAlign = ContentAlignment.MiddleCenter;
             this.Controls.Add(this.lblEventTitle);
 
-            // btnCreateSession (New Build)
-            this.btnCreateSession.Location = new System.Drawing.Point(40, 150);
-            this.btnCreateSession.Size = new System.Drawing.Size(200, 50);
-            this.btnCreateSession.Text = "Create Race Session";
-            this.btnCreateSession.Click += new System.EventHandler(this.btnCreateSession_Click);
-            this.Controls.Add(this.btnCreateSession);
+            // btnCreateRaceSession
+            this.btnCreateRaceSession.Location = new System.Drawing.Point(40, 150);
+            this.btnCreateRaceSession.Size = new System.Drawing.Size(200, 50);
+            this.btnCreateRaceSession.Text = "Create Race Session";
+            this.btnCreateRaceSession.Click += new System.EventHandler(this.btnCreateRaceSession_Click);
+            this.Controls.Add(this.btnCreateRaceSession);
 
-            // btnLoadEvent (Future)
+            // btnLoadEvent
             this.btnLoadEvent.Location = new System.Drawing.Point(40, 220);
             this.btnLoadEvent.Size = new System.Drawing.Size(200, 50);
             this.btnLoadEvent.Text = "Load Saved Event";
@@ -81,16 +79,9 @@ namespace RCDragManagerProd.UI.Forms
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             this.Controls.Add(this.btnSettings);
 
-            // btnNewMultiClassEvent
-            this.btnNewMultiClassEvent.Location = new System.Drawing.Point(40, 430);
-            this.btnNewMultiClassEvent.Size = new System.Drawing.Size(200, 50);
-            this.btnNewMultiClassEvent.Text = "New Multi-Class Event";
-            this.btnNewMultiClassEvent.Click += new System.EventHandler(this.btnNewMultiClassEvent_Click);
-            this.Controls.Add(this.btnNewMultiClassEvent);
-
             // btnExit
-            this.btnExit.Location = new System.Drawing.Point(750, 500);
-            this.btnExit.Size = new System.Drawing.Size(100, 40);
+            this.btnExit.Location = new System.Drawing.Point(40, 430);
+            this.btnExit.Size = new System.Drawing.Size(200, 50);
             this.btnExit.Text = "Exit";
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             this.Controls.Add(this.btnExit);
@@ -101,7 +92,6 @@ namespace RCDragManagerProd.UI.Forms
             this.lblVersion.Text = "v1.00";
             this.Controls.Add(this.lblVersion);
 
-            // logoBox
             // logoBox
             this.logoBox.Location = new System.Drawing.Point(260, 80);
             this.logoBox.Size = new System.Drawing.Size(590, 396);

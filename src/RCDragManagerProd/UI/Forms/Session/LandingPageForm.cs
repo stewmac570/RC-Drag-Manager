@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
@@ -34,26 +34,6 @@ namespace RCDragManagerProd.UI.Forms
         // ✅ keep designer convenience
         public LandingForm() : this(Program.ConnectionString) { }
 
-        private void btnCreateSession_Click(object sender, EventArgs e)
-        {
-            Logger.Log("[CREATE] Opening Create Session setup dialog…");
-            var setup = new SessionSetupForm(_driverRepo);
-            if (setup.ShowDialog() == DialogResult.OK)
-            {
-                var rs = setup.RaceSessionResult;
-                int count = rs?.DriverEntries?.Count ?? 0;
-                Logger.Log($"[CREATE] Session created: '{rs?.EventName ?? "(unnamed)"}' | raceType='{rs?.RaceType ?? "n/a"}' | entries={count}");
-
-                var controller = new RaceController(rs);
-                var mainForm = new Form1(controller);
-                mainForm.Show();
-            }
-            else
-            {
-                Logger.Log("[CREATE] Session creation cancelled.");
-            }
-        }
-
         private void btnLoadEvent_Click(object sender, EventArgs e)
         {
             using (var load = new LoadSessionForm(_connStr))
@@ -77,9 +57,9 @@ namespace RCDragManagerProd.UI.Forms
         }
 
 
-        private void btnNewMultiClassEvent_Click(object sender, EventArgs e)
+        private void btnCreateRaceSession_Click(object sender, EventArgs e)
         {
-            Logger.Log("[MULTI] Opening Multi-Class Event setup…");
+            Logger.Log("[MULTI] Opening Create Race Session setup…");
             var setup = new MultiClassSetupForm(_connStr);
             if (setup.ShowDialog() == DialogResult.OK)
             {
@@ -90,7 +70,7 @@ namespace RCDragManagerProd.UI.Forms
             }
             else
             {
-                Logger.Log("[MULTI] Multi-class setup cancelled.");
+                Logger.Log("[MULTI] Create Race Session setup cancelled.");
             }
         }
 

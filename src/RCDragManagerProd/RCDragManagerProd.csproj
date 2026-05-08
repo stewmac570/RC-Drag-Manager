@@ -296,12 +296,6 @@
     <Compile Include="UI\Forms\Common\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Forms\Session\SessionSetupForm.Events.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\Forms\Session\SessionSetupForm.UI.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="ViewModels\MultiClassEventSummary.cs" />
     <Compile Include="ViewModels\RaceSessionSummary.cs" />
     <Compile Include="RandomMode\RandomBracket.cs" />
@@ -319,12 +313,6 @@
     </Compile>
     <Compile Include="UI\Forms\Cars\SelectCarDialog.Designer.cs">
       <DependentUpon>SelectCarDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\Forms\Session\SessionSetupForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\Forms\Session\SessionSetupForm.Designer.cs">
-      <DependentUpon>SessionSetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\DictEx.cs" />
     <Compile Include="ViewModels\MatchResultSave.cs" />
@@ -357,9 +345,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\Forms\Session\SessionSetupForm.resx">
-      <DependentUpon>SessionSetupForm.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
