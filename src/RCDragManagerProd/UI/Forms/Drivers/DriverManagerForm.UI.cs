@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -10,94 +10,96 @@ namespace RCDragManagerProd.UI.Forms
 {
     public partial class DriverManagerForm
     {
-        private void SetupDriverDetailsGrid()
-        {
-            lvDriverDetails.Columns.Clear();
-            lvDriverDetails.View = View.Details;
-            lvDriverDetails.FullRowSelect = true;
-            lvDriverDetails.Columns.Add("Field", 150);
-            lvDriverDetails.Columns.Add("Value", 300);
-        }
-
         private void LoadDrivers()
         {
             var previousId = selectedDriver?.Id ?? 0;
 
-            lstDrivers.Items.Clear();
-            var drivers = repository.GetAllDrivers();
+            lvDrivers.BeginUpdate();
+            lvDrivers.Items.Clear();
+
+            var drivers = repository.GetAllDrivers() ?? new List<Driver>();
 
             foreach (var d in drivers.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))
-                lstDrivers.Items.Add($"{d.Id}: {d.Name}");
+            {
+                var item = new ListViewItem(d.Name ?? string.Empty) { Tag = d.Id };
+                item.SubItems.Add(d.State ?? string.Empty);
+                item.SubItems.Add(d.TotalWins.ToString());
+                item.SubItems.Add(d.TotalLosses.ToString());
+                item.SubItems.Add(d.EventsEntered.ToString());
+                item.SubItems.Add(d.EventsWon.ToString());
+                item.SubItems.Add((d.Cars?.Count ?? 0).ToString());
+                lvDrivers.Items.Add(item);
+            }
 
+            lvDrivers.EndUpdate();
+
+            // Re-select the previously-selected driver by Tag, if still present.
             if (previousId > 0)
             {
-                for (int i = 0; i < lstDrivers.Items.Count; i++)
+                foreach (ListViewItem item in lvDrivers.Items)
                 {
-                    var txt = lstDrivers.Items[i].ToString();
-                    if (txt.StartsWith(previousId.ToString() + ":", StringComparison.Ordinal))
+                    if (item.Tag is int id && id == previousId)
                     {
-                        lstDrivers.SelectedIndex = i;
+                        item.Selected = true;
+                        item.Focused = true;
+                        item.EnsureVisible();
                         break;
                     }
                 }
             }
+
+            UpdateButtonStates();
         }
 
-        private static int ParseIdFromListText(object listItem)
+        private void ShowCarsForDriver(Driver driver)
         {
-            if (listItem == null) return 0;
-            var s = listItem.ToString();
-            if (string.IsNullOrWhiteSpace(s)) return 0;
-            var idx = s.IndexOf(':');
-            if (idx <= 0) return 0;
-            return int.TryParse(s.Substring(0, idx).Trim(), out var id) ? id : 0;
-        }
-
-        private void AddDetail(string field, string value)
-        {
-            var it = new ListViewItem(field);
-            it.SubItems.Add(value ?? "");
-            lvDriverDetails.Items.Add(it);
-        }
-
-        private void ShowDriverDetails(int driverId)
-        {
-            selectedDriver = repository.GetDriverById(driverId);
-
-            lvDriverDetails.BeginUpdate();
-            lvDriverDetails.Items.Clear();
-
-            if (selectedDriver == null)
+            if (driver == null)
             {
-                lvDriverDetails.EndUpdate();
-                btnDriverStats.Enabled = false;
+                ClearCarsPanel();
                 return;
             }
 
-            btnDriverStats.Enabled = true;
+            lblCarsHeader.Text = $"Cars — {driver.Name}";
 
-            AddDetail("Name", selectedDriver.Name);
-            AddDetail("Qual Time", selectedDriver.QualTime?.ToString("0.000") ?? "");
-            AddDetail("State", selectedDriver.State ?? "");
-            AddDetail("Notes", selectedDriver.Notes ?? "");
-            AddDetail("Wins", selectedDriver.TotalWins.ToString());
-            AddDetail("Losses", selectedDriver.TotalLosses.ToString());
-            AddDetail("Events Entered", selectedDriver.EventsEntered.ToString());
-            AddDetail("Events Won", selectedDriver.EventsWon.ToString());
+            lvCars.BeginUpdate();
+            lvCars.Items.Clear();
 
-            AddDetail("--- Cars ---", "");
-            if (selectedDriver.Cars != null)
+            if (driver.Cars != null)
             {
-                foreach (var car in selectedDriver.Cars)
+                string qualTimeText = driver.QualTime?.ToString("0.000") ?? "—";
+                foreach (var car in driver.Cars)
                 {
-                    var dial = car.DefaultDialIn?.ToString("0.000") ?? "-";
-                    var item = new ListViewItem("Car") { Tag = car.CarID };
-                    item.SubItems.Add($"{car.CarName} - {car.ClassType} - {dial}");
-                    lvDriverDetails.Items.Add(item);
+                    var item = new ListViewItem(car.CarName ?? string.Empty) { Tag = car.CarID };
+                    item.SubItems.Add(car.ClassType ?? string.Empty);
+                    item.SubItems.Add(car.DefaultDialIn?.ToString("0.000") ?? "—");
+                    item.SubItems.Add(qualTimeText);
+                    lvCars.Items.Add(item);
                 }
             }
 
-            lvDriverDetails.EndUpdate();
+            lvCars.EndUpdate();
+        }
+
+        private void ClearCarsPanel()
+        {
+            lblCarsHeader.Text = "Cars";
+            lvCars.Items.Clear();
+        }
+
+        private void UpdateButtonStates()
+        {
+            bool hasDriver = lvDrivers.SelectedItems.Count > 0;
+            bool hasCar = lvCars.SelectedItems.Count > 0;
+
+            btnAddDriver.Enabled = true;
+            btnEditDriver.Enabled = hasDriver;
+            btnDeleteDriver.Enabled = hasDriver;
+            btnSetQualTime.Enabled = hasDriver;
+            btnDriverStats.Enabled = hasDriver;
+
+            btnAddCar.Enabled = hasDriver;
+            btnEditCar.Enabled = hasCar;
+            btnDeleteCar.Enabled = hasCar;
         }
     }
 }
