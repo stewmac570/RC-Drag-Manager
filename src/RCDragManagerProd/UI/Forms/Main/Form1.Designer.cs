@@ -646,7 +646,7 @@ namespace RCDragManagerProd.UI.Forms
             this.pnlRight.Controls.Add(this.lvWinners);
             this.pnlRight.Controls.Add(this.lblWinnersHeader);
             this.pnlRight.Dock = DockStyle.Fill;
-            this.pnlRight.Margin = new Padding(0);
+            this.pnlRight.Margin = new Padding(4, 0, 0, 0);
             this.pnlRight.Name = "pnlRight";
             this.pnlRight.TabIndex = 105;
 
