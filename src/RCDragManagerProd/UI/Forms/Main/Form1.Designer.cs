@@ -17,8 +17,6 @@ namespace RCDragManagerProd.UI.Forms
 
         // Header
         private Label lblEventTitle;
-        private Label lblRaceType;          // legacy, removed in next commit
-        private ComboBox cmbRaceType;       // legacy, removed in next commit
 
         // Left column
         private Label lblDriversHeader;
@@ -94,8 +92,6 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpMain = new TableLayoutPanel();
 
             this.lblEventTitle = new Label();
-            this.lblRaceType = new Label();
-            this.cmbRaceType = new ComboBox();
 
             this.lblDriversHeader = new Label();
             this.txtName = new TextBox();
@@ -167,24 +163,6 @@ namespace RCDragManagerProd.UI.Forms
             this.lblEventTitle.TextAlign = ContentAlignment.MiddleCenter;
             this.lblEventTitle.Click += new EventHandler(this.lblEventTitle_Click);
 
-            this.lblRaceType.AutoSize = true;
-            this.lblRaceType.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.lblRaceType.Location = new Point(10, 14);
-            this.lblRaceType.Name = "lblRaceType";
-            this.lblRaceType.TabIndex = 1;
-            this.lblRaceType.Text = "Race Type:";
-
-            this.cmbRaceType.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cmbRaceType.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.cmbRaceType.Items.AddRange(new object[] { "Pro Ladder", "Randomized", "Round Robin" });
-            this.cmbRaceType.Location = new Point(95, 11);
-            this.cmbRaceType.Name = "cmbRaceType";
-            this.cmbRaceType.Size = new Size(150, 24);
-            this.cmbRaceType.TabIndex = 2;
-            this.cmbRaceType.SelectedIndexChanged += new EventHandler(this.cmbRaceType_SelectedIndexChanged);
-
-            this.pnlHeader.Controls.Add(this.lblRaceType);
-            this.pnlHeader.Controls.Add(this.cmbRaceType);
             this.pnlHeader.Controls.Add(this.lblEventTitle);
             this.pnlHeader.Dock = DockStyle.Top;
             this.pnlHeader.Location = new Point(0, 0);

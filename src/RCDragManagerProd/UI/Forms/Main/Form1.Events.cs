@@ -242,7 +242,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            var selectedType = cmbRaceType.SelectedItem?.ToString();
+            var selectedType = _controller.Session?.RaceType ?? currentSession.RaceType;
             Logger.Log($"[FORM1] GenerateBracket called with race type: {selectedType} and {drivers.Count} drivers");
             _controller.GenerateBracket(selectedType, drivers);
             btnGenerateBracket.Enabled = false;
@@ -312,12 +312,6 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = true;
             btnNextRound.Enabled = false;
             btnStandings.Enabled = false;
-
-
-            if (currentSession != null && !string.IsNullOrEmpty(currentSession.RaceType))
-            {
-                cmbRaceType.SelectedItem = currentSession.RaceType;
-            }
         }
 
         private void btnSaveAndClose_Click(object sender, EventArgs e)
@@ -356,7 +350,6 @@ namespace RCDragManagerProd.UI.Forms
 
         // Designer stubs
         private void txtTime_TextChanged(object sender, EventArgs e) { }
-        private void cmbRaceType_SelectedIndexChanged(object sender, EventArgs e) { }
         private void lblPairingsHeader_Click(object sender, EventArgs e) { }
         private void lblDriversHeader_Click(object sender, EventArgs e) { }
         private void lblWinnersHeader_Click(object sender, EventArgs e) { }
