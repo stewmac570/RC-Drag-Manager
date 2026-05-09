@@ -370,7 +370,7 @@ namespace RCDragManagerProd.UI.Forms
 
             this.btnEditResult.Dock = DockStyle.Fill;
             this.btnEditResult.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.btnEditResult.Margin = new Padding(3);
+            this.btnEditResult.Margin = new Padding(3, 0, 3, 3);
             this.btnEditResult.Name = "btnEditResult";
             this.btnEditResult.TabIndex = 20;
             this.btnEditResult.Text = "Edit Match Result";
