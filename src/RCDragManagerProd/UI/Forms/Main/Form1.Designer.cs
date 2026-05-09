@@ -466,7 +466,7 @@ namespace RCDragManagerProd.UI.Forms
             this.lblDriversHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             this.lblDriversHeader.AutoSize = true;
             this.lblDriversHeader.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.lblDriversHeader.Location = new Point(8, 58);
+            this.lblDriversHeader.Location = new Point(8, 8);
             this.lblDriversHeader.Name = "lblDriversHeader";
             this.lblDriversHeader.TabIndex = 5;
             this.lblDriversHeader.Text = "Driver List:";
@@ -474,7 +474,7 @@ namespace RCDragManagerProd.UI.Forms
 
             this.txtName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.txtName.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.txtName.Location = new Point(8, 82);
+            this.txtName.Location = new Point(8, 32);
             this.txtName.Name = "txtName";
             this.txtName.Size = new Size(208, 22);
             this.txtName.TabIndex = 6;
@@ -498,7 +498,7 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpAddEdit.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.tlpAddEdit.ColumnCount = 2;
             this.tlpAddEdit.RowCount = 1;
-            this.tlpAddEdit.Location = new Point(8, 110);
+            this.tlpAddEdit.Location = new Point(8, 60);
             this.tlpAddEdit.Margin = new Padding(0);
             this.tlpAddEdit.Name = "tlpAddEdit";
             this.tlpAddEdit.Size = new Size(208, 30);
@@ -511,7 +511,7 @@ namespace RCDragManagerProd.UI.Forms
 
             this.txtTime.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.txtTime.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.txtTime.Location = new Point(8, 146);
+            this.txtTime.Location = new Point(8, 96);
             this.txtTime.Name = "txtTime";
             this.txtTime.Size = new Size(208, 22);
             this.txtTime.TabIndex = 7;
@@ -536,7 +536,7 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpSetTimes.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.tlpSetTimes.ColumnCount = 2;
             this.tlpSetTimes.RowCount = 1;
-            this.tlpSetTimes.Location = new Point(8, 174);
+            this.tlpSetTimes.Location = new Point(8, 124);
             this.tlpSetTimes.Margin = new Padding(0);
             this.tlpSetTimes.Name = "tlpSetTimes";
             this.tlpSetTimes.Size = new Size(208, 30);
@@ -552,7 +552,7 @@ namespace RCDragManagerProd.UI.Forms
             this.lvDrivers.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             this.lvDrivers.FullRowSelect = true;
             this.lvDrivers.HideSelection = false;
-            this.lvDrivers.Location = new Point(8, 212);
+            this.lvDrivers.Location = new Point(8, 162);
             this.lvDrivers.MultiSelect = false;
             this.lvDrivers.Name = "lvDrivers";
             this.lvDrivers.Size = new Size(208, 210);
