@@ -52,35 +52,35 @@ namespace RCDragManagerProd.UI.Forms
             this.Controls.Add(this.lblEventTitle);
 
             // btnCreateRaceSession
-            this.btnCreateRaceSession.Location = new System.Drawing.Point(40, 150);
+            this.btnCreateRaceSession.Location = new System.Drawing.Point(40, 100);
             this.btnCreateRaceSession.Size = new System.Drawing.Size(200, 50);
             this.btnCreateRaceSession.Text = "Create Race Session";
             this.btnCreateRaceSession.Click += new System.EventHandler(this.btnCreateRaceSession_Click);
             this.Controls.Add(this.btnCreateRaceSession);
 
             // btnLoadEvent
-            this.btnLoadEvent.Location = new System.Drawing.Point(40, 220);
+            this.btnLoadEvent.Location = new System.Drawing.Point(40, 170);
             this.btnLoadEvent.Size = new System.Drawing.Size(200, 50);
             this.btnLoadEvent.Text = "Load Saved Event";
             this.btnLoadEvent.Click += new System.EventHandler(this.btnLoadEvent_Click);
             this.Controls.Add(this.btnLoadEvent);
 
             // btnDriverLists
-            this.btnDriverLists.Location = new System.Drawing.Point(40, 290);
+            this.btnDriverLists.Location = new System.Drawing.Point(40, 240);
             this.btnDriverLists.Size = new System.Drawing.Size(200, 50);
             this.btnDriverLists.Text = "Driver Lists";
             this.btnDriverLists.Click += new System.EventHandler(this.btnDriverLists_Click);
             this.Controls.Add(this.btnDriverLists);
 
             // btnSettings
-            this.btnSettings.Location = new System.Drawing.Point(40, 360);
+            this.btnSettings.Location = new System.Drawing.Point(40, 310);
             this.btnSettings.Size = new System.Drawing.Size(200, 50);
             this.btnSettings.Text = "Settings";
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             this.Controls.Add(this.btnSettings);
 
             // btnExit
-            this.btnExit.Location = new System.Drawing.Point(40, 430);
+            this.btnExit.Location = new System.Drawing.Point(40, 380);
             this.btnExit.Size = new System.Drawing.Size(200, 50);
             this.btnExit.Text = "Exit";
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
@@ -89,7 +89,7 @@ namespace RCDragManagerProd.UI.Forms
             // lblVersion
             this.lblVersion.Location = new System.Drawing.Point(20, 570);
             this.lblVersion.Size = new System.Drawing.Size(200, 20);
-            this.lblVersion.Text = "v1.00";
+            this.lblVersion.Text = "v1.2.0";
             this.Controls.Add(this.lblVersion);
 
             // logoBox
