@@ -591,23 +591,20 @@ namespace RCDragManagerProd.UI.Forms
             this.colDriver2.Text = "Driver 2";
             this.colDriver2.Width = 160;
 
-            this.lvPairings.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             this.lvPairings.Columns.AddRange(new ColumnHeader[] { this.colMatch, this.colDriver1, this.colDriver2 });
+            this.lvPairings.Dock = DockStyle.Fill;
             this.lvPairings.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             this.lvPairings.FullRowSelect = true;
             this.lvPairings.HideSelection = false;
-            this.lvPairings.Location = new Point(0, 25);
             this.lvPairings.MultiSelect = false;
             this.lvPairings.Name = "lvPairings";
-            this.lvPairings.Size = new Size(420, 350);
             this.lvPairings.TabIndex = 4;
             this.lvPairings.UseCompatibleStateImageBehavior = false;
             this.lvPairings.View = View.Details;
 
-            this.lblPairingsHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            this.lblPairingsHeader.Dock = DockStyle.Top;
             this.lblPairingsHeader.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.lblPairingsHeader.Location = new Point(0, 0);
-            this.lblPairingsHeader.Size = new Size(420, 20);
+            this.lblPairingsHeader.Height = 20;
             this.lblPairingsHeader.Name = "lblPairingsHeader";
             this.lblPairingsHeader.TabIndex = 3;
             this.lblPairingsHeader.Text = "Current Round Pairings:";
@@ -627,23 +624,20 @@ namespace RCDragManagerProd.UI.Forms
             this.colLoser.Text = "Loser";
             this.colLoser.Width = 160;
 
-            this.lvWinners.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             this.lvWinners.Columns.AddRange(new ColumnHeader[] { this.colMatchWin, this.colWinner, this.colLoser });
+            this.lvWinners.Dock = DockStyle.Fill;
             this.lvWinners.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             this.lvWinners.FullRowSelect = true;
             this.lvWinners.HideSelection = false;
-            this.lvWinners.Location = new Point(0, 25);
             this.lvWinners.MultiSelect = false;
             this.lvWinners.Name = "lvWinners";
-            this.lvWinners.Size = new Size(420, 350);
             this.lvWinners.TabIndex = 13;
             this.lvWinners.UseCompatibleStateImageBehavior = false;
             this.lvWinners.View = View.Details;
 
-            this.lblWinnersHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            this.lblWinnersHeader.Dock = DockStyle.Top;
             this.lblWinnersHeader.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            this.lblWinnersHeader.Location = new Point(0, 0);
-            this.lblWinnersHeader.Size = new Size(420, 25);
+            this.lblWinnersHeader.Height = 20;
             this.lblWinnersHeader.Name = "lblWinnersHeader";
             this.lblWinnersHeader.TabIndex = 12;
             this.lblWinnersHeader.Text = "Match Winners:";
