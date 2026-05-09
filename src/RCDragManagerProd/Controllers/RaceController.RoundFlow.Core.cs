@@ -125,7 +125,7 @@ namespace RCDragManagerProd.Controllers
                 {
                     Logger.Log("[EngineCall] " + _engine.GetType().Name + " SetRoundsToRun matchId=- round=-");
                     int naturalMax = Math.Max(1, _drivers.Count - 1);
-                    int standardRounds = Math.Min(3, naturalMax);
+                    int standardRounds = Math.Min(_session?.RoundsToRun ?? 3, naturalMax);
                     rrAdapter.SetRoundsToRun(standardRounds);
                     Logger.Log($"[ENGINE][RR] Standard RR ? SetRoundsToRun({standardRounds}) (drivers={_drivers.Count}, naturalMax={naturalMax})");
                 }
