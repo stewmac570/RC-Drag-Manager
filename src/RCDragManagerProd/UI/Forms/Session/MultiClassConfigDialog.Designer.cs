@@ -89,9 +89,10 @@ namespace RCDragManagerProd.UI.Forms
             pnlRrConfig = new Panel
             {
                 Location = new Point(20, 135),
-                Size = new Size(640, 70),
+                Size = new Size(860, 70),
                 BackColor = Color.FromArgb(240, 253, 250),
                 BorderStyle = BorderStyle.FixedSingle,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 Visible = true
             };
             lblRrRounds = new Label
@@ -128,7 +129,7 @@ namespace RCDragManagerProd.UI.Forms
             pnlRrConfig.Controls.AddRange(new Control[] { lblRrRounds, nudRoundsToRun, chkBuybackRace, lblBuybackHint });
 
             // Class type group
-            grpClassType = new GroupBox { Text = "Class Type", Location = new Point(20, 235), Size = new Size(640, 62) };
+            grpClassType = new GroupBox { Text = "Class Type", Location = new Point(20, 235), Size = new Size(860, 62) };
             rbHeadsUp = new RadioButton { Text = "Heads Up",      Location = new Point(20, 28),  AutoSize = true, Checked = true };
             rbBracket = new RadioButton { Text = "Bracket Class", Location = new Point(130, 28), AutoSize = true };
             rbDialIn  = new RadioButton { Text = "Dial-In",        Location = new Point(265, 28), AutoSize = true };
