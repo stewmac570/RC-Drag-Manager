@@ -568,7 +568,7 @@ namespace RCDragManagerProd.UI.Forms
             this.pnlLeft.Controls.Add(this.txtName);
             this.pnlLeft.Controls.Add(this.lblDriversHeader);
             this.pnlLeft.Dock = DockStyle.Left;
-            this.pnlLeft.Padding = new Padding(0);
+            this.pnlLeft.Padding = new Padding(0, 50, 0, 0);
             this.pnlLeft.Size = new Size(224, 380);
             this.pnlLeft.Name = "pnlLeft";
             this.pnlLeft.TabIndex = 103;
