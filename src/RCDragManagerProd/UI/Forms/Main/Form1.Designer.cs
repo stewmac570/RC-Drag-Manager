@@ -440,6 +440,7 @@ namespace RCDragManagerProd.UI.Forms
 
             this.pnlRail.Controls.Add(this.tlpRail);
             this.pnlRail.Dock = DockStyle.Right;
+            this.pnlRail.Padding = new Padding(0, 50, 0, 0);
             this.pnlRail.Size = new Size(116, 380);
             this.pnlRail.Name = "pnlRail";
             this.pnlRail.TabIndex = 102;
