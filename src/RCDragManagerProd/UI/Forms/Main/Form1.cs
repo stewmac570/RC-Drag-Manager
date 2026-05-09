@@ -68,12 +68,6 @@ namespace RCDragManagerProd.UI.Forms
 
                 Logger.Log($"[CREATE] Hydrated {drivers.Count} drivers from RaceSession.DriverEntries.");
 
-                if (!string.IsNullOrWhiteSpace(currentSession.RaceType) && cmbRaceType != null)
-                {
-                    try { cmbRaceType.SelectedItem = currentSession.RaceType; } catch { }
-                    Logger.Log($"[CREATE] Restored RaceType on UI: '{currentSession.RaceType}'");
-                }
-
                 Logger.Log($"[CREATE][RR] Session config at Form load → Variant='{currentSession.RoundRobinVariant}', N={currentSession.RoundsToRun}");
 
                 UpdateDriverList();
