@@ -9,6 +9,7 @@ namespace RCDragManagerProd.UI.Forms
 
         private Label lblClassName;
         private TextBox txtClassName;
+        private TableLayoutPanel pnlCardRow;
         private Panel pnlCardProLadder;
         private Panel pnlCardRandomDraw;
         private Panel pnlCardRoundRobin;
@@ -52,15 +53,43 @@ namespace RCDragManagerProd.UI.Forms
             txtClassName = new TextBox { Location = new Point(110, 17), Width = 220 };
 
             // Race format cards (replace the old Race Type dropdown)
-            pnlCardProLadder  = CreateRaceTypeCard("Pro Ladder",  "Pro Ladder",  "NHRA bracket",  new Point(20, 55));
-            pnlCardRandomDraw = CreateRaceTypeCard("Random Draw", "Random Draw", "Single elim",   new Point(240, 55));
-            pnlCardRoundRobin = CreateRaceTypeCard("Round Robin", "Round Robin", "Points based",  new Point(460, 55));
+            // Cards live inside a TableLayoutPanel so they share the full width
+            // of the driver ListView below in three equal columns and stretch
+            // together if the form is ever resized.
+            pnlCardRow = new TableLayoutPanel
+            {
+                Location = new Point(20, 55),
+                Size = new Size(860, 70),
+                ColumnCount = 3,
+                RowCount = 1,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            };
+            pnlCardRow.ColumnStyles.Clear();
+            pnlCardRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            pnlCardRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
+            pnlCardRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            pnlCardRow.RowStyles.Clear();
+            pnlCardRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+
+            pnlCardProLadder  = CreateRaceTypeCard("Pro Ladder",  "Pro Ladder",  "NHRA bracket",  Point.Empty);
+            pnlCardRandomDraw = CreateRaceTypeCard("Random Draw", "Random Draw", "Single elim",   Point.Empty);
+            pnlCardRoundRobin = CreateRaceTypeCard("Round Robin", "Round Robin", "Points based",  Point.Empty);
+
+            pnlCardProLadder.Dock  = DockStyle.Fill;
+            pnlCardRandomDraw.Dock = DockStyle.Fill;
+            pnlCardRoundRobin.Dock = DockStyle.Fill;
+
+            pnlCardRow.Controls.Add(pnlCardProLadder,  0, 0);
+            pnlCardRow.Controls.Add(pnlCardRandomDraw, 1, 0);
+            pnlCardRow.Controls.Add(pnlCardRoundRobin, 2, 0);
 
             // Round Robin config panel (visible only when Round Robin card is selected)
+            // Single horizontal row: [Rounds: <nud>]   [☑ Buyback race for 4th finals spot]
+            // Hint text below, left-aligned under the checkbox.
             pnlRrConfig = new Panel
             {
                 Location = new Point(20, 135),
-                Size = new Size(640, 90),
+                Size = new Size(640, 70),
                 BackColor = Color.FromArgb(240, 253, 250),
                 BorderStyle = BorderStyle.FixedSingle,
                 Visible = true
@@ -68,13 +97,13 @@ namespace RCDragManagerProd.UI.Forms
             lblRrRounds = new Label
             {
                 Text = "Rounds:",
-                Location = new Point(15, 16),
+                Location = new Point(15, 20),
                 AutoSize = true,
                 BackColor = Color.Transparent
             };
             nudRoundsToRun = new NumericUpDown
             {
-                Location = new Point(75, 13),
+                Location = new Point(75, 17),
                 Width = 60,
                 Minimum = 1,
                 Maximum = 100,
@@ -83,7 +112,7 @@ namespace RCDragManagerProd.UI.Forms
             chkBuybackRace = new CheckBox
             {
                 Text = "Buyback race for 4th finals spot",
-                Location = new Point(15, 41),
+                Location = new Point(165, 19),
                 AutoSize = true,
                 Checked = true,
                 BackColor = Color.Transparent
@@ -91,7 +120,7 @@ namespace RCDragManagerProd.UI.Forms
             lblBuybackHint = new Label
             {
                 Text = "Unchecked → all drivers advance in ranked order",
-                Location = new Point(15, 64),
+                Location = new Point(165, 45),
                 AutoSize = true,
                 ForeColor = Color.Gray,
                 BackColor = Color.Transparent
@@ -139,7 +168,7 @@ namespace RCDragManagerProd.UI.Forms
             Controls.AddRange(new Control[]
             {
                 lblClassName, txtClassName,
-                pnlCardProLadder, pnlCardRandomDraw, pnlCardRoundRobin,
+                pnlCardRow,
                 pnlRrConfig,
                 grpClassType,
                 btnAddNewDriver,
