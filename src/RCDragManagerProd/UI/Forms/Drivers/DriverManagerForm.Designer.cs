@@ -122,26 +122,26 @@ namespace RCDragManagerProd.UI.Forms
 
             // ── Driver grid columns (lvDrivers) ────────────────────────────────
             this.colDriverName.Text = "Name";
-            this.colDriverName.Width = 180;
+            this.colDriverName.Width = 130;
             this.colDriverState.Text = "State";
-            this.colDriverState.Width = 55;
+            this.colDriverState.Width = 40;
             this.colDriverWins.Text = "Wins";
-            this.colDriverWins.Width = 55;
+            this.colDriverWins.Width = 44;
             this.colDriverWins.TextAlign = HorizontalAlignment.Right;
             this.colDriverLosses.Text = "Losses";
-            this.colDriverLosses.Width = 55;
+            this.colDriverLosses.Width = 50;
             this.colDriverLosses.TextAlign = HorizontalAlignment.Right;
             this.colDriverEvents.Text = "Events";
-            this.colDriverEvents.Width = 60;
+            this.colDriverEvents.Width = 50;
             this.colDriverEvents.TextAlign = HorizontalAlignment.Right;
             this.colDriverEventWins.Text = "Event wins";
-            this.colDriverEventWins.Width = 70;
+            this.colDriverEventWins.Width = 68;
             this.colDriverEventWins.TextAlign = HorizontalAlignment.Right;
             this.colDriverQualTime.Text = "Qual time";
-            this.colDriverQualTime.Width = 70;
+            this.colDriverQualTime.Width = 65;
             this.colDriverQualTime.TextAlign = HorizontalAlignment.Right;
             this.colDriverCars.Text = "Cars";
-            this.colDriverCars.Width = 50;
+            this.colDriverCars.Width = 40;
             this.colDriverCars.TextAlign = HorizontalAlignment.Right;
 
             // ── lvDrivers ───────────────────────────────────────────────────────
