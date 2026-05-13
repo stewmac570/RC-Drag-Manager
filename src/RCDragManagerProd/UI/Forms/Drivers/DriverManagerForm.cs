@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Repositories;
@@ -14,8 +14,6 @@ namespace RCDragManagerProd.UI.Forms
         {
             InitializeComponent();
             repository = new DriverRepository(Program.ConnectionString);
-
-            SetupDriverDetailsGrid();
             LoadDrivers();
         }
 
@@ -23,8 +21,6 @@ namespace RCDragManagerProd.UI.Forms
         {
             InitializeComponent();
             repository = repo ?? new DriverRepository(Program.ConnectionString);
-
-            SetupDriverDetailsGrid();
             LoadDrivers();
         }
 
@@ -34,7 +30,7 @@ namespace RCDragManagerProd.UI.Forms
             LoadDrivers();
 
             if (selectedDriver != null)
-                ShowDriverDetails(selectedDriver.Id);
+                ShowCarsForDriver(selectedDriver);
         }
     }
 }

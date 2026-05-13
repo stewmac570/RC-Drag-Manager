@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -35,19 +35,38 @@ namespace RCDragManagerProd.UI.Forms
 
     public partial class DriverManagerForm
     {
-        private void lstDrivers_SelectedIndexChanged(object sender, EventArgs e)
+        // ── Selection handlers ────────────────────────────────────────────────
+
+        private void lvDrivers_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var id = ParseIdFromListText(lstDrivers.SelectedItem);
-            if (id <= 0)
+            if (lvDrivers.SelectedItems.Count == 0)
             {
                 selectedDriver = null;
-                lvDriverDetails.Items.Clear();
-                btnDriverStats.Enabled = false;
+                ClearCarsPanel();
+                UpdateButtonStates();
                 return;
             }
 
-            ShowDriverDetails(id);
+            var tag = lvDrivers.SelectedItems[0].Tag;
+            if (!(tag is int id) || id <= 0)
+            {
+                selectedDriver = null;
+                ClearCarsPanel();
+                UpdateButtonStates();
+                return;
+            }
+
+            selectedDriver = repository.GetDriverById(id);
+            ShowCarsForDriver(selectedDriver);
+            UpdateButtonStates();
         }
+
+        private void lvCars_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateButtonStates();
+        }
+
+        // ── Driver CRUD ───────────────────────────────────────────────────────
 
         private void btnAddDriver_Click(object sender, EventArgs e)
         {
@@ -79,8 +98,10 @@ namespace RCDragManagerProd.UI.Forms
 
                 Logger.Log($"[DRIVERS] Added '{newDriver.Name}' with car '{newCar.CarName}'.");
 
+                selectedDriver = newDriver;
                 LoadDrivers();
-                ShowDriverDetails(newDriver.Id);
+                ShowCarsForDriver(selectedDriver);
+                UpdateButtonStates();
             }
         }
 
@@ -92,15 +113,18 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            var dlg = new EditDriverDialog(selectedDriver.Name, selectedDriver.State);
-            if (dlg.ShowDialog() != DialogResult.OK) return;
+            using (var dlg = new EditDriverDialog(selectedDriver.Name, selectedDriver.State))
+            {
+                if (dlg.ShowDialog() != DialogResult.OK) return;
 
-            selectedDriver.Name = dlg.DriverName;
-            selectedDriver.State = dlg.State;
-            repository.UpdateDriver(selectedDriver);
+                selectedDriver.Name = dlg.DriverName;
+                selectedDriver.State = dlg.State;
+                repository.UpdateDriver(selectedDriver);
 
-            LoadDrivers();
-            ShowDriverDetails(selectedDriver.Id);
+                LoadDrivers();
+                ShowCarsForDriver(selectedDriver);
+                UpdateButtonStates();
+            }
         }
 
         private void btnDeleteDriver_Click(object sender, EventArgs e)
@@ -119,16 +143,15 @@ namespace RCDragManagerProd.UI.Forms
             selectedDriver = null;
 
             LoadDrivers();
-            lvDriverDetails.Items.Clear();
+            ClearCarsPanel();
+            UpdateButtonStates();
         }
+
+        // ── Car CRUD (Tag-only — no row-index math) ────────────────────────────
 
         private void btnAddCar_Click(object sender, EventArgs e)
         {
-            if (selectedDriver == null)
-            {
-                MessageBox.Show("Select a driver first.");
-                return;
-            }
+            if (selectedDriver == null) return;
 
             using (var dlg = new AddCarDialog())
             {
@@ -140,77 +163,34 @@ namespace RCDragManagerProd.UI.Forms
                 repository.UpdateDriver(selectedDriver);
                 Logger.Log($"[CARS] Added car '{dlg.NewCar.CarName}' to driver #{selectedDriver.Id}.");
 
-                ShowDriverDetails(selectedDriver.Id);
+                RefreshDriverRowCarsCount(selectedDriver);
+                ShowCarsForDriver(selectedDriver);
+                UpdateButtonStates();
             }
         }
 
         private void btnEditCar_Click(object sender, EventArgs e)
         {
-            if (selectedDriver == null || selectedDriver.Cars == null || selectedDriver.Cars.Count == 0)
-            {
-                MessageBox.Show("This driver has no cars to edit.");
-                return;
-            }
+            if (selectedDriver == null) return;
+            if (lvCars.SelectedItems.Count == 0) return;
 
-            if (lvDriverDetails.SelectedItems.Count == 0 || lvDriverDetails.SelectedItems[0].Text != "Car")
-            {
-                MessageBox.Show("Select a Car row to edit.");
-                return;
-            }
+            var tag = lvCars.SelectedItems[0].Tag;
+            if (!(tag is int carId) || carId <= 0) return;
 
-            var displayedCarIds = new List<int>();
-            foreach (ListViewItem item in lvDriverDetails.Items)
-            {
-                if (item.Text == "Car" && item.Tag is int id && id > 0)
-                    displayedCarIds.Add(id);
-            }
-
-            var selectedItem = lvDriverDetails.SelectedItems[0];
-            var selectedCarIdFromTag = selectedItem.Tag is int taggedId ? taggedId : 0;
-            var selectedDisplayCarIndex = selectedCarIdFromTag > 0 ? displayedCarIds.IndexOf(selectedCarIdFromTag) : -1;
-
-            if (selectedDisplayCarIndex < 0)
-            {
-                int rowIndex = lvDriverDetails.Items.IndexOf(selectedItem);
-                int headerIndex = -1;
-                for (int i = 0; i < lvDriverDetails.Items.Count; i++)
-                {
-                    if (lvDriverDetails.Items[i].Text == "--- Cars ---")
-                    {
-                        headerIndex = i;
-                        break;
-                    }
-                }
-
-                var fallbackIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
-                if (fallbackIndex >= 0 && fallbackIndex < selectedDriver.Cars.Count)
-                {
-                    displayedCarIds = selectedDriver.Cars.Select(c => c.CarID).ToList();
-                    selectedDisplayCarIndex = fallbackIndex;
-                }
-            }
-
-            if (selectedDisplayCarIndex < 0 || selectedDisplayCarIndex >= displayedCarIds.Count)
-            {
-                MessageBox.Show("Could not match selected car.");
-                return;
-            }
-
-            var currentCar = selectedDriver.Cars.FirstOrDefault(c => c.CarID == displayedCarIds[selectedDisplayCarIndex]);
-            if (currentCar == null)
-            {
-                MessageBox.Show("Could not match selected car.");
-                return;
-            }
+            var currentCar = selectedDriver.Cars?.FirstOrDefault(c => c.CarID == carId);
+            if (currentCar == null) return;
 
             using (var dlg = new AddCarDialog(currentCar))
             {
                 if (dlg.ShowDialog() != DialogResult.OK) return;
 
+                var displayedCarIds = selectedDriver.Cars.Select(c => c.CarID).ToList();
+                int selectedIndex = displayedCarIds.IndexOf(carId);
+
                 if (!DriverManagerCarEditFlow.TryApplyEditedCar(
                     selectedDriver,
                     displayedCarIds,
-                    selectedDisplayCarIndex,
+                    selectedIndex,
                     dlg.NewCar))
                 {
                     MessageBox.Show("Could not apply car edit.");
@@ -218,87 +198,63 @@ namespace RCDragManagerProd.UI.Forms
                 }
 
                 repository.UpdateDriver(selectedDriver);
-                Logger.Log($"[CARS] Updated car for driver #{selectedDriver.Id}.");
+                Logger.Log($"[CARS] Updated car #{carId} for driver #{selectedDriver.Id}.");
 
-                LoadDrivers();
-                ShowDriverDetails(selectedDriver.Id);
+                ShowCarsForDriver(selectedDriver);
+                UpdateButtonStates();
             }
         }
 
         private void btnDeleteCar_Click(object sender, EventArgs e)
         {
-            if (selectedDriver == null || selectedDriver.Cars == null || selectedDriver.Cars.Count == 0)
-            {
-                MessageBox.Show("This driver has no cars to delete.");
-                return;
-            }
+            if (selectedDriver == null) return;
+            if (lvCars.SelectedItems.Count == 0) return;
 
-            if (lvDriverDetails.SelectedItems.Count == 0 || lvDriverDetails.SelectedItems[0].Text != "Car")
-            {
-                MessageBox.Show("Select a Car row to delete.");
-                return;
-            }
+            var tag = lvCars.SelectedItems[0].Tag;
+            if (!(tag is int carId) || carId <= 0) return;
 
-            int rowIndex = lvDriverDetails.Items.IndexOf(lvDriverDetails.SelectedItems[0]);
-            int headerIndex = -1;
-            for (int i = 0; i < lvDriverDetails.Items.Count; i++)
-            {
-                if (lvDriverDetails.Items[i].Text == "--- Cars ---")
-                {
-                    headerIndex = i;
-                    break;
-                }
-            }
+            var car = selectedDriver.Cars?.FirstOrDefault(c => c.CarID == carId);
+            if (car == null) return;
 
-            int carIndex = (headerIndex >= 0) ? (rowIndex - headerIndex - 1) : -1;
-            if (carIndex < 0 || carIndex >= selectedDriver.Cars.Count)
-            {
-                MessageBox.Show("Could not match selected car.");
-                return;
-            }
-
-            var car = selectedDriver.Cars[carIndex];
             var confirm = MessageBox.Show($"Delete car '{car.CarName}'?", "Confirm Delete", MessageBoxButtons.YesNo);
             if (confirm != DialogResult.Yes) return;
 
-            selectedDriver.Cars.RemoveAt(carIndex);
+            selectedDriver.Cars.Remove(car);
             repository.UpdateDriver(selectedDriver);
-            Logger.Log($"[CARS] Deleted car for driver #{selectedDriver.Id}.");
+            Logger.Log($"[CARS] Deleted car #{carId} for driver #{selectedDriver.Id}.");
 
-            ShowDriverDetails(selectedDriver.Id);
+            RefreshDriverRowCarsCount(selectedDriver);
+            ShowCarsForDriver(selectedDriver);
+            UpdateButtonStates();
         }
+
+        // ── Qual time + driver stats ──────────────────────────────────────────
 
         private void btnSetQualTime_Click(object sender, EventArgs e)
         {
-            var id = ParseIdFromListText(lstDrivers.SelectedItem);
-            if (id <= 0)
+            if (selectedDriver == null)
             {
                 MessageBox.Show("Please select a driver first.");
                 return;
             }
 
-            var driver = repository.GetDriverById(id);
+            var driver = repository.GetDriverById(selectedDriver.Id);
             using (var dialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime))
             {
                 if (dialog.ShowDialog() != DialogResult.OK) return;
 
                 if (dialog.QualifyingTime.HasValue)
                 {
-                    repository.UpdateQualifyingTime(id, dialog.QualifyingTime.Value);
-                    Logger.Log($"[DRIVERS] Set QualTime for #{id} to {dialog.QualifyingTime.Value:0.000}");
+                    repository.UpdateQualifyingTime(driver.Id, dialog.QualifyingTime.Value);
+                    Logger.Log($"[DRIVERS] Set QualTime for #{driver.Id} to {dialog.QualifyingTime.Value:0.000}");
 
+                    // refresh the in-memory driver so the cars-grid qual-time column updates
+                    selectedDriver = repository.GetDriverById(driver.Id);
                     LoadDrivers();
-                    ShowDriverDetails(id);
+                    ShowCarsForDriver(selectedDriver);
+                    UpdateButtonStates();
                 }
             }
-        }
-
-        private void btnSaveChanges_Click(object sender, EventArgs e)
-        {
-            if (selectedDriver != null)
-                repository.UpdateDriver(selectedDriver);
-
-            Close();
         }
 
         private void btnDriverStats_Click(object sender, EventArgs e)
@@ -312,6 +268,27 @@ namespace RCDragManagerProd.UI.Forms
             using (var statsForm = new DriverStatsForm(selectedDriver, Program.ConnectionString))
             {
                 statsForm.ShowDialog();
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        // Updates only the Cars-count cell on the driver's row (avoids a full LoadDrivers
+        // round-trip when only the car count changed).
+        private void RefreshDriverRowCarsCount(Driver driver)
+        {
+            if (driver == null) return;
+
+            foreach (ListViewItem item in lvDrivers.Items)
+            {
+                if (item.Tag is int id && id == driver.Id)
+                {
+                    int count = driver.Cars?.Count ?? 0;
+                    // Cars column is the last (index 7) of 8
+                    if (item.SubItems.Count >= 8)
+                        item.SubItems[7].Text = count.ToString();
+                    break;
+                }
             }
         }
     }
