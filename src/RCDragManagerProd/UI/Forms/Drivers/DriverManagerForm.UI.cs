@@ -27,6 +27,7 @@ namespace RCDragManagerProd.UI.Forms
                 item.SubItems.Add(d.TotalLosses.ToString());
                 item.SubItems.Add(d.EventsEntered.ToString());
                 item.SubItems.Add(d.EventsWon.ToString());
+                item.SubItems.Add(d.QualTime?.ToString("0.000") ?? "—");
                 item.SubItems.Add((d.Cars?.Count ?? 0).ToString());
                 lvDrivers.Items.Add(item);
             }
@@ -66,13 +67,11 @@ namespace RCDragManagerProd.UI.Forms
 
             if (driver.Cars != null)
             {
-                string qualTimeText = driver.QualTime?.ToString("0.000") ?? "—";
                 foreach (var car in driver.Cars)
                 {
                     var item = new ListViewItem(car.CarName ?? string.Empty) { Tag = car.CarID };
                     item.SubItems.Add(car.ClassType ?? string.Empty);
                     item.SubItems.Add(car.DefaultDialIn?.ToString("0.000") ?? "—");
-                    item.SubItems.Add(qualTimeText);
                     lvCars.Items.Add(item);
                 }
             }

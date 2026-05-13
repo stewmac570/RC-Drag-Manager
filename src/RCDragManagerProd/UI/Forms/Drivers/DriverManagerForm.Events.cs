@@ -284,9 +284,9 @@ namespace RCDragManagerProd.UI.Forms
                 if (item.Tag is int id && id == driver.Id)
                 {
                     int count = driver.Cars?.Count ?? 0;
-                    // Cars column is the last (index 6) of 7
-                    if (item.SubItems.Count >= 7)
-                        item.SubItems[6].Text = count.ToString();
+                    // Cars column is the last (index 7) of 8
+                    if (item.SubItems.Count >= 8)
+                        item.SubItems[7].Text = count.ToString();
                     break;
                 }
             }

@@ -7,8 +7,6 @@ namespace RCDragManagerProd.UI.Forms
     {
         private System.ComponentModel.IContainer components = null;
 
-        private Label lblEventTitle;
-
         // Driver grid (replaces lstDrivers)
         private ListView lvDrivers;
         private ColumnHeader colDriverName;
@@ -17,6 +15,7 @@ namespace RCDragManagerProd.UI.Forms
         private ColumnHeader colDriverLosses;
         private ColumnHeader colDriverEvents;
         private ColumnHeader colDriverEventWins;
+        private ColumnHeader colDriverQualTime;
         private ColumnHeader colDriverCars;
 
         // Cars header + grid (replaces lvDriverDetails Field/Value table)
@@ -25,7 +24,6 @@ namespace RCDragManagerProd.UI.Forms
         private ColumnHeader colCarName;
         private ColumnHeader colCarClass;
         private ColumnHeader colCarDialIn;
-        private ColumnHeader colCarQualTime;
 
         // Hosts the three docked controls above (lvDrivers / lblCarsHeader / lvCars)
         // so Dock=Top / Dock=Top / Dock=Fill stacks cleanly without colliding
@@ -52,7 +50,6 @@ namespace RCDragManagerProd.UI.Forms
 
         private void InitializeComponent()
         {
-            this.lblEventTitle = new Label();
             this.lvDrivers = new ListView();
             this.colDriverName = new ColumnHeader();
             this.colDriverState = new ColumnHeader();
@@ -60,13 +57,13 @@ namespace RCDragManagerProd.UI.Forms
             this.colDriverLosses = new ColumnHeader();
             this.colDriverEvents = new ColumnHeader();
             this.colDriverEventWins = new ColumnHeader();
+            this.colDriverQualTime = new ColumnHeader();
             this.colDriverCars = new ColumnHeader();
             this.lblCarsHeader = new Label();
             this.lvCars = new ListView();
             this.colCarName = new ColumnHeader();
             this.colCarClass = new ColumnHeader();
             this.colCarDialIn = new ColumnHeader();
-            this.colCarQualTime = new ColumnHeader();
             this.pnlContent = new Panel();
             this.btnAddDriver = new Button();
             this.btnEditDriver = new Button();
@@ -80,51 +77,44 @@ namespace RCDragManagerProd.UI.Forms
             this.pnlContent.SuspendLayout();
             this.SuspendLayout();
 
-            // ── Title ───────────────────────────────────────────────────────────
-            this.lblEventTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            this.lblEventTitle.Location = new Point(20, 10);
-            this.lblEventTitle.Size = new Size(860, 30);
-            this.lblEventTitle.Text = "Driver Manager";
-            this.lblEventTitle.TextAlign = ContentAlignment.MiddleCenter;
-
             // ── Left column buttons (driver CRUD) ───────────────────────────────
-            this.btnAddDriver.Location = new Point(20, 80);
+            this.btnAddDriver.Location = new Point(20, 20);
             this.btnAddDriver.Size = new Size(180, 40);
             this.btnAddDriver.Text = "Add Driver";
             this.btnAddDriver.Click += new System.EventHandler(this.btnAddDriver_Click);
 
-            this.btnEditDriver.Location = new Point(20, 140);
+            this.btnEditDriver.Location = new Point(20, 80);
             this.btnEditDriver.Size = new Size(180, 40);
             this.btnEditDriver.Text = "Edit Driver";
             this.btnEditDriver.Click += new System.EventHandler(this.btnEditDriver_Click);
 
-            this.btnDeleteDriver.Location = new Point(20, 200);
+            this.btnDeleteDriver.Location = new Point(20, 140);
             this.btnDeleteDriver.Size = new Size(180, 40);
             this.btnDeleteDriver.Text = "Delete Driver";
             this.btnDeleteDriver.Click += new System.EventHandler(this.btnDeleteDriver_Click);
 
             // ── Right column buttons (cars + qual time + stats) ─────────────────
-            this.btnAddCar.Location = new Point(722, 80);
+            this.btnAddCar.Location = new Point(722, 20);
             this.btnAddCar.Size = new Size(150, 40);
             this.btnAddCar.Text = "Add Car";
             this.btnAddCar.Click += new System.EventHandler(this.btnAddCar_Click);
 
-            this.btnEditCar.Location = new Point(722, 140);
+            this.btnEditCar.Location = new Point(722, 80);
             this.btnEditCar.Size = new Size(150, 40);
             this.btnEditCar.Text = "Edit Car";
             this.btnEditCar.Click += new System.EventHandler(this.btnEditCar_Click);
 
-            this.btnDeleteCar.Location = new Point(722, 200);
+            this.btnDeleteCar.Location = new Point(722, 140);
             this.btnDeleteCar.Size = new Size(150, 40);
             this.btnDeleteCar.Text = "Delete Car";
             this.btnDeleteCar.Click += new System.EventHandler(this.btnDeleteCar_Click);
 
-            this.btnSetQualTime.Location = new Point(722, 260);
+            this.btnSetQualTime.Location = new Point(722, 200);
             this.btnSetQualTime.Size = new Size(150, 40);
             this.btnSetQualTime.Text = "Set Qual Time";
             this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
 
-            this.btnDriverStats.Location = new Point(722, 320);
+            this.btnDriverStats.Location = new Point(722, 260);
             this.btnDriverStats.Size = new Size(150, 40);
             this.btnDriverStats.Text = "Driver Stats";
             this.btnDriverStats.Enabled = false;
@@ -147,8 +137,11 @@ namespace RCDragManagerProd.UI.Forms
             this.colDriverEventWins.Text = "Event wins";
             this.colDriverEventWins.Width = 70;
             this.colDriverEventWins.TextAlign = HorizontalAlignment.Right;
+            this.colDriverQualTime.Text = "Qual time";
+            this.colDriverQualTime.Width = 70;
+            this.colDriverQualTime.TextAlign = HorizontalAlignment.Right;
             this.colDriverCars.Text = "Cars";
-            this.colDriverCars.Width = 45;
+            this.colDriverCars.Width = 50;
             this.colDriverCars.TextAlign = HorizontalAlignment.Right;
 
             // ── lvDrivers ───────────────────────────────────────────────────────
@@ -159,6 +152,7 @@ namespace RCDragManagerProd.UI.Forms
                 this.colDriverLosses,
                 this.colDriverEvents,
                 this.colDriverEventWins,
+                this.colDriverQualTime,
                 this.colDriverCars
             });
             this.lvDrivers.View = View.Details;
@@ -166,7 +160,7 @@ namespace RCDragManagerProd.UI.Forms
             this.lvDrivers.MultiSelect = false;
             this.lvDrivers.HideSelection = false;
             this.lvDrivers.Dock = DockStyle.Top;
-            this.lvDrivers.Height = 180;
+            this.lvDrivers.Height = 240;
             this.lvDrivers.Name = "lvDrivers";
             this.lvDrivers.SelectedIndexChanged += new System.EventHandler(this.lvDrivers_SelectedIndexChanged);
 
@@ -186,16 +180,12 @@ namespace RCDragManagerProd.UI.Forms
             this.colCarDialIn.Text = "Dial-in";
             this.colCarDialIn.Width = 75;
             this.colCarDialIn.TextAlign = HorizontalAlignment.Right;
-            this.colCarQualTime.Text = "Qual time";
-            this.colCarQualTime.Width = 80;
-            this.colCarQualTime.TextAlign = HorizontalAlignment.Right;
 
             // ── lvCars ─────────────────────────────────────────────────────────
             this.lvCars.Columns.AddRange(new ColumnHeader[] {
                 this.colCarName,
                 this.colCarClass,
-                this.colCarDialIn,
-                this.colCarQualTime
+                this.colCarDialIn
             });
             this.lvCars.View = View.Details;
             this.lvCars.FullRowSelect = true;
@@ -210,15 +200,14 @@ namespace RCDragManagerProd.UI.Forms
             //   lvDrivers (top, 180) → lblCarsHeader (top, 22) → lvCars (fill rest)
             // we add in reverse: lvCars first (Fill), then lblCarsHeader (Top),
             // then lvDrivers (Top — added last so it docks to the very top).
-            this.pnlContent.Location = new Point(220, 50);
-            this.pnlContent.Size = new Size(494, 500);
+            this.pnlContent.Location = new Point(220, 20);
+            this.pnlContent.Size = new Size(494, 560);
             this.pnlContent.Name = "pnlContent";
             this.pnlContent.Controls.Add(this.lvCars);
             this.pnlContent.Controls.Add(this.lblCarsHeader);
             this.pnlContent.Controls.Add(this.lvDrivers);
 
             // ── Form root ──────────────────────────────────────────────────────
-            this.Controls.Add(this.lblEventTitle);
             this.Controls.Add(this.btnAddDriver);
             this.Controls.Add(this.btnEditDriver);
             this.Controls.Add(this.btnDeleteDriver);
