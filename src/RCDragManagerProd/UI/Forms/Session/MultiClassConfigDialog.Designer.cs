@@ -31,6 +31,8 @@ namespace RCDragManagerProd.UI.Forms
         private TextBox txtDialInOverride;
         private Button btnOk;
         private Button btnCancel;
+        private Panel pnlContent;
+        private Panel pnlButtonBar;
 
         protected override void Dispose(bool disposing)
         {
@@ -164,11 +166,27 @@ namespace RCDragManagerProd.UI.Forms
             lblDialInOverride = new Label { Text = "Override Dial-In:", Location = new Point(20, 658), AutoSize = true };
             txtDialInOverride = new TextBox { Location = new Point(145, 655), Width = 110, Enabled = false };
 
-            // Buttons
-            btnOk     = new Button { Text = "OK",     Location = new Point(690, 720), Size = new Size(85, 30) };
-            btnCancel = new Button { Text = "Cancel", Location = new Point(790, 720), Size = new Size(85, 30) };
+            // Bottom button bar — docked so OK/Cancel stay visible and clickable
+            // even when the form is clamped to the screen and the content scrolls.
+            pnlButtonBar = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 56
+            };
+            btnOk     = new Button { Text = "OK",     Location = new Point(690, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            btnCancel = new Button { Text = "Cancel", Location = new Point(790, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            pnlButtonBar.Controls.Add(btnOk);
+            pnlButtonBar.Controls.Add(btnCancel);
 
-            Controls.AddRange(new Control[]
+            // Scrollable content host — holds everything above the button bar.
+            // Filter controls are added to this panel at runtime (CreateFilterControls).
+            pnlContent = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(0, 0, 0, 10)
+            };
+            pnlContent.Controls.AddRange(new Control[]
             {
                 lblClassName, txtClassName,
                 pnlCardRow,
@@ -176,9 +194,13 @@ namespace RCDragManagerProd.UI.Forms
                 grpClassType,
                 btnAddNewDriver,
                 lblDrivers, lvDrivers,
-                lblDialInOverride, txtDialInOverride,
-                btnOk, btnCancel
+                lblDialInOverride, txtDialInOverride
             });
+
+            // Add the fill panel first, then the bottom bar, so the bar claims the
+            // bottom edge and the content fills the remaining space above it.
+            Controls.Add(pnlContent);
+            Controls.Add(pnlButtonBar);
         }
 
         private Panel CreateRaceTypeCard(string raceType, string title, string subtitle, Point location)

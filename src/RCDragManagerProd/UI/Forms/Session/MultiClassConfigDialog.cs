@@ -77,6 +77,31 @@ namespace RCDragManagerProd.UI.Forms
             UpdateClassTypeUi();
         }
 
+        // ── Fit to screen ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// On a 14" laptop at 150% scaling (or 1366x768 at 100%) the design-time
+        /// height exceeds the screen, which used to push the OK/Cancel buttons
+        /// off-screen. Clamp the window to the screen working area and keep it
+        /// fully on-screen; the docked button bar stays visible and the content
+        /// panel scrolls when space is tight.
+        /// </summary>
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            Rectangle workingArea = Screen.FromControl(this).WorkingArea;
+
+            int newWidth = Math.Min(Width, workingArea.Width);
+            int newHeight = Math.Min(Height, workingArea.Height);
+            if (newWidth != Width || newHeight != Height)
+                Size = new Size(newWidth, newHeight);
+
+            int x = Math.Max(workingArea.Left, Math.Min(Left, workingArea.Right - Width));
+            int y = Math.Max(workingArea.Top, Math.Min(Top, workingArea.Bottom - Height));
+            Location = new Point(x, y);
+        }
+
         // ── Filter controls ───────────────────────────────────────────────────
 
         private void CreateFilterControls()
@@ -90,7 +115,7 @@ namespace RCDragManagerProd.UI.Forms
             int stateLblW = TextRenderer.MeasureText("State:", this.Font).Width;
 
             var lblCar = new Label { Text = "Car:", AutoSize = true, Left = x, Top = y + 6 };
-            Controls.Add(lblCar); lblCar.BringToFront();
+            pnlContent.Controls.Add(lblCar); lblCar.BringToFront();
             cmbFilterCar = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -98,11 +123,11 @@ namespace RCDragManagerProd.UI.Forms
                 Top = y + 2,
                 Width = comboW
             };
-            Controls.Add(cmbFilterCar); cmbFilterCar.BringToFront();
+            pnlContent.Controls.Add(cmbFilterCar); cmbFilterCar.BringToFront();
 
             int nextX = cmbFilterCar.Left + comboW + groupGap;
             var lblClass = new Label { Text = "Class:", AutoSize = true, Left = nextX, Top = y + 6 };
-            Controls.Add(lblClass); lblClass.BringToFront();
+            pnlContent.Controls.Add(lblClass); lblClass.BringToFront();
             cmbFilterClass = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -110,11 +135,11 @@ namespace RCDragManagerProd.UI.Forms
                 Top = y + 2,
                 Width = comboW
             };
-            Controls.Add(cmbFilterClass); cmbFilterClass.BringToFront();
+            pnlContent.Controls.Add(cmbFilterClass); cmbFilterClass.BringToFront();
 
             nextX = cmbFilterClass.Left + comboW + groupGap;
             var lblState = new Label { Text = "State:", AutoSize = true, Left = nextX, Top = y + 6 };
-            Controls.Add(lblState); lblState.BringToFront();
+            pnlContent.Controls.Add(lblState); lblState.BringToFront();
             cmbFilterState = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -122,7 +147,7 @@ namespace RCDragManagerProd.UI.Forms
                 Top = y + 2,
                 Width = comboW
             };
-            Controls.Add(cmbFilterState); cmbFilterState.BringToFront();
+            pnlContent.Controls.Add(cmbFilterState); cmbFilterState.BringToFront();
 
             cmbFilterCar.SelectedIndexChanged   += FilterChanged;
             cmbFilterClass.SelectedIndexChanged += FilterChanged;
