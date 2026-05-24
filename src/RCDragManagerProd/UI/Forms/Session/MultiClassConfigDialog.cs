@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
@@ -32,9 +33,7 @@ namespace RCDragManagerProd.UI.Forms
         private readonly HashSet<int> _checkedDriverIds = new HashSet<int>();
         private bool _suppressRosterEvents = false;
 
-        private ComboBox cmbFilterCar;
-        private ComboBox cmbFilterClass;
-        private ComboBox cmbFilterState;
+        private TextBox txtSearch;
 
         private string _selectedRaceType = RaceTypes.RoundRobin;
 
@@ -53,8 +52,8 @@ namespace RCDragManagerProd.UI.Forms
 
             _driverRepo = new DriverRepository(connectionString);
 
-            CreateFilterControls();
-            FillFilterCombos();
+            CreateSearchControl();
+            LoadDrivers();
             PopulateDriverList(existing);
 
             if (existing != null)
@@ -102,96 +101,45 @@ namespace RCDragManagerProd.UI.Forms
             Location = new Point(x, y);
         }
 
-        // ── Filter controls ───────────────────────────────────────────────────
+        // ── Search control ────────────────────────────────────────────────────
 
-        private void CreateFilterControls()
+        private const int EM_SETCUEBANNER = 0x1501;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, string lParam);
+
+        private void CreateSearchControl()
         {
-            int comboW = 120, labelToBox = 4, groupGap = 12;
-            int y = btnAddNewDriver.Top;
-            int x = btnAddNewDriver.Right + 8;
-
-            int carLblW   = TextRenderer.MeasureText("Car:",   this.Font).Width;
-            int classLblW = TextRenderer.MeasureText("Class:", this.Font).Width;
-            int stateLblW = TextRenderer.MeasureText("State:", this.Font).Width;
-
-            var lblCar = new Label { Text = "Car:", AutoSize = true, Left = x, Top = y + 6 };
-            pnlContent.Controls.Add(lblCar); lblCar.BringToFront();
-            cmbFilterCar = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Left = lblCar.Left + carLblW + labelToBox,
-                Top = y + 2,
-                Width = comboW
-            };
-            pnlContent.Controls.Add(cmbFilterCar); cmbFilterCar.BringToFront();
-
-            int nextX = cmbFilterCar.Left + comboW + groupGap;
-            var lblClass = new Label { Text = "Class:", AutoSize = true, Left = nextX, Top = y + 6 };
-            pnlContent.Controls.Add(lblClass); lblClass.BringToFront();
-            cmbFilterClass = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Left = lblClass.Left + classLblW + labelToBox,
-                Top = y + 2,
-                Width = comboW
-            };
-            pnlContent.Controls.Add(cmbFilterClass); cmbFilterClass.BringToFront();
-
-            nextX = cmbFilterClass.Left + comboW + groupGap;
-            var lblState = new Label { Text = "State:", AutoSize = true, Left = nextX, Top = y + 6 };
-            pnlContent.Controls.Add(lblState); lblState.BringToFront();
-            cmbFilterState = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Left = lblState.Left + stateLblW + labelToBox,
-                Top = y + 2,
-                Width = comboW
-            };
-            pnlContent.Controls.Add(cmbFilterState); cmbFilterState.BringToFront();
-
-            cmbFilterCar.SelectedIndexChanged   += FilterChanged;
-            cmbFilterClass.SelectedIndexChanged += FilterChanged;
-            cmbFilterState.SelectedIndexChanged += FilterChanged;
-
+            // The State column used to be added as a side effect of the (now
+            // removed) filter row. State is kept as a display column, so its
+            // creation is relocated here to survive the filter-row removal.
             if (lvDrivers.Columns.Count == 5)
                 lvDrivers.Columns.Add("State", 70, HorizontalAlignment.Left);
+
+            // A single search box fills the slot vacated by the three combos,
+            // stretching from just right of "Add New Driver" to the list's edge.
+            int left = btnAddNewDriver.Right + 8;
+            txtSearch = new TextBox
+            {
+                Left = left,
+                Top = btnAddNewDriver.Top + 4,
+                Width = lvDrivers.Right - left
+            };
+            pnlContent.Controls.Add(txtSearch); txtSearch.BringToFront();
+
+            // Native cue text shown greyed when the box is empty and unfocused.
+            // wParam = 0 → the cue hides as soon as the box gains focus.
+            SendMessage(txtSearch.Handle, EM_SETCUEBANNER, IntPtr.Zero, "Search drivers...");
+
+            txtSearch.TextChanged += SearchChanged;
         }
 
-        private void FillFilterCombos()
+        private void LoadDrivers()
         {
             _allDrivers = _driverRepo.GetAllDrivers() ?? new List<Driver>();
-
-            var carNames = _allDrivers
-                .SelectMany(d => d.Cars ?? new List<Car>())
-                .Select(c => c.CarName)
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(s => s)
-                .ToList();
-
-            cmbFilterCar.Items.Clear();
-            cmbFilterCar.Items.Add("(All)");
-            foreach (var n in carNames) cmbFilterCar.Items.Add(n);
-            cmbFilterCar.SelectedIndex = 0;
-
-            cmbFilterClass.Items.Clear();
-            cmbFilterClass.Items.AddRange(new object[] { "(All)", "Heads Up", "Bracket", "Dial In" });
-            cmbFilterClass.SelectedIndex = 0;
-
-            var states = _allDrivers
-                .Select(d => d.State)
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(s => s)
-                .ToList();
-
-            cmbFilterState.Items.Clear();
-            cmbFilterState.Items.Add("(All)");
-            foreach (var s in states) cmbFilterState.Items.Add(s);
-            cmbFilterState.SelectedIndex = 0;
         }
 
-        private void FilterChanged(object sender, EventArgs e)
+        private void SearchChanged(object sender, EventArgs e)
         {
             PopulateDriverList(null);
         }
@@ -216,9 +164,7 @@ namespace RCDragManagerProd.UI.Forms
                 }
             }
 
-            string carFilter   = cmbFilterCar?.SelectedItem?.ToString()   ?? "(All)";
-            string classFilter = cmbFilterClass?.SelectedItem?.ToString() ?? "(All)";
-            string stateFilter = cmbFilterState?.SelectedItem?.ToString() ?? "(All)";
+            string search = txtSearch?.Text?.Trim() ?? "";
 
             _suppressRosterEvents = true;
             lvDrivers.BeginUpdate();
@@ -227,20 +173,13 @@ namespace RCDragManagerProd.UI.Forms
                 lvDrivers.Items.Clear();
                 foreach (var driver in _allDrivers)
                 {
-                    if (stateFilter != "(All)" &&
-                        !string.Equals(driver.State ?? "", stateFilter, StringComparison.OrdinalIgnoreCase))
+                    // Case-insensitive "contains" match on driver name only.
+                    // Empty search box shows every driver.
+                    if (!string.IsNullOrEmpty(search) &&
+                        (driver.Name ?? "").IndexOf(search, StringComparison.OrdinalIgnoreCase) < 0)
                         continue;
 
                     var car = driver.Cars?.FirstOrDefault();
-
-                    if (classFilter != "(All)" &&
-                        !string.Equals(car?.ClassType ?? "", classFilter, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    if (carFilter != "(All)" &&
-                        !string.Equals(car?.CarName ?? "", carFilter, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
                     double? defaultDialIn = car?.DefaultDialIn;
 
                     var item = new ListViewItem(driver.Name);
@@ -333,7 +272,7 @@ namespace RCDragManagerProd.UI.Forms
                 _driverRepo.AddCar(insertedDriver.Id, newCar);
             }
 
-            FillFilterCombos();
+            LoadDrivers();
             PopulateDriverList(null);
         }
 

@@ -144,7 +144,7 @@ namespace RCDragManagerProd.UI.Forms
             // Add New Driver button
             btnAddNewDriver = new Button { Text = "Add New Driver", Location = new Point(20, 310), Size = new Size(140, 30) };
 
-            // Filter controls are created dynamically in CreateFilterControls()
+            // Driver search box is created dynamically in CreateSearchControl()
 
             // Driver list
             lblDrivers = new Label { Text = "Drivers (check to include):", Location = new Point(20, 348), AutoSize = true };
@@ -179,7 +179,7 @@ namespace RCDragManagerProd.UI.Forms
             pnlButtonBar.Controls.Add(btnCancel);
 
             // Scrollable content host — holds everything above the button bar.
-            // Filter controls are added to this panel at runtime (CreateFilterControls).
+            // The search box is added to this panel at runtime (CreateSearchControl).
             pnlContent = new Panel
             {
                 Dock = DockStyle.Fill,
