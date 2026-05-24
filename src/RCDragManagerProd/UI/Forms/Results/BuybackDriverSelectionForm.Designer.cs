@@ -49,6 +49,8 @@
             // 
             // BuybackDriverSelectionForm
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(284, 260);
             this.Controls.Add(this.btnNoBuyback);
             this.Controls.Add(this.checkedListBoxDrivers);

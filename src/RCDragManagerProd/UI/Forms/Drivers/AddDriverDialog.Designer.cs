@@ -16,6 +16,8 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.Text = "Add Driver";
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new Size(400, 200);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;

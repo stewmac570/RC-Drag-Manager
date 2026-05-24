@@ -803,7 +803,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // Form1
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(884, 561);
             this.Controls.Add(this.tlpMain);
             this.Controls.Add(this.pnlLeft);

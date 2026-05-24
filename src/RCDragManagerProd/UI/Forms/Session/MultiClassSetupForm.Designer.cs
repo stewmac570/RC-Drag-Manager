@@ -31,6 +31,8 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.Text = "New Multi-Class Event";
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new Size(900, 600);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.StartPosition = FormStartPosition.CenterScreen;
