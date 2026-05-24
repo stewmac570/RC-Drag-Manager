@@ -32,6 +32,8 @@ namespace RCDragManagerProd.UI.Forms
         private void InitializeComponent()
         {
             this.Text = "Add / Edit Car";
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new Size(450, 300);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;

@@ -28,7 +28,8 @@ namespace RCDragManagerProd.UI.Forms
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = Color.White;
-            this.AutoScaleMode = AutoScaleMode.None;
+            this.AutoScaleDimensions = new SizeF(96F, 96F);
+            this.AutoScaleMode = AutoScaleMode.Dpi;
 
             _lblInstruction = new Label();
             _lblInstruction.Text = "Scan to open the live scoreboard\n" + LiveScoreboardUrl;

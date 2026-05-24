@@ -29,6 +29,8 @@ namespace RCDragManagerProd.UI.Forms
             MinimizeBox = false;
             MaximizeBox = true;
             ShowInTaskbar = false;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(820, 640);
 
             _rtb = new RichTextBox

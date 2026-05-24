@@ -53,6 +53,7 @@
   <PropertyGroup>
     <ApplicationIcon>Assets\retro trans icon.ico</ApplicationIcon>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="QRCoder">
@@ -358,6 +359,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\rcdrag_logo 2.ico">

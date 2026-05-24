@@ -120,6 +120,8 @@ namespace RCDragManagerProd.UI.Forms
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 
             // LoadSessionForm
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(900, 560);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.btnLoad);
