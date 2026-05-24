@@ -35,6 +35,12 @@ namespace RCDragManagerProd.UI.Forms
 
         private TextBox txtSearch;
 
+        // Click-to-sort state for the driver ListView. _columnBaseText holds each
+        // header's text without the ▲/▼ glyph so the indicator can be re-applied
+        // cleanly on every sort.
+        private readonly DriverColumnSorter _sorter = new DriverColumnSorter();
+        private string[] _columnBaseText;
+
         private string _selectedRaceType = RaceTypes.RoundRobin;
 
         public string ClassName { get; private set; }
@@ -74,6 +80,8 @@ namespace RCDragManagerProd.UI.Forms
 
             SelectRaceTypeCard(_selectedRaceType);
             UpdateClassTypeUi();
+
+            SetupSorting();
         }
 
         // ── Fit to screen ─────────────────────────────────────────────────────
@@ -202,6 +210,105 @@ namespace RCDragManagerProd.UI.Forms
             {
                 lvDrivers.EndUpdate();
                 _suppressRosterEvents = false;
+            }
+        }
+
+        // ── Column sorting ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Wires click-to-sort on the driver ListView. Captures the unadorned
+        /// header texts, installs the comparer, and applies the default sort
+        /// (Driver Name ascending) once the list is populated.
+        /// </summary>
+        private void SetupSorting()
+        {
+            _columnBaseText = new string[lvDrivers.Columns.Count];
+            for (int i = 0; i < lvDrivers.Columns.Count; i++)
+                _columnBaseText[i] = lvDrivers.Columns[i].Text;
+
+            _sorter.Column = 0;
+            _sorter.Order = SortOrder.Ascending;
+            lvDrivers.ListViewItemSorter = _sorter;
+            lvDrivers.ColumnClick += LvDrivers_ColumnClick;
+
+            lvDrivers.Sort();
+            UpdateSortIndicators();
+        }
+
+        private void LvDrivers_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            if (e.Column == _sorter.Column)
+            {
+                // Same column again → flip direction.
+                _sorter.Order = _sorter.Order == SortOrder.Ascending
+                    ? SortOrder.Descending
+                    : SortOrder.Ascending;
+            }
+            else
+            {
+                // New column → start ascending.
+                _sorter.Column = e.Column;
+                _sorter.Order = SortOrder.Ascending;
+            }
+
+            lvDrivers.Sort();
+            UpdateSortIndicators();
+        }
+
+        /// <summary>
+        /// Appends ▲ / ▼ to the active sort column header and strips it from the
+        /// rest, using the captured base texts so glyphs never accumulate.
+        /// </summary>
+        private void UpdateSortIndicators()
+        {
+            if (_columnBaseText == null) return;
+
+            for (int i = 0; i < lvDrivers.Columns.Count && i < _columnBaseText.Length; i++)
+            {
+                string baseText = _columnBaseText[i];
+                lvDrivers.Columns[i].Text = i == _sorter.Column
+                    ? baseText + (_sorter.Order == SortOrder.Descending ? " ▼" : " ▲")
+                    : baseText;
+            }
+        }
+
+        /// <summary>
+        /// Sorts driver rows by a single column and direction. Dial-In (col 3)
+        /// and Override Dial-In (col 4) compare numerically; everything else is
+        /// case-insensitive text. Blank numeric cells sort to the bottom when
+        /// ascending and to the top when descending (the ascending result puts
+        /// blanks last, then the whole result is negated for descending).
+        /// </summary>
+        private sealed class DriverColumnSorter : System.Collections.IComparer
+        {
+            public int Column;
+            public SortOrder Order = SortOrder.Ascending;
+
+            public int Compare(object a, object b)
+            {
+                var x = (ListViewItem)a;
+                var y = (ListViewItem)b;
+
+                string xt = Column < x.SubItems.Count ? x.SubItems[Column].Text : "";
+                string yt = Column < y.SubItems.Count ? y.SubItems[Column].Text : "";
+
+                int result;
+                if (Column == 3 || Column == 4)
+                {
+                    bool xHas = double.TryParse(xt, out double xv);
+                    bool yHas = double.TryParse(yt, out double yv);
+
+                    if (!xHas && !yHas) result = 0;
+                    else if (!xHas) result = 1;        // blank after numeric (ascending → bottom)
+                    else if (!yHas) result = -1;
+                    else result = xv.CompareTo(yv);
+                }
+                else
+                {
+                    result = string.Compare(xt, yt, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return Order == SortOrder.Descending ? -result : result;
             }
         }
 
