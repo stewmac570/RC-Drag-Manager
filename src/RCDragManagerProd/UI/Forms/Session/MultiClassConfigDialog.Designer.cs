@@ -46,11 +46,12 @@ namespace RCDragManagerProd.UI.Forms
             this.Text = "Class Configuration";
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new Size(900, 770);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.ClientSize = new Size(960, 650);
+            this.MinimumSize = new Size(880, 620);
+            this.FormBorderStyle = FormBorderStyle.Sizable;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.MaximizeBox = true;
+            this.MinimizeBox = true;
 
             // Class name
             lblClassName = new Label { Text = "Class Name:", Location = new Point(20, 20), AutoSize = true };
@@ -63,7 +64,7 @@ namespace RCDragManagerProd.UI.Forms
             pnlCardRow = new TableLayoutPanel
             {
                 Location = new Point(20, 55),
-                Size = new Size(860, 70),
+                Size = new Size(920, 70),
                 ColumnCount = 3,
                 RowCount = 1,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
@@ -93,7 +94,7 @@ namespace RCDragManagerProd.UI.Forms
             pnlRrConfig = new Panel
             {
                 Location = new Point(20, 135),
-                Size = new Size(860, 70),
+                Size = new Size(920, 70),
                 BackColor = Color.FromArgb(240, 253, 250),
                 BorderStyle = BorderStyle.FixedSingle,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
@@ -151,10 +152,11 @@ namespace RCDragManagerProd.UI.Forms
             lvDrivers = new ListView
             {
                 Location = new Point(20, 368),
-                Size = new Size(860, 280),
+                Size = new Size(920, 188),
                 View = View.Details,
                 FullRowSelect = true,
-                CheckBoxes = true
+                CheckBoxes = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
             lvDrivers.Columns.Add("Driver", 200);
             lvDrivers.Columns.Add("Car", 200);
@@ -163,8 +165,8 @@ namespace RCDragManagerProd.UI.Forms
             lvDrivers.Columns.Add("Override Dial-In", 115);
 
             // Dial-in override editor
-            lblDialInOverride = new Label { Text = "Override Dial-In:", Location = new Point(20, 658), AutoSize = true };
-            txtDialInOverride = new TextBox { Location = new Point(145, 655), Width = 110, Enabled = false };
+            lblDialInOverride = new Label { Text = "Override Dial-In:", Location = new Point(20, 566), AutoSize = true, Anchor = AnchorStyles.Bottom | AnchorStyles.Left };
+            txtDialInOverride = new TextBox { Location = new Point(145, 563), Width = 110, Enabled = false, Anchor = AnchorStyles.Bottom | AnchorStyles.Left };
 
             // Bottom button bar — docked so OK/Cancel stay visible and clickable
             // even when the form is clamped to the screen and the content scrolls.
@@ -173,8 +175,8 @@ namespace RCDragManagerProd.UI.Forms
                 Dock = DockStyle.Bottom,
                 Height = 56
             };
-            btnOk     = new Button { Text = "OK",     Location = new Point(690, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
-            btnCancel = new Button { Text = "Cancel", Location = new Point(790, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            btnOk     = new Button { Text = "OK",     Location = new Point(770, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            btnCancel = new Button { Text = "Cancel", Location = new Point(863, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
             pnlButtonBar.Controls.Add(btnOk);
             pnlButtonBar.Controls.Add(btnCancel);
 
@@ -183,7 +185,7 @@ namespace RCDragManagerProd.UI.Forms
             pnlContent = new Panel
             {
                 Dock = DockStyle.Fill,
-                AutoScroll = true,
+                AutoScroll = false,
                 Padding = new Padding(0, 0, 0, 10)
             };
             pnlContent.Controls.AddRange(new Control[]

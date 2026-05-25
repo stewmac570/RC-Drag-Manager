@@ -131,7 +131,8 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Left = left,
                 Top = btnAddNewDriver.Top + 4,
-                Width = lvDrivers.Right - left
+                Width = lvDrivers.Right - left,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
             pnlContent.Controls.Add(txtSearch); txtSearch.BringToFront();
 
