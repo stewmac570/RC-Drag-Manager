@@ -91,7 +91,7 @@ namespace RCDragManagerProd.UI.Forms
             // lblVersion
             this.lblVersion.Location = new System.Drawing.Point(20, 570);
             this.lblVersion.Size = new System.Drawing.Size(200, 20);
-            this.lblVersion.Text = "v1.2.0";
+            this.lblVersion.Text = "v1.4.0";
             this.Controls.Add(this.lblVersion);
 
             // logoBox
