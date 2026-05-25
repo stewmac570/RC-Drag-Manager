@@ -175,10 +175,6 @@ namespace RCDragManagerProd.UI.Forms
                 Dock = DockStyle.Bottom,
                 Height = 56
             };
-            btnOk     = new Button { Text = "OK",     Location = new Point(770, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
-            btnCancel = new Button { Text = "Cancel", Location = new Point(863, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
-            pnlButtonBar.Controls.Add(btnOk);
-            pnlButtonBar.Controls.Add(btnCancel);
 
             // Scrollable content host — holds everything above the button bar.
             // The search box is added to this panel at runtime (CreateSearchControl).
@@ -188,6 +184,26 @@ namespace RCDragManagerProd.UI.Forms
                 AutoScroll = false,
                 Padding = new Padding(0, 0, 0, 10)
             };
+
+            // IMPORTANT: dock the panels onto the form BEFORE populating them.
+            // ClientSize is already 960x650, so adding these docked panels sizes
+            // pnlContent to 960x594 and pnlButtonBar to 960x56 immediately. The
+            // anchored children added below then compute their anchor distances
+            // against the correct 960px width. If we populate first (while the
+            // panels are still at the default Panel width of 200), every
+            // Right / Left|Right-anchored child overshoots by (960-200)=760px when
+            // the panel later docks — pushing OK/Cancel off the right edge and
+            // stretching pnlCardRow/lvDrivers to ~1680px wide.
+            // Fill panel first, then the bottom bar, so the bar claims the bottom edge.
+            Controls.Add(pnlContent);
+            Controls.Add(pnlButtonBar);
+
+            // Now populate the correctly-sized panels.
+            btnOk     = new Button { Text = "OK",     Location = new Point(770, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            btnCancel = new Button { Text = "Cancel", Location = new Point(863, 13), Size = new Size(85, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            pnlButtonBar.Controls.Add(btnOk);
+            pnlButtonBar.Controls.Add(btnCancel);
+
             pnlContent.Controls.AddRange(new Control[]
             {
                 lblClassName, txtClassName,
@@ -198,11 +214,6 @@ namespace RCDragManagerProd.UI.Forms
                 lblDrivers, lvDrivers,
                 lblDialInOverride, txtDialInOverride
             });
-
-            // Add the fill panel first, then the bottom bar, so the bar claims the
-            // bottom edge and the content fills the remaining space above it.
-            Controls.Add(pnlContent);
-            Controls.Add(pnlButtonBar);
         }
 
         private Panel CreateRaceTypeCard(string raceType, string title, string subtitle, Point location)
