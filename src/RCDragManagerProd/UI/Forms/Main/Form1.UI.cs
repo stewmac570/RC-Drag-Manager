@@ -51,7 +51,10 @@ namespace RCDragManagerProd.UI.Forms
         private void UpdateDialInButtonEnabled()
         {
             if (btnSetDialIn == null) return;
-            btnSetDialIn.Enabled = drivers.Count > 0 && !_controller.DialInLocked;
+            // Stays enabled while a round is locked so the director can still open the
+            // override-confirmation path (issue #306). The lock is enforced inside
+            // btnSetDialIn_Click, not by disabling the button.
+            btnSetDialIn.Enabled = drivers.Count > 0;
         }
 
         private string GetFullRoundLabel(string label)
