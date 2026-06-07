@@ -174,14 +174,6 @@ namespace RCDragManagerProd.UI.Forms
 
         private void btnSetDialIn_Click(object sender, EventArgs e)
         {
-            if (_controller.DialInLocked)
-            {
-                MessageBox.Show("Dial-ins are locked for the current round.\nThey will unlock when the next round is ready.",
-                    "Dial-In Locked", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                Logger.Log("[UI][DIALIN] Set Dial-In click ignored — dial-in is locked.");
-                return;
-            }
-
             if (lvDrivers.SelectedItems.Count == 0)
             {
                 MessageBox.Show("Select a driver to edit their dial-in time.",
@@ -195,6 +187,24 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Logger.Log($"[UI][DIALIN] Selected driver '{selectedName}' not found in driver list.");
                 return;
+            }
+
+            // Round in progress: keep the lock as a guard rail but offer a safe override
+            // so the director never has to close (and lose) the race to honor a late
+            // dial-in change (issue #306).
+            if (_controller.DialInLocked)
+            {
+                var choice = MessageBox.Show(
+                    $"This round is in progress.\n\nEdit {driver.Name}'s dial-in anyway?\n\n" +
+                    "This won't affect pairs that have already raced.",
+                    "Round In Progress", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+                if (choice != DialogResult.Yes)
+                {
+                    Logger.Log($"[UI][DIALIN] Locked-round override declined for '{driver.Name}'.");
+                    return;
+                }
+                Logger.Log($"[UI][DIALIN] Locked-round override accepted for '{driver.Name}'.");
             }
 
             double? current = _controller.GetDriverDialIn(driver.Id);
