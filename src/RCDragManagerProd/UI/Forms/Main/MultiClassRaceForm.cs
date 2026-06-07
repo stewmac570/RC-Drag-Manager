@@ -58,6 +58,27 @@ namespace RCDragManagerProd.UI.Forms
             BuildTabs();
         }
 
+        private bool _resumeApplied;
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            // Replay any saved bracket state once the tabs (and their Form1 event
+            // subscriptions) exist, so an interrupted event resumes where it left off.
+            // No-ops for fresh events (no resume snapshot).
+            if (_resumeApplied) return;
+            _resumeApplied = true;
+
+            foreach (var controller in _controllers)
+            {
+                try { controller.RestoreFromSave(); }
+                catch (Exception ex) { Logger.Log($"[RESUME][ERROR] {ex}"); }
+            }
+
+            UpdateAllTabStates();
+        }
+
         private void SubscribeToController(RaceController controller, int classIndex)
         {
             controller.CanOfferBuybackChanged += (enabled) =>

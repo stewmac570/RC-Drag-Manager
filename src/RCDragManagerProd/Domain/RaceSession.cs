@@ -17,6 +17,15 @@ namespace RCDragManagerProd.Domain
         public string ClassType { get; set; }
         public double? FixedDialIn { get; set; }
 
+        // The mode the event STARTED in. Unlike RaceType (which mutates to
+        // "Losers Bracket"/"Finals" during the event) this is set once and never
+        // changes, so resume can regenerate the original bracket.
+        public string OriginalRaceType { get; set; }
+
+        // Bracket-structure + phase snapshot for resuming an interrupted event.
+        // Null on pre-feature saves or before a bracket is generated.
+        public ResumeSnapshot Resume { get; set; }
+
         // -----------------------------
         // Round Robin configuration
         // -----------------------------

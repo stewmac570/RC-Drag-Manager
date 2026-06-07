@@ -192,6 +192,28 @@ namespace RCDragManagerProd.RoundRobinMode
                           .ToList();
         }
 
+        /// <summary>
+        /// Replaces the generated schedule with an explicit one. Required for resume:
+        /// <see cref="GenerateMatches"/> shuffles and random-rotates the roster, so it
+        /// cannot reproduce a previously-saved schedule — the saved pairings must be
+        /// re-injected verbatim instead.
+        /// </summary>
+        public void InjectMatches(IEnumerable<(int MatchId, Driver D1, Driver D2, string RoundLabel)> injected)
+        {
+            matches.Clear();
+            results = new MatchResult();
+
+            int maxId = 0;
+            foreach (var m in injected ?? Enumerable.Empty<(int, Driver, Driver, string)>())
+            {
+                matches.Add((m.D1, m.D2, m.RoundLabel, m.MatchId));
+                if (m.MatchId > maxId) maxId = m.MatchId;
+            }
+
+            matchIdCounter = maxId + 1;
+            Log($"[RR] InjectMatches: loaded {matches.Count} match(es); next id={matchIdCounter}.");
+        }
+
         public bool TryGetMatch(int matchId, out Driver driver1, out Driver driver2, out string roundLabel)
         {
             var match = matches.FirstOrDefault(m => m.MatchId == matchId);
