@@ -47,6 +47,16 @@ namespace RCDragManagerProd.RaceEngines
             Logger.Log("[RR-ADAPTER] Engine reset.");
         }
 
+        // Resume path: re-inject a previously-saved schedule instead of regenerating
+        // (RR generation shuffles, so it cannot reproduce the saved pairings).
+        public void InjectMatches(IReadOnlyList<EngineMatch> matches)
+        {
+            Logger.Log($"[ENGINE-API] {GetType().Name}.InjectMatches(count={matches?.Count ?? 0})");
+            _engine.InjectMatches(
+                (matches ?? new List<EngineMatch>())
+                    .Select(m => (m.MatchId, m.Driver1, m.Driver2, m.RoundLabel)));
+        }
+
         public IReadOnlyList<EngineMatch> GetMatches()
         {
             Logger.Log($"[ENGINE-API] {GetType().Name}.GetMatches()");

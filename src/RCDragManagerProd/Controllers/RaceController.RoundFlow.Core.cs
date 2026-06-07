@@ -48,6 +48,11 @@ namespace RCDragManagerProd.Controllers
             }
             _session.RaceType = rt;
 
+            // Capture the starting mode exactly once — RaceType mutates during the event,
+            // but resume needs the original to regenerate the initial bracket.
+            if (string.IsNullOrWhiteSpace(_session.OriginalRaceType))
+                _session.OriginalRaceType = rt;
+
             Logger.Log($"[CTRL][DEBUG] GenerateBracket inputs ? raceTypeArg='{raceType}', rt='{rt}', session.RaceType='{_session.RaceType}', RRVariant='{_session.RoundRobinVariant}', N={_session.RoundsToRun}");
 
 
