@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test (.NET Framework 4.8)
+    # WinForms + .NET Framework 4.8 + old-style csproj require MSBuild on Windows.
+    # Do not switch to dotnet build (see CLAUDE.md) or a non-Windows runner.
+    runs-on: windows-latest
+
+    env:
+      SOLUTION: src/RCDragManagerProd/RCDragManagerProd.sln
+      TEST_PROJECT: src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj
+      CONFIGURATION: Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      # nuget restore covers both the packages.config production project and the
+      # PackageReference test project in one pass.
+      - name: Restore NuGet packages
+        run: nuget restore $env:SOLUTION
+
+      # Release build of the WinForms app through real MSBuild — this is the actual
+      # release path and the app must compile before tests are worth running.
+      - name: Build solution
+        run: msbuild $env:SOLUTION -p:Configuration=$env:CONFIGURATION -m -v:minimal -nologo
+
+      # The test project is not part of the .sln, so dotnet test restores and builds
+      # it (and its project reference) itself. Tests must be green for the build to be
+      # release-eligible; a failure here blocks the run.
+      - name: Run tests
+        run: dotnet test $env:TEST_PROJECT --configuration $env:CONFIGURATION --logger "console;verbosity=minimal"

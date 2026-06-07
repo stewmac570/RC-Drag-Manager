@@ -17,8 +17,14 @@ namespace RCDragManagerProd.Tests;
 ///
 /// [TestInitialize] calls ResetByeTracker() before every test to prevent inter-test
 /// contamination; the static-state-leak test deliberately omits the mid-test reset.
+///
+/// [DoNotParallelize]: every test here mutates the process-wide static byeGiven set, so
+/// running them concurrently (assembly default is method-level parallel) lets one test's
+/// ResetByeTracker()/GenerateFirstRound() corrupt another's state mid-run. Serialize the
+/// class so the static setup/teardown is reliable.
 /// </summary>
 [TestClass]
+[DoNotParallelize]
 public class RandomBracketByeTrackerTests
 {
     // ── Test isolation ────────────────────────────────────────────────────────
