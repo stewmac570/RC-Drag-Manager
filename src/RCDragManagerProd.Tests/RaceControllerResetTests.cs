@@ -102,15 +102,25 @@ public class RaceControllerResetTests
     [TestMethod]
     public void ActiveRound_IsNullAfterReset_WhenBracketWasStarted()
     {
-        // GenerateBracket sets _activeRound to the first round label.
-        // After Reset() it must be null (or empty) so that a fresh bracket can set it.
-        var controller = new RaceController(NewSession());
-        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
+        // _activeRound is the RR pre-reveal active-round gate: GenerateBracket only
+        // assigns it in Round Robin mode (roundOrder[0]); non-RR modes leave it null.
+        // Use a Round Robin session so the precondition is valid, then confirm Reset()
+        // clears it back to null/empty so a fresh bracket can re-assign it.
+        var rrSession = new RaceSession
+        {
+            EventName         = "Reset Field Tests",
+            EventDate         = new DateTime(2026, 3, 29),
+            RaceType          = "Round Robin",
+            ClassType         = "Open",
+            RoundRobinVariant = "Standard"
+        };
+        var controller = new RaceController(rrSession, new NoOpStandingsDialogService());
+        controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(6));
 
-        // Precondition: _activeRound was assigned by GenerateBracket.
+        // Precondition: _activeRound was assigned by GenerateBracket (RR1).
         var activeAfterGenerate = GetField<string>(controller, "_activeRound");
         Assert.IsFalse(string.IsNullOrEmpty(activeAfterGenerate),
-            "Precondition: _activeRound must be non-null/non-empty after GenerateBracket()");
+            "Precondition: _activeRound must be non-null/non-empty after GenerateBracket() in RR mode");
 
         controller.Reset();
 
