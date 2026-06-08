@@ -91,6 +91,16 @@ namespace RCDragManagerProd.UI.Forms
 
         private void btnAddDriver_Click(object sender, EventArgs e)
         {
+            // Late entries are a setup-only action. Once a bracket is live the active
+            // race must not gain or lose drivers (issue #254).
+            if (_controller.HasBracketStarted)
+            {
+                MessageBox.Show(
+                    "This race has already started. New drivers can be added to the driver list, but not to the active race.",
+                    "Race In Progress", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             try
             {
                 string name = (txtName.Text ?? "").Trim();
@@ -156,6 +166,16 @@ namespace RCDragManagerProd.UI.Forms
 
         private void btnEditDriver_Click(object sender, EventArgs e)
         {
+            // Driver identity is fixed once the bracket is live — editing it on the
+            // active console can desync from saved/bracket/report state (issue #254).
+            if (_controller.HasBracketStarted)
+            {
+                MessageBox.Show(
+                    "This race has already started. New drivers can be added to the driver list, but not to the active race.",
+                    "Race In Progress", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             if (lvDrivers.SelectedItems.Count > 0)
             {
                 string selectedName = lvDrivers.SelectedItems[0].Text;
@@ -256,6 +276,7 @@ namespace RCDragManagerProd.UI.Forms
             Logger.Log($"[FORM1] GenerateBracket called with race type: {selectedType} and {drivers.Count} drivers");
             _controller.GenerateBracket(selectedType, drivers);
             btnGenerateBracket.Enabled = false;
+            UpdateDriverEntryVisibility();
         }
 
         private void btnWinner1_Click(object sender, EventArgs e)
@@ -322,6 +343,7 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = true;
             btnNextRound.Enabled = false;
             btnStandings.Enabled = false;
+            UpdateDriverEntryVisibility();
         }
 
         // Save Progress and Close Race are distinct operator actions (issue #255).

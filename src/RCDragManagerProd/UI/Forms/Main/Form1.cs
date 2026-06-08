@@ -75,6 +75,7 @@ namespace RCDragManagerProd.UI.Forms
             }
 
             btnNextRound.Enabled = false;
+            UpdateDriverEntryVisibility();
 
             _controller.BracketRedrawn += RedrawFullBracket;
             _controller.NextMatchReady += OnNextMatchReady;
