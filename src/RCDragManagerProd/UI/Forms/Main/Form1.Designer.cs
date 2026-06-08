@@ -56,7 +56,8 @@ namespace RCDragManagerProd.UI.Forms
         private Button btnStandings;
         private Button btnGenerateLosersBracket;
         private Button btnShowQRCode;
-        private Button btnSaveAndClose;
+        private Button btnSaveProgress;
+        private Button btnCloseRace;
 
         // Bottom bar
         private TableLayoutPanel tlpBottom;
@@ -110,7 +111,8 @@ namespace RCDragManagerProd.UI.Forms
             this.btnStandings = new System.Windows.Forms.Button();
             this.btnGenerateLosersBracket = new System.Windows.Forms.Button();
             this.btnShowQRCode = new System.Windows.Forms.Button();
-            this.btnSaveAndClose = new System.Windows.Forms.Button();
+            this.btnSaveProgress = new System.Windows.Forms.Button();
+            this.btnCloseRace = new System.Windows.Forms.Button();
             this.pnlLeft = new System.Windows.Forms.Panel();
             this.lvDrivers = new System.Windows.Forms.ListView();
             this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -427,18 +429,20 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpRail.Controls.Add(this.btnStandings, 0, 2);
             this.tlpRail.Controls.Add(this.btnGenerateLosersBracket, 0, 3);
             this.tlpRail.Controls.Add(this.btnShowQRCode, 0, 4);
-            this.tlpRail.Controls.Add(this.btnSaveAndClose, 0, 6);
+            this.tlpRail.Controls.Add(this.btnSaveProgress, 0, 6);
+            this.tlpRail.Controls.Add(this.btnCloseRace, 0, 7);
             this.tlpRail.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpRail.Location = new System.Drawing.Point(0, 20);
             this.tlpRail.Margin = new System.Windows.Forms.Padding(0);
             this.tlpRail.Name = "tlpRail";
-            this.tlpRail.RowCount = 7;
+            this.tlpRail.RowCount = 8;
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tlpRail.Size = new System.Drawing.Size(116, 321);
             this.tlpRail.TabIndex = 0;
@@ -499,17 +503,28 @@ namespace RCDragManagerProd.UI.Forms
             this.btnShowQRCode.TabIndex = 24;
             this.btnShowQRCode.Text = "Show QR Code";
             this.btnShowQRCode.Click += new System.EventHandler(this.btnShowQRCode_Click);
-            // 
-            // btnSaveAndClose
-            // 
-            this.btnSaveAndClose.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSaveAndClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveAndClose.Location = new System.Drawing.Point(3, 274);
-            this.btnSaveAndClose.Name = "btnSaveAndClose";
-            this.btnSaveAndClose.Size = new System.Drawing.Size(110, 44);
-            this.btnSaveAndClose.TabIndex = 22;
-            this.btnSaveAndClose.Text = "Save and Close";
-            this.btnSaveAndClose.Click += new System.EventHandler(this.btnSaveAndClose_Click);
+            //
+            // btnSaveProgress
+            //
+            this.btnSaveProgress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnSaveProgress.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveProgress.Location = new System.Drawing.Point(3, 274);
+            this.btnSaveProgress.Name = "btnSaveProgress";
+            this.btnSaveProgress.Size = new System.Drawing.Size(110, 44);
+            this.btnSaveProgress.TabIndex = 22;
+            this.btnSaveProgress.Text = "Save Progress";
+            this.btnSaveProgress.Click += new System.EventHandler(this.btnSaveProgress_Click);
+            //
+            // btnCloseRace
+            //
+            this.btnCloseRace.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnCloseRace.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCloseRace.Location = new System.Drawing.Point(3, 324);
+            this.btnCloseRace.Name = "btnCloseRace";
+            this.btnCloseRace.Size = new System.Drawing.Size(110, 44);
+            this.btnCloseRace.TabIndex = 25;
+            this.btnCloseRace.Text = "Close Race";
+            this.btnCloseRace.Click += new System.EventHandler(this.btnCloseRace_Click);
             // 
             // pnlLeft
             // 

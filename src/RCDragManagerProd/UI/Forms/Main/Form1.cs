@@ -30,8 +30,8 @@ namespace RCDragManagerProd.UI.Forms
         public event EventHandler HostedSaveAndCloseCompleted;
 
         /// <summary>
-        /// Set by MultiClassRaceForm so that btnSaveAndClose also persists the
-        /// parent multi-class event record. Null in standalone (non-hosted) mode.
+        /// Set by MultiClassRaceForm so that Save Progress / Close Race also persist
+        /// the parent multi-class event record. Null in standalone (non-hosted) mode.
         /// </summary>
         internal MultiClassEvent _multiClassEvent;
         internal MultiClassEventRepository _multiClassEventRepo;
