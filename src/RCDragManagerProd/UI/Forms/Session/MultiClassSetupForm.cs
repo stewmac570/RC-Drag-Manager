@@ -94,7 +94,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             using (var dlg = new MultiClassConfigDialog(_connectionString))
             {
-                if (dlg.ShowDialog() == DialogResult.OK)
+                if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
                     AddClass(new ClassConfig
                     {
@@ -129,7 +129,7 @@ namespace RCDragManagerProd.UI.Forms
 
             using (var dlg = new MultiClassConfigDialog(_connectionString, existing))
             {
-                if (dlg.ShowDialog() == DialogResult.OK)
+                if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
                     _classList[idx] = new ClassConfig
                     {

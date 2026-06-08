@@ -204,6 +204,9 @@ namespace RCDragManagerProd.UI.Forms
             pnlButtonBar.Controls.Add(btnOk);
             pnlButtonBar.Controls.Add(btnCancel);
 
+            this.AcceptButton = btnOk;
+            this.CancelButton = btnCancel;
+
             pnlContent.Controls.AddRange(new Control[]
             {
                 lblClassName, txtClassName,

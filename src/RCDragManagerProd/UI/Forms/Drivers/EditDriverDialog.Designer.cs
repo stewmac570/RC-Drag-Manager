@@ -42,8 +42,11 @@ namespace RCDragManagerProd.UI.Forms
                 "", "NSW", "QLD", "VIC", "WA", "SA", "TAS", "NT", "ACT",
             });
 
-            btnOK = new Button() { Text = "OK", Location = new Point(100, 150), Size = new Size(100, 40) };
+            btnOK = new Button() { Text = "Save Changes", Location = new Point(100, 150), Size = new Size(100, 40) };
             btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 150), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
 
             btnOK.Click += new EventHandler(this.btnOK_Click);
 

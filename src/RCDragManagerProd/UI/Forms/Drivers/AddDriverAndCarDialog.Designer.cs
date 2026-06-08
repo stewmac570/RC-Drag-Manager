@@ -45,8 +45,11 @@ namespace RCDragManagerProd.UI.Forms
             lblDialIn = new Label() { Text = "Dial-In:", Location = new Point(20, 140), AutoSize = true };
             txtDialIn = new TextBox() { Location = new Point(140, 140), Width = 100, Enabled = false };
 
-            btnOK = new Button() { Text = "OK", Location = new Point(100, 200), Size = new Size(100, 40) };
+            btnOK = new Button() { Text = "Add Driver", Location = new Point(100, 200), Size = new Size(100, 40) };
             btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 200), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
 
             // Wire events
             btnOK.Click += new EventHandler(this.btnOK_Click);

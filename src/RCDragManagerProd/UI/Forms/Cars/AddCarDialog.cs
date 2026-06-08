@@ -17,6 +17,9 @@ namespace RCDragManagerProd.UI.Forms
         {
             InitializeComponent();
 
+            this.Text = "Edit Car";
+            btnOK.Text = "Save Changes";
+
             txtCarName.Text = carToEdit.CarName;
 
             if (carToEdit.ClassType == "Heads Up")

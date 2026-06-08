@@ -31,7 +31,7 @@ namespace RCDragManagerProd.UI.Forms
 
         private void InitializeComponent()
         {
-            this.Text = "Add / Edit Car";
+            this.Text = "Add Car";
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new Size(450, 300);
@@ -55,8 +55,11 @@ namespace RCDragManagerProd.UI.Forms
             lblDialIn = new Label() { Text = "Dial-In:", Location = new Point(20, 100), AutoSize = true };
             txtDialIn = new TextBox() { Location = new Point(140, 100), Width = 100, Enabled = false };
 
-            btnOK = new Button() { Text = "OK", Location = new Point(100, 180), Size = new Size(100, 40) };
+            btnOK = new Button() { Text = "Add Car", Location = new Point(100, 180), Size = new Size(100, 40) };
             btnCancel = new Button() { Text = "Cancel", Location = new Point(240, 180), Size = new Size(100, 40), DialogResult = DialogResult.Cancel };
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
 
             btnOK.Click += new EventHandler(this.btnOK_Click);
 
