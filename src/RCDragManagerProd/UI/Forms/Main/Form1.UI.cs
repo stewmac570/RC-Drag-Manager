@@ -44,20 +44,24 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = canGenerate;
 
             UpdateDialInButtonEnabled();
-            UpdateDriverEntryVisibility();
+            UpdateSetupPhaseUi();
 
             Logger.Log($"[UI] Driver list updated ({drivers.Count}); Generate Bracket {(canGenerate ? "ENABLED" : "disabled")}.");
         }
 
-        // The Add Driver section (name/time inputs + Add/Edit buttons) is a pre-race
-        // setup affordance only. Once a bracket is live it must not be exposed on the
-        // active console (issue #254); it returns after a Reset clears the bracket.
-        private void UpdateDriverEntryVisibility()
+        // Setup-phase affordances that must not act like normal race-day controls once
+        // a bracket is live:
+        //   • the Add Driver section (name/time inputs + Add/Edit) is hidden (issue #254);
+        //   • Reset is a plain "Reset Setup" before racing but becomes the protected
+        //     "Reset Race" recovery action afterwards (issue #256).
+        // All of these return to setup form after a Reset clears the bracket.
+        private void UpdateSetupPhaseUi()
         {
             bool setupPhase = !_controller.HasBracketStarted;
             txtName.Visible = setupPhase;
             txtTime.Visible = setupPhase;
             tlpAddEdit.Visible = setupPhase;
+            btnReset.Text = setupPhase ? "Reset Setup" : "Reset Race";
         }
 
         private void UpdateDialInButtonEnabled()

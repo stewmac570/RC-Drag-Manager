@@ -276,7 +276,7 @@ namespace RCDragManagerProd.UI.Forms
             Logger.Log($"[FORM1] GenerateBracket called with race type: {selectedType} and {drivers.Count} drivers");
             _controller.GenerateBracket(selectedType, drivers);
             btnGenerateBracket.Enabled = false;
-            UpdateDriverEntryVisibility();
+            UpdateSetupPhaseUi();
         }
 
         private void btnWinner1_Click(object sender, EventArgs e)
@@ -334,6 +334,22 @@ namespace RCDragManagerProd.UI.Forms
 
         private void btnReset_Click(object sender, EventArgs e)
         {
+            // Before a bracket exists this is a harmless setup reset. Once a bracket is
+            // live it is a destructive recovery action (issue #256): confirm strongly and
+            // save a recovery snapshot first so the race can be reloaded if Reset was a
+            // mistake.
+            if (_controller.HasBracketStarted)
+            {
+                var confirm = MessageBox.Show(
+                    "Reset this active race? This will clear current bracket progress, winners, and round state. This cannot be undone.",
+                    "Reset Active Race", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+                if (confirm != DialogResult.Yes)
+                    return;
+
+                SaveRecoverySnapshot();
+            }
+
             _controller.Reset();
 
             lvPairings.Items.Clear();
@@ -343,7 +359,25 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = true;
             btnNextRound.Enabled = false;
             btnStandings.Enabled = false;
-            UpdateDriverEntryVisibility();
+            UpdateSetupPhaseUi();
+        }
+
+        // Persists a resumable checkpoint before an active-race reset wipes live state,
+        // so a mistaken Reset can be recovered by reloading the saved session (issue #256).
+        private void SaveRecoverySnapshot()
+        {
+            if (currentSession == null) return;   // Quick Session: nothing persisted to recover
+
+            try
+            {
+                _controller.SaveProgress();
+                PersistSession();
+                Logger.Log("[RESET] Recovery snapshot saved before active-race reset.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[RESET][ERROR] Recovery snapshot failed: {ex}");
+            }
         }
 
         // Save Progress and Close Race are distinct operator actions (issue #255).
