@@ -26,6 +26,7 @@ on this codebase:
 | `DATA-LAYER.md` | Touching DB or repositories — schema, serialization, quirks |
 | `RACE-FLOW.md` | Touching race logic — step-by-step event flow, bracket types |
 | `CODEBASE-MAP.md` | Finding files — every source file with one-line description |
+| `TESTING.md` | Writing tests or refactoring UI — standard commands, coverage expectations, headless test helpers |
 | `TECHNICAL-DEBT.md` | Before any refactor — known issues, closed bugs, weaknesses |
 | `CURRENT-SESSION-SETUP-AUDIT.md` | Touching session setup or multi-class work |
 | `MULTI-CLASS-EVENT-SPEC.md` | Working on the multi-class feature — full specification |
