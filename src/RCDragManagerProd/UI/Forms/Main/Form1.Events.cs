@@ -37,7 +37,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 RaceDialogs.Info(this,
                     "Round-Robin complete.\nClick 'Open Buybacks' to add drivers to the Losers Bracket.",
-                    "Buy-Back Phase Ready");
+                    "Buyback Phase Ready");
             }
         }
 
