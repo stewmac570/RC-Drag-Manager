@@ -39,6 +39,11 @@ namespace RCDragManagerProd.UI.Forms
             btnRemoveClass.Click += BtnRemoveClass_Click;
             btnStartRace.Click += BtnStartRace_Click;
             btnCancel.Click += BtnCancel_Click;
+
+            // Double-click a class row to open Edit Class (issue #264). Shortcut only —
+            // the Edit Class button remains and Remove stays button-only. BtnEditClass_Click
+            // already no-ops when nothing is selected, so empty-area double-clicks are safe.
+            lvClasses.DoubleClick += BtnEditClass_Click;
         }
 
         // ── Class list management ─────────────────────────────────────────────

@@ -73,6 +73,7 @@ namespace RCDragManagerProd.UI.Forms
             rbDialIn.CheckedChanged  += RbClassType_CheckedChanged;
             lvDrivers.SelectedIndexChanged += LvDrivers_SelectedIndexChanged;
             lvDrivers.ItemChecked += LvDrivers_ItemChecked;
+            lvDrivers.DoubleClick += LvDrivers_DoubleClick;
             txtDialInOverride.Leave += TxtDialInOverride_Leave;
             btnOk.Click += BtnOk_Click;
             btnCancel.Click += BtnCancel_Click;
@@ -461,6 +462,105 @@ namespace RCDragManagerProd.UI.Forms
             txtDialInOverride.Text = _dialInOverrides.TryGetValue(driverId, out var val) && val.HasValue
                 ? val.Value.ToString("F3")
                 : "";
+        }
+
+        // Double-click is the consistent primary shortcut for the setup roster
+        // (issues #261/#262): an unincluded driver is included; an already-included
+        // driver in a Dial-In class opens the per-driver override editor. Other
+        // class types have no per-driver dial-in, so an included row does nothing
+        // rather than risk an accidental removal.
+        private void LvDrivers_DoubleClick(object sender, EventArgs e)
+        {
+            var hit = lvDrivers.HitTest(lvDrivers.PointToClient(Cursor.Position));
+            var item = hit.Item;
+            if (item == null || !(item.Tag is int driverId)) return;
+
+            if (!item.Checked)
+            {
+                item.Checked = true;   // LvDrivers_ItemChecked records the id
+                return;
+            }
+
+            if (rbDialIn.Checked)
+                EditDialInOverride(item, driverId);
+        }
+
+        // Small modal to set/update/clear a per-driver dial-in override. Mirrors the
+        // race-console dial-in editor so the override column updates immediately on save.
+        private void EditDialInOverride(ListViewItem item, int driverId)
+        {
+            _dialInOverrides.TryGetValue(driverId, out var current);
+
+            using (var dlg = new Form())
+            {
+                dlg.Text = "Edit Dial-In Override";
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ClientSize = new Size(320, 120);
+                dlg.MinimizeBox = false;
+                dlg.MaximizeBox = false;
+
+                var lbl = new Label
+                {
+                    Text = "Dial-in override (seconds):",
+                    AutoSize = true,
+                    Location = new Point(16, 18)
+                };
+
+                var txt = new TextBox
+                {
+                    Text = current?.ToString("F3") ?? string.Empty,
+                    Location = new Point(16, 40),
+                    Width = 140
+                };
+                txt.SelectAll();
+
+                var btnOk = new Button
+                {
+                    Text = "OK",
+                    Location = new Point(16, 78),
+                    Size = new Size(70, 26),
+                    DialogResult = DialogResult.OK
+                };
+
+                var btnClear = new Button
+                {
+                    Text = "Clear",
+                    Location = new Point(92, 78),
+                    Size = new Size(64, 26)
+                };
+                btnClear.Click += (_, __) => txt.Clear();
+
+                var btnCancel = new Button
+                {
+                    Text = "Cancel",
+                    Location = new Point(224, 78),
+                    Size = new Size(80, 26),
+                    DialogResult = DialogResult.Cancel
+                };
+
+                dlg.AcceptButton = btnOk;
+                dlg.CancelButton = btnCancel;
+                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnClear, btnCancel });
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                string val = txt.Text.Trim();
+                if (string.IsNullOrEmpty(val))
+                {
+                    _dialInOverrides.Remove(driverId);
+                    item.SubItems[4].Text = "";
+                }
+                else if (double.TryParse(val, out double parsed))
+                {
+                    _dialInOverrides[driverId] = parsed;
+                    item.SubItems[4].Text = parsed.ToString("F3");
+                }
+                else
+                {
+                    RaceDialogs.Warn(this, "Invalid value — enter a number or leave blank to clear.", "Invalid Dial-In");
+                }
+            }
         }
 
         private void TxtDialInOverride_Leave(object sender, EventArgs e)

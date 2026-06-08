@@ -49,6 +49,16 @@ namespace RCDragManagerProd.UI.Forms
             lvPairings.SizeChanged += (s, e) => ResizePairingsColumns();
             lvWinners.SizeChanged += (s, e) => ResizeWinnersColumns();
 
+            // Double-clicking a driver row is a shortcut to the Set Dial-In flow
+            // (issue #260). It routes through the same handler as the button so the
+            // dial-in lock policy (issue #306) stays in one place. Guarded by HitTest
+            // so a double-click on empty space does nothing.
+            lvDrivers.DoubleClick += (s, e) =>
+            {
+                var hit = lvDrivers.HitTest(lvDrivers.PointToClient(Cursor.Position));
+                if (hit.Item != null) btnSetDialIn_Click(s, e);
+            };
+
             currentSession = _controller.Session;
 
             lblEventTitle.Text = currentSession != null
