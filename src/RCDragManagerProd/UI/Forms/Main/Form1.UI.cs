@@ -62,6 +62,16 @@ namespace RCDragManagerProd.UI.Forms
             txtTime.Visible = setupPhase;
             tlpAddEdit.Visible = setupPhase;
             btnReset.Text = setupPhase ? "Reset Setup" : "Reset Race";
+
+            // Back in setup (fresh load or after a Reset clears the bracket) the action
+            // buttons return to their base operator labels (issue #257). Phase-specific
+            // labels — "Start Losers Bracket", "Start Finals", "Edit Buybacks" — are
+            // applied later by the controller phase events.
+            if (setupPhase)
+            {
+                btnGenerateBracket.Text = "Build Bracket";
+                btnGenerateLosersBracket.Text = "Open Buybacks";
+            }
         }
 
         private void UpdateDialInButtonEnabled()

@@ -35,11 +35,9 @@ namespace RCDragManagerProd.UI.Forms
 
             if (enabled && !IsHostedMode)
             {
-                MessageBox.Show(
-                    "Round-Robin complete.\nClick 'Buy Back' to add drivers to the Losers Bracket.",
-                    "Buy-Back Phase Ready",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                RaceDialogs.Info(this,
+                    "Round-Robin complete.\nClick 'Open Buybacks' to add drivers to the Losers Bracket.",
+                    "Buy-Back Phase Ready");
             }
         }
 
@@ -47,16 +45,16 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (InvokeRequired) { BeginInvoke(new Action<bool>(OnCanStartFinalsChanged), enabled); return; }
             btnGenerateBracket.Enabled = enabled;
-            Logger.Log($"UI: Finals pending — Generate Bracket {(enabled ? "enabled" : "disabled")}.");
+            if (enabled)
+                btnGenerateBracket.Text = "Start Finals";
+            Logger.Log($"UI: Finals pending — Start Finals {(enabled ? "enabled" : "disabled")}.");
 
             if (enabled && !_finalsPopupShown)
             {
                 _finalsPopupShown = true;
-                MessageBox.Show(
-                    "Losers Bracket complete.\nWinner will be added to the Finals.\n\nClick 'Generate Bracket' to start the Finals.",
-                    "Finals Ready",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                RaceDialogs.Info(this,
+                    "Losers Bracket complete.\nWinner will be added to the Finals.\n\nClick 'Start Finals' to start the Finals.",
+                    "Finals Ready");
             }
 
             if (!enabled)
@@ -81,7 +79,7 @@ namespace RCDragManagerProd.UI.Forms
                 $"Matches: {summary.TotalMatches}";
 
             Logger.Log($"[UI] TournamentCompleted → Winner={winnerName}, RunnerUp={runnerUp}");
-            MessageBox.Show(msg, "Event Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            RaceDialogs.Info(this, msg, "Event Complete");
             Logger.Log("[UI] Event Complete acknowledged (OK). Session left intact.");
 
             _controller.PersistTournamentStats(summary, drivers, Program.ConnectionString);
@@ -95,9 +93,9 @@ namespace RCDragManagerProd.UI.Forms
             // race must not gain or lose drivers (issue #254).
             if (_controller.HasBracketStarted)
             {
-                MessageBox.Show(
+                RaceDialogs.Info(this,
                     "This race has already started. New drivers can be added to the driver list, but not to the active race.",
-                    "Race In Progress", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Race In Progress");
                 return;
             }
 
@@ -108,7 +106,7 @@ namespace RCDragManagerProd.UI.Forms
 
                 if (string.IsNullOrWhiteSpace(name))
                 {
-                    MessageBox.Show("Enter a driver name.");
+                    RaceDialogs.Warn(this, "Enter a driver name.", "Add Driver");
                     return;
                 }
 
@@ -121,7 +119,7 @@ namespace RCDragManagerProd.UI.Forms
                         qualTime = parsed;
                     else
                     {
-                        MessageBox.Show("Qualifying time is invalid. Leave it blank or enter a number.");
+                        RaceDialogs.Warn(this, "Qualifying time is invalid. Leave it blank or enter a number.", "Add Driver");
                         return;
                     }
                 }
@@ -160,7 +158,7 @@ namespace RCDragManagerProd.UI.Forms
             catch (Exception ex)
             {
                 Logger.Log($"[UI][ADD][ERROR] {ex}");
-                MessageBox.Show("Failed to add driver. See log for details.");
+                RaceDialogs.Error(this, "Failed to add driver. See log for details.", "Add Driver");
             }
         }
 
@@ -170,9 +168,9 @@ namespace RCDragManagerProd.UI.Forms
             // active console can desync from saved/bracket/report state (issue #254).
             if (_controller.HasBracketStarted)
             {
-                MessageBox.Show(
+                RaceDialogs.Info(this,
                     "This race has already started. New drivers can be added to the driver list, but not to the active race.",
-                    "Race In Progress", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Race In Progress");
                 return;
             }
 
@@ -196,8 +194,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (lvDrivers.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Select a driver to edit their dial-in time.",
-                    "Set Dial-In", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RaceDialogs.Info(this, "Select a driver to edit their dial-in time.", "Set Dial-In");
                 return;
             }
 
@@ -214,12 +211,11 @@ namespace RCDragManagerProd.UI.Forms
             // dial-in change (issue #306).
             if (_controller.DialInLocked)
             {
-                var choice = MessageBox.Show(
+                bool proceed = RaceDialogs.Confirm(this,
                     $"This round is in progress.\n\nEdit {driver.Name}'s dial-in anyway?\n\n" +
                     "This won't affect pairs that have already raced.",
-                    "Round In Progress", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2);
-                if (choice != DialogResult.Yes)
+                    "Round In Progress", destructive: true);
+                if (!proceed)
                 {
                     Logger.Log($"[UI][DIALIN] Locked-round override declined for '{driver.Name}'.");
                     return;
@@ -249,7 +245,7 @@ namespace RCDragManagerProd.UI.Forms
             }
             else
             {
-                MessageBox.Show("Select a driver to edit qualifying time.");
+                RaceDialogs.Warn(this, "Select a driver to edit qualifying time.", "Set Qualifying Time");
             }
         }
 
@@ -289,7 +285,7 @@ namespace RCDragManagerProd.UI.Forms
             catch (Exception ex)
             {
                 Logger.Log("[UI][CLICK][ERROR] btnWinner1_Click failed: " + ex);
-                MessageBox.Show("Winner1 click failed. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RaceDialogs.Error(this, "Winner1 click failed. Check log.", "Error");
             }
         }
 
@@ -303,7 +299,7 @@ namespace RCDragManagerProd.UI.Forms
             catch (Exception ex)
             {
                 Logger.Log("[UI][CLICK][ERROR] btnWinner2_Click failed: " + ex);
-                MessageBox.Show("Winner2 click failed. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RaceDialogs.Error(this, "Winner2 click failed. Check log.", "Error");
             }
         }
 
@@ -323,8 +319,7 @@ namespace RCDragManagerProd.UI.Forms
             catch (Exception ex)
             {
                 Logger.Log($"[FORM1][ERROR] AdvanceRound failed: {ex.Message}");
-                MessageBox.Show("Failed to advance the round. Check the log for details.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RaceDialogs.Error(this, "Failed to advance the round. Check the log for details.", "Advance Round");
             }
             finally
             {
@@ -340,11 +335,10 @@ namespace RCDragManagerProd.UI.Forms
             // mistake.
             if (_controller.HasBracketStarted)
             {
-                var confirm = MessageBox.Show(
+                bool confirmed = RaceDialogs.Confirm(this,
                     "Reset this active race? This will clear current bracket progress, winners, and round state. This cannot be undone.",
-                    "Reset Active Race", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2);
-                if (confirm != DialogResult.Yes)
+                    "Reset Active Race", destructive: true);
+                if (!confirmed)
                     return;
 
                 SaveRecoverySnapshot();
@@ -389,31 +383,29 @@ namespace RCDragManagerProd.UI.Forms
         {
             if (currentSession == null)
             {
-                MessageBox.Show("Quick Session has no saved file to update.", "Nothing to Save",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RaceDialogs.Info(this, "Quick Session has no saved file to update.", "Nothing to Save");
                 return;
             }
 
             _controller.SaveProgress();   // captures a resumable checkpoint, keeps race open
             PersistSession();
 
-            MessageBox.Show("Race progress saved. You can resume this race later.", "Progress Saved",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            RaceDialogs.Success(this, "Race progress saved. You can resume this race later.", "Progress Saved");
         }
 
         private void btnCloseRace_Click(object sender, EventArgs e)
         {
             if (currentSession == null)
             {
-                MessageBox.Show("Quick Session completed. No session file saved.");
+                RaceDialogs.Info(this, "Quick Session completed. No session file saved.", "Close Race");
                 Close();
                 return;
             }
 
-            var confirm = MessageBox.Show(
+            bool confirmed = RaceDialogs.Confirm(this,
                 "Close this race? Make sure progress has been saved if you need to resume it later.",
-                "Close Race", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (confirm != DialogResult.Yes)
+                "Close Race", destructive: true);
+            if (!confirmed)
                 return;
 
             _controller.SaveSession();   // capture final state into the session
@@ -467,8 +459,7 @@ namespace RCDragManagerProd.UI.Forms
 
                 if (eligible == null || eligible.Count < 2)
                 {
-                    MessageBox.Show("Not enough eligible drivers for a Losers Bracket.", "No Entries",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RaceDialogs.Info(this, "Not enough eligible drivers for a Losers Bracket.", "No Entries");
                     Logger.Log($"⚠️ [LB] Only {eligible?.Count ?? 0} eligible buyback drivers — bracket not created.");
                     return;
                 }
@@ -487,8 +478,7 @@ namespace RCDragManagerProd.UI.Forms
 
                     if (selectedDrivers == null || selectedDrivers.Count == 0)
                     {
-                        MessageBox.Show("At least one driver must be selected.", "Invalid Selection",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        RaceDialogs.Warn(this, "At least one driver must be selected.", "Invalid Selection");
                         Logger.Log("⚠️ [LB] Invalid buyback selection — no drivers selected.");
                         return;
                     }
@@ -508,11 +498,12 @@ namespace RCDragManagerProd.UI.Forms
                         _controller.SetBuybackDrivers(selectedDrivers);
 
                         btnGenerateBracket.Enabled = true;
+                        btnGenerateBracket.Text = "Start Losers Bracket";
 
                         btnGenerateLosersBracket.Enabled = true;
                         btnGenerateLosersBracket.Text = "Edit Buybacks";
 
-                        Logger.Log("[UI] Buybacks stored. 'Generate Bracket' enabled; 'Buy Back' stays enabled for edits until LB is generated.");
+                        Logger.Log("[UI] Buybacks stored. 'Start Losers Bracket' enabled; 'Open Buybacks' stays enabled for edits until LB is generated.");
                     }
                 }
             }
@@ -529,8 +520,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (lvWinners.SelectedItems.Count == 0 || !(lvWinners.SelectedItems[0].Tag is int matchId))
                 {
-                    MessageBox.Show("Select a match in the Winners list to edit.", "Edit Match Result",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RaceDialogs.Info(this, "Select a match in the Winners list to edit.", "Edit Match Result");
                     Logger.Log("[UI][EDIT] No match selected in Winners list (or header row selected).");
                     return;
                 }
@@ -538,24 +528,21 @@ namespace RCDragManagerProd.UI.Forms
                 var match = _controller.GetMatch(matchId);
                 if (match == null)
                 {
-                    MessageBox.Show("Match not found.", "Edit Match Result",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    RaceDialogs.Warn(this, "Match not found.", "Edit Match Result");
                     Logger.Log($"[UI][EDIT] GetMatch({matchId}) returned null.");
                     return;
                 }
 
                 if (!match.HasResult)
                 {
-                    MessageBox.Show("That match has not run yet.", "Edit Match Result",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RaceDialogs.Info(this, "That match has not run yet.", "Edit Match Result");
                     Logger.Log($"[UI][EDIT] Reject — M{matchId} has no result yet.");
                     return;
                 }
 
                 if (!_controller.IsMatchInActiveRound(matchId))
                 {
-                    MessageBox.Show("You can only change results for the ACTIVE round.", "Edit Match Result",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RaceDialogs.Info(this, "You can only change results for the ACTIVE round.", "Edit Match Result");
                     Logger.Log($"[UI][EDIT] Reject — M{matchId} not in active round.");
                     return;
                 }
@@ -576,8 +563,8 @@ namespace RCDragManagerProd.UI.Forms
 
                 if (!ok)
                 {
-                    MessageBox.Show("Edit rejected. Only active-round matches can be changed and BYE cannot be a winner.",
-                        "Edit Match Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RaceDialogs.Info(this, "Edit rejected. Only active-round matches can be changed and BYE cannot be a winner.",
+                        "Edit Match Result");
                     return;
                 }
 
@@ -586,8 +573,7 @@ namespace RCDragManagerProd.UI.Forms
             catch (Exception ex)
             {
                 Logger.Log($"[UI][EDIT][ERROR] {ex}");
-                MessageBox.Show("Failed to edit match result. See log for details.",
-                    "Edit Match Result", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RaceDialogs.Error(this, "Failed to edit match result. See log for details.", "Edit Match Result");
             }
         }
         private void ShowEditDialInForButton(bool isLeft)
@@ -664,8 +650,7 @@ namespace RCDragManagerProd.UI.Forms
                     if (!double.TryParse(val, System.Globalization.NumberStyles.Any,
                                          System.Globalization.CultureInfo.InvariantCulture, out double parsed))
                     {
-                        MessageBox.Show("Invalid value — enter a number or leave blank to clear.",
-                            "Invalid Dial-In", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        RaceDialogs.Warn(this, "Invalid value — enter a number or leave blank to clear.", "Invalid Dial-In");
                         return;
                     }
                     newDialIn = parsed;
@@ -722,17 +707,15 @@ namespace RCDragManagerProd.UI.Forms
 
                 if (!shown)
                 {
-                    MessageBox.Show(
+                    RaceDialogs.Info(this,
                         "Standings are not available yet.\n\nThey will be available after Round Robin is complete.",
-                        "Standings Not Ready",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                        "Standings Not Ready");
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log("[UI][STANDINGS][ERROR] " + ex);
-                MessageBox.Show("Failed to show standings. Check log.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RaceDialogs.Error(this, "Failed to show standings. Check log.", "Error");
             }
         }
 
