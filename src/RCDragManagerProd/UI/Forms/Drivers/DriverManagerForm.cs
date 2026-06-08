@@ -14,6 +14,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             InitializeComponent();
             repository = new DriverRepository(Program.ConnectionString);
+            WireGridShortcuts();
             LoadDrivers();
         }
 
@@ -21,7 +22,25 @@ namespace RCDragManagerProd.UI.Forms
         {
             InitializeComponent();
             repository = repo ?? new DriverRepository(Program.ConnectionString);
+            WireGridShortcuts();
             LoadDrivers();
+        }
+
+        // Double-click a driver/car row to open its existing edit dialog (issue #263).
+        // Buttons remain the explicit actions; delete stays button-only. Guarded by
+        // HitTest so a double-click on empty space is ignored.
+        private void WireGridShortcuts()
+        {
+            lvDrivers.DoubleClick += (s, e) =>
+            {
+                if (lvDrivers.HitTest(lvDrivers.PointToClient(Cursor.Position)).Item != null)
+                    btnEditDriver_Click(s, e);
+            };
+            lvCars.DoubleClick += (s, e) =>
+            {
+                if (lvCars.HitTest(lvCars.PointToClient(Cursor.Position)).Item != null)
+                    btnEditCar_Click(s, e);
+            };
         }
 
         protected override void OnActivated(EventArgs e)
