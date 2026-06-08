@@ -72,7 +72,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             using (var dlg = new AddDriverAndCarDialog())
             {
-                if (dlg.ShowDialog() != DialogResult.OK) return;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
                 var newDriver = new Driver
                 {
@@ -115,7 +115,7 @@ namespace RCDragManagerProd.UI.Forms
 
             using (var dlg = new EditDriverDialog(selectedDriver.Name, selectedDriver.State))
             {
-                if (dlg.ShowDialog() != DialogResult.OK) return;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
                 selectedDriver.Name = dlg.DriverName;
                 selectedDriver.State = dlg.State;
@@ -155,7 +155,7 @@ namespace RCDragManagerProd.UI.Forms
 
             using (var dlg = new AddCarDialog())
             {
-                if (dlg.ShowDialog() != DialogResult.OK) return;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
                 selectedDriver.Cars ??= new List<Car>();
                 selectedDriver.Cars.Add(dlg.NewCar);
@@ -182,7 +182,7 @@ namespace RCDragManagerProd.UI.Forms
 
             using (var dlg = new AddCarDialog(currentCar))
             {
-                if (dlg.ShowDialog() != DialogResult.OK) return;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
                 var displayedCarIds = selectedDriver.Cars.Select(c => c.CarID).ToList();
                 int selectedIndex = displayedCarIds.IndexOf(carId);
@@ -241,7 +241,7 @@ namespace RCDragManagerProd.UI.Forms
             var driver = repository.GetDriverById(selectedDriver.Id);
             using (var dialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime))
             {
-                if (dialog.ShowDialog() != DialogResult.OK) return;
+                if (dialog.ShowDialog(this) != DialogResult.OK) return;
 
                 if (dialog.QualifyingTime.HasValue)
                 {
@@ -267,7 +267,7 @@ namespace RCDragManagerProd.UI.Forms
 
             using (var statsForm = new DriverStatsForm(selectedDriver, Program.ConnectionString))
             {
-                statsForm.ShowDialog();
+                statsForm.ShowDialog(this);
             }
         }
 

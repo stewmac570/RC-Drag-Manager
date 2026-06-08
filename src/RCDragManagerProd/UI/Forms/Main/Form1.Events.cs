@@ -181,7 +181,7 @@ namespace RCDragManagerProd.UI.Forms
                 if (driver != null)
                 {
                     var editDialog = new EditDriverDialog(driver.Name, "");
-                    if (editDialog.ShowDialog() == DialogResult.OK)
+                    if (editDialog.ShowDialog(this) == DialogResult.OK)
                     {
                         driver.Name = editDialog.DriverName;
                         UpdateDriverList();
@@ -236,7 +236,7 @@ namespace RCDragManagerProd.UI.Forms
                 if (driver != null)
                 {
                     var qualDialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime);
-                    if (qualDialog.ShowDialog() == DialogResult.OK)
+                    if (qualDialog.ShowDialog(this) == DialogResult.OK)
                     {
                         driver.QualTime = qualDialog.QualifyingTime;
                         UpdateDriverList();
@@ -466,7 +466,7 @@ namespace RCDragManagerProd.UI.Forms
 
                 using (var dlg = new BuybackDriverSelectionForm(eligible))
                 {
-                    var dr = dlg.ShowDialog();
+                    var dr = dlg.ShowDialog(this);
 
                     if (dr != DialogResult.OK)
                     {

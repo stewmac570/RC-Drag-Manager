@@ -65,6 +65,8 @@ namespace RCDragManagerProd.UI.Forms
             if (existing != null)
                 LoadExistingValues(existing);
 
+            btnOk.Text = existing != null ? "Save Class" : "Add Class";
+
             WireRaceTypeCard(pnlCardProLadder);
             WireRaceTypeCard(pnlCardRandomDraw);
             WireRaceTypeCard(pnlCardRoundRobin);
@@ -364,7 +366,7 @@ namespace RCDragManagerProd.UI.Forms
         {
             using (var addDialog = new AddDriverAndCarDialog())
             {
-                if (addDialog.ShowDialog() != DialogResult.OK) return;
+                if (addDialog.ShowDialog(this) != DialogResult.OK) return;
 
                 var newDriver = new Driver { Name = addDialog.DriverName, Cars = new List<Car>() };
                 _driverRepo.AddDriver(newDriver);

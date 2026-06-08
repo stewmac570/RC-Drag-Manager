@@ -61,6 +61,7 @@
             this.Name = "BuybackDriverSelectionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Select Buyback Drivers";
+            this.AcceptButton = this.btnConfirm;
             this.ResumeLayout(false);
         }
     }

@@ -82,8 +82,10 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "DriverStatsForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Driver Stats";
+            this.AcceptButton = this.btnClose;
+            this.CancelButton = this.btnClose;
             this.ResumeLayout(false);
         }
     }

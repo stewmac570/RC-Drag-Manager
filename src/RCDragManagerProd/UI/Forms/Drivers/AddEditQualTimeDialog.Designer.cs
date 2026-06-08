@@ -62,6 +62,9 @@ namespace RCDragManagerProd.UI.Forms
             };
             btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             this.Controls.Add(btnCancel);
+
+            this.AcceptButton = btnSave;
+            this.CancelButton = btnCancel;
         }
     }
 }
