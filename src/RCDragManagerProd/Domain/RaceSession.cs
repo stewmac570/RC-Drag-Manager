@@ -26,6 +26,11 @@ namespace RCDragManagerProd.Domain
         // Null on pre-feature saves or before a bracket is generated.
         public ResumeSnapshot Resume { get; set; }
 
+        // True once the operator has CLOSED the race (event finished / done with the
+        // console). Distinct from a Save Progress checkpoint, which leaves the race open
+        // and resumable. See issue #255 (Save Progress vs Close Race) and #294 (resume).
+        public bool IsClosed { get; set; }
+
         // -----------------------------
         // Round Robin configuration
         // -----------------------------
