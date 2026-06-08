@@ -324,7 +324,28 @@ namespace RCDragManagerProd.UI.Forms
             btnStandings.Enabled = false;
         }
 
-        private void btnSaveAndClose_Click(object sender, EventArgs e)
+        // Save Progress and Close Race are distinct operator actions (issue #255).
+        // Save Progress persists a resumable checkpoint and KEEPS the console open;
+        // Close Race finalises the event and leaves the console. They share the
+        // persistence path below so both write through the same repositories.
+
+        private void btnSaveProgress_Click(object sender, EventArgs e)
+        {
+            if (currentSession == null)
+            {
+                MessageBox.Show("Quick Session has no saved file to update.", "Nothing to Save",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            _controller.SaveProgress();   // captures a resumable checkpoint, keeps race open
+            PersistSession();
+
+            MessageBox.Show("Race progress saved. You can resume this race later.", "Progress Saved",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnCloseRace_Click(object sender, EventArgs e)
         {
             if (currentSession == null)
             {
@@ -333,7 +354,28 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            _controller.SaveSession();
+            var confirm = MessageBox.Show(
+                "Close this race? Make sure progress has been saved if you need to resume it later.",
+                "Close Race", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirm != DialogResult.Yes)
+                return;
+
+            _controller.SaveSession();   // capture final state into the session
+            _controller.CloseRace();     // mark the event finished
+            PersistSession();
+            _controller.RecomputeEventsWon(drivers, Program.ConnectionString);
+
+            if (IsHostedMode)
+                HostedSaveAndCloseCompleted?.Invoke(this, EventArgs.Empty);
+            else
+                Close();
+        }
+
+        // Writes the current race session (and the parent multi-class event, when
+        // hosted) through the repositories. Callers capture controller state into the
+        // session first; this performs the single repository write per operator action.
+        private void PersistSession()
+        {
             sessionRepository.SaveSession(currentSession);
 
             if (_multiClassEventRepo != null && _multiClassEvent != null)
@@ -348,14 +390,6 @@ namespace RCDragManagerProd.UI.Forms
                     Logger.Log($"[SAVE][ERROR] Multi-class event save failed: {ex}");
                 }
             }
-
-            _controller.RecomputeEventsWon(drivers, Program.ConnectionString);
-
-            MessageBox.Show("Race session saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            if (IsHostedMode)
-                HostedSaveAndCloseCompleted?.Invoke(this, EventArgs.Empty);
-            else
-                Close();
         }
 
         // Designer stubs
