@@ -44,8 +44,20 @@ namespace RCDragManagerProd.UI.Forms
             btnGenerateBracket.Enabled = canGenerate;
 
             UpdateDialInButtonEnabled();
+            UpdateDriverEntryVisibility();
 
             Logger.Log($"[UI] Driver list updated ({drivers.Count}); Generate Bracket {(canGenerate ? "ENABLED" : "disabled")}.");
+        }
+
+        // The Add Driver section (name/time inputs + Add/Edit buttons) is a pre-race
+        // setup affordance only. Once a bracket is live it must not be exposed on the
+        // active console (issue #254); it returns after a Reset clears the bracket.
+        private void UpdateDriverEntryVisibility()
+        {
+            bool setupPhase = !_controller.HasBracketStarted;
+            txtName.Visible = setupPhase;
+            txtTime.Visible = setupPhase;
+            tlpAddEdit.Visible = setupPhase;
         }
 
         private void UpdateDialInButtonEnabled()
