@@ -297,6 +297,7 @@
     <Compile Include="Domain\RaceSession.cs" />
     <Compile Include="Domain\ResumeSnapshot.cs" />
     <Compile Include="Repositories\RaceSessionRepository.cs" />
+    <Compile Include="UI\Forms\Common\RaceDialogs.cs" />
     <Compile Include="UI\Forms\Common\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

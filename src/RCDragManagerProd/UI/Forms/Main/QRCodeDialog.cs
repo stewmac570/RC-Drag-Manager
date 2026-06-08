@@ -21,7 +21,7 @@ namespace RCDragManagerProd.UI.Forms
 
         private void InitializeComponent()
         {
-            this.Text = "Live Scoreboard QR Code";
+            this.Text = "Public Site QR";
             this.ClientSize = new Size(500, 580);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -32,7 +32,7 @@ namespace RCDragManagerProd.UI.Forms
             this.AutoScaleMode = AutoScaleMode.Dpi;
 
             _lblInstruction = new Label();
-            _lblInstruction.Text = "Scan to open the live scoreboard\n" + LiveScoreboardUrl;
+            _lblInstruction.Text = "Scan to open the public live scoreboard site.\n" + LiveScoreboardUrl;
             _lblInstruction.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             _lblInstruction.ForeColor = Color.FromArgb(30, 30, 30);
             _lblInstruction.TextAlign = ContentAlignment.MiddleCenter;

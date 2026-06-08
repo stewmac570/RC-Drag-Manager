@@ -214,7 +214,7 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpBottom.SetRowSpan(this.btnGenerateBracket, 3);
             this.btnGenerateBracket.Size = new System.Drawing.Size(194, 164);
             this.btnGenerateBracket.TabIndex = 15;
-            this.btnGenerateBracket.Text = "Generate Bracket";
+            this.btnGenerateBracket.Text = "Build Bracket";
             this.btnGenerateBracket.Click += new System.EventHandler(this.btnGenerateBracket_Click);
             // 
             // tlpRaceQueue
@@ -407,7 +407,7 @@ namespace RCDragManagerProd.UI.Forms
             this.tlpBottom.SetRowSpan(this.btnNextRound, 3);
             this.btnNextRound.Size = new System.Drawing.Size(194, 164);
             this.btnNextRound.TabIndex = 16;
-            this.btnNextRound.Text = "Generate Next Round";
+            this.btnNextRound.Text = "Advance Round";
             this.btnNextRound.Click += new System.EventHandler(this.btnNextRound_Click);
             // 
             // pnlRail
@@ -490,7 +490,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnGenerateLosersBracket.Name = "btnGenerateLosersBracket";
             this.btnGenerateLosersBracket.Size = new System.Drawing.Size(110, 44);
             this.btnGenerateLosersBracket.TabIndex = 21;
-            this.btnGenerateLosersBracket.Text = "Buy Back";
+            this.btnGenerateLosersBracket.Text = "Open Buybacks";
             this.btnGenerateLosersBracket.Click += new System.EventHandler(this.btnGenerateLosersBracket_Click);
             // 
             // btnShowQRCode
@@ -501,7 +501,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnShowQRCode.Name = "btnShowQRCode";
             this.btnShowQRCode.Size = new System.Drawing.Size(110, 44);
             this.btnShowQRCode.TabIndex = 24;
-            this.btnShowQRCode.Text = "Show QR Code";
+            this.btnShowQRCode.Text = "Show Site QR";
             this.btnShowQRCode.Click += new System.EventHandler(this.btnShowQRCode_Click);
             //
             // btnSaveProgress
