@@ -243,9 +243,9 @@ namespace RCDragManagerProd.UI.Forms
                 Logger.Log("[MultiClass] All classes completed RR — releasing LB gate");
                 MessageBox.Show(
                     "All classes have completed Round Robin.\n" +
-                    "The Buy-Back phase is now open for all classes.\n\n" +
-                    "Switch to each class tab to run buy-backs.",
-                    "Buy-Back Phase Ready — All Classes",
+                    "The Buyback phase is now open for all classes.\n\n" +
+                    "Switch to each class tab to run buybacks.",
+                    "Buyback Phase Ready — All Classes",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }

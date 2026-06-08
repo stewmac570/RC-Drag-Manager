@@ -111,7 +111,7 @@ namespace RCDragManagerProd.UI.Forms
 
             this.btnSetQualTime.Location = new Point(722, 200);
             this.btnSetQualTime.Size = new Size(150, 40);
-            this.btnSetQualTime.Text = "Set Qual Time";
+            this.btnSetQualTime.Text = "Set Qualifying Time";
             this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
 
             this.btnDriverStats.Location = new Point(722, 260);
@@ -177,7 +177,7 @@ namespace RCDragManagerProd.UI.Forms
             this.colCarName.Width = 200;
             this.colCarClass.Text = "Class";
             this.colCarClass.Width = 110;
-            this.colCarDialIn.Text = "Dial-in";
+            this.colCarDialIn.Text = "Dial-In";
             this.colCarDialIn.Width = 75;
             this.colCarDialIn.TextAlign = HorizontalAlignment.Right;
 

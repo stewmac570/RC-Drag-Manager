@@ -568,8 +568,8 @@ namespace RCDragManagerProd.UI.Forms
             // 
             // colTime
             // 
-            this.colTime.Text = "Qual Time";
-            this.colTime.Width = 65;
+            this.colTime.Text = "Qualifying Time";
+            this.colTime.Width = 110;
             // 
             // colDialIn
             // 
@@ -602,7 +602,7 @@ namespace RCDragManagerProd.UI.Forms
             this.btnSetQualTime.Name = "btnSetQualTime";
             this.btnSetQualTime.Size = new System.Drawing.Size(100, 26);
             this.btnSetQualTime.TabIndex = 11;
-            this.btnSetQualTime.Text = "Set Time";
+            this.btnSetQualTime.Text = "Set Qualifying Time";
             this.btnSetQualTime.Click += new System.EventHandler(this.btnSetQualTime_Click);
             // 
             // btnSetDialIn
@@ -830,7 +830,7 @@ namespace RCDragManagerProd.UI.Forms
             this.MinimumSize = new System.Drawing.Size(900, 600);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "RC Drag Manager Stable Build";
+            this.Text = "RC Drag Manager";
             this.pnlHeader.ResumeLayout(false);
             this.pnlBottom.ResumeLayout(false);
             this.tlpBottom.ResumeLayout(false);
