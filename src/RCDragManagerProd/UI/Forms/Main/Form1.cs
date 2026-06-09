@@ -13,7 +13,7 @@ using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form, IRaceSessionStore
     {
         private List<Driver> drivers = new List<Driver>();
         private RaceSession currentSession;
@@ -41,7 +41,7 @@ namespace RCDragManagerProd.UI.Forms
         public Form1(RaceController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-            _raceConsole = new RaceConsoleService(_controller);
+            _raceConsole = new RaceConsoleService(_controller, this);
             InitializeComponent();
 
             btnEditResult.Click += btnEditResult_Click;
@@ -119,6 +119,11 @@ namespace RCDragManagerProd.UI.Forms
 
             base.OnFormClosed(e);
         }
+
+        // IRaceSessionStore: RaceConsoleService calls this to persist save/close orchestration
+        // through the form's repositories (issue #284). Callers guard quick sessions
+        // (currentSession == null) before invoking the persistence commands.
+        void IRaceSessionStore.Persist() => PersistSession();
         private sealed class WinnerButtonContext
         {
             public int MatchId { get; set; }
