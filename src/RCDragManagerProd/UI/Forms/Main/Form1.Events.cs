@@ -1,4 +1,5 @@
-﻿using RCDragManagerProd.Controllers;
+﻿using RCDragManagerProd.AppServices;
+using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.RaceEngines;
@@ -251,28 +252,28 @@ namespace RCDragManagerProd.UI.Forms
 
         private void btnGenerateBracket_Click(object sender, EventArgs e)
         {
-            if (_controller.IsFinalsPending)
-            {
-                Logger.Log("[FORM1] Generate Bracket pressed — starting Finals…");
-                _controller.StartFinals();
-                btnGenerateBracket.Enabled = false;
-                return;
-            }
-
-            if (_controller.IsInLosersBracketPhase)
-            {
-                Logger.Log("[FORM1] Starting Losers Bracket from stored buybacks...");
-                _controller.StartLosersBracket();
-                btnGenerateBracket.Enabled = false;
-                btnGenerateLosersBracket.Enabled = false;
-                return;
-            }
-
+            // The phase decision (start Finals / start Losers Bracket / build initial bracket)
+            // now lives in RaceConsoleService; the form only dispatches and updates button
+            // state from the action that ran (issue #284).
             var selectedType = _controller.Session?.RaceType ?? currentSession.RaceType;
-            Logger.Log($"[FORM1] GenerateBracket called with race type: {selectedType} and {drivers.Count} drivers");
-            _controller.GenerateBracket(selectedType, drivers);
+            var action = _raceConsole.ExecutePrimaryAction(drivers, selectedType);
+
             btnGenerateBracket.Enabled = false;
-            UpdateSetupPhaseUi();
+
+            switch (action)
+            {
+                case RaceConsolePrimaryAction.StartFinals:
+                    Logger.Log("[FORM1] Build/Start pressed — Finals started.");
+                    break;
+                case RaceConsolePrimaryAction.StartLosersBracket:
+                    Logger.Log("[FORM1] Build/Start pressed — Losers Bracket started from stored buybacks.");
+                    btnGenerateLosersBracket.Enabled = false;
+                    break;
+                default:
+                    Logger.Log($"[FORM1] Build/Start pressed — bracket built (race type: {selectedType}, {drivers.Count} drivers).");
+                    UpdateSetupPhaseUi();
+                    break;
+            }
         }
 
         private void btnWinner1_Click(object sender, EventArgs e)
