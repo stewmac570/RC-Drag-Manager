@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Repositories;
 
@@ -7,21 +8,18 @@ namespace RCDragManagerProd.UI.Forms
 {
     public partial class DriverManagerForm : Form
     {
-        private readonly DriverRepository repository;
+        private readonly DriverManagerService _drivers;
         private Driver selectedDriver;
 
         public DriverManagerForm()
+            : this(new DriverRepository(Program.ConnectionString))
         {
-            InitializeComponent();
-            repository = new DriverRepository(Program.ConnectionString);
-            WireGridShortcuts();
-            LoadDrivers();
         }
 
         public DriverManagerForm(DriverRepository repo)
         {
             InitializeComponent();
-            repository = repo ?? new DriverRepository(Program.ConnectionString);
+            _drivers = new DriverManagerService(repo ?? new DriverRepository(Program.ConnectionString));
             WireGridShortcuts();
             LoadDrivers();
         }
