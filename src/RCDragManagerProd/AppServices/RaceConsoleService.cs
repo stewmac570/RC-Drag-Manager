@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;
 
 namespace RCDragManagerProd.AppServices
 {
@@ -92,6 +93,103 @@ namespace RCDragManagerProd.AppServices
             _controller.SetBuybackDrivers(selected);
             return BuybackSelectionOutcome.Stored;
         }
+
+        /// <summary>
+        /// Submits the winner of a match from a winner-button click. Maps the UI side that was
+        /// clicked to the engine's winner option, honoring BYEs (the real driver is forced to
+        /// win) and lane swap (a swapped pairing flips left/right). Returns whether the submit
+        /// was accepted (rejected only when both sides are BYE/unresolved). This is the mapping
+        /// that used to live inline in the console's winner-button handler; the form keeps the
+        /// stats bookkeeping that runs after a result is recorded.
+        /// </summary>
+        /// <param name="matchId">Engine match id.</param>
+        /// <param name="uiFirstOption">True when the left winner button was clicked.</param>
+        public WinnerSubmission SubmitWinnerFromButton(int matchId, bool uiFirstOption)
+        {
+            var match = _controller.GetMatch(matchId);
+            if (match == null)
+                return WinnerSubmission.Rejected;
+
+            bool d1IsBye = ByePolicy.IsBye(match.Driver1);
+            bool d2IsBye = ByePolicy.IsBye(match.Driver2);
+
+            bool engineFirstOption;
+            if (d1IsBye && !d2IsBye)
+                engineFirstOption = false;            // engine Driver2 (the real driver) wins
+            else if (d2IsBye && !d1IsBye)
+                engineFirstOption = true;             // engine Driver1 (the real driver) wins
+            else if (d1IsBye && d2IsBye)
+                return WinnerSubmission.Rejected;      // nothing real to advance
+            else
+            {
+                bool swapped = _controller.IsLaneSwapped(match.MatchId, match.RoundLabel, match.Driver1.Id, match.Driver2.Id);
+                engineFirstOption = swapped ? !uiFirstOption : uiFirstOption;
+            }
+
+            _controller.SubmitWinner(matchId, engineFirstOption);
+            return WinnerSubmission.Accept(engineFirstOption);
+        }
+
+        /// <summary>
+        /// Whether a match's result can be edited: it must exist, already have a result, and be
+        /// in the active round. Backs the validation the console's "Edit Match Result" handler
+        /// did before opening the winner picker.
+        /// </summary>
+        public EditResultStatus ValidateEditable(int matchId)
+        {
+            var match = _controller.GetMatch(matchId);
+            if (match == null) return EditResultStatus.MatchNotFound;
+            if (!match.HasResult) return EditResultStatus.NoResultYet;
+            if (!_controller.IsMatchInActiveRound(matchId)) return EditResultStatus.NotInActiveRound;
+            return EditResultStatus.Editable;
+        }
+
+        /// <summary>
+        /// Applies an edited winner for an active-round match (engine option as chosen in the
+        /// picker) and refreshes the on-deck match. Returns false if the controller rejects it.
+        /// </summary>
+        public bool ApplyEditResult(int matchId, bool engineFirstOption)
+        {
+            var ok = _controller.EditWinnerInActiveRound(matchId, engineFirstOption);
+            if (ok) _controller.PushNextMatch();
+            return ok;
+        }
+    }
+
+    /// <summary>Result of <see cref="RaceConsoleService.SubmitWinnerFromButton"/>.</summary>
+    public readonly struct WinnerSubmission
+    {
+        private WinnerSubmission(bool accepted, bool engineFirstOption)
+        {
+            Accepted = accepted;
+            EngineFirstOption = engineFirstOption;
+        }
+
+        /// <summary>False only when the match could not be resolved (both sides BYE / not found).</summary>
+        public bool Accepted { get; }
+
+        /// <summary>The engine winner option that was submitted (meaningful when accepted).</summary>
+        public bool EngineFirstOption { get; }
+
+        public static readonly WinnerSubmission Rejected = new WinnerSubmission(false, false);
+
+        public static WinnerSubmission Accept(bool engineFirstOption) => new WinnerSubmission(true, engineFirstOption);
+    }
+
+    /// <summary>Result of <see cref="RaceConsoleService.ValidateEditable"/>.</summary>
+    public enum EditResultStatus
+    {
+        /// <summary>No match with that id.</summary>
+        MatchNotFound,
+
+        /// <summary>The match has not run yet — nothing to edit.</summary>
+        NoResultYet,
+
+        /// <summary>Only active-round results can be changed.</summary>
+        NotInActiveRound,
+
+        /// <summary>The result can be edited.</summary>
+        Editable
     }
 
     /// <summary>Result of <see cref="RaceConsoleService.ApplyBuybackSelection"/>.</summary>

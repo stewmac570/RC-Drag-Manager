@@ -522,28 +522,25 @@ namespace RCDragManagerProd.UI.Forms
                     return;
                 }
 
+                // Editability rules (exists / has a result / in the active round) now live in
+                // RaceConsoleService (issue #284); the form maps each status to its message.
+                switch (_raceConsole.ValidateEditable(matchId))
+                {
+                    case EditResultStatus.MatchNotFound:
+                        RaceDialogs.Warn(this, "Match not found.", "Edit Match Result");
+                        Logger.Log($"[UI][EDIT] GetMatch({matchId}) returned null.");
+                        return;
+                    case EditResultStatus.NoResultYet:
+                        RaceDialogs.Info(this, "That match has not run yet.", "Edit Match Result");
+                        Logger.Log($"[UI][EDIT] Reject — M{matchId} has no result yet.");
+                        return;
+                    case EditResultStatus.NotInActiveRound:
+                        RaceDialogs.Info(this, "You can only change results for the ACTIVE round.", "Edit Match Result");
+                        Logger.Log($"[UI][EDIT] Reject — M{matchId} not in active round.");
+                        return;
+                }
+
                 var match = _controller.GetMatch(matchId);
-                if (match == null)
-                {
-                    RaceDialogs.Warn(this, "Match not found.", "Edit Match Result");
-                    Logger.Log($"[UI][EDIT] GetMatch({matchId}) returned null.");
-                    return;
-                }
-
-                if (!match.HasResult)
-                {
-                    RaceDialogs.Info(this, "That match has not run yet.", "Edit Match Result");
-                    Logger.Log($"[UI][EDIT] Reject — M{matchId} has no result yet.");
-                    return;
-                }
-
-                if (!_controller.IsMatchInActiveRound(matchId))
-                {
-                    RaceDialogs.Info(this, "You can only change results for the ACTIVE round.", "Edit Match Result");
-                    Logger.Log($"[UI][EDIT] Reject — M{matchId} not in active round.");
-                    return;
-                }
-
                 int choice = ShowWinnerPicker(match);
                 if (choice == 0)
                 {
@@ -555,7 +552,7 @@ namespace RCDragManagerProd.UI.Forms
                 var d1 = match.Driver1?.Name ?? "BYE";
                 var d2 = match.Driver2?.Name ?? "BYE";
 
-                var ok = _controller.EditWinnerInActiveRound(matchId, setFirst);
+                var ok = _raceConsole.ApplyEditResult(matchId, setFirst);
                 Logger.Log($"[UI][EDIT] Set winner {(setFirst ? d1 : d2)} for M{matchId} → {(ok ? "OK" : "REJECTED")}");
 
                 if (!ok)
@@ -564,8 +561,6 @@ namespace RCDragManagerProd.UI.Forms
                         "Edit Match Result");
                     return;
                 }
-
-                _controller.PushNextMatch();
             }
             catch (Exception ex)
             {

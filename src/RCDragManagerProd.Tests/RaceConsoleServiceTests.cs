@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.Tests.Helpers;
 
 namespace RCDragManagerProd.Tests;
@@ -106,5 +107,85 @@ public class RaceConsoleServiceTests
 
         Assert.AreEqual(BuybackSelectionOutcome.Stored, outcome);
         Assert.IsTrue(controller.IsInLosersBracketPhase, "Two or more buyback drivers enter the Losers Bracket phase");
+    }
+
+    // ── Result entry: winner submission + edit ────────────────────────────────────
+
+    [TestMethod]
+    public void SubmitWinnerFromButton_NormalMatch_MapsClickedSideViaLaneSwap()
+    {
+        var controller = StartedProLadder(out var service);
+        var match = controller.PeekUpcomingMatches(1).First(); // two real drivers, no BYE
+
+        bool swapped = controller.IsLaneSwapped(match.MatchId, match.RoundLabel, match.Driver1.Id, match.Driver2.Id);
+        var submission = service.SubmitWinnerFromButton(match.MatchId, uiFirstOption: true);
+
+        Assert.IsTrue(submission.Accepted);
+        // UI-left click → engine Driver1 normally, engine Driver2 when the lane is swapped.
+        Assert.AreEqual(!swapped, submission.EngineFirstOption);
+    }
+
+    [TestMethod]
+    public void SubmitWinnerFromButton_ByeMatch_ForcesRealDriverToWin()
+    {
+        var controller = new RaceController(TestSessionFactory.ProLadder());
+        var service = new RaceConsoleService(controller);
+        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderByePack());
+
+        var byeMatch = controller.PeekUpcomingMatches(20)
+            .First(m => ByePolicy.IsBye(m.Driver1) ^ ByePolicy.IsBye(m.Driver2));
+        var realDriver = ByePolicy.IsBye(byeMatch.Driver1) ? byeMatch.Driver2 : byeMatch.Driver1;
+
+        // Even clicking the BYE side, the real driver must be the one advanced.
+        var submission = service.SubmitWinnerFromButton(byeMatch.MatchId, uiFirstOption: ByePolicy.IsBye(byeMatch.Driver2) ? false : true);
+
+        Assert.IsTrue(submission.Accepted);
+        Assert.AreEqual(realDriver.Id, controller.GetWinner(byeMatch.MatchId)?.Id);
+    }
+
+    [TestMethod]
+    public void SubmitWinnerFromButton_UnknownMatch_IsRejected()
+    {
+        var controller = StartedProLadder(out var service);
+
+        Assert.IsFalse(service.SubmitWinnerFromButton(999999, uiFirstOption: true).Accepted);
+    }
+
+    [TestMethod]
+    public void ValidateEditable_ReflectsMatchState()
+    {
+        var controller = StartedProLadder(out var service);
+        var match = controller.PeekUpcomingMatches(1).First();
+
+        Assert.AreEqual(EditResultStatus.NoResultYet, service.ValidateEditable(match.MatchId));
+
+        controller.SubmitWinner(match.MatchId, firstOption: true);
+        Assert.AreEqual(EditResultStatus.Editable, service.ValidateEditable(match.MatchId));
+
+        Assert.AreEqual(EditResultStatus.MatchNotFound, service.ValidateEditable(999999));
+    }
+
+    [TestMethod]
+    public void ApplyEditResult_FlipsWinner_ForActiveRoundMatch()
+    {
+        var controller = StartedProLadder(out var service);
+        var match = controller.PeekUpcomingMatches(1).First();
+
+        controller.SubmitWinner(match.MatchId, firstOption: true);
+        var firstWinner = controller.GetWinner(match.MatchId);
+
+        var ok = service.ApplyEditResult(match.MatchId, engineFirstOption: false);
+
+        Assert.IsTrue(ok);
+        Assert.AreNotEqual(firstWinner.Id, controller.GetWinner(match.MatchId).Id,
+            "Editing to the other option must flip the recorded winner");
+    }
+
+    private static RaceController StartedProLadder(out RaceConsoleService service)
+    {
+        var controller = new RaceController(TestSessionFactory.ProLadder());
+        service = new RaceConsoleService(controller);
+        service.ExecutePrimaryAction(TestDriverFactory.CreateProLadderPack(), "Pro Ladder");
+        return controller;
     }
 }
