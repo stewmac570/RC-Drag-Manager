@@ -181,6 +181,43 @@ public class RaceConsoleServiceTests
             "Editing to the other option must flip the recorded winner");
     }
 
+    // ── Save / Close persistence ──────────────────────────────────────────────────
+
+    [TestMethod]
+    public void SaveProgress_PersistsAndKeepsRaceOpen()
+    {
+        var controller = new RaceController(TestSessionFactory.ProLadder());
+        var store = new RecordingSessionStore();
+        var service = new RaceConsoleService(controller, store);
+
+        service.SaveProgress();
+
+        Assert.AreEqual(1, store.PersistCount, "Save Progress must write through the session store");
+        Assert.IsFalse(controller.Session.IsClosed, "Save Progress keeps the race open");
+    }
+
+    [TestMethod]
+    public void CloseRace_MarksClosedAndPersists()
+    {
+        var controller = new RaceController(TestSessionFactory.ProLadder());
+        var store = new RecordingSessionStore();
+        var service = new RaceConsoleService(controller, store);
+
+        service.CloseRace();
+
+        Assert.AreEqual(1, store.PersistCount, "Close Race must write through the session store");
+        Assert.IsTrue(controller.Session.IsClosed, "Close Race marks the event finished");
+    }
+
+    [TestMethod]
+    public void PersistenceCommands_WithoutStore_Throw()
+    {
+        var service = new RaceConsoleService(new RaceController(TestSessionFactory.ProLadder()));
+
+        Assert.ThrowsExactly<System.InvalidOperationException>(() => service.SaveProgress());
+        Assert.ThrowsExactly<System.InvalidOperationException>(() => service.CloseRace());
+    }
+
     private static RaceController StartedProLadder(out RaceConsoleService service)
     {
         var controller = new RaceController(TestSessionFactory.ProLadder());

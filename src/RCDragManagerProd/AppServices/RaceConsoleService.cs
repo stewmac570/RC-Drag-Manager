@@ -15,10 +15,12 @@ namespace RCDragManagerProd.AppServices
     public sealed class RaceConsoleService
     {
         private readonly RaceController _controller;
+        private readonly IRaceSessionStore _store;
 
-        public RaceConsoleService(RaceController controller)
+        public RaceConsoleService(RaceController controller, IRaceSessionStore store = null)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _store = store;
         }
 
         /// <summary>Current console state snapshot.</summary>
@@ -154,6 +156,50 @@ namespace RCDragManagerProd.AppServices
             if (ok) _controller.PushNextMatch();
             return ok;
         }
+
+        /// <summary>
+        /// Captures a resumable checkpoint and writes it through the session store: the race
+        /// stays open and can be reopened later. Backs both "Save Progress" and the recovery
+        /// snapshot taken before an active-race reset.
+        /// </summary>
+        public void SaveProgress()
+        {
+            RequireStore();
+            _controller.SaveProgress();
+            _store.Persist();
+        }
+
+        /// <summary>
+        /// Finalises and closes the event: captures final state into the session, marks it
+        /// finished, and persists. Stat recomputation and leaving the console stay with the
+        /// caller (they are UI/lifecycle concerns).
+        /// </summary>
+        public void CloseRace()
+        {
+            RequireStore();
+            _controller.SaveSession();
+            _controller.CloseRace();
+            _store.Persist();
+        }
+
+        private void RequireStore()
+        {
+            if (_store == null)
+                throw new InvalidOperationException(
+                    "This RaceConsoleService was created without an IRaceSessionStore; persistence commands are unavailable.");
+        }
+    }
+
+    /// <summary>
+    /// Persistence seam for the race console: writes the current session (and parent
+    /// multi-class event, when hosted) through the repositories. The console form implements
+    /// this over its repositories so save/close orchestration can live in
+    /// <see cref="RaceConsoleService"/> and be tested with a fake store (issue #284/#283).
+    /// </summary>
+    public interface IRaceSessionStore
+    {
+        /// <summary>Writes the current race session through the repositories.</summary>
+        void Persist();
     }
 
     /// <summary>Result of <see cref="RaceConsoleService.SubmitWinnerFromButton"/>.</summary>

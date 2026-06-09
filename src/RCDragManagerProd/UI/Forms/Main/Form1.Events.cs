@@ -364,8 +364,7 @@ namespace RCDragManagerProd.UI.Forms
 
             try
             {
-                _controller.SaveProgress();
-                PersistSession();
+                _raceConsole.SaveProgress();   // controller checkpoint + repository write (issue #284)
                 Logger.Log("[RESET] Recovery snapshot saved before active-race reset.");
             }
             catch (Exception ex)
@@ -387,8 +386,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            _controller.SaveProgress();   // captures a resumable checkpoint, keeps race open
-            PersistSession();
+            _raceConsole.SaveProgress();   // checkpoint + persist, keeps race open (issue #284)
 
             RaceDialogs.Success(this, "Race progress saved. You can resume this race later.", "Progress Saved");
         }
@@ -408,9 +406,7 @@ namespace RCDragManagerProd.UI.Forms
             if (!confirmed)
                 return;
 
-            _controller.SaveSession();   // capture final state into the session
-            _controller.CloseRace();     // mark the event finished
-            PersistSession();
+            _raceConsole.CloseRace();    // capture final state, mark finished, persist (issue #284)
             _controller.RecomputeEventsWon(drivers, Program.ConnectionString);
 
             if (IsHostedMode)
