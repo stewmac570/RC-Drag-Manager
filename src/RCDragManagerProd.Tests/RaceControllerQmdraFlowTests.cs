@@ -138,6 +138,40 @@ public class RaceControllerQmdraFlowTests
         Assert.AreEqual(0, controller.PeekUpcomingMatches(10).Count);
     }
 
+    [TestMethod]
+    public void Qmdra_AfterFinalsTransition_BracketGridKeepsRoundRobinHistory()
+    {
+        // Regression: QMDRA "all advance" used to clear the match-up grid when moving to
+        // Finals (it captured no RR snapshot and swapped engines), leaving only the injected
+        // Finals round. The grid must keep the full match-up list in race order — every
+        // Round Robin round first, then the Finals round.
+        var session = CreateQmdraSession(roundsToRun: 2);
+        var controller = CreateController(session);
+        controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
+
+        ResolveVisibleMatches(controller); // RR1
+        controller.AdvanceRound();         // reveal RR2
+        ResolveVisibleMatches(controller); // RR2 complete -> auto-injects Finals
+
+        Assert.AreEqual("Finals", session.RaceType);
+
+        var headers = controller.BuildCurrentBracketRows()
+            .Where(r => r.IsHeader)
+            .Select(r => r.RoundLabel)
+            .ToList();
+
+        CollectionAssert.Contains(headers, "RR1", "RR1 must remain in the grid after moving to Finals");
+        CollectionAssert.Contains(headers, "RR2", "RR2 must remain in the grid after moving to Finals");
+        Assert.IsTrue(headers.Any(h => string.Equals(h, "SF", StringComparison.OrdinalIgnoreCase)),
+            "The Finals round (SF) must be appended after the Round Robin rounds");
+
+        // Race order: all RR rounds must be listed before the Finals round.
+        int lastRrIndex = headers.FindLastIndex(h => h != null && h.StartsWith("RR", StringComparison.OrdinalIgnoreCase));
+        int sfIndex = headers.FindIndex(h => string.Equals(h, "SF", StringComparison.OrdinalIgnoreCase));
+        Assert.IsTrue(lastRrIndex >= 0 && sfIndex > lastRrIndex,
+            "Round Robin rounds must be listed before the Finals round (race order)");
+    }
+
     private static void ResolveVisibleMatches(RaceController controller)
     {
         foreach (var match in controller.PeekUpcomingMatches(20).ToList())

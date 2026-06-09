@@ -189,15 +189,29 @@ namespace RCDragManagerProd.Controllers
             Logger.Log("[FINALS][QMDRA] Seed order: " +
                 string.Join(", ", rankedDrivers.Select(d => d.Name)));
 
+            // Preserve the completed Round Robin before we swap _engine to the Finals
+            // ladder. The bracket grid renders RR rounds from this snapshot (View Phase A),
+            // so without it the grid would drop the entire RR match-up history and show only
+            // the freshly-injected Finals round. The Standard RR path snapshots at completion
+            // for the same reason; QMDRA "all advance" must do the same.
+            if (_engine != null && (_rrMatchesSnapshot == null || _rrRoundOrderSnapshot == null))
+            {
+                _rrMatchesSnapshot = EngineGetMatches(_engine).ToList();
+                _rrRoundOrderSnapshot = EngineGetRoundOrder(_engine).ToList();
+                Logger.Log($"[FINALS][QMDRA] RR snapshot captured: matches={_rrMatchesSnapshot.Count}, rounds={_rrRoundOrderSnapshot.Count}");
+            }
+
             // Switch session to Finals
             _session.RaceType = RaceTypes.Finals;
             _inLosersPhase = false;
             _finalsPending = false;
             _activeRound = null;   // RR active-round gate cleared on Finals injection
 
-            // Reset state
+            // Reset revealed rounds (the Finals first round is revealed below). The winners
+            // list is NOT cleared: it is append-only and holds the RR results, so the grid
+            // keeps the full race-order history as Finals results are added — matching the
+            // Standard RR → Finals path, which never clears it.
             _revealedRounds.Clear();
-            _winners.Clear();
 
             // Create Pro Ladder engine
             var pro = new ProLadderEngineAdapter();
