@@ -1,4 +1,5 @@
-﻿using RCDragManagerProd.Controllers;
+﻿using RCDragManagerProd.AppServices;
+using RCDragManagerProd.Controllers;
 using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.ViewModels;
 using System;
@@ -18,6 +19,7 @@ namespace RCDragManagerProd.UI.Forms
         private RaceSession currentSession;
         private RaceSessionRepository sessionRepository = new RaceSessionRepository(Program.ConnectionString);
         private readonly RaceController _controller;
+        private readonly RaceConsoleService _raceConsole;
         private bool _finalsPopupShown;
         private WinnerButtonContext _currentWinnerButtonContext;
 
@@ -39,6 +41,7 @@ namespace RCDragManagerProd.UI.Forms
         public Form1(RaceController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _raceConsole = new RaceConsoleService(_controller);
             InitializeComponent();
 
             btnEditResult.Click += btnEditResult_Click;
@@ -61,9 +64,9 @@ namespace RCDragManagerProd.UI.Forms
 
             currentSession = _controller.Session;
 
-            lblEventTitle.Text = currentSession != null
-                ? $"Event: {currentSession.EventName}"
-                : "Quick Session";
+            // Title comes from the console view model so the "Event: …" / "Quick Session"
+            // composition lives in one UI-independent place (issue #284).
+            lblEventTitle.Text = _raceConsole.GetState().EventTitle;
 
             if (currentSession?.DriverEntries != null && currentSession.DriverEntries.Count > 0)
             {
