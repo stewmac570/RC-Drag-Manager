@@ -110,6 +110,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppServices\RaceConsoleViewModel.cs" />
+    <Compile Include="AppServices\RaceConsoleViewModelBuilder.cs" />
     <Compile Include="Controllers\IStandingsDialogService.cs" />
     <Compile Include="Controllers\LaneFairnessManager.cs" />
     <Compile Include="Controllers\RaceController.DialIn.cs" />
