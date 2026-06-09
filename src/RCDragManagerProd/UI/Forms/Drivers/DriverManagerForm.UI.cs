@@ -17,7 +17,7 @@ namespace RCDragManagerProd.UI.Forms
             lvDrivers.BeginUpdate();
             lvDrivers.Items.Clear();
 
-            var drivers = repository.GetAllDrivers() ?? new List<Driver>();
+            var drivers = _drivers.GetAllDrivers();
 
             foreach (var d in drivers.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))
             {

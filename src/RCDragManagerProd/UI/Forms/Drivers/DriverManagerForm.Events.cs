@@ -56,7 +56,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            selectedDriver = repository.GetDriverById(id);
+            selectedDriver = _drivers.GetDriverById(id);
             ShowCarsForDriver(selectedDriver);
             UpdateButtonStates();
         }
@@ -74,18 +74,6 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
-                var newDriver = new Driver
-                {
-                    Name = dlg.DriverName,
-                    Notes = "",
-                    TotalWins = 0,
-                    TotalLosses = 0,
-                    EventsEntered = 0,
-                    EventsWon = 0,
-                    State = "",
-                    Cars = new List<Car>()
-                };
-
                 var newCar = new Car
                 {
                     CarName = dlg.CarName,
@@ -93,12 +81,10 @@ namespace RCDragManagerProd.UI.Forms
                     DefaultDialIn = dlg.DialIn
                 };
 
-                newDriver.Cars.Add(newCar);
-                repository.AddDriver(newDriver);
+                selectedDriver = _drivers.AddDriverWithCar(dlg.DriverName, newCar);
 
-                Logger.Log($"[DRIVERS] Added '{newDriver.Name}' with car '{newCar.CarName}'.");
+                Logger.Log($"[DRIVERS] Added '{selectedDriver.Name}' with car '{newCar.CarName}'.");
 
-                selectedDriver = newDriver;
                 LoadDrivers();
                 ShowCarsForDriver(selectedDriver);
                 UpdateButtonStates();
@@ -117,9 +103,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
-                selectedDriver.Name = dlg.DriverName;
-                selectedDriver.State = dlg.State;
-                repository.UpdateDriver(selectedDriver);
+                _drivers.UpdateDriverDetails(selectedDriver, dlg.DriverName, dlg.State);
 
                 LoadDrivers();
                 ShowCarsForDriver(selectedDriver);
@@ -138,7 +122,7 @@ namespace RCDragManagerProd.UI.Forms
             var confirm = MessageBox.Show("Delete this driver?", "Confirm", MessageBoxButtons.YesNo);
             if (confirm != DialogResult.Yes) return;
 
-            repository.DeleteDriver(selectedDriver.Id);
+            _drivers.DeleteDriver(selectedDriver.Id);
             Logger.Log($"[DRIVERS] Deleted id={selectedDriver.Id}.");
             selectedDriver = null;
 
@@ -157,10 +141,7 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
-                selectedDriver.Cars ??= new List<Car>();
-                selectedDriver.Cars.Add(dlg.NewCar);
-
-                repository.UpdateDriver(selectedDriver);
+                _drivers.AddCar(selectedDriver, dlg.NewCar);
                 Logger.Log($"[CARS] Added car '{dlg.NewCar.CarName}' to driver #{selectedDriver.Id}.");
 
                 RefreshDriverRowCarsCount(selectedDriver);
@@ -184,20 +165,12 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
-                var displayedCarIds = selectedDriver.Cars.Select(c => c.CarID).ToList();
-                int selectedIndex = displayedCarIds.IndexOf(carId);
-
-                if (!DriverManagerCarEditFlow.TryApplyEditedCar(
-                    selectedDriver,
-                    displayedCarIds,
-                    selectedIndex,
-                    dlg.NewCar))
+                if (!_drivers.ApplyCarEdit(selectedDriver, carId, dlg.NewCar))
                 {
                     MessageBox.Show("Could not apply car edit.");
                     return;
                 }
 
-                repository.UpdateDriver(selectedDriver);
                 Logger.Log($"[CARS] Updated car #{carId} for driver #{selectedDriver.Id}.");
 
                 ShowCarsForDriver(selectedDriver);
@@ -219,8 +192,7 @@ namespace RCDragManagerProd.UI.Forms
             var confirm = MessageBox.Show($"Delete car '{car.CarName}'?", "Confirm Delete", MessageBoxButtons.YesNo);
             if (confirm != DialogResult.Yes) return;
 
-            selectedDriver.Cars.Remove(car);
-            repository.UpdateDriver(selectedDriver);
+            _drivers.DeleteCar(selectedDriver, carId);
             Logger.Log($"[CARS] Deleted car #{carId} for driver #{selectedDriver.Id}.");
 
             RefreshDriverRowCarsCount(selectedDriver);
@@ -238,18 +210,17 @@ namespace RCDragManagerProd.UI.Forms
                 return;
             }
 
-            var driver = repository.GetDriverById(selectedDriver.Id);
+            var driver = _drivers.GetDriverById(selectedDriver.Id);
             using (var dialog = new AddEditQualTimeDialog(driver.Name, driver.QualTime))
             {
                 if (dialog.ShowDialog(this) != DialogResult.OK) return;
 
                 if (dialog.QualifyingTime.HasValue)
                 {
-                    repository.UpdateQualifyingTime(driver.Id, dialog.QualifyingTime.Value);
+                    // refresh the in-memory driver so the cars-grid qual-time column updates
+                    selectedDriver = _drivers.SetQualifyingTime(driver.Id, dialog.QualifyingTime.Value);
                     Logger.Log($"[DRIVERS] Set QualTime for #{driver.Id} to {dialog.QualifyingTime.Value:0.000}");
 
-                    // refresh the in-memory driver so the cars-grid qual-time column updates
-                    selectedDriver = repository.GetDriverById(driver.Id);
                     LoadDrivers();
                     ShowCarsForDriver(selectedDriver);
                     UpdateButtonStates();
