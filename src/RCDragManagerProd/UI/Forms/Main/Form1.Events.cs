@@ -313,9 +313,8 @@ namespace RCDragManagerProd.UI.Forms
             {
                 btnNextRound.Enabled = false;
                 Logger.Log("[FORM1] Generate Next Round clicked");
-                _controller.LockDialIn();
+                _raceConsole.AdvanceRound();   // locks dial-ins, then advances (issue #284)
                 UpdateDialInButtonEnabled();
-                _controller.AdvanceRound();
             }
             catch (Exception ex)
             {
@@ -456,7 +455,7 @@ namespace RCDragManagerProd.UI.Forms
 
             try
             {
-                var eligible = _controller.GetEligibleBuybackDrivers();
+                var eligible = _raceConsole.GetEligibleBuybacks();
 
                 if (eligible == null || eligible.Count < 2)
                 {
@@ -465,7 +464,7 @@ namespace RCDragManagerProd.UI.Forms
                     return;
                 }
 
-                using (var dlg = new BuybackDriverSelectionForm(eligible))
+                using (var dlg = new BuybackDriverSelectionForm(eligible.ToList()))
                 {
                     var dr = dlg.ShowDialog(this);
 
@@ -476,35 +475,32 @@ namespace RCDragManagerProd.UI.Forms
                     }
 
                     var selectedDrivers = dlg.SelectedDrivers;
+                    Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers?.Count ?? 0} drivers → {(selectedDrivers == null ? "" : string.Join(", ", selectedDrivers.Select(d => d.Name)))}");
 
-                    if (selectedDrivers == null || selectedDrivers.Count == 0)
+                    // The single-vs-multi decision now lives in RaceConsoleService (issue #284);
+                    // the form just maps the outcome back to button state.
+                    switch (_raceConsole.ApplyBuybackSelection(selectedDrivers))
                     {
-                        RaceDialogs.Warn(this, "At least one driver must be selected.", "Invalid Selection");
-                        Logger.Log("⚠️ [LB] Invalid buyback selection — no drivers selected.");
-                        return;
-                    }
+                        case BuybackSelectionOutcome.Invalid:
+                            RaceDialogs.Warn(this, "At least one driver must be selected.", "Invalid Selection");
+                            Logger.Log("⚠️ [LB] Invalid buyback selection — no drivers selected.");
+                            return;
 
-                    Logger.Log($"📥 [LB] Buybacks selected: {selectedDrivers.Count} drivers → {string.Join(", ", selectedDrivers.Select(d => d.Name))}");
+                        case BuybackSelectionOutcome.SingleToFinals:
+                            // GenerateLosersBracket fired CanStartFinalsChanged(true), which enables
+                            // btnGenerateBracket via OnCanStartFinalsChanged.
+                            Logger.Log("[UI] Single buyback driver — LB skipped, Finals gate raised.");
+                            break;
 
-                    if (selectedDrivers.Count == 1)
-                    {
-                        // Single buyback: skip LB entirely, promote direct to Finals.
-                        // GenerateLosersBracket sets _buybackChampionOverride + fires CanStartFinalsChanged(true),
-                        // which enables btnGenerateBracket via OnCanStartFinalsChanged.
-                        _controller.GenerateLosersBracket(selectedDrivers);
-                        Logger.Log("[UI] Single buyback driver — LB skipped, Finals gate raised.");
-                    }
-                    else
-                    {
-                        _controller.SetBuybackDrivers(selectedDrivers);
+                        case BuybackSelectionOutcome.Stored:
+                            btnGenerateBracket.Enabled = true;
+                            btnGenerateBracket.Text = "Start Losers Bracket";
 
-                        btnGenerateBracket.Enabled = true;
-                        btnGenerateBracket.Text = "Start Losers Bracket";
+                            btnGenerateLosersBracket.Enabled = true;
+                            btnGenerateLosersBracket.Text = "Edit Buybacks";
 
-                        btnGenerateLosersBracket.Enabled = true;
-                        btnGenerateLosersBracket.Text = "Edit Buybacks";
-
-                        Logger.Log("[UI] Buybacks stored. 'Start Losers Bracket' enabled; 'Open Buybacks' stays enabled for edits until LB is generated.");
+                            Logger.Log("[UI] Buybacks stored. 'Start Losers Bracket' enabled; 'Open Buybacks' stays enabled for edits until LB is generated.");
+                            break;
                     }
                 }
             }
@@ -703,8 +699,8 @@ namespace RCDragManagerProd.UI.Forms
             {
                 Logger.Log("[UI][CLICK] Standings clicked.");
 
-                var shown = _controller.TryShowRoundRobinStandings();
-                Logger.Log("[UI][STANDINGS] TryShowRoundRobinStandings() -> " + (shown ? "SHOWN" : "NOT AVAILABLE"));
+                var shown = _raceConsole.TryShowStandings();
+                Logger.Log("[UI][STANDINGS] TryShowStandings() -> " + (shown ? "SHOWN" : "NOT AVAILABLE"));
 
                 if (!shown)
                 {
