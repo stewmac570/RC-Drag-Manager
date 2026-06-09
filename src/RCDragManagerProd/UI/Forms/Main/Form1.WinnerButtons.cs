@@ -74,51 +74,14 @@ namespace RCDragManagerProd.UI.Forms
             string round;
             round = match.RoundLabel ?? "Unknown";
 
-            // ---- Source of truth: ENGINE drivers ----
-            bool d1IsBye;
-            bool d2IsBye;
-
-            d1IsBye = ByePolicy.IsBye(match.Driver1);
-            d2IsBye = ByePolicy.IsBye(match.Driver2);
-
-            Logger.Log("[UI][WINNER] Engine snapshot: M" + matchId + " (" + round + ") " +
-                       "D1=" + (match.Driver1 != null ? match.Driver1.Name : "NULL") + " bye=" + d1IsBye + " | " +
-                       "D2=" + (match.Driver2 != null ? match.Driver2.Name : "NULL") + " bye=" + d2IsBye);
-
-            bool engineFirstOption;
-
-            // ---- BYE matches: force the real engine driver to win (ignores swap + button clicked) ----
-            if (d1IsBye && !d2IsBye)
+            // BYE-forcing + lane-swap → engine winner option, and the submit itself, now live
+            // in RaceConsoleService (issue #284). The form keeps the post-result stats below.
+            var submission = _raceConsole.SubmitWinnerFromButton(matchId, firstOption);
+            if (!submission.Accepted)
             {
-                engineFirstOption = false; // Engine Driver2 must win
-                Logger.Log("[UI][WINNER] Mapping: Engine D1 is BYE => force Engine option=2 (engineFirstOption=false)");
-            }
-            else if (d2IsBye && !d1IsBye)
-            {
-                engineFirstOption = true; // Engine Driver1 must win
-                Logger.Log("[UI][WINNER] Mapping: Engine D2 is BYE => force Engine option=1 (engineFirstOption=true)");
-            }
-            else if (d1IsBye && d2IsBye)
-            {
-                Logger.Log("[UI][WINNER][ERROR] Both engine sides are BYE/NULL for M" + matchId + " (" + round + "). Cannot submit winner.");
+                Logger.Log("[UI][WINNER] Submit not accepted (both sides BYE/unresolved) for M" + matchId + " (" + round + ").");
                 return;
             }
-            else
-            {
-                // ---- Normal match: use lane swap mapping ----
-                bool swapped;
-                swapped = _controller.IsLaneSwapped(match.MatchId, match.RoundLabel, match.Driver1.Id, match.Driver2.Id);
-
-                // firstOption == UI-left button. If swapped, UI-left corresponds to engine Driver2.
-                engineFirstOption = swapped ? !firstOption : firstOption;
-
-                Logger.Log("[UI][WINNER] Mapping: Normal match swapped=" + swapped +
-                           " UI-firstOption(left)=" + firstOption +
-                           " => engineFirstOption=" + engineFirstOption);
-            }
-
-            Logger.Log("[UI][WINNER] Calling SubmitWinner(M" + matchId + ", engineFirstOption=" + engineFirstOption + ")...");
-            _controller.SubmitWinner(matchId, engineFirstOption);
 
             var winner = _controller.GetWinner(matchId);
             var loser = _controller.GetLoser(matchId);
