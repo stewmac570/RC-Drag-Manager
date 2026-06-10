@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
@@ -27,7 +28,7 @@ namespace RCDragManagerProd.UI.Forms
 
     public partial class MultiClassConfigDialog : Form
     {
-        private readonly DriverRepository _driverRepo;
+        private readonly MultiClassSetupService _service;
         private List<Driver> _allDrivers = new List<Driver>();
         private readonly Dictionary<int, double?> _dialInOverrides = new Dictionary<int, double?>();
         private readonly HashSet<int> _checkedDriverIds = new HashSet<int>();
@@ -53,10 +54,15 @@ namespace RCDragManagerProd.UI.Forms
 
         public MultiClassConfigDialog(string connectionString,
                                        MultiClassConfigDialogValues existing = null)
+            : this(new MultiClassSetupService(new DriverRepository(connectionString)), existing)
         {
-            InitializeComponent();
+        }
 
-            _driverRepo = new DriverRepository(connectionString);
+        internal MultiClassConfigDialog(MultiClassSetupService service,
+                                        MultiClassConfigDialogValues existing = null)
+        {
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            InitializeComponent();
 
             CreateSearchControl();
             LoadDrivers();
@@ -148,7 +154,7 @@ namespace RCDragManagerProd.UI.Forms
 
         private void LoadDrivers()
         {
-            _allDrivers = _driverRepo.GetAllDrivers() ?? new List<Driver>();
+            _allDrivers = _service.GetAllDrivers();
         }
 
         private void SearchChanged(object sender, EventArgs e)
@@ -368,19 +374,13 @@ namespace RCDragManagerProd.UI.Forms
             {
                 if (addDialog.ShowDialog(this) != DialogResult.OK) return;
 
-                var newDriver = new Driver { Name = addDialog.DriverName, Cars = new List<Car>() };
-                _driverRepo.AddDriver(newDriver);
-
-                var insertedDriver = _driverRepo.GetAllDrivers()
-                    .First(d => d.Name == newDriver.Name);
-
-                var newCar = new Car
+                var car = new Car
                 {
-                    CarName = addDialog.CarName,
-                    ClassType = addDialog.ClassType,
+                    CarName       = addDialog.CarName,
+                    ClassType     = addDialog.ClassType,
                     DefaultDialIn = addDialog.DialIn
                 };
-                _driverRepo.AddCar(insertedDriver.Id, newCar);
+                _service.QuickAddDriver(addDialog.DriverName, car);
             }
 
             LoadDrivers();
@@ -635,34 +635,13 @@ namespace RCDragManagerProd.UI.Forms
                 Logger.Log($"[MULTICLASS][CFG][RR] '{className}' → Variant='{Variant}', RoundsToRun={(RoundsToRun.HasValue ? RoundsToRun.Value.ToString() : "null")}");
             }
 
-            BuiltDriverEntries = new List<RaceSessionDriverEntry>();
-            foreach (var driverId in _checkedDriverIds)
-            {
-                var driver = _allDrivers.FirstOrDefault(d => d.Id == driverId);
-                if (driver == null) continue;
-
-                var car = driver.Cars?.FirstOrDefault();
-
-                double? dialIn;
-                if (rbBracket.Checked)
-                    dialIn = FixedDialIn;
-                else if (rbHeadsUp.Checked)
-                    dialIn = null;
-                else
-                    dialIn = _dialInOverrides.TryGetValue(driverId, out var overrideVal)
-                        ? overrideVal
-                        : car?.DefaultDialIn;
-
-                BuiltDriverEntries.Add(new RaceSessionDriverEntry
-                {
-                    DriverID   = driver.Id,
-                    DriverName = driver.Name,
-                    CarID      = car?.CarID ?? 0,
-                    CarName    = car?.CarName ?? "",
-                    ClassType  = ClassName,
-                    DialIn     = dialIn
-                });
-            }
+            BuiltDriverEntries = _service.BuildDriverEntries(
+                _checkedDriverIds,
+                _allDrivers,
+                ClassType,
+                FixedDialIn,
+                _dialInOverrides,
+                ClassName);
 
             DialogResult = DialogResult.OK;
             Close();

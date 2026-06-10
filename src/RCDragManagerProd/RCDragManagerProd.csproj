@@ -112,6 +112,7 @@
   <ItemGroup>
     <Compile Include="AppServices\DriverManagerService.cs" />
     <Compile Include="AppServices\LoadSessionService.cs" />
+    <Compile Include="AppServices\MultiClassSetupService.cs" />
     <Compile Include="AppServices\RaceConsoleService.cs" />
     <Compile Include="AppServices\RaceConsoleViewModel.cs" />
     <Compile Include="AppServices\RaceConsoleViewModelBuilder.cs" />

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
@@ -9,30 +10,21 @@ namespace RCDragManagerProd.UI.Forms
 {
     public partial class MultiClassSetupForm : Form
     {
-        private readonly string _connectionString;
-        private readonly DriverRepository _driverRepo;
+        private readonly MultiClassSetupService _service;
 
-        private readonly List<ClassConfig> _classList = new List<ClassConfig>();
+        private readonly List<ClassConfigDto> _classList = new List<ClassConfigDto>();
 
         public MultiClassEvent MultiClassEventResult { get; private set; }
 
-        private class ClassConfig
+        public MultiClassSetupForm(string connectionString)
+            : this(new MultiClassSetupService(new DriverRepository(connectionString)))
         {
-            public string ClassName { get; set; }
-            public string RaceType { get; set; }
-            public string ClassType { get; set; }
-            public double? FixedDialIn { get; set; }
-            public string Variant { get; set; }
-            public int? RoundsToRun { get; set; }
-            public List<RaceSessionDriverEntry> DriverEntries { get; set; }
         }
 
-        public MultiClassSetupForm(string connectionString)
+        internal MultiClassSetupForm(MultiClassSetupService service)
         {
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             InitializeComponent();
-
-            _connectionString = connectionString;
-            _driverRepo = new DriverRepository(connectionString);
 
             btnAddClass.Click += BtnAddClass_Click;
             btnEditClass.Click += BtnEditClass_Click;
@@ -48,17 +40,17 @@ namespace RCDragManagerProd.UI.Forms
 
         // ── Class list management ─────────────────────────────────────────────
 
-        private void AddClass(ClassConfig config)
+        private void AddClass(ClassConfigDto config)
         {
-            foreach (var existing in _classList)
+            var existingNames = new List<string>();
+            foreach (var cc in _classList)
+                existingNames.Add(cc.ClassName);
+
+            string error = _service.ValidateClassName(config.ClassName, existingNames);
+            if (error != null)
             {
-                if (string.Equals(existing.ClassName, config.ClassName, StringComparison.OrdinalIgnoreCase))
-                {
-                    MessageBox.Show($"A class named '{config.ClassName}' already exists. " +
-                                    "Please use a different name.",
-                                    "Duplicate Class", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                MessageBox.Show(error, "Duplicate Class", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
             _classList.Add(config);
@@ -92,11 +84,11 @@ namespace RCDragManagerProd.UI.Forms
 
         private void BtnAddClass_Click(object sender, EventArgs e)
         {
-            using (var dlg = new MultiClassConfigDialog(_connectionString))
+            using (var dlg = new MultiClassConfigDialog(_service))
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    AddClass(new ClassConfig
+                    AddClass(new ClassConfigDto
                     {
                         ClassName     = dlg.ClassName,
                         RaceType      = dlg.RaceType,
@@ -127,11 +119,11 @@ namespace RCDragManagerProd.UI.Forms
                 DriverEntries = cc.DriverEntries
             };
 
-            using (var dlg = new MultiClassConfigDialog(_connectionString, existing))
+            using (var dlg = new MultiClassConfigDialog(_service, existing))
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    _classList[idx] = new ClassConfig
+                    _classList[idx] = new ClassConfigDto
                     {
                         ClassName     = dlg.ClassName,
                         RaceType      = dlg.RaceType,
@@ -153,57 +145,29 @@ namespace RCDragManagerProd.UI.Forms
 
         private void BtnStartRace_Click(object sender, EventArgs e)
         {
-            foreach (var cc in _classList)
+            string error = _service.ValidateCanStart(_classList);
+            if (error != null)
             {
-                if (cc.DriverEntries.Count == 0)
-                {
-                    MessageBox.Show(
-                        $"Class '{cc.ClassName}' has no drivers. " +
-                        "Add at least one driver or remove the class.",
-                        "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                MessageBox.Show(error, "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            foreach (var cc in _classList)
+            try
             {
-                foreach (var entry in cc.DriverEntries)
-                {
-                    _driverRepo.IncrementEventsEntered(entry.DriverID);
-                }
+                MultiClassEventResult = _service.StartEvent(
+                    txtEventName.Text.Trim(),
+                    dtpEventDate.Value.Date,
+                    _classList);
+
+                DialogResult = DialogResult.OK;
+                Close();
             }
-
-            MultiClassEventResult = new MultiClassEvent
+            catch (Exception ex)
             {
-                EventName = txtEventName.Text.Trim(),
-                EventDate = dtpEventDate.Value.Date
-            };
-
-            foreach (var cc in _classList)
-            {
-                bool isRR = string.Equals(cc.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
-
-                var session = new RaceSession
-                {
-                    EventName          = MultiClassEventResult.EventName,
-                    EventDate          = MultiClassEventResult.EventDate,
-                    RaceType           = cc.RaceType ?? RaceTypes.RoundRobin,
-                    ClassType          = cc.ClassName,
-                    FixedDialIn        = cc.FixedDialIn,
-                    RoundRobinVariant  = isRR ? cc.Variant : null,
-                    RoundsToRun        = isRR ? cc.RoundsToRun : null,
-                    DriverEntries      = cc.DriverEntries
-                };
-                MultiClassEventResult.ClassSessions.Add(session);
-
-                if (isRR)
-                {
-                    Logger.Log($"[MULTICLASS][START][RR] Class '{cc.ClassName}' → Variant='{session.RoundRobinVariant}', RoundsToRun={(session.RoundsToRun.HasValue ? session.RoundsToRun.Value.ToString() : "null")}");
-                }
+                Logger.Log($"[UI][MultiClassSetup] StartEvent failed: {ex}");
+                MessageBox.Show("Failed to start the race event. Check the log for details.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            DialogResult = DialogResult.OK;
-            Close();
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
