@@ -83,7 +83,7 @@ namespace RCDragManagerProd.UI.Forms
             RaceDialogs.Info(this, msg, "Event Complete");
             Logger.Log("[UI] Event Complete acknowledged (OK). Session left intact.");
 
-            _controller.PersistTournamentStats(summary, drivers, Program.ConnectionString);
+            _raceConsole.RecordTournamentCompletion(summary, drivers);
         }
 
         // === UI Button Handlers ===
@@ -105,25 +105,16 @@ namespace RCDragManagerProd.UI.Forms
                 string name = (txtName.Text ?? "").Trim();
                 string timeText = (txtTime.Text ?? "").Trim();
 
-                if (string.IsNullOrWhiteSpace(name))
+                string error = _rosterService.Validate(name, timeText);
+                if (error != null)
                 {
-                    RaceDialogs.Warn(this, "Enter a driver name.", "Add Driver");
+                    RaceDialogs.Warn(this, error, "Add Driver");
                     return;
                 }
 
                 if (drivers == null) drivers = new List<Driver>();
 
-                double? qualTime = null;
-                if (!string.IsNullOrWhiteSpace(timeText))
-                {
-                    if (double.TryParse(timeText, out var parsed))
-                        qualTime = parsed;
-                    else
-                    {
-                        RaceDialogs.Warn(this, "Qualifying time is invalid. Leave it blank or enter a number.", "Add Driver");
-                        return;
-                    }
-                }
+                double? qualTime = _rosterService.ParseQualTime(timeText);
 
                 var existingDriver = drivers.FirstOrDefault(d =>
                     string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -138,18 +129,10 @@ namespace RCDragManagerProd.UI.Forms
                 }
                 else
                 {
-                    int newId = (drivers.Count == 0) ? 1 : drivers.Max(d => d.Id) + 1;
-
-                    var newDriver = new Driver
-                    {
-                        Id = newId,
-                        Name = name,
-                        QualTime = qualTime
-                    };
-
+                    var newDriver = _rosterService.BuildNewDriver(name, qualTime, drivers);
                     drivers.Add(newDriver);
                     var tmsg = qualTime.HasValue ? qualTime.Value.ToString("0.000") : "—";
-                    Logger.Log($"[UI][ADD] Added driver Id={newId}, Name='{name}', Qual={tmsg}.");
+                    Logger.Log($"[UI][ADD] Added driver Id={newDriver.Id}, Name='{name}', Qual={tmsg}.");
                 }
 
                 UpdateDriverList();
@@ -407,7 +390,7 @@ namespace RCDragManagerProd.UI.Forms
                 return;
 
             _raceConsole.CloseRace();    // capture final state, mark finished, persist (issue #284)
-            _controller.RecomputeEventsWon(drivers, Program.ConnectionString);
+            _raceConsole.RecomputeEventsWon(drivers);
 
             if (IsHostedMode)
                 HostedSaveAndCloseCompleted?.Invoke(this, EventArgs.Empty);

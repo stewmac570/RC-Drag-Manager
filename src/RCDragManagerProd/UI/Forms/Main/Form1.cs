@@ -20,6 +20,7 @@ namespace RCDragManagerProd.UI.Forms
         private RaceSessionRepository sessionRepository = new RaceSessionRepository(Program.ConnectionString);
         private readonly RaceController _controller;
         private readonly RaceConsoleService _raceConsole;
+        private readonly SessionRosterService _rosterService = new SessionRosterService();
         private bool _finalsPopupShown;
         private WinnerButtonContext _currentWinnerButtonContext;
 
@@ -41,7 +42,8 @@ namespace RCDragManagerProd.UI.Forms
         public Form1(RaceController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-            _raceConsole = new RaceConsoleService(_controller, this);
+            _raceConsole = new RaceConsoleService(
+                _controller, this, new DriverRepository(Program.ConnectionString));
             InitializeComponent();
 
             btnEditResult.Click += btnEditResult_Click;
