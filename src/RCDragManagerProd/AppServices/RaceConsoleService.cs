@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.Logging;
 using RCDragManagerProd.RaceEngines;
+using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.AppServices
 {
@@ -16,11 +18,14 @@ namespace RCDragManagerProd.AppServices
     {
         private readonly RaceController _controller;
         private readonly IRaceSessionStore _store;
+        private readonly DriverRepository _driverRepo;
 
-        public RaceConsoleService(RaceController controller, IRaceSessionStore store = null)
+        public RaceConsoleService(RaceController controller, IRaceSessionStore store = null,
+                                  DriverRepository driverRepo = null)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             _store = store;
+            _driverRepo = driverRepo;
         }
 
         /// <summary>Current console state snapshot.</summary>
@@ -180,6 +185,59 @@ namespace RCDragManagerProd.AppServices
             _controller.SaveSession();
             _controller.CloseRace();
             _store.Persist();
+        }
+
+        /// <summary>
+        /// Persists win/loss tallies, events-won, and events-entered stats for a completed
+        /// single-class tournament. Safe to call with a null summary or when no
+        /// <see cref="DriverRepository"/> was supplied (no-ops). Backs
+        /// <c>Form1.OnTournamentCompleted</c>.
+        /// </summary>
+        public void RecordTournamentCompletion(RaceController.RaceSummary summary, IEnumerable<Driver> participants)
+        {
+            if (_driverRepo == null || summary == null) return;
+
+            if (participants != null)
+                foreach (var d in participants)
+                    if (d?.Id > 0)
+                    {
+                        _driverRepo.IncrementEventsEntered(d.Id);
+                        Logger.Log($"[STATS] +EventsEntered → #{d.Id} {d.Name}");
+                    }
+
+            if (summary.MatchResults != null)
+                foreach (var (wId, lId) in summary.MatchResults)
+                {
+                    _driverRepo.IncrementWinsAndLosses(wId, lId);
+                    Logger.Log($"[STATS] +Wins/Losses → winner={wId}, loser={lId}");
+                }
+
+            var winnerId = summary.Winner?.Id ?? 0;
+            if (winnerId > 0)
+            {
+                _driverRepo.IncrementEventsWon(winnerId);
+                Logger.Log($"[STATS] +EventsWon → #{winnerId} {summary.Winner?.Name}");
+            }
+        }
+
+        /// <summary>
+        /// Recomputes each participant's events-won tally from saved session history.
+        /// Safe to call when no <see cref="DriverRepository"/> was supplied (no-ops).
+        /// Backs the <c>Form1.btnCloseRace_Click</c> recompute after close.
+        /// </summary>
+        public void RecomputeEventsWon(IEnumerable<Driver> participants)
+        {
+            if (_driverRepo == null || participants == null) return;
+
+            foreach (var d in participants)
+            {
+                if (d?.Id <= 0) continue;
+                var db = _driverRepo.GetDriverById(d.Id);
+                if (db == null) continue;
+                db.EventsWon = _driverRepo.ComputeEventsWonFromSavedSessions(d.Id);
+                _driverRepo.UpdateDriver(db);
+                Logger.Log($"[STATS] Recompute EventsWon → #{db.Id} {db.Name}: {db.EventsWon}");
+            }
         }
 
         private void RequireStore()

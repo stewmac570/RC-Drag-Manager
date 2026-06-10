@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
@@ -22,7 +23,7 @@ namespace RCDragManagerProd.UI.Forms
     public partial class MultiClassRaceForm : Form
     {
         private readonly MultiClassEvent _multiEvent;
-        private readonly string _connectionString;
+        private readonly MultiClassRaceService _service;
         private readonly MultiClassEventRepository _multiClassRepo;
         private readonly List<RaceController> _controllers;
         private readonly List<Form1> _classRaceForms;
@@ -35,12 +36,20 @@ namespace RCDragManagerProd.UI.Forms
         // ── Construction ──────────────────────────────────────────────────────
 
         public MultiClassRaceForm(MultiClassEvent multiEvent, string connectionString)
+            : this(multiEvent,
+                   new MultiClassRaceService(new DriverRepository(connectionString)),
+                   new MultiClassEventRepository(connectionString))
+        {
+        }
+
+        internal MultiClassRaceForm(MultiClassEvent multiEvent, MultiClassRaceService service,
+                                    MultiClassEventRepository multiClassRepo)
         {
             InitializeComponent();
 
             _multiEvent = multiEvent ?? throw new ArgumentNullException(nameof(multiEvent));
-            _connectionString = connectionString;
-            _multiClassRepo = new MultiClassEventRepository(connectionString);
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _multiClassRepo = multiClassRepo;
             _controllers = new List<RaceController>();
             _classRaceForms = new List<Form1>();
 
@@ -260,23 +269,7 @@ namespace RCDragManagerProd.UI.Forms
             // Write win/loss stats
             try
             {
-                var repo = new DriverRepository(_connectionString);
-
-                if (summary.MatchResults != null)
-                {
-                    foreach (var (wId, lId) in summary.MatchResults)
-                    {
-                        repo.IncrementWinsAndLosses(wId, lId);
-                        Logger.Log($"[MultiClass][STATS] +Wins/Losses → winner={wId}, loser={lId}");
-                    }
-                }
-
-                var winnerId = summary.Winner?.Id ?? 0;
-                if (winnerId > 0)
-                {
-                    repo.IncrementEventsWon(winnerId);
-                    Logger.Log($"[MultiClass][STATS] +EventsWon → #{winnerId} {summary.Winner?.Name}");
-                }
+                _service.RecordClassCompletion(summary);
             }
             catch (Exception ex)
             {

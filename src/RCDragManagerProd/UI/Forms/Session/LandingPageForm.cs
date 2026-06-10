@@ -1,17 +1,12 @@
 using System;
 using System.Windows.Forms;
-using RCDragManagerProd.Controllers;
-using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
-using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
 {
     public partial class LandingForm : Form
     {
         private readonly string _connStr;
-        private DriverRepository _driverRepo;
-        private RaceSessionRepository _sessionRepo;
 
         // ✅ primary runtime ctor
         public LandingForm(string connectionString)
@@ -23,12 +18,7 @@ namespace RCDragManagerProd.UI.Forms
 
             InitializeComponent();
 
-            // Init repos once
-            _driverRepo = new DriverRepository(Program.ConnectionString);
-            _sessionRepo = new RaceSessionRepository(Program.ConnectionString);
-
-
-            Logger.Log("[UI][Landing] repositories wired");
+            Logger.Log("[UI][Landing] initialised");
         }
 
         // ✅ keep designer convenience
