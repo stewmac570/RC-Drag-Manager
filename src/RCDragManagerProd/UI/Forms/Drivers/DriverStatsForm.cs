@@ -1,94 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using RCDragManagerProd.ViewModels;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
-using RCDragManagerProd.Helpers;
 using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.UI.Forms
 {
     public partial class DriverStatsForm : Form
     {
-        private Driver driver;
-        private string dbPath;
+        private readonly Driver _driver;
+        private readonly DriverStatsService _service;
 
         public DriverStatsForm(Driver selectedDriver, string databasePath)
+            : this(selectedDriver, new DriverStatsService(new RaceSessionRepository(databasePath ?? Program.ConnectionString)))
+        {
+        }
+
+        internal DriverStatsForm(Driver selectedDriver, DriverStatsService service)
         {
             InitializeComponent();
-            driver = selectedDriver;
-            dbPath = databasePath;
+            _driver = selectedDriver ?? throw new ArgumentNullException(nameof(selectedDriver));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             LoadDriverStats();
         }
 
         private void LoadDriverStats()
         {
-            // Top summary label
-            lblHeader.Text = $"Driver Statistics — {driver.Name}";
-            lblSummary.Text = $"Wins: {driver.TotalWins} | Losses: {driver.TotalLosses} | " +
-                              $"Events Entered: {driver.EventsEntered} | Events Won: {driver.EventsWon}";
-
-            // Prepare session repo
-            var sessionRepository = new RaceSessionRepository(Program.ConnectionString);
-
-            var sessionSummaries = sessionRepository.GetAllSessions();
+            lblHeader.Text = $"Driver Statistics — {_driver.Name}";
+            lblSummary.Text = $"Wins: {_driver.TotalWins} | Losses: {_driver.TotalLosses} | " +
+                              $"Events Entered: {_driver.EventsEntered} | Events Won: {_driver.EventsWon}";
 
             lvMatches.Items.Clear();
 
-            foreach (var summary in sessionSummaries)
+            foreach (var row in _service.GetMatchHistory(_driver))
             {
-                var session = sessionRepository.LoadSession(summary.Id);
-
-                // Only continue if driver participated in session
-                var driverEntry = session.DriverEntries.FirstOrDefault(d => d.DriverID == driver.Id);
-                if (driverEntry == null)
-                    continue;
-
-                foreach (var result in session.SavedResults)
+                lvMatches.Items.Add(new ListViewItem(new[]
                 {
-                    string resultLabel;
-                    string opponentName;
-                    bool isMatchInvolvingDriver = false;
-                    int opponentId = -1;
-                    bool isWin = false;
-
-                    if (result.WinnerDriverId == driver.Id)
-                    {
-                        isWin = true;
-                        opponentId = result.LoserDriverId;
-                        isMatchInvolvingDriver = true;
-                    }
-                    else if (result.LoserDriverId == driver.Id)
-                    {
-                        isWin = false;
-                        opponentId = result.WinnerDriverId;
-                        isMatchInvolvingDriver = true;
-                    }
-
-                    if (!isMatchInvolvingDriver)
-                        continue;
-
-                    var opponentEntry = session.DriverEntries.FirstOrDefault(d => d.DriverID == opponentId);
-                    opponentName = opponentEntry != null ? opponentEntry.DriverName : "BYE";
-
-
-                    resultLabel = isWin ? "Win" : "Loss";
-
-                    var match = MatchLookupHelper.FindMatchInSession(session, result.MatchId);
-                    string roundLabel = match?.RoundLabel ?? "";
-
-                    var item = new ListViewItem(new[]
-                    {
-                        session.EventName,
-                        session.EventDate.ToString("yyyy-MM-dd"),
-                        roundLabel,
-                        opponentName,
-                        resultLabel
-                    });
-
-                    lvMatches.Items.Add(item);
-                }
+                    row.EventName,
+                    row.EventDate,
+                    row.RoundLabel,
+                    row.OpponentName,
+                    row.Result
+                }));
             }
         }
 
