@@ -1,4 +1,7 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.WPF.ViewModels;
@@ -35,6 +38,28 @@ namespace RCDragManagerProd.WPF.Dialogs
 
         private void CardRoundRobin_Click(object sender, RoutedEventArgs e) =>
             _vm.SelectedRaceType = ClassConfigViewModel.RoundRobin;
+
+        // ── Roster double-click toggles inclusion ────────────────────────────
+
+        private void DgRoster_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // Ignore double-clicks that land on the editable Override cell so the
+            // user can edit it without toggling the row.
+            if (FindParentCell(e.OriginalSource as DependencyObject) is DataGridCell cell &&
+                cell.Column?.Header is string header &&
+                header == "Override")
+                return;
+
+            if (DgRoster.SelectedItem is DriverRosterRow row)
+                row.IsChecked = !row.IsChecked;
+        }
+
+        private static DataGridCell FindParentCell(DependencyObject d)
+        {
+            while (d != null && !(d is DataGridCell))
+                d = VisualTreeHelper.GetParent(d);
+            return d as DataGridCell;
+        }
 
         // ── Add new driver ───────────────────────────────────────────────────
 
