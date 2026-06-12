@@ -122,7 +122,9 @@
                                FontSize="{StaticResource FontSize.Xs}"
                                Foreground="{StaticResource Brush.TextMuted}"
                                Margin="0,0,0,8"/>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Fixed height so toggling fixed-dial-in / RR options never
+                         moves the roster grid below. -->
+                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
                         <RadioButton Style="{StaticResource Style.RadioButton}"
                                      Content="Heads Up" GroupName="ct"
                                      VerticalAlignment="Center"
@@ -144,7 +146,8 @@
                                        FontSize="{StaticResource FontSize.Sm}"
                                        Foreground="{StaticResource Brush.TextMuted}"
                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBox Style="{StaticResource Style.TextBox}" Width="70"
+                            <TextBox Style="{StaticResource Style.TextBox}" Width="70" Height="26"
+                                     VerticalContentAlignment="Center"
                                      Text="{Binding FixedDialInText, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
 
@@ -160,7 +163,8 @@
                                        FontSize="{StaticResource FontSize.Sm}"
                                        Foreground="{StaticResource Brush.TextMuted}"
                                        VerticalAlignment="Center" Margin="20,0,8,0"/>
-                            <TextBox Style="{StaticResource Style.TextBox}" Width="56"
+                            <TextBox Style="{StaticResource Style.TextBox}" Width="56" Height="26"
+                                     VerticalContentAlignment="Center"
                                      Text="{Binding RoundsToRun, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </StackPanel>
