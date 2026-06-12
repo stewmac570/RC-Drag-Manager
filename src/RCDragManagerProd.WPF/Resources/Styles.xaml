@@ -389,6 +389,15 @@
         <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
     </Style>
 
+    <!-- ── DataGrid: kill default white border and row-details border ──────── -->
+
+    <Style TargetType="DataGrid">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="RowDetailsVisibilityMode" Value="Collapsed"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+    </Style>
+
     <!-- ── ScrollViewer (keep background transparent in dark mode) ────────── -->
 
     <Style TargetType="ScrollViewer">
