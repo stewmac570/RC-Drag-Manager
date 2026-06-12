@@ -1,0 +1,42 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.DialInDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dial-in"
+        Width="340"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Surface}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+        <StackPanel Margin="24,22">
+            <TextBlock x:Name="TitleText"
+                       FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
+                       Foreground="{StaticResource Brush.TextPrimary}" Margin="0,0,0,18"/>
+
+            <StackPanel Margin="0,0,0,22">
+                <TextBlock Text="Dial-in (seconds) — leave blank to clear"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,5"/>
+                <TextBox x:Name="TxtDialIn" Style="{StaticResource Style.TextBox}"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                        Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
+                <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                        Content="Save" Click="BtnSave_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

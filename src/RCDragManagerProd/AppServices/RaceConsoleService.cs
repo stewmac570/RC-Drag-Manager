@@ -32,6 +32,36 @@ namespace RCDragManagerProd.AppServices
         public RaceConsoleViewModel GetState() => RaceConsoleViewModelBuilder.Build(_controller);
 
         /// <summary>
+        /// Lane-correct winner-button info for a match: the left/right names (after lane swap),
+        /// their dial-ins, and whether each side is a BYE. Returns null when the match is unknown.
+        /// Lets a view (WinForms or WPF) label the two winner buttons without owning the internal
+        /// lane-adjustment logic; pass the resulting left/right click straight to
+        /// <see cref="SubmitWinnerFromButton"/> as uiFirstOption (true = left).
+        /// </summary>
+        public MatchButtons? GetMatchButtons(int matchId)
+        {
+            var m = _controller.GetMatch(matchId);
+            if (m == null) return null;
+
+            _controller.GetLaneAdjustedNames(m, out string left, out string right);
+
+            bool swapped = left != (m.Driver1?.Name ?? "BYE");
+            int leftId  = (swapped ? m.Driver2 : m.Driver1)?.Id ?? 0;
+            int rightId = (swapped ? m.Driver1 : m.Driver2)?.Id ?? 0;
+
+            return new MatchButtons(
+                matchId,
+                left, right,
+                leftId  > 0 ? _controller.GetDriverDialIn(leftId)  : null,
+                rightId > 0 ? _controller.GetDriverDialIn(rightId) : null,
+                leftId, rightId,
+                IsByeName(left), IsByeName(right));
+        }
+
+        private static bool IsByeName(string name) =>
+            string.Equals((name ?? "").Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
         /// Runs the phase-appropriate primary Build/Start action and reports which one ran.
         /// This is the decision that used to live inline in the console's Build/Start button
         /// handler: Finals pending → start Finals; Losers Bracket pending → start it;
@@ -278,6 +308,36 @@ namespace RCDragManagerProd.AppServices
         public static readonly WinnerSubmission Rejected = new WinnerSubmission(false, false);
 
         public static WinnerSubmission Accept(bool engineFirstOption) => new WinnerSubmission(true, engineFirstOption);
+    }
+
+    /// <summary>Lane-correct winner-button info from <see cref="RaceConsoleService.GetMatchButtons"/>.</summary>
+    public readonly struct MatchButtons
+    {
+        public MatchButtons(int matchId, string leftName, string rightName,
+                            double? leftDialIn, double? rightDialIn,
+                            int leftDriverId, int rightDriverId,
+                            bool leftIsBye, bool rightIsBye)
+        {
+            MatchId = matchId;
+            LeftName = leftName;
+            RightName = rightName;
+            LeftDialIn = leftDialIn;
+            RightDialIn = rightDialIn;
+            LeftDriverId = leftDriverId;
+            RightDriverId = rightDriverId;
+            LeftIsBye = leftIsBye;
+            RightIsBye = rightIsBye;
+        }
+
+        public int MatchId { get; }
+        public string LeftName { get; }
+        public string RightName { get; }
+        public double? LeftDialIn { get; }
+        public double? RightDialIn { get; }
+        public int LeftDriverId { get; }
+        public int RightDriverId { get; }
+        public bool LeftIsBye { get; }
+        public bool RightIsBye { get; }
     }
 
     /// <summary>Result of <see cref="RaceConsoleService.ValidateEditable"/>.</summary>
