@@ -248,11 +248,12 @@
 
                 <Border Grid.Column="1" Background="{StaticResource Brush.BorderSubtle}"/>
 
-                <!-- Bracket -->
+                <!-- Bracket + current-match winner buttons -->
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0" Padding="16,10,16,8"
                             BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
@@ -262,6 +263,38 @@
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="10,6">
                         <ItemsControl x:Name="IcPairings" ItemTemplate="{StaticResource PairingRowTemplate}"/>
                     </ScrollViewer>
+
+                    <!-- Current match: now-racing label + the two winner buttons -->
+                    <Border Grid.Row="2" Padding="14,12"
+                            Background="{StaticResource Brush.Surface}"
+                            BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="LblNowRacing" Text="No active match"
+                                       FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                                       Foreground="{StaticResource Brush.TextHint}"
+                                       HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" x:Name="BtnWinner1"
+                                        Style="{StaticResource Style.Button.Winner}"
+                                        Content="—" Click="BtnWinner1_Click"
+                                        MouseRightButtonUp="BtnWinner1_RightClick"
+                                        IsEnabled="False"/>
+                                <TextBlock Grid.Column="1" Text="vs" VerticalAlignment="Center"
+                                           Foreground="{StaticResource Brush.TextHint}"
+                                           FontSize="{StaticResource FontSize.Sm}" Margin="12,0"/>
+                                <Button Grid.Column="2" x:Name="BtnWinner2"
+                                        Style="{StaticResource Style.Button.Winner}"
+                                        Content="—" Click="BtnWinner2_Click"
+                                        MouseRightButtonUp="BtnWinner2_RightClick"
+                                        IsEnabled="False"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </Grid>
 
                 <Border Grid.Column="3" Background="{StaticResource Brush.BorderSubtle}"/>
@@ -305,63 +338,42 @@
                 </Grid>
             </Grid>
 
-            <!-- Race queue bar -->
+            <!-- Action bar: queue + primary actions -->
             <Border Grid.Row="3"
                     Background="{StaticResource Brush.Chrome}"
                     BorderBrush="{StaticResource Brush.BorderSubtle}"
                     BorderThickness="0,1,0,0"
-                    Padding="20,14">
+                    Padding="20,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Now racing + winner buttons -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="LblNowRacing" Text="No active match"
-                                   FontSize="{StaticResource FontSize.Xs}"
-                                   FontWeight="Medium"
-                                   Foreground="{StaticResource Brush.TextHint}"
-                                   Margin="0,0,0,8"/>
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="BtnWinner1" Style="{StaticResource Style.Button.Winner}"
-                                    Content="—" Click="BtnWinner1_Click"
-                                    MouseRightButtonUp="BtnWinner1_RightClick"
-                                    Width="240" Margin="0,0,10,0" IsEnabled="False"/>
-                            <TextBlock Text="vs" VerticalAlignment="Center"
-                                       Foreground="{StaticResource Brush.TextHint}"
-                                       FontSize="{StaticResource FontSize.Sm}" Margin="0,0,10,0"/>
-                            <Button x:Name="BtnWinner2" Style="{StaticResource Style.Button.Winner}"
-                                    Content="—" Click="BtnWinner2_Click"
-                                    MouseRightButtonUp="BtnWinner2_RightClick"
-                                    Width="240" IsEnabled="False"/>
-                        </StackPanel>
-                    </StackPanel>
-
                     <!-- Queue -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="On deck" Width="60"
-                                       FontSize="{StaticResource FontSize.Xs}"
-                                       Foreground="{StaticResource Brush.TextHint}"/>
-                            <TextBlock x:Name="LblOnDeck" Text="—"
-                                       FontSize="{StaticResource FontSize.Sm}"
-                                       Foreground="{StaticResource Brush.TextSecondary}"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="In the hole" Width="60"
-                                       FontSize="{StaticResource FontSize.Xs}"
-                                       Foreground="{StaticResource Brush.TextHint}"/>
-                            <TextBlock x:Name="LblInHole" Text="—"
-                                       FontSize="{StaticResource FontSize.Sm}"
-                                       Foreground="{StaticResource Brush.TextSecondary}"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Margin="0,0,28,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="On deck" Width="64"
+                                           FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextHint}"/>
+                                <TextBlock x:Name="LblOnDeck" Text="—"
+                                           FontSize="{StaticResource FontSize.Sm}"
+                                           Foreground="{StaticResource Brush.TextSecondary}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="In the hole" Width="64"
+                                           FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextHint}"/>
+                                <TextBlock x:Name="LblInHole" Text="—"
+                                           FontSize="{StaticResource FontSize.Sm}"
+                                           Foreground="{StaticResource Brush.TextSecondary}"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Primary actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button x:Name="BtnGenerateBracket" Style="{StaticResource Style.Button.Dialog.Primary}"
                                 Content="Generate bracket" Click="BtnGenerateBracket_Click"
                                 Padding="20,12" Margin="0,0,8,0" IsEnabled="False"/>

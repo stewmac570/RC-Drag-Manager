@@ -49,6 +49,7 @@ namespace RCDragManagerProd.WPF.Windows
                 RefreshDriverGrid();
                 BtnGenerateBracket.IsEnabled = true;
             }
+            UpdatePrimaryButtons();
 
             _controller.BracketRedrawn += OnBracketRedrawn;
             _controller.NextMatchReady += OnNextMatchReady;
@@ -188,6 +189,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             BtnNextRound.IsEnabled = can;
             if (can) _controller.UnlockDialIn();
+            UpdatePrimaryButtons();
         });
 
         private void OnCanOfferBuybackChanged(bool enabled) => Run(() =>
@@ -214,6 +216,7 @@ namespace RCDragManagerProd.WPF.Windows
                 }
             }
             else _finalsPopupShown = false;
+            UpdatePrimaryButtons();
         });
 
         private void OnTournamentCompleted(RaceController.RaceSummary summary) => Run(() =>
@@ -244,6 +247,17 @@ namespace RCDragManagerProd.WPF.Windows
             var mb = _raceConsole.GetMatchButtons(m.MatchId);
             if (mb == null) return "—";
             return $"{mb.Value.LeftName}  vs  {mb.Value.RightName}";
+        }
+
+        // The "what to push next" button is orange (primary); the other is grey.
+        // Next round takes priority once a round is ready to advance.
+        private void UpdatePrimaryButtons()
+        {
+            var primary = (Style)FindResource("Style.Button.Dialog.Primary");
+            var secondary = (Style)FindResource("Style.Button.Dialog.Secondary");
+            bool nextActive = BtnNextRound.IsEnabled;
+            BtnNextRound.Style = nextActive ? primary : secondary;
+            BtnGenerateBracket.Style = (!nextActive && BtnGenerateBracket.IsEnabled) ? primary : secondary;
         }
 
         private void RefreshDriverGrid()
@@ -313,6 +327,7 @@ namespace RCDragManagerProd.WPF.Windows
             TxtName.Clear();
             TxtTime.Clear();
             BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
+            UpdatePrimaryButtons();
         }
 
         private void BtnEditDriver_Click(object sender, RoutedEventArgs e)
@@ -451,6 +466,7 @@ namespace RCDragManagerProd.WPF.Windows
             BtnGenerateBracket.IsEnabled = false;
             if (action == RaceConsolePrimaryAction.StartLosersBracket)
                 BtnBuybacks.IsEnabled = false;
+            UpdatePrimaryButtons();
         }
 
         private void BtnNextRound_Click(object sender, RoutedEventArgs e)
@@ -486,6 +502,7 @@ namespace RCDragManagerProd.WPF.Windows
             BtnNextRound.IsEnabled = false;
             BtnStandings.IsEnabled = false;
             BtnBuybacks.IsEnabled = false;
+            UpdatePrimaryButtons();
         }
 
         private void BtnStandings_Click(object sender, RoutedEventArgs e)
@@ -520,6 +537,7 @@ namespace RCDragManagerProd.WPF.Windows
                     BtnGenerateBracket.IsEnabled = true;
                     BtnGenerateBracket.Content = "Start losers bracket";
                     BtnBuybacks.Content = "Edit buybacks";
+                    UpdatePrimaryButtons();
                     break;
             }
         }
