@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Repositories;
@@ -44,15 +45,32 @@ namespace RCDragManagerProd.WPF.Windows
         private void BtnStartNewEvent_Click(object sender, RoutedEventArgs e)
         {
             var setup = new SetupWindow(_connectionString) { Owner = this };
-            if (setup.ShowDialog() == true)
+            if (setup.ShowDialog() == true && setup.CreatedEvent != null)
             {
-                // Race console not ported yet — confirm creation and refresh the list.
-                MessageBox.Show(
-                    $"Event '{setup.CreatedEvent.EventName}' created and saved.\n\n" +
-                    "The race console is coming in a later screen.",
-                    "RC Drag Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                OpenConsole(setup.CreatedEvent, restore: false);
             }
             _vm.Load();
+        }
+
+        // Temporary single-class launch: opens the race console on the event's first
+        // class session. The multi-class tab wrapper replaces this in the next screen.
+        private void OpenConsole(RCDragManagerProd.Domain.MultiClassEvent evt, bool restore)
+        {
+            var session = evt?.ClassSessions?.FirstOrDefault();
+            if (session == null)
+            {
+                MessageBox.Show("This event has no class sessions to race.", "RC Drag Manager",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var controller = new RCDragManagerProd.Controllers.RaceController(session);
+            var console = new RaceConsoleWindow(controller, _connectionString) { Owner = this };
+            console.Show();
+            if (restore)
+            {
+                try { controller.RestoreFromSave(); } catch { }
+            }
         }
 
         private void BtnLoadSaved_Click(object sender, RoutedEventArgs e)
@@ -60,11 +78,7 @@ namespace RCDragManagerProd.WPF.Windows
             var load = new LoadSessionWindow(_connectionString) { Owner = this };
             if (load.ShowDialog() == true && load.ResumedEvent != null)
             {
-                // Race console not ported yet — confirm the load resolved.
-                MessageBox.Show(
-                    $"Loaded '{load.ResumedEvent.EventName}'.\n\n" +
-                    "The race console is coming in a later screen.",
-                    "RC Drag Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                OpenConsole(load.ResumedEvent, restore: true);
             }
             _vm.Load();
         }

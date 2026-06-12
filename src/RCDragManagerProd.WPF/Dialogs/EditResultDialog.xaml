@@ -1,0 +1,39 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.EditResultDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Edit result"
+        Width="420"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Surface}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+        <StackPanel Margin="24,22">
+            <TextBlock x:Name="TitleText"
+                       FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
+                       Foreground="{StaticResource Brush.TextPrimary}" Margin="0,0,0,4"/>
+            <TextBlock Text="Choose the correct winner:"
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,16"/>
+
+            <Button x:Name="Btn1" Style="{StaticResource Style.Button.Winner}"
+                    Click="Btn1_Click" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+            <Button x:Name="Btn2" Style="{StaticResource Style.Button.Winner}"
+                    Click="Btn2_Click" Margin="0,0,0,18" HorizontalAlignment="Stretch"/>
+
+            <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                    Content="Cancel" Click="BtnCancel_Click" HorizontalAlignment="Right"/>
+        </StackPanel>
+    </Border>
+</Window>
