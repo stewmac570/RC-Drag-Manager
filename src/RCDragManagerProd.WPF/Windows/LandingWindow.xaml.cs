@@ -52,25 +52,18 @@ namespace RCDragManagerProd.WPF.Windows
             _vm.Load();
         }
 
-        // Temporary single-class launch: opens the race console on the event's first
-        // class session. The multi-class tab wrapper replaces this in the next screen.
+        // Opens the multi-class race window (one console tab per class). The window
+        // replays saved bracket state itself on load, so 'restore' is implicit.
         private void OpenConsole(RCDragManagerProd.Domain.MultiClassEvent evt, bool restore)
         {
-            var session = evt?.ClassSessions?.FirstOrDefault();
-            if (session == null)
+            if (evt?.ClassSessions == null || evt.ClassSessions.Count == 0)
             {
                 MessageBox.Show("This event has no class sessions to race.", "RC Drag Manager",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var controller = new RCDragManagerProd.Controllers.RaceController(session);
-            var console = new RaceConsoleWindow(controller, _connectionString) { Owner = this };
-            console.Show();
-            if (restore)
-            {
-                try { controller.RestoreFromSave(); } catch { }
-            }
+            new MultiClassRaceWindow(evt, _connectionString).Show();
         }
 
         private void BtnLoadSaved_Click(object sender, RoutedEventArgs e)
