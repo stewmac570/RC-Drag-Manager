@@ -57,9 +57,16 @@ namespace RCDragManagerProd.WPF.Windows
 
         private void BtnLoadSaved_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: open load-session dialog when it is ported
-            MessageBox.Show("Load saved event — coming soon.", "RC Drag Manager",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var load = new LoadSessionWindow(_connectionString) { Owner = this };
+            if (load.ShowDialog() == true && load.ResumedEvent != null)
+            {
+                // Race console not ported yet — confirm the load resolved.
+                MessageBox.Show(
+                    $"Loaded '{load.ResumedEvent.EventName}'.\n\n" +
+                    "The race console is coming in a later screen.",
+                    "RC Drag Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            _vm.Load();
         }
 
         private void EventCard_Click(object sender, RoutedEventArgs e)
