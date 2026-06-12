@@ -40,6 +40,19 @@
             <!-- Body -->
             <StackPanel Grid.Row="1" Margin="24,20">
 
+                <!-- Appearance -->
+                <TextBlock Text="Appearance"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                    <RadioButton x:Name="RbDark" Style="{StaticResource Style.RadioButton}"
+                                 GroupName="theme" Content="Dark" Checked="Theme_Changed"/>
+                    <RadioButton x:Name="RbLight" Style="{StaticResource Style.RadioButton}"
+                                 GroupName="theme" Content="Light" Checked="Theme_Changed"/>
+                </StackPanel>
+
+                <Border Height="1" Background="{StaticResource Brush.BorderSubtle}" Margin="0,18"/>
+
                 <!-- Logging -->
                 <TextBlock Text="Logging"
                            FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"

@@ -19,6 +19,15 @@ namespace RCDragManagerProd.WPF
         {
             AppSettings.Load();
 
+            // Merge the code-built (mutable) theme brushes, then Styles.xaml so its
+            // StaticResource brush references resolve against them. Order matters.
+            var theme = ThemeManager.FromSetting();
+            Resources.MergedDictionaries.Add(ThemeManager.BuildBrushDictionary(theme));
+            Resources.MergedDictionaries.Add(new ResourceDictionary
+            {
+                Source = new Uri("Resources/Styles.xaml", UriKind.Relative)
+            });
+
             DispatcherUnhandledException += (_, args) =>
             {
                 Logger.Log($"[WPF][ERROR] {args.Exception}");

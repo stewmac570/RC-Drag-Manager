@@ -2,35 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Backgrounds -->
-    <SolidColorBrush x:Key="Brush.Background"     Color="#0D0D0D"/>
-    <SolidColorBrush x:Key="Brush.Surface"        Color="#181818"/>
-    <SolidColorBrush x:Key="Brush.Raised"         Color="#252525"/>
-    <SolidColorBrush x:Key="Brush.Chrome"         Color="#161616"/>
-
-    <!-- Brand — NPRC flame orange -->
-    <SolidColorBrush x:Key="Brush.Primary"        Color="#E85010"/>
-    <SolidColorBrush x:Key="Brush.PrimaryHover"   Color="#F06522"/>
-    <SolidColorBrush x:Key="Brush.PrimaryPressed" Color="#D04008"/>
-    <SolidColorBrush x:Key="Brush.Accent"         Color="#FF8A00"/>
-
-    <!-- Semantic -->
-    <SolidColorBrush x:Key="Brush.Success"        Color="#2A8E60"/>
-    <SolidColorBrush x:Key="Brush.Danger"         Color="#C84040"/>
-
-    <!-- Text -->
-    <SolidColorBrush x:Key="Brush.TextPrimary"    Color="#F0F0F0"/>
-    <SolidColorBrush x:Key="Brush.TextSecondary"  Color="#909090"/>
-    <SolidColorBrush x:Key="Brush.TextMuted"      Color="#505050"/>
-    <SolidColorBrush x:Key="Brush.TextHint"       Color="#444444"/>
-    <SolidColorBrush x:Key="Brush.TextGhost"      Color="#333333"/>
-
-    <!-- Borders (AARRGGBB — WPF alpha format) -->
-    <!-- rgba(255,255,255,0.09) -->
-    <SolidColorBrush x:Key="Brush.Border"         Color="#17FFFFFF"/>
-    <!-- rgba(255,255,255,0.06) -->
-    <SolidColorBrush x:Key="Brush.BorderSubtle"   Color="#0FFFFFFF"/>
-    <SolidColorBrush x:Key="Brush.BorderEmphasis" Color="#252525"/>
+    <!-- Theme COLOURS are created in code (ThemeManager) so they can be re-themed
+         live for dark/light mode — XAML-defined brushes get frozen and can't change.
+         Only non-colour tokens live here. -->
 
     <!-- Corner radii -->
     <CornerRadius x:Key="Radius.Card">10</CornerRadius>

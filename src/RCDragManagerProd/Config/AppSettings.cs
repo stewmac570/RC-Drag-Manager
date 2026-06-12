@@ -17,6 +17,9 @@ namespace RCDragManagerProd.Config
 #endif
             public bool LiveBroadcastEnabled { get; set; } = false;
             public bool LiveBroadcastDebugLogging { get; set; } = false;
+
+            // UI theme for the WPF app: "Dark" (default) or "Light".
+            public string Theme { get; set; } = "Dark";
         }
 
         private static readonly string AppFolder =
@@ -77,6 +80,12 @@ namespace RCDragManagerProd.Config
         {
             get => _model.LiveBroadcastDebugLogging;
             set { _model.LiveBroadcastDebugLogging = value; Save(); }
+        }
+
+        public static string Theme
+        {
+            get => string.IsNullOrWhiteSpace(_model.Theme) ? "Dark" : _model.Theme;
+            set { _model.Theme = value; Save(); }
         }
 
         public static string LogFilePath
