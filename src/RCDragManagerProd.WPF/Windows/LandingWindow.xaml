@@ -1,0 +1,354 @@
+<Window x:Class="RCDragManagerProd.WPF.Windows.LandingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RC Drag Manager"
+        Width="1000" Height="680"
+        MinWidth="820" MinHeight="540"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38"
+                      CornerRadius="0"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="5"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Background}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Title bar ──────────────────────────────────────────────── -->
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+
+                <!-- Window control circles (right) -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                            HorizontalAlignment="Right" Margin="0,0,14,0">
+                    <Button Style="{StaticResource Style.WinCtrl.Minimize}"
+                            Click="BtnMinimize_Click" ToolTip="Minimise"/>
+                    <Button Style="{StaticResource Style.WinCtrl.Maximize}"
+                            Click="BtnMaximize_Click" Margin="7,0,0,0" ToolTip="Maximise"/>
+                    <Button Style="{StaticResource Style.WinCtrl.Close}"
+                            Click="BtnClose_Click" Margin="7,0,0,0" ToolTip="Close"/>
+                </StackPanel>
+
+                <!-- Window title (centred) -->
+                <TextBlock Text="RC Drag Manager"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}"
+                           FontWeight="Medium"/>
+            </Grid>
+
+            <!-- ── Header ─────────────────────────────────────────────────── -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource Brush.Surface}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,0,0,1"
+                    Padding="28,18">
+                <Grid>
+                    <!-- Left: app identity -->
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                            <TextBlock Text="RC Drag Manager"
+                                       FontSize="{StaticResource FontSize.Xxl}"
+                                       FontWeight="Medium"
+                                       Foreground="{StaticResource Brush.TextPrimary}"/>
+                            <TextBlock Text="NPRC Australia"
+                                       FontSize="12" FontWeight="Medium"
+                                       Foreground="{StaticResource Brush.Primary}"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="Race director console"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   Foreground="{StaticResource Brush.TextMuted}"/>
+                    </StackPanel>
+
+                    <!-- Right: live server status chip -->
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="{StaticResource Brush.Chrome}"
+                            BorderBrush="{StaticResource Brush.BorderSubtle}"
+                            BorderThickness="1" CornerRadius="6" Padding="10,6">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="7" Height="7" VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="{StaticResource Brush.TextHint}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLiveConnected}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource Brush.Success}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <TextBlock Text="{Binding LiveStatusText}"
+                                       FontSize="{StaticResource FontSize.Xs}"
+                                       Foreground="{StaticResource Brush.TextMuted}"
+                                       VerticalAlignment="Center"
+                                       Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ── Body ───────────────────────────────────────────────────── -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left column: primary actions + recent events -->
+                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="28,24,24,24">
+
+                        <!-- Start new event CTA -->
+                        <Button Style="{StaticResource Style.Button.Primary}"
+                                Margin="0,0,0,10"
+                                Click="BtnStartNewEvent_Click">
+                            <StackPanel>
+                                <TextBlock Text="Start new event"
+                                           FontSize="{StaticResource FontSize.Xl}"
+                                           FontWeight="Medium"
+                                           Foreground="White"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="Create a new race session — single or multi-class"
+                                           FontSize="{StaticResource FontSize.Sm}"
+                                           Foreground="#A6FFFFFF"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Load saved event -->
+                        <Button Style="{StaticResource Style.Button.Secondary}"
+                                Margin="0,0,0,22"
+                                Click="BtnLoadSaved_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="&#xE838;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18"
+                                           Foreground="{StaticResource Brush.Primary}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,14,0"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Load saved event"
+                                               FontSize="{StaticResource FontSize.Lg}"
+                                               FontWeight="Medium"
+                                               Foreground="{StaticResource Brush.TextPrimary}"
+                                               Margin="0,0,0,2"/>
+                                    <TextBlock Text="Resume a previously saved race session"
+                                               FontSize="{StaticResource FontSize.Xs}"
+                                               Foreground="{StaticResource Brush.TextMuted}"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="2"
+                                           Text="&#xE76C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="13"
+                                           Foreground="{StaticResource Brush.TextHint}"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Recent events label -->
+                        <TextBlock Text="Recent events"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- Recent events list -->
+                        <ItemsControl ItemsSource="{Binding RecentEvents}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource Style.Button.EventCard}"
+                                            Margin="0,0,0,5"
+                                            Tag="{Binding}"
+                                            Click="EventCard_Click">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding EventName}"
+                                                           FontSize="{StaticResource FontSize.Md}"
+                                                           FontWeight="Medium"
+                                                           Foreground="{StaticResource Brush.TextPrimary}"
+                                                           Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding SubText}"
+                                                           FontSize="{StaticResource FontSize.Xs}"
+                                                           Foreground="{StaticResource Brush.TextMuted}"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="Saved"
+                                                       FontSize="{StaticResource FontSize.Xs}"
+                                                       FontWeight="Medium"
+                                                       Foreground="{StaticResource Brush.TextHint}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="12,0,0,0"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Empty state -->
+                        <TextBlock Text="No saved events yet. Start your first race above."
+                                   FontSize="{StaticResource FontSize.Sm}"
+                                   Foreground="{StaticResource Brush.TextHint}"
+                                   Visibility="{Binding EmptyEventsVisibility}"
+                                   Margin="0,4,0,0"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Right column: tools sidebar -->
+                <Border Grid.Column="1"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="1,0,0,0">
+                    <DockPanel Margin="20,24">
+
+                        <TextBlock DockPanel.Dock="Top"
+                                   Text="Tools"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- Tool buttons (top-docked) -->
+                        <Button DockPanel.Dock="Top"
+                                Style="{StaticResource Style.Button.Tool}"
+                                Margin="0,0,0,6"
+                                Click="BtnDriverManager_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE716;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17"
+                                           Foreground="{StaticResource Brush.TextSecondary}"
+                                           VerticalAlignment="Center"
+                                           Width="26"/>
+                                <TextBlock Text="Driver manager"
+                                           FontSize="{StaticResource FontSize.Md}"
+                                           Foreground="{StaticResource Brush.TextPrimary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button DockPanel.Dock="Top"
+                                Style="{StaticResource Style.Button.Tool}"
+                                Margin="0,0,0,6"
+                                Click="BtnSettings_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE713;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17"
+                                           Foreground="{StaticResource Brush.TextSecondary}"
+                                           VerticalAlignment="Center"
+                                           Width="26"/>
+                                <TextBlock Text="Settings"
+                                           FontSize="{StaticResource FontSize.Md}"
+                                           Foreground="{StaticResource Brush.TextPrimary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button DockPanel.Dock="Top"
+                                Style="{StaticResource Style.Button.Tool}"
+                                Margin="0,0,0,0"
+                                Click="BtnLiveScoreboard_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE701;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17"
+                                           Foreground="{StaticResource Brush.TextSecondary}"
+                                           VerticalAlignment="Center"
+                                           Width="26"/>
+                                <TextBlock Text="Live scoreboard"
+                                           FontSize="{StaticResource FontSize.Md}"
+                                           Foreground="{StaticResource Brush.TextPrimary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Exit button (bottom) -->
+                        <Button DockPanel.Dock="Bottom"
+                                Style="{StaticResource Style.Button.Ghost}"
+                                Click="BtnExit_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8FB;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17"
+                                           Foreground="{StaticResource Brush.TextHint}"
+                                           VerticalAlignment="Center"
+                                           Width="26"/>
+                                <TextBlock Text="Exit"
+                                           FontSize="{StaticResource FontSize.Md}"
+                                           Foreground="{StaticResource Brush.TextHint}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Live server status card (above exit) -->
+                        <Border DockPanel.Dock="Bottom"
+                                Background="{StaticResource Brush.Chrome}"
+                                BorderBrush="{StaticResource Brush.BorderSubtle}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Panel}"
+                                Padding="12,10"
+                                Margin="0,0,0,6">
+                            <StackPanel>
+                                <TextBlock Text="Live server"
+                                           FontSize="{StaticResource FontSize.Xs}"
+                                           FontWeight="Medium"
+                                           Foreground="{StaticResource Brush.TextMuted}"
+                                           Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding LiveStatusDetail}"
+                                           FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextHint}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Spacer fills remaining middle space -->
+                        <Border/>
+
+                    </DockPanel>
+                </Border>
+
+            </Grid>
+
+            <!-- ── Footer ─────────────────────────────────────────────────── -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource Brush.Chrome}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,1,0,0"
+                    Padding="28,9">
+                <Grid>
+                    <TextBlock HorizontalAlignment="Left"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextGhost}"
+                               Text="{Binding VersionText}"/>
+                    <TextBlock HorizontalAlignment="Right"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextGhost}"
+                               Text="{Binding DriverCountText}"/>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>

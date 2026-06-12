@@ -1,0 +1,150 @@
+<Window x:Class="RCDragManagerProd.WPF.Windows.DriverStatsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Driver Stats — RC Drag Manager"
+        Width="680" Height="480"
+        MinWidth="520" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38" CornerRadius="0"
+                      GlassFrameThickness="0" ResizeBorderThickness="5"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Background}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title bar -->
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+                <TextBlock x:Name="TbarTitle"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}"
+                           FontWeight="Medium"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,14,0">
+                    <Button Style="{StaticResource Style.WinCtrl.Close}"
+                            Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Summary stat cards -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource Brush.Surface}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,0,0,1"
+                    Padding="20,16">
+                <StackPanel Orientation="Horizontal">
+                    <Border Style="{StaticResource Style.StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock x:Name="ValWins" Style="{StaticResource Style.StatCard.Value}"/>
+                            <TextBlock Text="Wins" Style="{StaticResource Style.StatCard.Label}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Style.StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock x:Name="ValLosses" Style="{StaticResource Style.StatCard.Value}"/>
+                            <TextBlock Text="Losses" Style="{StaticResource Style.StatCard.Label}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Style.StatCard}" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock x:Name="ValEventsEntered" Style="{StaticResource Style.StatCard.Value}"/>
+                            <TextBlock Text="Events entered" Style="{StaticResource Style.StatCard.Label}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Style.StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="ValEventsWon" Style="{StaticResource Style.StatCard.Value}"/>
+                            <TextBlock Text="Events won" Style="{StaticResource Style.StatCard.Label}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Match history -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Padding="20,10,20,8"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="0,0,0,1">
+                    <TextBlock Text="Match history"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               FontWeight="Medium"
+                               Foreground="{StaticResource Brush.TextHint}"/>
+                </Border>
+
+                <DataGrid Grid.Row="1"
+                          x:Name="DgHistory"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
+                          Background="{StaticResource Brush.Background}"
+                          RowBackground="{StaticResource Brush.Background}"
+                          AlternatingRowBackground="{StaticResource Brush.Surface}"
+                          Foreground="{StaticResource Brush.TextPrimary}"
+                          FontSize="{StaticResource FontSize.Sm}"
+                          BorderThickness="0"
+                          RowHeight="32">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource Brush.Chrome}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Brush.TextHint}"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSize.Xs}"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="Padding" Value="16,0"/>
+                            <Setter Property="Height" Value="30"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="SeparatorBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="16,0"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Event"    Binding="{Binding EventName}"    Width="*"/>
+                        <DataGridTextColumn Header="Date"     Binding="{Binding EventDate}"    Width="110"/>
+                        <DataGridTextColumn Header="Round"    Binding="{Binding RoundLabel}"   Width="70"/>
+                        <DataGridTextColumn Header="Opponent" Binding="{Binding OpponentName}" Width="130"/>
+                        <DataGridTextColumn Header="Result"   Binding="{Binding Result}"       Width="70"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
