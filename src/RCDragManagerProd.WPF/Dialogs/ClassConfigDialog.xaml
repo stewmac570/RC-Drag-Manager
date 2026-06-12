@@ -1,0 +1,305 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.ClassConfigDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configure class — RC Drag Manager"
+        Width="740" Height="660"
+        MinWidth="640" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38" CornerRadius="0"
+                      GlassFrameThickness="0" ResizeBorderThickness="5"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Background}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title bar -->
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+                <TextBlock x:Name="TbarTitle" Text="Configure class"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}"
+                           FontWeight="Medium"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,14,0">
+                    <Button Style="{StaticResource Style.WinCtrl.Close}" Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Top config: name, race type, class type, RR -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource Brush.Surface}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,0,0,1"
+                    Padding="24,18">
+                <StackPanel>
+
+                    <!-- Class name -->
+                    <TextBlock Text="Class name"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               Margin="0,0,0,5"/>
+                    <TextBox Style="{StaticResource Style.TextBox}"
+                             Text="{Binding ClassName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,16"/>
+
+                    <!-- Race type cards -->
+                    <TextBlock Text="Race type"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               Margin="0,0,0,6"/>
+                    <UniformGrid Columns="3" Margin="0,0,0,16">
+                        <Button Click="CardProLadder_Click" Margin="0,0,8,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Style.RaceCard}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsProLadderSelected}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                                            <Setter Property="Background" Value="{StaticResource Brush.Raised}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel>
+                                <TextBlock Text="Pro Ladder" FontSize="{StaticResource FontSize.Md}"
+                                           FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
+                                <TextBlock Text="NHRA bracket" FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CardRandomDraw_Click" Margin="0,0,8,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Style.RaceCard}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRandomDrawSelected}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                                            <Setter Property="Background" Value="{StaticResource Brush.Raised}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel>
+                                <TextBlock Text="Random Draw" FontSize="{StaticResource FontSize.Md}"
+                                           FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
+                                <TextBlock Text="Single elim" FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CardRoundRobin_Click">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Style.RaceCard}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRoundRobinSelected}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                                            <Setter Property="Background" Value="{StaticResource Brush.Raised}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel>
+                                <TextBlock Text="Round Robin" FontSize="{StaticResource FontSize.Md}"
+                                           FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
+                                <TextBlock Text="Points based" FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+
+                    <!-- Class type + fixed dial-in -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Class type"
+                                       FontSize="{StaticResource FontSize.Xs}"
+                                       Foreground="{StaticResource Brush.TextMuted}"
+                                       Margin="0,0,0,8"/>
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource Style.RadioButton}"
+                                             Content="Heads Up" GroupName="ct"
+                                             IsChecked="{Binding IsHeadsUp}"/>
+                                <RadioButton Style="{StaticResource Style.RadioButton}"
+                                             Content="Bracket Class" GroupName="ct"
+                                             IsChecked="{Binding IsBracket}"/>
+                                <RadioButton Style="{StaticResource Style.RadioButton}"
+                                             Content="Dial-In" GroupName="ct"
+                                             IsChecked="{Binding IsDialIn}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Width="120"
+                                    Visibility="{Binding FixedDialInVisibility}">
+                            <TextBlock Text="Fixed dial-in"
+                                       FontSize="{StaticResource FontSize.Xs}"
+                                       Foreground="{StaticResource Brush.TextMuted}"
+                                       Margin="0,0,0,8"/>
+                            <TextBox Style="{StaticResource Style.TextBox}"
+                                     Text="{Binding FixedDialInText, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Round Robin options -->
+                    <Border Visibility="{Binding RrConfigVisibility}"
+                            Background="{StaticResource Brush.Chrome}"
+                            BorderBrush="{StaticResource Brush.BorderSubtle}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource Radius.Panel}"
+                            Padding="14,12" Margin="0,14,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Style="{StaticResource Style.CheckBox}"
+                                      Content="Buyback race (Standard)"
+                                      IsChecked="{Binding BuybackEnabled}"
+                                      VerticalAlignment="Center"/>
+                            <TextBlock Text="Rounds"
+                                       FontSize="{StaticResource FontSize.Sm}"
+                                       Foreground="{StaticResource Brush.TextMuted}"
+                                       VerticalAlignment="Center" Margin="28,0,8,0"/>
+                            <TextBox Style="{StaticResource Style.TextBox}" Width="60"
+                                     Text="{Binding RoundsToRun, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Border>
+
+            <!-- Roster -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Padding="24,12"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Drivers"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"
+                                   VerticalAlignment="Center"/>
+
+                        <Border Grid.Column="1"
+                                Background="{StaticResource Brush.Chrome}"
+                                BorderBrush="{StaticResource Brush.Border}"
+                                BorderThickness="1" CornerRadius="5"
+                                Padding="8,4" Margin="16,0" HorizontalAlignment="Stretch"
+                                MaxWidth="280">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="13" Foreground="{StaticResource Brush.TextHint}"
+                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox Width="220" BorderThickness="0" Background="Transparent"
+                                         Foreground="{StaticResource Brush.TextPrimary}"
+                                         FontSize="{StaticResource FontSize.Sm}"
+                                         VerticalAlignment="Center"
+                                         Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Grid.Column="2"
+                                Style="{StaticResource Style.Button.Toolbar}"
+                                Content="Add new driver" Click="BtnAddNewDriver_Click"/>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Roster}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserReorderColumns="False" CanUserResizeRows="False"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
+                          Background="{StaticResource Brush.Background}"
+                          RowBackground="{StaticResource Brush.Background}"
+                          AlternatingRowBackground="{StaticResource Brush.Surface}"
+                          Foreground="{StaticResource Brush.TextPrimary}"
+                          FontSize="{StaticResource FontSize.Sm}"
+                          BorderThickness="0" RowHeight="34">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource Brush.Chrome}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Brush.TextHint}"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSize.Xs}"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="Padding" Value="12,0"/>
+                            <Setter Property="Height" Value="30"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="SeparatorBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="12,0"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="40" IsReadOnly="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Style="{StaticResource Style.CheckBox}"
+                                              HorizontalAlignment="Center"
+                                              IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Driver"   Binding="{Binding Name}"            Width="*"  IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Car"      Binding="{Binding CarName}"         Width="150" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Class"    Binding="{Binding ClassType}"       Width="90" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Dial-in"  Binding="{Binding DefaultDialInText}" Width="70" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Override" Binding="{Binding OverrideText, UpdateSourceTrigger=LostFocus}" Width="80" IsReadOnly="False"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <!-- Footer -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource Brush.Chrome}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,1,0,0"
+                    Padding="24,14">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                            Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="BtnOk" Style="{StaticResource Style.Button.Dialog.Primary}"
+                            Content="Add class" Click="BtnOk_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -43,9 +43,16 @@ namespace RCDragManagerProd.WPF.Windows
 
         private void BtnStartNewEvent_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: open setup dialog when it is ported
-            MessageBox.Show("New event setup — coming soon.", "RC Drag Manager",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var setup = new SetupWindow(_connectionString) { Owner = this };
+            if (setup.ShowDialog() == true)
+            {
+                // Race console not ported yet — confirm creation and refresh the list.
+                MessageBox.Show(
+                    $"Event '{setup.CreatedEvent.EventName}' created and saved.\n\n" +
+                    "The race console is coming in a later screen.",
+                    "RC Drag Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            _vm.Load();
         }
 
         private void BtnLoadSaved_Click(object sender, RoutedEventArgs e)

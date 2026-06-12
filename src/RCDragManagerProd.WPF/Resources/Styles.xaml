@@ -389,6 +389,124 @@
         <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
     </Style>
 
+    <!-- ── CheckBox (dark) ────────────────────────────────────────────────── -->
+
+    <Style x:Key="Style.CheckBox" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Sm}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="box" Width="17" Height="17"
+                                CornerRadius="4"
+                                Background="{StaticResource Brush.Chrome}"
+                                BorderBrush="{StaticResource Brush.Border}"
+                                BorderThickness="1"
+                                VerticalAlignment="Center">
+                            <TextBlock x:Name="tick" Text="&#xE73E;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Border>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="box" Property="Background" Value="{StaticResource Brush.Primary}"/>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                            <Setter TargetName="tick" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── RadioButton (dark) ─────────────────────────────────────────────── -->
+
+    <Style x:Key="Style.RadioButton" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Md}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,0,18,0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Grid Width="17" Height="17" VerticalAlignment="Center">
+                            <Ellipse x:Name="ring"
+                                     Stroke="{StaticResource Brush.Border}" StrokeThickness="1"
+                                     Fill="{StaticResource Brush.Chrome}"/>
+                            <Ellipse x:Name="dot" Width="7" Height="7"
+                                     Fill="{StaticResource Brush.Primary}" Visibility="Collapsed"/>
+                        </Grid>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="ring" Property="Stroke" Value="{StaticResource Brush.Primary}"/>
+                            <Setter TargetName="dot" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ring" Property="Stroke" Value="{StaticResource Brush.Primary}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Race-type selectable card ──────────────────────────────────────── -->
+
+    <Style x:Key="Style.RaceCard" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource Brush.Chrome}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="14,12"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Radius.Panel}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Brush.PrimaryHover}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── DatePicker (dark text box portion) ─────────────────────────────── -->
+
+    <Style x:Key="Style.DatePicker" TargetType="DatePicker">
+        <Setter Property="Background" Value="{StaticResource Brush.Chrome}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Md}"/>
+        <Setter Property="Padding" Value="6,4"/>
+    </Style>
+
     <!-- ── ScrollViewer (keep background transparent in dark mode) ────────── -->
 
     <Style TargetType="ScrollViewer">
