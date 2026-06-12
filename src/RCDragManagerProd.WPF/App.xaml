@@ -6,10 +6,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Non-colour tokens only. The colour brushes (code-built, mutable for
-                     theming) and Styles.xaml are merged at startup in App_Startup, in
-                     that order, so styles resolve against the live theme brushes. -->
                 <ResourceDictionary Source="Resources/Theme.xaml"/>
+                <ResourceDictionary Source="Resources/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
