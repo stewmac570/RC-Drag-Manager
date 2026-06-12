@@ -1,0 +1,85 @@
+<Window x:Class="RCDragManagerProd.WPF.Windows.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings — RC Drag Manager"
+        Width="500"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38" CornerRadius="0"
+                      GlassFrameThickness="0" ResizeBorderThickness="0"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Background}"
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title bar -->
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+                <TextBlock Text="Settings"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}" FontWeight="Medium"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,14,0">
+                    <Button Style="{StaticResource Style.WinCtrl.Close}" Click="BtnCancel_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Body -->
+            <StackPanel Grid.Row="1" Margin="24,20">
+
+                <!-- Logging -->
+                <TextBlock Text="Logging"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
+                <CheckBox x:Name="ChkLogging" Style="{StaticResource Style.CheckBox}"
+                          Content="Enable logging" Margin="0,0,0,10"/>
+                <TextBlock Text="Log file"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtLogPath" Style="{StaticResource Style.TextBox}"
+                         IsReadOnly="True" Foreground="{StaticResource Brush.TextMuted}"/>
+
+                <Border Height="1" Background="{StaticResource Brush.BorderSubtle}" Margin="0,18"/>
+
+                <!-- Live broadcast -->
+                <TextBlock Text="Live broadcast"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
+                <CheckBox x:Name="ChkLiveBroadcast" Style="{StaticResource Style.CheckBox}"
+                          Content="Broadcast live results to stewmacrc.com" Margin="0,0,0,10"/>
+                <CheckBox x:Name="ChkDebugLogging" Style="{StaticResource Style.CheckBox}"
+                          Content="Verbose live-broadcast logging" Margin="0,0,0,14"/>
+                <Button Style="{StaticResource Style.Button.Toolbar}"
+                        Content="Open live view ↗" Click="BtnOpenLiveView_Click"
+                        HorizontalAlignment="Left" Padding="14,7"/>
+            </StackPanel>
+
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    Background="{StaticResource Brush.Chrome}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,1,0,0"
+                    Padding="24,14">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                            Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                            Content="Save" Click="BtnSave_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
