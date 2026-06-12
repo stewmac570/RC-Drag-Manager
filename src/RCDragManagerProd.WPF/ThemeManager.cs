@@ -18,6 +18,10 @@ namespace RCDragManagerProd.WPF
 
         public static AppTheme Current { get; private set; } = AppTheme.Dark;
 
+        // The live brush dictionary built at startup — Apply mutates these exact
+        // instances (the ones the UI's StaticResource references resolved to).
+        private static ResourceDictionary _brushes;
+
         // key → (dark hex, light hex). Light values come from the approved design system
         // (flame orange on warm off-white).
         private static readonly Dictionary<string, (string Dark, string Light)> Palette =
@@ -65,18 +69,18 @@ namespace RCDragManagerProd.WPF
                 dict[kvp.Key] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
             }
             Current = theme;
+            _brushes = dict;
             return dict;
         }
 
         public static void Apply(AppTheme theme)
         {
             Current = theme;
-            var res = Application.Current?.Resources;
-            if (res == null) return;
+            if (_brushes == null) return;
 
             foreach (var kvp in Palette)
             {
-                if (res[kvp.Key] is SolidColorBrush brush && !brush.IsFrozen)
+                if (_brushes[kvp.Key] is SolidColorBrush brush)
                 {
                     var hex = theme == AppTheme.Light ? kvp.Value.Light : kvp.Value.Dark;
                     brush.Color = (Color)ColorConverter.ConvertFromString(hex);
