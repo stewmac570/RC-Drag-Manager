@@ -117,62 +117,53 @@
                         </Button>
                     </UniformGrid>
 
-                    <!-- Class type + fixed dial-in -->
-                    <Grid Margin="0,0,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Class type + (inline) fixed dial-in + RR options -->
+                    <TextBlock Text="Class type"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <RadioButton Style="{StaticResource Style.RadioButton}"
+                                     Content="Heads Up" GroupName="ct"
+                                     VerticalAlignment="Center"
+                                     IsChecked="{Binding IsHeadsUp}"/>
+                        <RadioButton Style="{StaticResource Style.RadioButton}"
+                                     Content="Bracket Class" GroupName="ct"
+                                     VerticalAlignment="Center"
+                                     IsChecked="{Binding IsBracket}"/>
+                        <RadioButton Style="{StaticResource Style.RadioButton}"
+                                     Content="Dial-In" GroupName="ct"
+                                     VerticalAlignment="Center"
+                                     IsChecked="{Binding IsDialIn}"/>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Class type"
-                                       FontSize="{StaticResource FontSize.Xs}"
-                                       Foreground="{StaticResource Brush.TextMuted}"
-                                       Margin="0,0,0,8"/>
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton Style="{StaticResource Style.RadioButton}"
-                                             Content="Heads Up" GroupName="ct"
-                                             IsChecked="{Binding IsHeadsUp}"/>
-                                <RadioButton Style="{StaticResource Style.RadioButton}"
-                                             Content="Bracket Class" GroupName="ct"
-                                             IsChecked="{Binding IsBracket}"/>
-                                <RadioButton Style="{StaticResource Style.RadioButton}"
-                                             Content="Dial-In" GroupName="ct"
-                                             IsChecked="{Binding IsDialIn}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Width="120"
+                        <!-- Fixed dial-in (Bracket Class only) -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                    Margin="6,0,0,0"
                                     Visibility="{Binding FixedDialInVisibility}">
                             <TextBlock Text="Fixed dial-in"
-                                       FontSize="{StaticResource FontSize.Xs}"
+                                       FontSize="{StaticResource FontSize.Sm}"
                                        Foreground="{StaticResource Brush.TextMuted}"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Style="{StaticResource Style.TextBox}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Style="{StaticResource Style.TextBox}" Width="70"
                                      Text="{Binding FixedDialInText, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
-                    </Grid>
 
-                    <!-- Round Robin options -->
-                    <Border Visibility="{Binding RrConfigVisibility}"
-                            Background="{StaticResource Brush.Chrome}"
-                            BorderBrush="{StaticResource Brush.BorderSubtle}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource Radius.Panel}"
-                            Padding="14,12" Margin="0,14,0,0">
-                        <StackPanel Orientation="Horizontal">
+                        <!-- Round Robin options (RR race type only) -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                    Margin="20,0,0,0"
+                                    Visibility="{Binding RrConfigVisibility}">
                             <CheckBox Style="{StaticResource Style.CheckBox}"
-                                      Content="Buyback race (Standard)"
-                                      IsChecked="{Binding BuybackEnabled}"
-                                      VerticalAlignment="Center"/>
+                                      Content="Buyback race"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding BuybackEnabled}"/>
                             <TextBlock Text="Rounds"
                                        FontSize="{StaticResource FontSize.Sm}"
                                        Foreground="{StaticResource Brush.TextMuted}"
-                                       VerticalAlignment="Center" Margin="28,0,8,0"/>
-                            <TextBox Style="{StaticResource Style.TextBox}" Width="60"
+                                       VerticalAlignment="Center" Margin="20,0,8,0"/>
+                            <TextBox Style="{StaticResource Style.TextBox}" Width="56"
                                      Text="{Binding RoundsToRun, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
-                    </Border>
+                    </StackPanel>
 
                 </StackPanel>
             </Border>
@@ -230,6 +221,7 @@
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserReorderColumns="False" CanUserResizeRows="False"
                           SelectionMode="Single"
+                          HeadersVisibility="Column"
                           GridLinesVisibility="Horizontal"
                           HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
                           Background="{StaticResource Brush.Background}"

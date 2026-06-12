@@ -108,6 +108,7 @@
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserReorderColumns="False" CanUserResizeRows="False"
                           IsReadOnly="True" SelectionMode="Single"
+                          HeadersVisibility="Column"
                           GridLinesVisibility="Horizontal"
                           HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
                           Background="{StaticResource Brush.Background}"
