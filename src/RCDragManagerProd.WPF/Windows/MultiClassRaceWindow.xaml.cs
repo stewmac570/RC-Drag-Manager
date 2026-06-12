@@ -36,7 +36,6 @@ namespace RCDragManagerProd.WPF.Windows
             new Dictionary<int, RaceController.RaceSummary>();
 
         private int _activeIndex;
-        private bool _reverting;
         private bool _resumeApplied;
 
         public MultiClassRaceWindow(MultiClassEvent multiEvent, string connectionString)
@@ -128,23 +127,10 @@ namespace RCDragManagerProd.WPF.Windows
         {
             // Ignore selection changes bubbling up from inner controls (e.g. DataGrids).
             if (e.OriginalSource != Tabs) return;
-            if (_reverting) return;
 
-            int newIndex = Tabs.SelectedIndex;
-            if (newIndex == _activeIndex) return;
-
-            var active = _controllers[_activeIndex];
-            if (active.HasBracketStarted && active.HasPendingMatchesInCurrentRound())
-            {
-                LblStatus.Text = "Complete all matches before switching class.";
-                _reverting = true;
-                Tabs.SelectedIndex = _activeIndex;
-                _reverting = false;
-                return;
-            }
-
+            // Free navigation — the operator can switch to any class tab at any time.
+            _activeIndex = Tabs.SelectedIndex;
             LblStatus.Text = "";
-            _activeIndex = newIndex;
             UpdateAllTabStates();
         }
 
