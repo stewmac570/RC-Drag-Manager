@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 
 namespace RCDragManagerProd.WPF.Dialogs
 {
@@ -28,5 +29,10 @@ namespace RCDragManagerProd.WPF.Dialogs
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e) =>
             DialogResult = false;
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape) DialogResult = false;
+        }
     }
 }
