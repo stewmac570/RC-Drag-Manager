@@ -5,7 +5,8 @@
         Width="320" Height="180"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
+        KeyDown="Window_KeyDown"
         Background="{StaticResource Brush.Surface}"
         FontFamily="Segoe UI"
         ShowInTaskbar="False">
