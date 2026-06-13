@@ -52,7 +52,7 @@ namespace RCDragManagerProd.WPF.Windows
 
             for (int i = 0; i < _multiEvent.ClassSessions.Count; i++)
             {
-                var controller = new RaceController(_multiEvent.ClassSessions[i]);
+                var controller = new RaceController(_multiEvent.ClassSessions[i], new WpfStandingsDialogService());
                 _controllers.Add(controller);
                 SubscribeToController(controller, i);
             }
