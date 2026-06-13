@@ -7,9 +7,14 @@ docs listed below before writing any code.
 
 ## Project in One Sentence
 
-A Windows desktop app (C# / .NET 4.8 / WinForms / SQLite) that lets a Race
-Director run NHRA-style RC drag racing tournaments. One operator, one machine,
-no network, no auto-advancement — every step is a manual click.
+A Windows desktop app (C# / .NET 4.8 / SQLite) that lets a Race Director run
+NHRA-style RC drag racing tournaments. One operator, one machine, no network,
+no auto-advancement — every step is a manual click.
+
+As of **v2.0.0** the primary UI is **WPF** (`RCDragManagerProd.WPF`), a dark /
+flame-orange rebuild on top of the same engine and data layer. The original
+**WinForms** UI (`Form1` and the other `UI/Forms/*`) is now **legacy** but still
+in the solution and still builds. New UI work goes in the WPF project.
 
 ---
 
@@ -36,15 +41,28 @@ on this codebase:
 ## How to Build
 
 ```
-Solution: src/RCDragManagerProd/RCDragManagerProd.sln
+Solution: RCDragManagerProd.sln   (repo root — contains all three projects)
 ```
 
 Open in Visual Studio 2022. NuGet packages restore automatically.
-Build → Rebuild Solution.
-Output: `src/RCDragManagerProd/bin/Debug/` or `bin/Release/`.
+Build → Rebuild Solution. Output under each project's `bin/Debug` or `bin/Release`.
+
+To run the **WPF app** (the current UI): right-click `RCDragManagerProd.WPF` →
+Set as Startup Project → F5. To run the legacy WinForms app, set
+`RCDragManagerProd` as startup instead.
 
 Do not use `dotnet build` — this is .NET Framework 4.8, not .NET Core/5+.
-Use MSBuild or Visual Studio only.
+Use MSBuild or Visual Studio only. Command-line example:
+`MSBuild RCDragManagerProd.sln /t:Build /p:Configuration=Debug`.
+
+> Note: there are two `.sln` files. The repo-root `RCDragManagerProd.sln` is the
+> one to use — it includes `RCDragManagerProd.WPF`. The older
+> `src/RCDragManagerProd/RCDragManagerProd.sln` predates the WPF project.
+
+> Gotcha: a clean rebuild of the WinForms project needs
+> `System.Resources.Extensions` present at its `HintPath`
+> (`src/RCDragManagerProd/packages/...`). If a clean build fails with `MSB3822`,
+> restore NuGet packages for the solution.
 
 ---
 
@@ -55,6 +73,36 @@ Test project: `src/RCDragManagerProd.Tests/`
 Run via Visual Studio Test Explorer → Run All.
 Tests use an in-memory SQLite connection string. No external setup required.
 All tests must pass before committing.
+
+---
+
+## WPF UI (current — v2.0.0)
+
+Project: `src/RCDragManagerProd.WPF/`. Same Form → Service → Controller → Engine
+discipline as the WinForms app — **views hold no race logic**; they bind to the
+extracted AppServices (`RaceConsoleService`, `LoadSessionService`,
+`MultiClassSetupService`, …) and subscribe to `RaceController` events.
+
+Layout:
+- `Windows/` — top-level windows (Landing, Setup, Load, DriverManager,
+  DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard)
+- `Views/RaceConsoleView` — the console UserControl, hosted standalone by
+  `RaceConsoleWindow` and one-per-tab by `MultiClassRaceWindow`
+- `Dialogs/` — themed modal dialogs (incl. `MessageDialog`, the dark replacement
+  for `MessageBox`)
+- `ViewModels/` — INotifyPropertyChanged view models + display-row types
+- `Resources/Theme.xaml` (brushes/radii/fonts) + `Resources/Styles.xaml` (control styles)
+- `ThemeManager` — dark/light via swapping a `C.*` colour dictionary (theme
+  brushes bind their `Color` with DynamicResource so they re-theme live and never
+  freeze); applied at startup, switched on Settings save (which restarts the app)
+- `WindowSizing` — clamps windows to the work area, constrains borderless maximize
+  (`WM_GETMINMAXINFO`), and rounds corners (Win11 DWM)
+
+Conventions:
+- Use themed dialogs (`MessageDialog.Info/Warn/Error/Confirm`), never `MessageBox`
+  (except the startup-error fallback in `App.xaml.cs`).
+- Reference theme colours via `{StaticResource Brush.*}`; never hardcode hex.
+- Marshal controller-event handlers to the UI thread (`Dispatcher`).
 
 ---
 
@@ -120,16 +168,15 @@ deviation will be caught in code review.
 
 ---
 
-## Current Active Feature
+## Status
 
-**Multi-Class Event Support** — see `MULTI-CLASS-EVENT-SPEC.md` for the full
-specification and `MULTI-CLASS-IMPLEMENTATION-PLAN.md` for the sequenced
-task list.
+- **Multi-Class Event Support** — shipped. (`MultiClassEvent` parent object,
+  setup flow, tabbed race console, `MultiClassEventRepository`.) Spec:
+  `MULTI-CLASS-EVENT-SPEC.md`.
+- **WPF UI rebuild** — shipped in **v2.0.0** (see the WPF UI section above). All
+  screens reimplemented; WinForms UI is legacy.
 
-Summary: add a new `MultiClassEvent` parent object, a new setup form, a new
-tabbed race console (`MultiClassRaceForm`), and a new repository. All changes
-are additive — no existing classes, forms, or tables are modified except where
-explicitly listed in the spec §5 "Changes to Existing Code".
+No active feature in flight. New UI work goes in `RCDragManagerProd.WPF`.
 
 ---
 
@@ -142,5 +189,6 @@ Unless the spec explicitly says otherwise, do not modify:
 - `IRaceEngine` and all engine adapters
 - `RoundRobinEngine`, `RoundRobinRanker`
 - `LosersBracketBuilder`, `RandomBracket`
-- `Form1` and its partial files
+- `Form1` and its partial files (legacy WinForms — leave as-is; do WPF work in
+  `RCDragManagerProd.WPF`)
 - Any existing test file (add new ones; don't change passing tests)
