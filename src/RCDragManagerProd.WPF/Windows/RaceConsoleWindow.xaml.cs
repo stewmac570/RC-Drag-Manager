@@ -12,6 +12,7 @@ namespace RCDragManagerProd.WPF.Windows
         public RaceConsoleWindow(RaceController controller, string connectionString)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             _view = new RaceConsoleView(controller, connectionString);
             ViewHost.Child = _view;
             Closed += (_, __) => _view.Teardown();

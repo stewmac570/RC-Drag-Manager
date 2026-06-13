@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             _connectionString = connectionString;
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             _vm = new DriverManagerViewModel(new DriverRepository(connectionString));
             DataContext = _vm;
             _vm.Load();

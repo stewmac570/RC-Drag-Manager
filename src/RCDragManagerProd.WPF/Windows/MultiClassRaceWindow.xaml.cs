@@ -43,6 +43,7 @@ namespace RCDragManagerProd.WPF.Windows
             _multiEvent = multiEvent ?? throw new ArgumentNullException(nameof(multiEvent));
             _connectionString = connectionString;
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
 
             _service = new MultiClassRaceService(new DriverRepository(connectionString));
             _multiRepo = new MultiClassEventRepository(connectionString);

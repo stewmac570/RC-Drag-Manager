@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Windows
         public SetupWindow(string connectionString)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             var service = new MultiClassSetupService(new DriverRepository(connectionString));
             var eventRepo = new MultiClassEventRepository(connectionString);
             _vm = new SetupViewModel(service, eventRepo);

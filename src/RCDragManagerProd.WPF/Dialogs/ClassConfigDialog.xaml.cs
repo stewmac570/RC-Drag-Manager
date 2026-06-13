@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public ClassConfigDialog(MultiClassSetupService service, ClassConfigDto existing = null)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             _vm = new ClassConfigViewModel(service, existing);
             DataContext = _vm;
 

@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Windows
         public LoadSessionWindow(string connectionString)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             var service = new LoadSessionService(
                 new RaceSessionRepository(connectionString),
                 new MultiClassEventRepository(connectionString));
