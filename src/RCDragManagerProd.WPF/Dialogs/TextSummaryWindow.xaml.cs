@@ -15,6 +15,11 @@ namespace RCDragManagerProd.WPF.Dialogs
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
 
+        private void BtnCopy_Click(object sender, RoutedEventArgs e)
+        {
+            try { Clipboard.SetText(TxtBody.Text ?? ""); } catch { }
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape) Close();

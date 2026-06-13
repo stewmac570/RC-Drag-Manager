@@ -10,6 +10,7 @@ namespace RCDragManagerProd.WPF.Windows
         public DriverStatsWindow(Driver driver, string connectionString)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
 
             TbarTitle.Text = $"Stats — {driver.Name}";
             ValWins.Text = driver.TotalWins.ToString();

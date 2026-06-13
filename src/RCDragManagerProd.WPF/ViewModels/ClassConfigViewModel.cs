@@ -126,11 +126,13 @@ namespace RCDragManagerProd.WPF.ViewModels
             set { _buybackEnabled = value; OnPropertyChanged(); }
         }
 
-        private int _roundsToRun = 3;
-        public int RoundsToRun
+        // String-backed so the field accepts free typing (clearing/retyping) without
+        // per-keystroke int-conversion binding errors. Parsed in BuildResult.
+        private string _roundsText = "3";
+        public string RoundsText
         {
-            get => _roundsToRun;
-            set { _roundsToRun = value; OnPropertyChanged(); }
+            get => _roundsText;
+            set { _roundsText = value; OnPropertyChanged(); }
         }
 
         // ── Search ────────────────────────────────────────────────────────────
@@ -216,7 +218,7 @@ namespace RCDragManagerProd.WPF.ViewModels
             OnClassTypeChanged();
 
             BuybackEnabled = !string.Equals(c.Variant, "QMDRA", StringComparison.OrdinalIgnoreCase);
-            if (c.RoundsToRun.HasValue) RoundsToRun = c.RoundsToRun.Value;
+            if (c.RoundsToRun.HasValue) RoundsText = c.RoundsToRun.Value.ToString();
 
             bool wasDialIn = string.Equals(c.ClassType, "Dial-In", StringComparison.OrdinalIgnoreCase);
             foreach (var entry in c.DriverEntries ?? new List<RaceSessionDriverEntry>())
@@ -253,12 +255,12 @@ namespace RCDragManagerProd.WPF.ViewModels
             if (IsRoundRobinSelected)
             {
                 variant = BuybackEnabled ? "Standard" : "QMDRA";
-                if (RoundsToRun <= 0)
+                if (!int.TryParse(RoundsText?.Trim(), out var n) || n <= 0)
                 {
-                    error = "Rounds must be at least 1.";
+                    error = "Rounds must be a whole number of at least 1.";
                     return null;
                 }
-                rounds = RoundsToRun;
+                rounds = n;
             }
 
             var checkedIds = _allRows.Where(r => r.IsChecked).Select(r => r.DriverId).ToList();

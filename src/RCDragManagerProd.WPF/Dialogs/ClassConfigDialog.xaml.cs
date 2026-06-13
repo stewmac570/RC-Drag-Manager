@@ -18,11 +18,13 @@ namespace RCDragManagerProd.WPF.Dialogs
         public ClassConfigDialog(MultiClassSetupService service, ClassConfigDto existing = null)
         {
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             _vm = new ClassConfigViewModel(service, existing);
             DataContext = _vm;
 
             TbarTitle.Text = _vm.IsEdit ? "Edit class" : "Add class";
             BtnOk.Content = _vm.IsEdit ? "Save class" : "Add class";
+            Loaded += (_, __) => TxtClassName.Focus();
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
@@ -84,7 +86,7 @@ namespace RCDragManagerProd.WPF.Dialogs
             var result = _vm.BuildResult(out var error);
             if (result == null)
             {
-                MessageBox.Show(error, "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageDialog.Warn(this, error, "Validation");
                 return;
             }
             Result = result;

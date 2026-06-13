@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             _connectionString = connectionString;
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
             _vm = new DriverManagerViewModel(new DriverRepository(connectionString));
             DataContext = _vm;
             _vm.Load();
@@ -53,10 +54,10 @@ namespace RCDragManagerProd.WPF.Windows
         private void BtnDeleteDriver_Click(object sender, RoutedEventArgs e)
         {
             if (_vm.SelectedDriver == null) return;
-            var result = MessageBox.Show(
-                $"Delete '{_vm.SelectedDriver.Name}'? This cannot be undone.",
-                "Delete driver", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
+            if (!MessageDialog.Confirm(this,
+                    $"Delete '{_vm.SelectedDriver.Name}'? This cannot be undone.",
+                    "Delete driver", destructive: true))
+                return;
             _vm.DeleteDriver();
         }
 
@@ -104,10 +105,10 @@ namespace RCDragManagerProd.WPF.Windows
         private void BtnDeleteCar_Click(object sender, RoutedEventArgs e)
         {
             if (_vm.SelectedCar == null) return;
-            var result = MessageBox.Show(
-                $"Delete car '{_vm.SelectedCar.CarName}'?",
-                "Delete car", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
+            if (!MessageDialog.Confirm(this,
+                    $"Delete car '{_vm.SelectedCar.CarName}'?",
+                    "Delete car", destructive: true))
+                return;
             _vm.DeleteCar();
         }
 

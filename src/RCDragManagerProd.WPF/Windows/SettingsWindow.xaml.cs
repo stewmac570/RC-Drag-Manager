@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using RCDragManagerProd.Config;
 using RCDragManagerProd.Logging;
+using RCDragManagerProd.WPF.Dialogs;
 
 namespace RCDragManagerProd.WPF.Windows
 {
@@ -66,8 +67,7 @@ namespace RCDragManagerProd.WPF.Windows
             catch (Exception ex)
             {
                 Logger.Log("[LIVE][FAIL] Open live view failed. " + ex.Message);
-                MessageBox.Show("Could not open live view.\n\n" + ex.Message, "Live view",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageDialog.Error(this, "Could not open live view.\n\n" + ex.Message, "Live view");
             }
         }
 

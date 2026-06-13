@@ -43,6 +43,7 @@ namespace RCDragManagerProd.WPF.Windows
             _multiEvent = multiEvent ?? throw new ArgumentNullException(nameof(multiEvent));
             _connectionString = connectionString;
             InitializeComponent();
+            WindowSizing.FitToScreen(this);
 
             _service = new MultiClassRaceService(new DriverRepository(connectionString));
             _multiRepo = new MultiClassEventRepository(connectionString);
@@ -51,7 +52,7 @@ namespace RCDragManagerProd.WPF.Windows
 
             for (int i = 0; i < _multiEvent.ClassSessions.Count; i++)
             {
-                var controller = new RaceController(_multiEvent.ClassSessions[i]);
+                var controller = new RaceController(_multiEvent.ClassSessions[i], new WpfStandingsDialogService());
                 _controllers.Add(controller);
                 SubscribeToController(controller, i);
             }
@@ -147,11 +148,10 @@ namespace RCDragManagerProd.WPF.Windows
             Logger.Log($"[WPF][MultiClass] RR gate: {_rrComplete.Count}/{_controllers.Count} complete");
 
             if (_controllers.Count > 0 && _rrComplete.Count == _controllers.Count)
-                MessageBox.Show(
+                MessageDialog.Info(this,
                     "All classes have completed Round Robin.\nThe buyback phase is now open for every class.\n\n" +
                     "Switch to each class tab to run buybacks.",
-                    "Buyback phase ready — all classes",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    "Buyback phase ready — all classes");
         }
 
         // ── Completion ─────────────────────────────────────────────────────────
@@ -164,9 +164,9 @@ namespace RCDragManagerProd.WPF.Windows
             catch (Exception ex) { Logger.Log($"[WPF][MultiClass][STATS] {ex}"); }
 
             var className = _multiEvent.ClassSessions[classIndex].ClassType;
-            MessageBox.Show(
+            MessageDialog.Info(this,
                 $"Class: {className}\nWinner: {summary.Winner?.Name ?? "N/A"}\nRunner-up: {summary.RunnerUp?.Name ?? "N/A"}",
-                "Class complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Class complete");
 
             _completed.Add(classIndex);
             UpdateAllTabStates();
