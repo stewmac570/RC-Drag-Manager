@@ -52,19 +52,27 @@ namespace RCDragManagerProd.WPF
             string.Equals(AppSettings.Theme, "Light", StringComparison.OrdinalIgnoreCase)
                 ? AppTheme.Light : AppTheme.Dark;
 
+        // The currently-installed colours dictionary, so it can be swapped wholesale.
+        private static ResourceDictionary _colors;
+
         public static void Apply(AppTheme theme)
         {
             Current = theme;
-            var res = Application.Current?.Resources;
-            if (res == null) return;
+            var app = Application.Current;
+            if (app == null) return;
 
-            // Overriding the C.* colour at the top dictionary shadows Theme.xaml's value;
-            // DynamicResource re-resolves it, updating the brushes (and all consumers).
+            var next = new ResourceDictionary();
             foreach (var kvp in Palette)
             {
                 var hex = theme == AppTheme.Light ? kvp.Value.Light : kvp.Value.Dark;
-                res[kvp.Key] = (Color)ColorConverter.ConvertFromString(hex);
+                next[kvp.Key] = (Color)ColorConverter.ConvertFromString(hex);
             }
+
+            // Swapping the whole merged dictionary reliably re-resolves every
+            // DynamicResource C.* — so all open windows re-theme live.
+            if (_colors != null) app.Resources.MergedDictionaries.Remove(_colors);
+            app.Resources.MergedDictionaries.Add(next);
+            _colors = next;
         }
     }
 }
