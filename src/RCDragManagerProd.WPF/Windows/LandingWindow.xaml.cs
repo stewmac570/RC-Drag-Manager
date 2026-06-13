@@ -100,8 +100,7 @@ namespace RCDragManagerProd.WPF.Windows
         }
 
         private void BtnLiveScoreboard_Click(object sender, RoutedEventArgs e) =>
-            MessageBox.Show("Live scoreboard — coming soon.", "RC Drag Manager",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            new LiveScoreboardWindow { Owner = this }.ShowDialog();
 
         private void BtnExit_Click(object sender, RoutedEventArgs e) =>
             Application.Current.Shutdown();
