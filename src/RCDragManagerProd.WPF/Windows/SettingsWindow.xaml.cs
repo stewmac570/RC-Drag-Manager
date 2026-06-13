@@ -11,28 +11,18 @@ namespace RCDragManagerProd.WPF.Windows
     {
         private const string ProductionLiveViewUrl = "https://stewmacrc.com";
 
-        private readonly ThemeManager.AppTheme _originalTheme;
-        private bool _loaded;
+        private string _originalTheme;
 
         public SettingsWindow()
         {
             InitializeComponent();
-            _originalTheme = ThemeManager.Current;
-            RbDark.IsChecked = _originalTheme == ThemeManager.AppTheme.Dark;
-            RbLight.IsChecked = _originalTheme == ThemeManager.AppTheme.Light;
+            _originalTheme = AppSettings.Theme;
+            RbDark.IsChecked = !string.Equals(_originalTheme, "Light", StringComparison.OrdinalIgnoreCase);
+            RbLight.IsChecked = string.Equals(_originalTheme, "Light", StringComparison.OrdinalIgnoreCase);
             ChkLogging.IsChecked = AppSettings.EnableLogging;
             ChkLiveBroadcast.IsChecked = AppSettings.LiveBroadcastEnabled;
             ChkDebugLogging.IsChecked = AppSettings.LiveBroadcastDebugLogging;
             TxtLogPath.Text = AppSettings.LogFilePath;
-            _loaded = true;
-        }
-
-        // Live preview while the dialog is open.
-        private void Theme_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!_loaded) return;
-            ThemeManager.Apply(RbLight.IsChecked == true
-                ? ThemeManager.AppTheme.Light : ThemeManager.AppTheme.Dark);
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -40,17 +30,31 @@ namespace RCDragManagerProd.WPF.Windows
             AppSettings.EnableLogging = ChkLogging.IsChecked == true;
             AppSettings.LiveBroadcastEnabled = ChkLiveBroadcast.IsChecked == true;
             AppSettings.LiveBroadcastDebugLogging = ChkDebugLogging.IsChecked == true;
-            AppSettings.Theme = RbLight.IsChecked == true ? "Light" : "Dark";
             if (AppSettings.EnableLogging) Logger.Log("[SETTINGS] Logging enabled.");
+
+            var newTheme = RbLight.IsChecked == true ? "Light" : "Dark";
+            bool themeChanged = !string.Equals(_originalTheme, newTheme, StringComparison.OrdinalIgnoreCase);
+            AppSettings.Theme = newTheme;
+
             DialogResult = true;
+
+            // The theme is applied cleanly at startup, so a change takes effect on a
+            // quick restart — avoids any partially-repainted live-switch state.
+            if (themeChanged) RestartApp();
         }
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        private static void RestartApp()
         {
-            // Revert any live theme preview.
-            ThemeManager.Apply(_originalTheme);
-            DialogResult = false;
+            try
+            {
+                var exe = Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrEmpty(exe)) Process.Start(exe);
+            }
+            catch (Exception ex) { Logger.Log("[SETTINGS][RESTART] " + ex.Message); }
+            Application.Current.Shutdown();
         }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
         private void BtnOpenLiveView_Click(object sender, RoutedEventArgs e)
         {

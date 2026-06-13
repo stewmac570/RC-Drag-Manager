@@ -46,10 +46,13 @@
                            Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
                     <RadioButton x:Name="RbDark" Style="{StaticResource Style.RadioButton}"
-                                 GroupName="theme" Content="Dark" Checked="Theme_Changed"/>
+                                 GroupName="theme" Content="Dark"/>
                     <RadioButton x:Name="RbLight" Style="{StaticResource Style.RadioButton}"
-                                 GroupName="theme" Content="Light" Checked="Theme_Changed"/>
+                                 GroupName="theme" Content="Light"/>
                 </StackPanel>
+                <TextBlock Text="Changing theme restarts the app."
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,6,0,0"/>
 
                 <Border Height="1" Background="{StaticResource Brush.BorderSubtle}" Margin="0,18"/>
 
