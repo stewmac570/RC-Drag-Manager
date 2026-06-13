@@ -29,6 +29,7 @@
     <SolidColorBrush x:Key="Brush.Border"         Color="{DynamicResource C.Border}"/>
     <SolidColorBrush x:Key="Brush.BorderSubtle"   Color="{DynamicResource C.BorderSubtle}"/>
     <SolidColorBrush x:Key="Brush.BorderEmphasis" Color="{DynamicResource C.BorderEmphasis}"/>
+    <SolidColorBrush x:Key="Brush.WindowEdge"     Color="{DynamicResource C.WindowEdge}"/>
 
     <!-- Corner radii -->
     <CornerRadius x:Key="Radius.Card">10</CornerRadius>

@@ -15,6 +15,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         private MessageDialog(Window owner, Kind kind, string title, string message, bool destructive)
         {
             InitializeComponent();
+            WindowSizing.RoundCorners(this);
             Owner = owner ?? ActiveOwner();
             if (Owner == null) WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
