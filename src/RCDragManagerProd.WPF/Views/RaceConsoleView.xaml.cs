@@ -252,6 +252,7 @@ namespace RCDragManagerProd.WPF.Views
 
             var winner = summary.Winner?.Name ?? "N/A";
             var runnerUp = summary.RunnerUp?.Name ?? "N/A";
+            Logger.Log($"[RESULT][EVENT] '{summary.EventName}' complete — winner={winner}, runner-up={runnerUp}, matches={summary.TotalMatches}");
             MessageDialog.Info(Host,
                 $"Event: {summary.EventName}\nWinner: {winner}\nRunner-up: {runnerUp}\nMatches: {summary.TotalMatches}",
                 "Event complete");
@@ -444,11 +445,14 @@ namespace RCDragManagerProd.WPF.Views
                 return;
             }
 
+            var winner = _controller.GetWinner(matchId);
+            var loser = _controller.GetLoser(matchId);
+            var round = _controller.GetMatch(matchId)?.RoundLabel ?? "?";
+            Logger.Log($"[RESULT] M{matchId} ({round}): {winner?.Name ?? "?"} defeated {loser?.Name ?? "BYE"}");
+
             // In hosted mode the multi-class window records win/loss stats on completion.
             if (IsHostedMode) return;
 
-            var winner = _controller.GetWinner(matchId);
-            var loser = _controller.GetLoser(matchId);
             if (winner != null && loser != null && !IsBye(winner.Name) && !IsBye(loser.Name))
                 PersistStats(winner, loser, matchId);
         }

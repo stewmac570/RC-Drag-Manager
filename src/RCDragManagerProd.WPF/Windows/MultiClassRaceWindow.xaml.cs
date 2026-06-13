@@ -164,6 +164,7 @@ namespace RCDragManagerProd.WPF.Windows
             catch (Exception ex) { Logger.Log($"[WPF][MultiClass][STATS] {ex}"); }
 
             var className = _multiEvent.ClassSessions[classIndex].ClassType;
+            Logger.Log($"[RESULT][CLASS] '{className}' complete — winner={summary.Winner?.Name ?? "N/A"}, runner-up={summary.RunnerUp?.Name ?? "N/A"}");
             MessageDialog.Info(this,
                 $"Class: {className}\nWinner: {summary.Winner?.Name ?? "N/A"}\nRunner-up: {summary.RunnerUp?.Name ?? "N/A"}",
                 "Class complete");
@@ -172,7 +173,10 @@ namespace RCDragManagerProd.WPF.Windows
             UpdateAllTabStates();
 
             if (_completed.Count == _controllers.Count)
+            {
+                Logger.Log($"[RESULT][EVENT] '{_multiEvent.EventName}' complete — all {_controllers.Count} classes finished");
                 ShowCombinedSummary();
+            }
         }
 
         private void ShowCombinedSummary()
