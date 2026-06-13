@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Repositories;
+using RCDragManagerProd.WPF.Dialogs;
 using RCDragManagerProd.WPF.ViewModels;
 
 namespace RCDragManagerProd.WPF.Windows
@@ -58,8 +59,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             if (evt?.ClassSessions == null || evt.ClassSessions.Count == 0)
             {
-                MessageBox.Show("This event has no class sessions to race.", "RC Drag Manager",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageDialog.Warn(this, "This event has no class sessions to race.");
                 return;
             }
 
@@ -80,8 +80,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             if (e.Source is FrameworkElement el && el.Tag is RecentEventRow row)
             {
-                MessageBox.Show($"Resume '{row.EventName}' — coming soon.", "RC Drag Manager",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageDialog.Info(this, $"Resume '{row.EventName}' — coming soon.");
             }
         }
 

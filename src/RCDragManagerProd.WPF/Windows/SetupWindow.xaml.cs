@@ -22,6 +22,7 @@ namespace RCDragManagerProd.WPF.Windows
             var eventRepo = new MultiClassEventRepository(connectionString);
             _vm = new SetupViewModel(service, eventRepo);
             DataContext = _vm;
+            Loaded += (_, __) => TxtEventName.Focus();
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
@@ -36,7 +37,7 @@ namespace RCDragManagerProd.WPF.Windows
 
             var error = _vm.AddClass(dlg.Result);
             if (error != null)
-                MessageBox.Show(error, "Duplicate class", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageDialog.Warn(this, error, "Duplicate class");
         }
 
         private void BtnEditClass_Click(object sender, RoutedEventArgs e)
@@ -71,7 +72,7 @@ namespace RCDragManagerProd.WPF.Windows
             var error = _vm.ValidateCanStart();
             if (error != null)
             {
-                MessageBox.Show(error, "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageDialog.Warn(this, error, "Validation");
                 return;
             }
 

@@ -3,6 +3,7 @@ using System.Windows.Input;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Repositories;
+using RCDragManagerProd.WPF.Dialogs;
 using RCDragManagerProd.WPF.ViewModels;
 
 namespace RCDragManagerProd.WPF.Windows
@@ -35,8 +36,7 @@ namespace RCDragManagerProd.WPF.Windows
             var result = _vm.LoadSelected();
             if (!result.Success)
             {
-                MessageBox.Show(result.ErrorMessage, "Load error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageDialog.Error(this, result.ErrorMessage, "Load error");
                 return;
             }
 
@@ -47,10 +47,10 @@ namespace RCDragManagerProd.WPF.Windows
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (_vm.Selected == null) return;
-            var confirm = MessageBox.Show(
-                $"Permanently delete '{_vm.Selected.EventName}'? This cannot be undone.",
-                "Delete event", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.Yes) return;
+            if (!MessageDialog.Confirm(this,
+                    $"Permanently delete '{_vm.Selected.EventName}'? This cannot be undone.",
+                    "Delete event", destructive: true))
+                return;
             _vm.DeleteSelected();
         }
 
