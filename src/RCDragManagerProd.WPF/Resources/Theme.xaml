@@ -2,35 +2,33 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Backgrounds -->
-    <SolidColorBrush x:Key="Brush.Background"     Color="#0D0D0D"/>
-    <SolidColorBrush x:Key="Brush.Surface"        Color="#181818"/>
-    <SolidColorBrush x:Key="Brush.Raised"         Color="#252525"/>
-    <SolidColorBrush x:Key="Brush.Chrome"         Color="#161616"/>
+    <!-- The C.* COLOURS the brushes below bind to are supplied at runtime by
+         ThemeManager (a swappable merged dictionary), so dark/light switches live.
+         Each brush's Color is a DynamicResource, which also keeps it unfreezable. -->
 
-    <!-- Brand — NPRC flame orange -->
-    <SolidColorBrush x:Key="Brush.Primary"        Color="#E85010"/>
-    <SolidColorBrush x:Key="Brush.PrimaryHover"   Color="#F06522"/>
-    <SolidColorBrush x:Key="Brush.PrimaryPressed" Color="#D04008"/>
-    <SolidColorBrush x:Key="Brush.Accent"         Color="#FF8A00"/>
+    <!-- Brushes (Color bound dynamically so they re-theme live) -->
+    <SolidColorBrush x:Key="Brush.Background"     Color="{DynamicResource C.Background}"/>
+    <SolidColorBrush x:Key="Brush.Surface"        Color="{DynamicResource C.Surface}"/>
+    <SolidColorBrush x:Key="Brush.Raised"         Color="{DynamicResource C.Raised}"/>
+    <SolidColorBrush x:Key="Brush.Chrome"         Color="{DynamicResource C.Chrome}"/>
 
-    <!-- Semantic -->
-    <SolidColorBrush x:Key="Brush.Success"        Color="#2A8E60"/>
-    <SolidColorBrush x:Key="Brush.Danger"         Color="#C84040"/>
+    <SolidColorBrush x:Key="Brush.Primary"        Color="{DynamicResource C.Primary}"/>
+    <SolidColorBrush x:Key="Brush.PrimaryHover"   Color="{DynamicResource C.PrimaryHover}"/>
+    <SolidColorBrush x:Key="Brush.PrimaryPressed" Color="{DynamicResource C.PrimaryPressed}"/>
+    <SolidColorBrush x:Key="Brush.Accent"         Color="{DynamicResource C.Accent}"/>
 
-    <!-- Text -->
-    <SolidColorBrush x:Key="Brush.TextPrimary"    Color="#F0F0F0"/>
-    <SolidColorBrush x:Key="Brush.TextSecondary"  Color="#909090"/>
-    <SolidColorBrush x:Key="Brush.TextMuted"      Color="#505050"/>
-    <SolidColorBrush x:Key="Brush.TextHint"       Color="#444444"/>
-    <SolidColorBrush x:Key="Brush.TextGhost"      Color="#333333"/>
+    <SolidColorBrush x:Key="Brush.Success"        Color="{DynamicResource C.Success}"/>
+    <SolidColorBrush x:Key="Brush.Danger"         Color="{DynamicResource C.Danger}"/>
 
-    <!-- Borders (AARRGGBB — WPF alpha format) -->
-    <!-- rgba(255,255,255,0.09) -->
-    <SolidColorBrush x:Key="Brush.Border"         Color="#17FFFFFF"/>
-    <!-- rgba(255,255,255,0.06) -->
-    <SolidColorBrush x:Key="Brush.BorderSubtle"   Color="#0FFFFFFF"/>
-    <SolidColorBrush x:Key="Brush.BorderEmphasis" Color="#252525"/>
+    <SolidColorBrush x:Key="Brush.TextPrimary"    Color="{DynamicResource C.TextPrimary}"/>
+    <SolidColorBrush x:Key="Brush.TextSecondary"  Color="{DynamicResource C.TextSecondary}"/>
+    <SolidColorBrush x:Key="Brush.TextMuted"      Color="{DynamicResource C.TextMuted}"/>
+    <SolidColorBrush x:Key="Brush.TextHint"       Color="{DynamicResource C.TextHint}"/>
+    <SolidColorBrush x:Key="Brush.TextGhost"      Color="{DynamicResource C.TextGhost}"/>
+
+    <SolidColorBrush x:Key="Brush.Border"         Color="{DynamicResource C.Border}"/>
+    <SolidColorBrush x:Key="Brush.BorderSubtle"   Color="{DynamicResource C.BorderSubtle}"/>
+    <SolidColorBrush x:Key="Brush.BorderEmphasis" Color="{DynamicResource C.BorderEmphasis}"/>
 
     <!-- Corner radii -->
     <CornerRadius x:Key="Radius.Card">10</CornerRadius>

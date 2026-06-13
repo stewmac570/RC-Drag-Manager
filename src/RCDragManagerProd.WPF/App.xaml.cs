@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF
         private void App_Startup(object sender, StartupEventArgs e)
         {
             AppSettings.Load();
+            ThemeManager.Apply(ThemeManager.FromSetting());
 
             DispatcherUnhandledException += (_, args) =>
             {

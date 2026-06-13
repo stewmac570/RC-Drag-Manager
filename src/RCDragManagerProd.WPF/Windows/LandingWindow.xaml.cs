@@ -93,9 +93,11 @@ namespace RCDragManagerProd.WPF.Windows
             _vm.Load();
         }
 
-        private void BtnSettings_Click(object sender, RoutedEventArgs e) =>
-            MessageBox.Show("Settings — coming soon.", "RC Drag Manager",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+        private void BtnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            new SettingsWindow { Owner = this }.ShowDialog();
+            _vm.Load();
+        }
 
         private void BtnLiveScoreboard_Click(object sender, RoutedEventArgs e) =>
             MessageBox.Show("Live scoreboard — coming soon.", "RC Drag Manager",
