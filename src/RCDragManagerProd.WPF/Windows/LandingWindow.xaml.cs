@@ -17,6 +17,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
             InitializeComponent();
+            WindowSizing.RoundCorners(this);
 
             var driverRepo = new DriverRepository(connectionString);
             var sessionRepo = new RaceSessionRepository(connectionString);

@@ -27,11 +27,41 @@ namespace RCDragManagerProd.WPF
 
                 var hwnd = new WindowInteropHelper(w).Handle;
                 HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+                RoundCornersHwnd(hwnd);
             }
 
             if (w.IsLoaded) Apply();
             else w.SourceInitialized += (_, __) => Apply();
         }
+
+        /// <summary>Rounds the window corners (and lets DWM cast its drop shadow) on
+        /// Windows 11. No-op on older Windows. For dialogs that don't call FitToScreen.</summary>
+        public static void RoundCorners(Window w)
+        {
+            void Apply()
+            {
+                RoundCornersHwnd(new WindowInteropHelper(w).Handle);
+            }
+            if (w.IsLoaded) Apply();
+            else w.SourceInitialized += (_, __) => Apply();
+        }
+
+        private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+        private const int DWMWCP_ROUND = 2;
+
+        private static void RoundCornersHwnd(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return;
+            try
+            {
+                int pref = DWMWCP_ROUND;
+                DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref pref, sizeof(int));
+            }
+            catch { /* pre-Win11 — ignore */ }
+        }
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
 
         // ── Constrain maximize to the monitor work area ─────────────────────────
 

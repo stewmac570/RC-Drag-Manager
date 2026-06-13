@@ -17,7 +17,8 @@
                       UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
-    <Border Background="{StaticResource Brush.Background}">
+    <Border Background="{StaticResource Brush.Background}"
+            BorderBrush="{StaticResource Brush.WindowEdge}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="38"/>

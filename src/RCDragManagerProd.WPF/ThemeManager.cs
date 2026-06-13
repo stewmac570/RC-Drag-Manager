@@ -46,6 +46,7 @@ namespace RCDragManagerProd.WPF
                 ["C.Border"]         = ("#17FFFFFF", "#14000000"),
                 ["C.BorderSubtle"]   = ("#0FFFFFFF", "#0A000000"),
                 ["C.BorderEmphasis"] = ("#252525", "#D0CEC9"),
+                ["C.WindowEdge"]     = ("#3C3C3C", "#C7C4BE"),
             };
 
         public static AppTheme FromSetting() =>
