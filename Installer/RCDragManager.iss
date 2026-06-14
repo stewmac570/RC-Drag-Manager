@@ -1,7 +1,7 @@
 #define MyAppName        "RC Drag Manager"
 #define MyAppPublisher   "Stewart McMillan"
 #define MyAppURL         "https://github.com/stewmac570/RC-Drag-Manager"
-#define MyAppExeName     "RCDragManagerProd.exe"
+#define MyAppExeName     "RCDragManagerProd.WPF.exe"
 #define MyCompanyAppData "RC_Drag_Manager"
 #define MyAppId          "{{A41B3B69-3B2F-4C2F-9D0A-3A2C3F1F8F8B}}"
 
