@@ -16,6 +16,14 @@ namespace RCDragManagerProd.WPF.Windows
             _view = new RaceConsoleView(controller, connectionString);
             ViewHost.Child = _view;
             Closed += (_, __) => _view.Teardown();
+
+            // Show the event on the live site as soon as the console opens, even before
+            // a bracket is generated (mirrors the multi-class window behaviour).
+            Loaded += (_, __) =>
+            {
+                try { controller.BroadcastLiveSnapshot("EventStarted"); }
+                catch { /* live broadcast is best-effort */ }
+            };
         }
 
         private void BtnMinimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

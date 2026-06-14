@@ -155,12 +155,21 @@ namespace RCDragManagerProd.AppServices
                 EventDate    = date.Date
             };
 
+            // All classes in a multi-class event share one EventId. The live server
+            // buckets classes by EventName but treats a push whose EventId differs
+            // from the last one it saw as a *new session* and clears the whole bucket
+            // (all sibling classes). Giving every class the same EventId keeps them
+            // together on the live site, while a genuinely new event still gets a
+            // fresh shared id that correctly clears stale state.
+            var sharedEventId = Guid.NewGuid();
+
             foreach (var cc in classesList)
             {
                 bool isRR = string.Equals(cc.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
 
                 var session = new RaceSession
                 {
+                    EventId           = sharedEventId,
                     EventName         = multiEvent.EventName,
                     EventDate         = multiEvent.EventDate,
                     RaceType          = cc.RaceType ?? RaceTypes.RoundRobin,

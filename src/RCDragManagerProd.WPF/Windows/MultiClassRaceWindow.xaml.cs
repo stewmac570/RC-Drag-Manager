@@ -99,6 +99,16 @@ namespace RCDragManagerProd.WPF.Windows
                 try { c.RestoreFromSave(); }
                 catch (Exception ex) { Logger.Log($"[WPF][RESUME] {ex}"); }
             }
+
+            // Announce every class to the live site as soon as the event opens, so all
+            // classes are visible immediately — classes without a bracket yet show as
+            // "waiting" rather than being absent until their first round is generated.
+            foreach (var c in _controllers)
+            {
+                try { c.BroadcastLiveSnapshot("EventStarted"); }
+                catch (Exception ex) { Logger.Log($"[WPF][LIVE][INIT] {ex}"); }
+            }
+
             UpdateAllTabStates();
         }
 
