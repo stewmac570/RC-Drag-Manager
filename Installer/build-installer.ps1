@@ -52,13 +52,15 @@ function Get-ISCCPath {
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$projectPath = Join-Path $repoRoot "src\RCDragManagerProd\RCDragManagerProd.csproj"
-$releaseDir = Join-Path $repoRoot "src\RCDragManagerProd\bin\Release"
+# v2.0.0: the shipped app is the WPF UI. Build the WPF project (it pulls in the
+# engine project via ProjectReference) and package its net48 Release output.
+$projectPath = Join-Path $repoRoot "src\RCDragManagerProd.WPF\RCDragManagerProd.WPF.csproj"
+$releaseDir = Join-Path $repoRoot "src\RCDragManagerProd.WPF\bin\Release\net48"
 $payloadDir = Join-Path $scriptDir "Payload"
 $outputDir = Join-Path $scriptDir "output"
 $issPath = Join-Path $scriptDir "RCDragManager.iss"
 $payloadReadme = Join-Path $payloadDir "README.txt"
-$exePath = Join-Path $releaseDir "RCDragManagerProd.exe"
+$exePath = Join-Path $releaseDir "RCDragManagerProd.WPF.exe"
 
 Write-Step "Locating build tools"
 $msbuildPath = Get-MSBuildPath
@@ -76,12 +78,20 @@ if (Test-Path $outputDir) {
 New-Item -ItemType Directory -Path $payloadDir | Out-Null
 New-Item -ItemType Directory -Path $outputDir | Out-Null
 
+# Clear the WPF Release output so stale files are never packaged.
+if (Test-Path $releaseDir) {
+    Remove-Item $releaseDir -Recurse -Force
+}
+
 Write-Step "Building Release output"
+# -restore is required: the WPF project is SDK-style and needs its NuGet
+# PackageReferences restored before Build (no separate Clean target, which would
+# drop the restore assets).
 if ($msbuildPath -eq "dotnet msbuild") {
-    & dotnet msbuild $projectPath /t:Clean,Build /p:Configuration=Release /p:Platform="AnyCPU" /nologo /verbosity:minimal
+    & dotnet msbuild $projectPath -restore /t:Build /p:Configuration=Release /p:Platform="AnyCPU" /nologo /verbosity:minimal
 }
 else {
-    & $msbuildPath $projectPath /t:Clean,Build /p:Configuration=Release /p:Platform="AnyCPU" /nologo /verbosity:minimal
+    & $msbuildPath $projectPath -restore /t:Build /p:Configuration=Release /p:Platform="AnyCPU" /nologo /verbosity:minimal
 }
 
 if (-not (Test-Path $exePath)) {
