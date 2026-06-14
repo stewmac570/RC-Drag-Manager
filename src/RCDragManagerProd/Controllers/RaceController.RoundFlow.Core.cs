@@ -41,6 +41,11 @@ namespace RCDragManagerProd.Controllers
 
             // normalize + default to RR if empty
             var rt = (raceType ?? _session?.RaceType ?? string.Empty).Trim();
+            // Reset() blanks _session.RaceType, so a reset+regenerate arrives here
+            // with no race type. Fall back to the class's original mode before
+            // defaulting, otherwise every reset silently became a Round Robin.
+            if (string.IsNullOrWhiteSpace(rt))
+                rt = (_session?.OriginalRaceType ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(rt))
             {
                 rt = RaceTypes.RoundRobin;
