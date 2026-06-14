@@ -32,7 +32,7 @@ PrivilegesRequired=lowest
 UsePreviousAppDir=yes
 UsePreviousLanguage=yes
 SetupLogging=yes
-SetupIconFile=..\src\RCDragManagerProd\Assets\retro trans icon.ico
+SetupIconFile=..\src\RCDragManagerProd\Assets\rcdrag_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 VersionInfoVersion={#MyAppVersion}
 
