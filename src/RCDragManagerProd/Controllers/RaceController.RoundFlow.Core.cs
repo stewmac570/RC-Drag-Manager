@@ -171,8 +171,12 @@ namespace RCDragManagerProd.Controllers
 
             _winners.Clear();
             PushFullRefresh();
-            var resetEventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Quick Session" : _session.EventName;
-            _ = _liveApiClient.ResetAsync(_session.EventId.ToString("N"), _session.ClassType, resetEventName);
+            // NOTE: no live /api/reset here. Reset is event-wide on the server (it clears
+            // every class in the event bucket), so resetting on each class's bracket
+            // generation wiped sibling classes off the live site. The QueueLiveUpdate
+            // below fully overwrites this class's state on the server (matches + cleared
+            // winners), so a per-class reset is unnecessary; stale state from a previous
+            // event run is cleared by the server's new-session guard (shared EventId).
             QueueLiveUpdate("GenerateBracket");
         }
 

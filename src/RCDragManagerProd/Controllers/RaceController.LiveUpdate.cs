@@ -110,6 +110,66 @@ namespace RCDragManagerProd.Controllers
             };
         }
 
+        /// <summary>
+        /// Pushes the current live state if a bracket exists, otherwise a roster-only
+        /// "initial" state so the class still appears on the live site before any bracket
+        /// is generated. Called when the race window opens so every class of an event is
+        /// visible the moment the event starts, regardless of which classes have brackets.
+        /// </summary>
+        public void BroadcastLiveSnapshot(string reason)
+        {
+            if (_engine != null)
+                QueueLiveUpdate(reason);
+            else
+                BroadcastInitialState(reason);
+        }
+
+        /// <summary>
+        /// Sends a minimal state for this class (event/class identity, no matches) so the
+        /// class shows up on the live site before its bracket is generated. Built from the
+        /// session alone because the engine does not exist until the first bracket.
+        /// </summary>
+        private void BroadcastInitialState(string reason)
+        {
+            try
+            {
+                if (!AppSettings.LiveBroadcastEnabled)
+                {
+                    Logger.Log("[LIVE][SKIP] reason=" + reason + " disabled=true");
+                    return;
+                }
+                if (_session == null || _session.EventDate == default)
+                {
+                    Logger.Log("[LIVE][SKIP] reason=" + reason + " initialState session/date invalid");
+                    return;
+                }
+
+                var eventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Quick Session" : _session.EventName;
+                var dto = new LiveRaceUpdateDto
+                {
+                    EventId      = _session.EventId.ToString("N"),
+                    EventName    = eventName,
+                    EventDate    = _session.EventDate.ToString("yyyy-MM-dd"),
+                    ClassType    = _session.ClassType,
+                    RaceType     = _session.RaceType,
+                    CurrentRound = string.Empty,
+                    NextUp       = string.Empty,
+                    Matches      = new List<LiveMatchDto>(),
+                    Winners      = new List<LiveWinnerDto>(),
+                    RRStandings  = null,
+                    DialInLocked = false
+                };
+
+                Logger.Log("[LIVE][BUILD] reason=" + reason + " initialState class=" +
+                           (string.IsNullOrWhiteSpace(dto.ClassType) ? "(none)" : dto.ClassType));
+                _ = _liveApiClient.SendAsync(dto);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("[LIVE][SKIP] reason=" + reason + " initialState exception=" + ex.Message);
+            }
+        }
+
         private void QueueLiveUpdate(string reason)
         {
             try
