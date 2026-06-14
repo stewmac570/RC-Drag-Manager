@@ -63,11 +63,6 @@
                                        FontSize="{StaticResource FontSize.Xxl}"
                                        FontWeight="Medium"
                                        Foreground="{StaticResource Brush.TextPrimary}"/>
-                            <TextBlock Text="NPRC Australia"
-                                       FontSize="12" FontWeight="Medium"
-                                       Foreground="{StaticResource Brush.Primary}"
-                                       VerticalAlignment="Center"
-                                       Margin="12,0,0,0"/>
                         </StackPanel>
                         <TextBlock Text="Race director console"
                                    FontSize="{StaticResource FontSize.Xs}"
