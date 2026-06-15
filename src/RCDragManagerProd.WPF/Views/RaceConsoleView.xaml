@@ -316,6 +316,10 @@
                                 Content="—" Click="BtnWinner2_Click"
                                 MouseRightButtonUp="BtnWinner2_RightClick" IsEnabled="False"/>
                     </Grid>
+                    <Button x:Name="BtnMoreTime" Style="{StaticResource Style.Button.Toolbar}"
+                            Content="More time — send to back of round"
+                            Click="BtnMoreTime_Click" IsEnabled="False"
+                            HorizontalAlignment="Center" Margin="0,8,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="16,0"

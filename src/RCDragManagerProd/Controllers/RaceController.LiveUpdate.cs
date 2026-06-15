@@ -36,9 +36,8 @@ namespace RCDragManagerProd.Controllers
             if (string.IsNullOrWhiteSpace(currentRound))
                 currentRound = _revealedRounds.LastOrDefault();
 
-            var nextMatch = EngineGetMatches(_engine)
-                .Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult)
-                .OrderBy(m => m.MatchId)
+            var nextMatch = ApplyRaceOrder(
+                    EngineGetMatches(_engine).Where(m => _revealedRounds.Contains(m.RoundLabel) && !m.HasResult))
                 .FirstOrDefault();
 
             string nextUp = string.Empty;

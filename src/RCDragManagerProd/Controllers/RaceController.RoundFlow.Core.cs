@@ -175,6 +175,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             _winners.Clear();
+            ClearDeferrals();
             PushFullRefresh();
             // NOTE: no live /api/reset here. Reset is event-wide on the server (it clears
             // every class in the event bucket), so resetting on each class's bracket
@@ -209,6 +210,9 @@ namespace RCDragManagerProd.Controllers
                 CanAdvanceChanged?.Invoke(false);
                 return;
             }
+
+            // Push-to-back ordering is scoped to a single round — drop it as we move on.
+            ClearDeferrals();
 
             if (_activeRound != null)
             {
@@ -275,15 +279,13 @@ namespace RCDragManagerProd.Controllers
         public void PushNextMatch()
         {
             EnsureReady();
+            PushDeferState();
 
             // In RR active-round mode, only the active round can supply the next match.
-            // In all other modes, use _revealedRounds as before.
-            var next = EngineGetMatches(_engine)
-                              .Where(m => (_activeRound != null
-                                               ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
-                                               : _revealedRounds.Contains(m.RoundLabel))
-                                          && !m.HasResult)
-                              .OrderBy(m => m.MatchId)
+            // In all other modes, use _revealedRounds as before. ApplyRaceOrder honours
+            // any "push to end of round" the operator has applied.
+            var next = ApplyRaceOrder(
+                              EngineGetMatches(_engine).Where(m => InActiveRaceScope(m) && !m.HasResult))
                               .FirstOrDefault();
 
             if (next == null)

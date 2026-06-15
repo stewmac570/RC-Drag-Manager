@@ -130,6 +130,7 @@
     <Compile Include="Controllers\RaceController.SaveClose.cs" />
     <Compile Include="Controllers\RaceController.Results.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Core.cs" />
+    <Compile Include="Controllers\RaceController.RoundFlow.Defer.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Finals.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Losers.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.View.cs" />

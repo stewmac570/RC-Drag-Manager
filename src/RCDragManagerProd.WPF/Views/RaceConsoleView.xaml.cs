@@ -75,6 +75,7 @@ namespace RCDragManagerProd.WPF.Views
             _controller.NextMatchReady += OnNextMatchReady;
             _controller.WinnersUpdated += OnWinnersUpdated;
             _controller.CanAdvanceChanged += OnCanAdvanceChanged;
+            _controller.CanDeferChanged += OnCanDeferChanged;
             _controller.CanOfferBuybackChanged += OnCanOfferBuybackChanged;
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
@@ -92,6 +93,7 @@ namespace RCDragManagerProd.WPF.Views
                 _controller.NextMatchReady -= OnNextMatchReady;
                 _controller.WinnersUpdated -= OnWinnersUpdated;
                 _controller.CanAdvanceChanged -= OnCanAdvanceChanged;
+                _controller.CanDeferChanged -= OnCanDeferChanged;
                 _controller.CanOfferBuybackChanged -= OnCanOfferBuybackChanged;
                 _controller.CanStartFinalsChanged -= OnCanStartFinalsChanged;
                 _controller.TournamentCompleted -= OnTournamentCompleted;
@@ -218,6 +220,8 @@ namespace RCDragManagerProd.WPF.Views
             if (can) _controller.UnlockDialIn();
             UpdatePrimaryButtons();
         });
+
+        private void OnCanDeferChanged(bool can) => Run(() => BtnMoreTime.IsEnabled = can);
 
         private void OnCanOfferBuybackChanged(bool enabled) => Run(() =>
         {
@@ -490,6 +494,16 @@ namespace RCDragManagerProd.WPF.Views
             if (action == RaceConsolePrimaryAction.StartLosersBracket)
                 BtnBuybacks.IsEnabled = false;
             UpdatePrimaryButtons();
+        }
+
+        private void BtnMoreTime_Click(object sender, RoutedEventArgs e)
+        {
+            try { _raceConsole.PushCurrentMatchToEndOfRound(); }
+            catch (Exception ex)
+            {
+                Logger.Log($"[WPF][CONSOLE] PushCurrentMatchToEndOfRound failed: {ex}");
+                MessageDialog.Error(Host, "Couldn't move that race. Check the log.", "More time");
+            }
         }
 
         private void BtnNextRound_Click(object sender, RoutedEventArgs e)

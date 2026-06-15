@@ -25,6 +25,7 @@ namespace RCDragManagerProd.Controllers
             _revealedRounds.Clear();
             _activeRound = null;
             _winners.Clear();
+            ClearDeferrals();
 
             _matchResult.Clear();
             _rrMatchesSnapshot = null;
@@ -43,6 +44,7 @@ namespace RCDragManagerProd.Controllers
             NextMatchReady?.Invoke(null);
             CanAdvanceChanged?.Invoke(false);
             CanPickWinnerChanged?.Invoke(false);
+            CanDeferChanged?.Invoke(false);
 
             Logger.Log("[RESET] Controller cleared — ready for new class.");
         }
