@@ -168,6 +168,13 @@ namespace RCDragManagerProd.AppServices
         }
 
         /// <summary>
+        /// Pushes the current (next-up) race to the back of its round — used when a racer
+        /// needs more time. No-op when fewer than two races remain in the round. The order
+        /// is live-session only and is not persisted with the session.
+        /// </summary>
+        public void PushCurrentMatchToEndOfRound() => _controller.PushCurrentMatchToEndOfRound();
+
+        /// <summary>
         /// Whether a match's result can be edited: it must exist, already have a result, and be
         /// in the active round. Backs the validation the console's "Edit Match Result" handler
         /// did before opening the winner picker.

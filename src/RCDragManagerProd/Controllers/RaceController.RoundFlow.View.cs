@@ -134,7 +134,7 @@ namespace RCDragManagerProd.Controllers
 
                     rows.Add(new PairingRow { IsHeader = true, RoundLabel = normalizedRound });
 
-                    foreach (var m in mList.Where(x => string.Equals(RoundLabels.Normalize(x.RoundLabel), normalizedRound, StringComparison.OrdinalIgnoreCase)))
+                    foreach (var m in ApplyRaceOrder(mList.Where(x => string.Equals(RoundLabels.Normalize(x.RoundLabel), normalizedRound, StringComparison.OrdinalIgnoreCase))))
                     {
                         string leftName;
                         string rightName;
@@ -222,12 +222,8 @@ namespace RCDragManagerProd.Controllers
                 if (_engine == null || count <= 0) return Array.Empty<EngineMatch>();
 
                 // In RR active-round mode, show upcoming matches for the active round only.
-                var list = EngineGetMatches(_engine)
-                                  .Where(m => (_activeRound != null
-                                                   ? string.Equals(m.RoundLabel, _activeRound, StringComparison.OrdinalIgnoreCase)
-                                                   : _revealedRounds.Contains(m.RoundLabel))
-                                              && !m.HasResult)
-                                  .OrderBy(m => m.MatchId)
+                var list = ApplyRaceOrder(
+                                  EngineGetMatches(_engine).Where(m => InActiveRaceScope(m) && !m.HasResult))
                                   .Take(count)
                                   .ToList();
 
