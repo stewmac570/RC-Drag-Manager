@@ -63,6 +63,60 @@ public class RaceControllerSaveCloseTests
     }
 
     [TestMethod]
+    public void RestoreFromSave_ClosedRace_RemainsResultsOnly()
+    {
+        var (session, controller) = NewMidEventRace();
+        controller.SaveProgress();
+        controller.CloseRace();
+        var loaded = Persist(session);
+
+        var restored = new RaceController(loaded, new NoOpStandingsDialogService());
+        restored.RestoreFromSave();
+
+        Assert.IsTrue(restored.IsCompleted);
+        Assert.IsFalse(restored.HasBracketStarted,
+            "A closed race must not reconstruct a live engine that can be rerun");
+
+        restored.GenerateBracket(loaded.RaceType, loaded.Drivers);
+        Assert.IsFalse(restored.HasBracketStarted,
+            "GenerateBracket must reject completed races");
+    }
+
+    [TestMethod]
+    public void RestoreFromSave_RaceWithCompletedResults_RemainsResultsOnly()
+    {
+        var (session, controller) = NewMidEventRace();
+        controller.SaveProgress();
+        session.ResultsArchive.CompletedAt = new DateTime(2026, 6, 8, 10, 0, 0);
+        var loaded = Persist(session);
+
+        var restored = new RaceController(loaded, new NoOpStandingsDialogService());
+        restored.RestoreFromSave();
+
+        Assert.IsTrue(restored.IsCompleted);
+        Assert.IsFalse(restored.HasBracketStarted);
+    }
+
+    [TestMethod]
+    public void GenerateBracket_WhenEngineAlreadyExists_RejectsPhaseNameWithoutCrashing()
+    {
+        var session = NewSession("Round Robin");
+        var drivers = TestDriverFactory.CreateRoundRobinPack(6);
+        var controller = new RaceController(session, new NoOpStandingsDialogService());
+        controller.GenerateBracket("Round Robin", drivers);
+        var before = controller.PeekUpcomingMatches(10)
+            .Select(m => m.MatchId)
+            .ToArray();
+
+        session.RaceType = "Finals";
+        controller.GenerateBracket(session.RaceType, drivers);
+
+        CollectionAssert.AreEqual(before, controller.PeekUpcomingMatches(10)
+            .Select(m => m.MatchId)
+            .ToArray());
+    }
+
+    [TestMethod]
     public void SaveProgress_AndCloseRace_AreNotTheSameAction()
     {
         var (saveSession, saveController) = NewMidEventRace();

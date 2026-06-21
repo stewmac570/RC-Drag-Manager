@@ -24,6 +24,20 @@ namespace RCDragManagerProd.Controllers
         /// </summary>
         public void RestoreFromSave()
         {
+            if (IsCompleted)
+            {
+                _tournamentClosed = true;
+                Logger.Log($"[RESUME] Completed race '{_session.EventName}' opened results-only; live engine restore skipped.");
+                BracketRedrawn?.Invoke(Array.Empty<RCDragManagerProd.ViewModels.PairingRow>());
+                WinnersUpdated?.Invoke(Array.Empty<RCDragManagerProd.ViewModels.WinnerRow>());
+                NextMatchReady?.Invoke(null);
+                CanAdvanceChanged?.Invoke(false);
+                CanPickWinnerChanged?.Invoke(false);
+                CanOfferBuybackChanged?.Invoke(false);
+                CanStartFinalsChanged?.Invoke(false);
+                return;
+            }
+
             if (_session?.Resume == null)
             {
                 Logger.Log("[RESUME] No resume snapshot — nothing to restore (fresh or pre-feature session).");

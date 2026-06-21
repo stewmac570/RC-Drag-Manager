@@ -71,6 +71,12 @@ namespace RCDragManagerProd.AppServices
         /// <param name="raceType">Engine key used only when building the initial bracket.</param>
         public RaceConsolePrimaryAction ExecutePrimaryAction(List<Driver> drivers, string raceType)
         {
+            if (_controller.IsCompleted)
+            {
+                Logger.Log($"[CONSOLE][REJECT] Primary action blocked for completed race '{_controller.Session?.EventName}'.");
+                return RaceConsolePrimaryAction.None;
+            }
+
             var action = RaceConsoleViewModelBuilder.ResolvePrimaryAction(
                 _controller.IsFinalsPending, _controller.IsInLosersBracketPhase);
 
@@ -97,6 +103,12 @@ namespace RCDragManagerProd.AppServices
         /// </summary>
         public void AdvanceRound()
         {
+            if (_controller.IsCompleted)
+            {
+                Logger.Log($"[CONSOLE][REJECT] Advance blocked for completed race '{_controller.Session?.EventName}'.");
+                return;
+            }
+
             _controller.LockDialIn();
             _controller.AdvanceRound();
         }

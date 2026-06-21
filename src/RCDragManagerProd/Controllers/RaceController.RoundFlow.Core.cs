@@ -33,6 +33,20 @@ namespace RCDragManagerProd.Controllers
         // ------------------  PUBLIC API (CORE FLOW)  ------------------
         public void GenerateBracket(string raceType, List<Driver> drivers)
         {
+            if (IsCompleted)
+            {
+                Logger.Log($"[CTRL][REJECT] GenerateBracket blocked for completed race '{_session.EventName}'.");
+                CanAdvanceChanged?.Invoke(false);
+                CanPickWinnerChanged?.Invoke(false);
+                return;
+            }
+
+            if (_engine != null)
+            {
+                Logger.Log($"[CTRL][REJECT] GenerateBracket blocked because a '{_engine.GetType().Name}' race is already active (requested type='{raceType}').");
+                return;
+            }
+
             if (drivers == null || drivers.Count < 2)
             {
                 Logger.Log("? Cannot generate bracket � provided driver list is invalid.");
@@ -202,6 +216,13 @@ namespace RCDragManagerProd.Controllers
 
         public void AdvanceRound()
         {
+            if (IsCompleted)
+            {
+                Logger.Log($"[CTRL][REJECT] AdvanceRound blocked for completed race '{_session.EventName}'.");
+                CanAdvanceChanged?.Invoke(false);
+                return;
+            }
+
             Logger.Log($"[SNAP] AdvanceRound-entry  |  _engine={_engine?.GetType().Name ?? "null"}  |  _losersEngine={_losersEngine?.GetType().Name ?? "null"}  |  revealedRounds={string.Join(",", _revealedRounds)}");
 
             if (_engine == null)

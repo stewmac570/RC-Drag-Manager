@@ -71,6 +71,7 @@ namespace RCDragManagerProd.WPF.Views
             }
             UpdatePrimaryButtons();
             UpdateRaceResultsButton();
+            ApplyCompletedRaceState();
 
             _controller.BracketRedrawn += OnBracketRedrawn;
             _controller.NextMatchReady += OnNextMatchReady;
@@ -81,7 +82,29 @@ namespace RCDragManagerProd.WPF.Views
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
 
-            _controller.StartDialInPolling();
+            if (!_controller.IsCompleted)
+                _controller.StartDialInPolling();
+        }
+
+        private void ApplyCompletedRaceState()
+        {
+            if (!_controller.IsCompleted) return;
+
+            LblEventTitle.Text = $"{_raceConsole.GetState().EventTitle} — completed (results only)";
+            TxtName.IsEnabled = false;
+            TxtTime.IsEnabled = false;
+            DgDrivers.IsHitTestVisible = false;
+            BtnEditResult.IsEnabled = false;
+            BtnStandings.IsEnabled = false;
+            BtnBuybacks.IsEnabled = false;
+            BtnReset.IsEnabled = false;
+            BtnWinner1.IsEnabled = false;
+            BtnWinner2.IsEnabled = false;
+            BtnMoreTime.IsEnabled = false;
+            BtnGenerateBracket.IsEnabled = false;
+            BtnNextRound.IsEnabled = false;
+            UpdatePrimaryButtons();
+            Logger.Log($"[WPF][CONSOLE] Completed race '{_session?.EventName}' opened results-only.");
         }
 
         /// <summary>Explicit cleanup — called by the host window on close (not on tab
@@ -218,17 +241,18 @@ namespace RCDragManagerProd.WPF.Views
 
         private void OnCanAdvanceChanged(bool can) => Run(() =>
         {
-            BtnNextRound.IsEnabled = can;
+            BtnNextRound.IsEnabled = can && !_controller.IsCompleted;
             if (can) _controller.UnlockDialIn();
             UpdatePrimaryButtons();
         });
 
-        private void OnCanDeferChanged(bool can) => Run(() => BtnMoreTime.IsEnabled = can);
+        private void OnCanDeferChanged(bool can) =>
+            Run(() => BtnMoreTime.IsEnabled = can && !_controller.IsCompleted);
 
         private void OnCanOfferBuybackChanged(bool enabled) => Run(() =>
         {
-            BtnBuybacks.IsEnabled = enabled;
-            BtnStandings.IsEnabled = enabled;
+            BtnBuybacks.IsEnabled = enabled && !_controller.IsCompleted;
+            BtnStandings.IsEnabled = enabled && !_controller.IsCompleted;
             if (enabled && !IsHostedMode)
                 MessageDialog.Info(Host, "Round-Robin complete.\nClick 'Open buybacks' to add drivers to the Losers Bracket.",
                     "Buyback phase ready");
@@ -236,7 +260,7 @@ namespace RCDragManagerProd.WPF.Views
 
         private void OnCanStartFinalsChanged(bool enabled) => Run(() =>
         {
-            BtnGenerateBracket.IsEnabled = enabled;
+            BtnGenerateBracket.IsEnabled = enabled && !_controller.IsCompleted;
             if (enabled)
             {
                 BtnGenerateBracket.Content = "Start finals";
@@ -253,6 +277,9 @@ namespace RCDragManagerProd.WPF.Views
 
         private void OnTournamentCompleted(RaceController.RaceSummary summary) => Run(() =>
         {
+            UpdateRaceResultsButton();
+            ApplyCompletedRaceState();
+
             // In hosted mode the multi-class window records stats and shows the popup.
             if (IsHostedMode) return;
 
@@ -321,8 +348,19 @@ namespace RCDragManagerProd.WPF.Views
 
         // ── Driver actions ────────────────────────────────────────────────────
 
+        private bool RejectCompletedRaceEdit()
+        {
+            if (!_controller.IsCompleted) return false;
+            MessageDialog.Info(Host,
+                "This race is complete and is available for viewing only. Use Results to view the saved winners and ladder.",
+                "Race complete");
+            return true;
+        }
+
         private void BtnAddDriver_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (_controller.HasBracketStarted)
             {
                 MessageDialog.Info(Host, "This race has already started — drivers can't be added to the active race.",
@@ -360,6 +398,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnEditDriver_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (_controller.HasBracketStarted)
             {
                 MessageDialog.Info(Host, "This race has already started — driver identity is fixed.",
@@ -382,6 +422,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnSetQual_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             var row = DgDrivers.SelectedItem as ConsoleDriverRow;
             if (row == null) { MessageDialog.Info(Host, "Select a driver.", "Set qual time"); return; }
             var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
@@ -404,6 +446,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnSetDialIn_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             var row = DgDrivers.SelectedItem as ConsoleDriverRow;
             if (row == null) { MessageDialog.Info(Host, "Select a driver.", "Set dial-in"); return; }
             EditDialIn(row.DriverId, row.Name);
@@ -411,11 +455,15 @@ namespace RCDragManagerProd.WPF.Views
 
         private void DgDrivers_DoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (DgDrivers.SelectedItem is ConsoleDriverRow row) EditDialIn(row.DriverId, row.Name);
         }
 
         private void EditDialIn(int driverId, string name)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (_controller.DialInLocked)
             {
                 if (!MessageDialog.Confirm(Host,
@@ -499,6 +547,13 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnGenerateBracket_Click(object sender, RoutedEventArgs e)
         {
+            if (_controller.IsCompleted)
+            {
+                MessageDialog.Info(Host, "This race is complete. Use Results to view the saved winners and ladder.",
+                    "Race complete");
+                return;
+            }
+
             var raceType = _controller.Session?.RaceType ?? _session?.RaceType;
             var action = _raceConsole.ExecutePrimaryAction(_drivers, raceType);
             BtnGenerateBracket.IsEnabled = false;
@@ -531,6 +586,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (_controller.HasBracketStarted)
             {
                 if (!MessageDialog.Confirm(Host,
@@ -579,6 +636,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnBuybacks_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             var eligible = _raceConsole.GetEligibleBuybacks();
             if (eligible == null || eligible.Count < 2)
             {
@@ -607,6 +666,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnEditResult_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             var selectable = (IcWinners.ItemsSource as IEnumerable<WinnerDisplayRow>)
                 ?.Where(r => !r.IsHeader && r.MatchId > 0).ToList();
             if (selectable == null || selectable.Count == 0)
@@ -646,6 +707,8 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnSaveProgress_Click(object sender, RoutedEventArgs e)
         {
+            if (RejectCompletedRaceEdit()) return;
+
             if (_session == null)
             {
                 MessageDialog.Info(Host, "Quick session has no saved file to update.", "Nothing to save");
