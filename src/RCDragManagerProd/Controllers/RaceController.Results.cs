@@ -18,6 +18,12 @@ namespace RCDragManagerProd.Controllers
     {
         public void SubmitWinner(int matchId, bool firstOption)
         {
+            if (IsCompleted)
+            {
+                Logger.Log($"[WINNER] Reject — completed race '{_session.EventName}' is results-only.");
+                return;
+            }
+
             EnsureReady();
 
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);
@@ -129,6 +135,12 @@ namespace RCDragManagerProd.Controllers
 
         public bool EditWinnerInActiveRound(int matchId, bool firstOption)
         {
+            if (IsCompleted)
+            {
+                Logger.Log($"[CTRL][EDIT] Reject — completed race '{_session.EventName}' is results-only.");
+                return false;
+            }
+
             EnsureReady();
 
             var match = EngineGetMatches(_engine, matchId: matchId).FirstOrDefault(m => m.MatchId == matchId);

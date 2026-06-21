@@ -25,6 +25,8 @@ namespace RCDragManagerProd.Controllers
         private readonly List<WinnerRow> _winners = new();
 
         public RaceSession Session => _session;
+        public bool IsCompleted =>
+            _session.IsClosed || _session.ResultsArchive?.CompletedAt != null;
         private readonly MatchResult _matchResult = new();
         private MatchResult _results => _matchResult;
 

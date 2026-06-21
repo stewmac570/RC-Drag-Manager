@@ -12,6 +12,7 @@ namespace RCDragManagerProd.AppServices
     {
         /// <summary>Initial state — build the bracket from the entered drivers.</summary>
         BuildBracket,
+        None,
 
         /// <summary>Round Robin done and buybacks stored — start the Losers Bracket.</summary>
         StartLosersBracket,
