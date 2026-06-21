@@ -56,25 +56,18 @@ namespace RCDragManagerProd.Repositories
         public int SaveSession(RaceSession session)
         {
             if (session == null) throw new ArgumentNullException(nameof(session));
-            Logger.Log("[DB][SessionRepo] SaveSession()");
+            Logger.Log($"[DB][SessionRepo] SaveSession(id={session.Id})");
 
             string eventName = session.EventName ?? "(event)";
             string classType = session.ClassType ?? "";
             string raceType = session.RaceType ?? "";
             DateTime eventDate = session.EventDate != default ? session.EventDate : DateTime.Now;
 
-            string json = JsonSerializer.Serialize(session, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = false
-            });
-
-            const string sql = @"
+            const string insertSql = @"
 INSERT INTO RaceSessions (EventName, EventDate, ClassType, RaceType, SessionData)
 VALUES (@EventName, @EventDate, @ClassType, @RaceType, @SessionData);
 SELECT last_insert_rowid();";
 
-            int newId;
             using (var cn = Open())
             {
                 using (var tx = cn.BeginTransaction())
@@ -82,17 +75,16 @@ SELECT last_insert_rowid();";
                     Logger.Log("[TX] BEGIN SaveSession");
                     try
                     {
-                        using (var cmd = new SQLiteCommand(sql, cn, tx))
+                        if (session.Id <= 0)
                         {
-                            cmd.Parameters.AddWithValue("@EventName", eventName);
-                            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                            cmd.Parameters.AddWithValue("@ClassType", classType);
-                            cmd.Parameters.AddWithValue("@RaceType", raceType);
-                            cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
-
-                            newId = Convert.ToInt32(cmd.ExecuteScalar());
+                            using (var cmd = new SQLiteCommand(insertSql, cn, tx))
+                            {
+                                AddSaveParameters(cmd, eventName, eventDate, classType, raceType, Serialize(session));
+                                session.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                            }
                         }
 
+                        UpdateExistingSession(cn, tx, session, eventName, eventDate, classType, raceType);
                         tx.Commit();
                         Logger.Log("[TX] COMMIT SaveSession");
                     }
@@ -105,10 +97,60 @@ SELECT last_insert_rowid();";
                 }
             }
 
-            session.Id = newId;
-            Logger.Log($"[DB][SessionRepo] SaveSession → Id={newId}");
-            return newId;
+            Logger.Log($"[DB][SessionRepo] SaveSession → Id={session.Id}");
+            return session.Id;
         }
+
+        private static void UpdateExistingSession(
+            SQLiteConnection cn,
+            SQLiteTransaction tx,
+            RaceSession session,
+            string eventName,
+            DateTime eventDate,
+            string classType,
+            string raceType)
+        {
+            const string sql = @"
+UPDATE RaceSessions
+SET EventName = @EventName,
+    EventDate = @EventDate,
+    ClassType = @ClassType,
+    RaceType = @RaceType,
+    SessionData = @SessionData
+WHERE Id = @Id;";
+
+            using (var cmd = new SQLiteCommand(sql, cn, tx))
+            {
+                AddSaveParameters(cmd, eventName, eventDate, classType, raceType, Serialize(session));
+                cmd.Parameters.AddWithValue("@Id", session.Id);
+                int affected = cmd.ExecuteNonQuery();
+                if (affected != 1)
+                    throw new InvalidOperationException(
+                        $"Expected to update RaceSession Id={session.Id}, but affected {affected} rows.");
+            }
+        }
+
+        private static void AddSaveParameters(
+            SQLiteCommand cmd,
+            string eventName,
+            DateTime eventDate,
+            string classType,
+            string raceType,
+            string json)
+        {
+            cmd.Parameters.AddWithValue("@EventName", eventName);
+            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@ClassType", classType);
+            cmd.Parameters.AddWithValue("@RaceType", raceType);
+            cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
+        }
+
+        private static string Serialize(RaceSession session) =>
+            JsonSerializer.Serialize(session, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            });
 
         // ---------- LIST ----------
         public List<RaceSessionSummary> GetAllSessions()
@@ -166,6 +208,7 @@ ORDER BY datetime(EventDate) DESC";
                 {
                     var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var session = JsonSerializer.Deserialize<RaceSession>(json, opts);
+                    if (session != null) session.Id = id;
                     Logger.Log("[DB][SessionRepo] LoadSession → OK");
                     return session;
                 }

@@ -132,15 +132,22 @@ namespace RCDragManagerProd.Tests
         }
 
         [TestMethod]
-        public void SaveTwice_CreatesTwoRows()
+        public void SaveTwice_UpdatesExistingRow()
         {
             var evt = BuildSampleEvent(classCount: 1);
 
             _repo.SaveEvent(evt);
-            _repo.SaveEvent(evt); // second save — append-only, creates new row
+            var firstId = evt.Id;
+            evt.EventName = "Updated Event";
+            _repo.SaveEvent(evt);
 
             var all = _repo.GetAllEvents();
-            Assert.AreEqual(2, all.Count);
+            var loaded = _repo.LoadEvent(firstId);
+
+            Assert.AreEqual(1, all.Count);
+            Assert.AreEqual(firstId, evt.Id);
+            Assert.AreEqual(firstId, loaded.Id);
+            Assert.AreEqual("Updated Event", loaded.EventName);
         }
 
         [TestMethod]

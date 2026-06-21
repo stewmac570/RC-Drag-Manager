@@ -406,6 +406,7 @@ namespace RCDragManagerProd.Controllers
                         Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing ALL drivers to finals. RankedCount={rankedAll.Count}, SessionDrivers={totalDrivers}");
                         Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
 
+                        CaptureRoundRobinResultSnapshot(rr);
                         InjectFinalsAllAdvance(rankedAll);
                         return;
                     }
@@ -434,6 +435,7 @@ namespace RCDragManagerProd.Controllers
 
                     _rrMatchesSnapshot = EngineGetMatches(_engine).ToList();
                     _rrRoundOrderSnapshot = EngineGetRoundOrder(_engine).ToList();
+                    CaptureRoundRobinResultSnapshot(rr);
 
                     // Popup scorecard + keep detailed log
                     try
@@ -556,6 +558,8 @@ namespace RCDragManagerProd.Controllers
                         MatchResults = _matchResult.GetAllResults()
                     };
 
+                    CaptureCurrentResultSnapshot();
+                    CaptureCompletedResult(winner, runnerUp, summary.CompletedAt);
                     Logger.Log($"?? Tournament complete � Winner: {winner?.Name}, Runner-Up: {runnerUp?.Name}");
                     _tournamentClosed = true;
 

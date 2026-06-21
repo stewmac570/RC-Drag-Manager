@@ -91,6 +91,97 @@ public class RaceSessionRepositoryTests
         Assert.IsFalse(summariesAfterDelete.Any(s => s.Id == savedId));
     }
 
+    [TestMethod]
+    public void SaveSession_WhenAlreadyPersisted_UpdatesExistingRow()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+
+        var session = CreateSession(
+            "QA Update Session",
+            new DateTime(2026, 3, 2, 9, 0, 0),
+            "Pro Ladder");
+
+        var firstId = repository.SaveSession(session);
+        session.EventName = "QA Updated Session";
+        session.DriverEntries[0].DialIn = 4.125;
+
+        var secondId = repository.SaveSession(session);
+        var all = repository.GetAllSessions();
+        var loaded = repository.LoadSession(firstId);
+
+        Assert.AreEqual(firstId, secondId);
+        Assert.AreEqual(1, all.Count, "Saving an existing session must not insert a stale duplicate");
+        Assert.AreEqual("QA Updated Session", loaded.EventName);
+        Assert.AreEqual(4.125, loaded.DriverEntries[0].DialIn);
+        Assert.AreEqual(firstId, loaded.Id);
+    }
+
+    [TestMethod]
+    public void ControllerSaveSession_PreservesDialInsAndEntryMetadata()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+
+        var session = CreateSession(
+            "QA Dial-In Preservation",
+            new DateTime(2026, 3, 2, 10, 0, 0),
+            "Pro Ladder");
+        for (int i = 0; i < session.DriverEntries.Count; i++)
+            session.DriverEntries[i].DialIn = 4.000 + (i * 0.100);
+
+        var controller = new RCDragManagerProd.Controllers.RaceController(
+            session,
+            new NoOpStandingsDialogService());
+        controller.GenerateBracket("Pro Ladder", session.Drivers);
+        controller.UpdateDriverDialIn(session.Drivers[1].Id, 4.555);
+        controller.SaveProgress();
+
+        var id = repository.SaveSession(session);
+        var loaded = repository.LoadSession(id);
+
+        Assert.AreEqual(4.000, loaded.DriverEntries[0].DialIn);
+        Assert.AreEqual(4.555, loaded.DriverEntries[1].DialIn);
+        Assert.AreEqual(4.200, loaded.DriverEntries[2].DialIn);
+        Assert.AreEqual(4.300, loaded.DriverEntries[3].DialIn);
+        Assert.AreEqual(500, loaded.DriverEntries[0].CarID);
+        Assert.AreEqual("Car 1", loaded.DriverEntries[0].CarName);
+        Assert.AreEqual(1, loaded.DriverEntries[0].Seed);
+    }
+
+    [TestMethod]
+    public void ControllerSaveSession_PersistsProLadderResultSnapshot()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+
+        var session = CreateSession(
+            "QA Result Snapshot",
+            new DateTime(2026, 3, 2, 11, 0, 0),
+            "Pro Ladder");
+        var controller = new RCDragManagerProd.Controllers.RaceController(
+            session,
+            new NoOpStandingsDialogService());
+        controller.GenerateBracket("Pro Ladder", session.Drivers);
+
+        var first = controller.PeekUpcomingMatches(10).First();
+        controller.SubmitWinner(first.MatchId, firstOption: true);
+        controller.SaveProgress();
+
+        var id = repository.SaveSession(session);
+        var loaded = repository.LoadSession(id);
+        var phase = loaded.ResultsArchive.Phases
+            .Single(p => p.Phase == "Pro Ladder");
+        var savedMatch = phase.Matches.Single(m => m.MatchId == first.MatchId);
+
+        Assert.AreEqual(session.Drivers[0].Id, savedMatch.WinnerDriverId);
+        Assert.AreEqual(session.Drivers[0].Name, savedMatch.WinnerName);
+        Assert.IsTrue(phase.Matches.Count >= 3);
+    }
+
     private static RaceSession CreateSession(string eventName, DateTime eventDate, string raceType)
     {
         var drivers = TestDriverFactory.CreateRoundRobinPack(4);

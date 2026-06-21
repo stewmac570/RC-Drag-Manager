@@ -129,6 +129,7 @@
     <Compile Include="Controllers\RaceController.Resume.cs" />
     <Compile Include="Controllers\RaceController.SaveClose.cs" />
     <Compile Include="Controllers\RaceController.Results.cs" />
+    <Compile Include="Controllers\RaceController.ResultSnapshots.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Core.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Defer.cs" />
     <Compile Include="Controllers\RaceController.RoundFlow.Finals.cs" />
@@ -305,6 +306,7 @@
     <Compile Include="RaceEngines\RandomEngineAdapter.cs" />
     <Compile Include="RaceEngines\RoundRobinEngineAdapter.cs" />
     <Compile Include="Domain\RaceSession.cs" />
+    <Compile Include="Domain\RaceResults.cs" />
     <Compile Include="Domain\ResumeSnapshot.cs" />
     <Compile Include="Repositories\RaceSessionRepository.cs" />
     <Compile Include="UI\Forms\Common\RaceDialogs.cs" />

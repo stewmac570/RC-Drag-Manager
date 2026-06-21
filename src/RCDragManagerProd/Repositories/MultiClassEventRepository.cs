@@ -51,19 +51,13 @@ namespace RCDragManagerProd.Repositories
         public void SaveEvent(MultiClassEvent evt)
         {
             if (evt == null) throw new ArgumentNullException(nameof(evt));
-            Logger.Log("[DB][MultiClassEventRepo] SaveEvent()");
+            Logger.Log($"[DB][MultiClassEventRepo] SaveEvent(id={evt.Id})");
 
             string eventName = evt.EventName ?? "(event)";
             DateTime eventDate = evt.EventDate != default ? evt.EventDate : DateTime.Now;
             int classCount = evt.ClassSessions?.Count ?? 0;
 
-            string json = JsonSerializer.Serialize(evt, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = false
-            });
-
-            const string sql = @"
+            const string insertSql = @"
 INSERT INTO MultiClassEvents (EventName, EventDate, ClassCount, EventData)
 VALUES (@EventName, @EventDate, @ClassCount, @EventData);
 SELECT last_insert_rowid();";
@@ -74,16 +68,16 @@ SELECT last_insert_rowid();";
                 Logger.Log("[TX] BEGIN SaveEvent");
                 try
                 {
-                    using (var cmd = new SQLiteCommand(sql, cn, tx))
+                    if (evt.Id <= 0)
                     {
-                        cmd.Parameters.AddWithValue("@EventName", eventName);
-                        cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
-                        cmd.Parameters.AddWithValue("@ClassCount", classCount);
-                        cmd.Parameters.AddWithValue("@EventData", json ?? "{}");
-
-                        evt.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                        using (var cmd = new SQLiteCommand(insertSql, cn, tx))
+                        {
+                            AddSaveParameters(cmd, eventName, eventDate, classCount, Serialize(evt));
+                            evt.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
                     }
 
+                    UpdateExistingEvent(cn, tx, evt, eventName, eventDate, classCount);
                     tx.Commit();
                     Logger.Log("[TX] COMMIT SaveEvent");
                 }
@@ -97,6 +91,53 @@ SELECT last_insert_rowid();";
 
             Logger.Log($"[DB][MultiClassEventRepo] SaveEvent → Id={evt.Id}");
         }
+
+        private static void UpdateExistingEvent(
+            SQLiteConnection cn,
+            SQLiteTransaction tx,
+            MultiClassEvent evt,
+            string eventName,
+            DateTime eventDate,
+            int classCount)
+        {
+            const string sql = @"
+UPDATE MultiClassEvents
+SET EventName = @EventName,
+    EventDate = @EventDate,
+    ClassCount = @ClassCount,
+    EventData = @EventData
+WHERE Id = @Id;";
+
+            using (var cmd = new SQLiteCommand(sql, cn, tx))
+            {
+                AddSaveParameters(cmd, eventName, eventDate, classCount, Serialize(evt));
+                cmd.Parameters.AddWithValue("@Id", evt.Id);
+                int affected = cmd.ExecuteNonQuery();
+                if (affected != 1)
+                    throw new InvalidOperationException(
+                        $"Expected to update MultiClassEvent Id={evt.Id}, but affected {affected} rows.");
+            }
+        }
+
+        private static void AddSaveParameters(
+            SQLiteCommand cmd,
+            string eventName,
+            DateTime eventDate,
+            int classCount,
+            string json)
+        {
+            cmd.Parameters.AddWithValue("@EventName", eventName);
+            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@ClassCount", classCount);
+            cmd.Parameters.AddWithValue("@EventData", json ?? "{}");
+        }
+
+        private static string Serialize(MultiClassEvent evt) =>
+            JsonSerializer.Serialize(evt, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            });
 
         // ---------- LIST ----------
         public List<MultiClassEventSummary> GetAllEvents()
@@ -152,6 +193,7 @@ ORDER BY datetime(EventDate) DESC";
                 {
                     var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var multiEvent = JsonSerializer.Deserialize<MultiClassEvent>(json, opts);
+                    if (multiEvent != null) multiEvent.Id = id;
                     Logger.Log("[DB][MultiClassEventRepo] LoadEvent → OK");
                     return multiEvent;
                 }

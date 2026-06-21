@@ -76,18 +76,34 @@ namespace RCDragManagerProd.Controllers
 
                 if (_drivers != null)
                 {
-                    _session.DriverEntries.Clear();
-                    foreach (var d in _drivers)
+                    lock (_dialInLock)
                     {
-                        _session.DriverEntries.Add(new RaceSessionDriverEntry
+                        var existingByDriverId = (_session.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                            .Where(e => e != null)
+                            .GroupBy(e => e.DriverID)
+                            .ToDictionary(g => g.Key, g => g.First());
+
+                        var synchronizedEntries = new List<RaceSessionDriverEntry>(_drivers.Count);
+                        foreach (var d in _drivers)
                         {
-                            DriverID = d.Id,
-                            DriverName = d.Name,
-                            QualifyingTime = d.QualTime
-                        });
+                            if (d == null) continue;
+
+                            if (!existingByDriverId.TryGetValue(d.Id, out var entry))
+                                entry = new RaceSessionDriverEntry { DriverID = d.Id };
+
+                            // The controller owns identity/qualifying time. The session
+                            // entry owns race metadata such as DialIn, car, class and seed,
+                            // so reuse the entry instead of destructively rebuilding it.
+                            entry.DriverName = d.Name;
+                            entry.QualifyingTime = d.QualTime;
+                            synchronizedEntries.Add(entry);
+                        }
+
+                        _session.DriverEntries = synchronizedEntries;
                     }
                 }
 
+                CaptureCurrentResultSnapshot();
                 CaptureResumeSnapshot();
 
                 Logger.Log($"[SAVE] results={list.Count}, rounds={_session.SavedRevealedRounds.Count}, type='{_session.RaceType}'");
