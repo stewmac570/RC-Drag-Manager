@@ -350,6 +350,7 @@ namespace RCDragManagerProd.WPF.Views
                 _drivers.Add(_rosterService.BuildNewDriver(name, qual, _drivers));
             }
 
+            SyncSessionRoster();
             RefreshDriverGrid();
             TxtName.Clear();
             TxtTime.Clear();
@@ -374,6 +375,7 @@ namespace RCDragManagerProd.WPF.Views
             if (dlg.ShowDialog() == true)
             {
                 driver.Name = dlg.DriverName;
+                SyncSessionRoster();
                 RefreshDriverGrid();
             }
         }
@@ -389,8 +391,15 @@ namespace RCDragManagerProd.WPF.Views
             if (dlg.ShowDialog() == true)
             {
                 driver.QualTime = dlg.QualTime;
+                SyncSessionRoster();
                 RefreshDriverGrid();
             }
+        }
+
+        private void SyncSessionRoster()
+        {
+            if (_session == null) return;
+            _rosterService.SyncSession(_session, _drivers);
         }
 
         private void BtnSetDialIn_Click(object sender, RoutedEventArgs e)

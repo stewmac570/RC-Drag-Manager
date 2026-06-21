@@ -35,9 +35,19 @@ namespace RCDragManagerProd.Controllers
             _rrStandingsCardCache = null;
             _rrLoggedRounds.Clear();
 
+            // Reset returns the console to pre-bracket setup. A lock from the
+            // previous round must not block dial-in entry for the new race.
+            UnlockDialIn();
             laneFairness.Reset();
 
-            if (_session != null) _session.RaceType = string.Empty;
+            if (_session != null)
+            {
+                _session.RaceType = string.Empty;
+                _session.Resume = null;
+                _session.SavedResults?.Clear();
+                _session.SavedRevealedRounds?.Clear();
+                _session.ResultsArchive = new RaceResultsArchive();
+            }
 
             BracketRedrawn?.Invoke(Array.Empty<PairingRow>());
             WinnersUpdated?.Invoke(Array.Empty<WinnerRow>());
