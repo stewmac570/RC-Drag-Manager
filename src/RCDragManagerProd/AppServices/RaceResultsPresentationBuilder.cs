@@ -69,7 +69,9 @@ namespace RCDragManagerProd.AppServices
                     Rank = s.Rank,
                     Driver = s.DriverName,
                     Wins = s.Wins,
-                    Losses = s.Losses
+                    Losses = s.Losses,
+                    Points = s.Points.ToString("0.00"),
+                    OpponentStrength = s.OpponentStrength.ToString("0.00")
                 })
                 .ToList();
 

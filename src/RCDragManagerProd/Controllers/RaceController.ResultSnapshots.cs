@@ -35,23 +35,25 @@ namespace RCDragManagerProd.Controllers
             var matches = EngineGetMatches(rr).ToList();
             CapturePhaseSnapshot(RaceTypes.RoundRobin, matches);
 
-            var standings = rr.GetStandings();
-            var losses = matches
-                .Where(m => m.HasResult)
-                .Select(m => _matchResult.GetLoser(m.MatchId))
+            var standings = rr.GetRankedStandings();
+            var driverById = (_session.Drivers ?? new List<Driver>())
                 .Where(d => d != null)
                 .GroupBy(d => d.Id)
-                .ToDictionary(g => g.Key, g => g.Count());
+                .ToDictionary(g => g.Key, g => g.First());
 
             EnsureResultsArchive();
             _session.ResultsArchive.RoundRobinStandings = standings
-                .Select((row, index) => new RoundRobinStandingSnapshot
+                .Select(row => new RoundRobinStandingSnapshot
                 {
-                    Rank = index + 1,
-                    DriverId = row.Driver.Id,
-                    DriverName = row.Driver.Name,
+                    Rank = row.Rank,
+                    DriverId = row.DriverId,
+                    DriverName = driverById.TryGetValue(row.DriverId, out var driver)
+                        ? driver.Name
+                        : row.DriverId.ToString(),
                     Wins = row.Wins,
-                    Losses = losses.TryGetValue(row.Driver.Id, out var count) ? count : 0
+                    Losses = row.Losses,
+                    Points = row.Points,
+                    OpponentStrength = row.OpponentStrength
                 })
                 .ToList();
         }
