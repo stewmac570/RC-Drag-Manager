@@ -119,6 +119,7 @@
     <Compile Include="AppServices\RaceConsoleService.cs" />
     <Compile Include="AppServices\RaceConsoleViewModel.cs" />
     <Compile Include="AppServices\RaceConsoleViewModelBuilder.cs" />
+    <Compile Include="AppServices\RaceResultsPresentationBuilder.cs" />
     <Compile Include="Controllers\IStandingsDialogService.cs" />
     <Compile Include="Controllers\LaneFairnessManager.cs" />
     <Compile Include="Controllers\RaceController.DialIn.cs" />
@@ -335,6 +336,7 @@
     <Compile Include="ViewModels\MatchResultSave.cs" />
     <Compile Include="ViewModels\PairingRow.cs" />
     <Compile Include="ViewModels\WinnerRow.cs" />
+    <Compile Include="ViewModels\RaceResultsPresentation.cs" />
     <EmbeddedResource Include="UI\Forms\Drivers\DriverManagerForm.resx">
       <DependentUpon>DriverManagerForm.cs</DependentUpon>
       <SubType>Designer</SubType>
