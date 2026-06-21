@@ -70,6 +70,7 @@ namespace RCDragManagerProd.WPF.Views
                 BtnGenerateBracket.IsEnabled = true;
             }
             UpdatePrimaryButtons();
+            UpdateRaceResultsButton();
 
             _controller.BracketRedrawn += OnBracketRedrawn;
             _controller.NextMatchReady += OnNextMatchReady;
@@ -212,6 +213,7 @@ namespace RCDragManagerProd.WPF.Views
                 });
             }
             IcWinners.ItemsSource = list;
+            UpdateRaceResultsButton();
         });
 
         private void OnCanAdvanceChanged(bool can) => Run(() =>
@@ -546,6 +548,24 @@ namespace RCDragManagerProd.WPF.Views
             if (!_raceConsole.TryShowStandings())
                 MessageDialog.Info(Host, "Standings aren't available yet — they appear after Round Robin completes.",
                     "Standings not ready");
+        }
+
+        private void BtnRaceResults_Click(object sender, RoutedEventArgs e)
+        {
+            var presentation = RaceResultsPresentationBuilder.Build(_session);
+            if (!presentation.HasResults)
+            {
+                MessageDialog.Info(Host, "No race results have been recorded yet.", "Race results");
+                return;
+            }
+
+            new RaceResultsWindow(_session) { Owner = Host }.ShowDialog();
+        }
+
+        private void UpdateRaceResultsButton()
+        {
+            if (BtnRaceResults != null)
+                BtnRaceResults.IsEnabled = RaceResultsPresentationBuilder.Build(_session).HasResults;
         }
 
         private void BtnBuybacks_Click(object sender, RoutedEventArgs e)

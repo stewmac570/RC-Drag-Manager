@@ -1,0 +1,156 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.RaceResultsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Race results"
+        Width="1040" Height="720" MinWidth="760" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="38" GlassFrameThickness="0"
+                      ResizeBorderThickness="5" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <DataTemplate x:Key="MatchCardTemplate">
+            <Border Width="210" MinHeight="94" Margin="0,0,0,10" Padding="12,10"
+                    Background="{StaticResource Brush.Surface}"
+                    BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Panel}">
+                <StackPanel>
+                    <TextBlock Text="{Binding MatchLabel}"
+                               Foreground="{StaticResource Brush.TextHint}"
+                               FontSize="{StaticResource FontSize.Xs}"/>
+                    <TextBlock Text="{Binding Driver1}" Margin="0,6,0,2"
+                               Foreground="{StaticResource Brush.TextPrimary}"
+                               FontSize="{StaticResource FontSize.Md}" FontWeight="Medium"/>
+                    <TextBlock Text="{Binding Driver2}"
+                               Foreground="{StaticResource Brush.TextSecondary}"
+                               FontSize="{StaticResource FontSize.Md}"/>
+                    <TextBlock Text="{Binding Winner}" Margin="0,8,0,0"
+                               Foreground="{StaticResource Brush.Success}"
+                               FontSize="{StaticResource FontSize.Sm}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RoundColumnTemplate">
+            <StackPanel Width="230" Margin="0,0,22,0">
+                <TextBlock Text="{Binding RoundLabel}" Margin="0,0,0,10"
+                           Foreground="{StaticResource Brush.Primary}"
+                           FontSize="{StaticResource FontSize.Lg}" FontWeight="SemiBold"/>
+                <ItemsControl ItemsSource="{Binding Matches}"
+                              ItemTemplate="{StaticResource MatchCardTemplate}"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PhaseLadderTemplate">
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="{Binding Phase}" Margin="0,0,0,14"
+                           Foreground="{StaticResource Brush.TextPrimary}"
+                           FontSize="{StaticResource FontSize.Xl}" FontWeight="SemiBold"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Rounds}"
+                                  ItemTemplate="{StaticResource RoundColumnTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border Background="{StaticResource Brush.Background}"
+            BorderBrush="{StaticResource Brush.WindowEdge}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+                <TextBlock Text="Race results"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}" FontWeight="Medium"/>
+                <Button Style="{StaticResource Style.WinCtrl.Close}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Margin="0,0,14,0" Click="BtnClose_Click"/>
+            </Grid>
+
+            <Border Grid.Row="1" Padding="24,16"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
+                <StackPanel>
+                    <TextBlock Text="{Binding EventName}"
+                               Foreground="{StaticResource Brush.TextPrimary}"
+                               FontSize="{StaticResource FontSize.Xxl}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Summary}" Margin="0,5,0,0"
+                               Foreground="{StaticResource Brush.TextSecondary}"
+                               FontSize="{StaticResource FontSize.Md}"/>
+                </StackPanel>
+            </Border>
+
+            <TabControl Grid.Row="2" Margin="18,12"
+                        Background="{StaticResource Brush.Background}"
+                        Foreground="{StaticResource Brush.TextPrimary}">
+                <TabItem Header="Ladder">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,18">
+                        <ItemsControl ItemsSource="{Binding Phases}"
+                                      ItemTemplate="{StaticResource PhaseLadderTemplate}"/>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem Header="Results list">
+                    <DataGrid ItemsSource="{Binding ResultRows}" AutoGenerateColumns="False"
+                              IsReadOnly="True" CanUserAddRows="False" Margin="8,14"
+                              Background="{StaticResource Brush.Background}"
+                              Foreground="{StaticResource Brush.TextPrimary}"
+                              RowBackground="{StaticResource Brush.Background}"
+                              AlternatingRowBackground="{StaticResource Brush.Surface}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Phase" Binding="{Binding Phase}" Width="150"/>
+                            <DataGridTextColumn Header="Round" Binding="{Binding Round}" Width="100"/>
+                            <DataGridTextColumn Header="Match" Binding="{Binding Match}" Width="65"/>
+                            <DataGridTextColumn Header="Pairing" Binding="{Binding Pairing}" Width="*"/>
+                            <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="160"/>
+                            <DataGridTextColumn Header="Loser" Binding="{Binding Loser}" Width="160"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Round Robin standings"
+                         IsEnabled="{Binding HasRoundRobinStandings}">
+                    <DataGrid ItemsSource="{Binding Standings}" AutoGenerateColumns="False"
+                              IsReadOnly="True" CanUserAddRows="False" Margin="8,14"
+                              Background="{StaticResource Brush.Background}"
+                              Foreground="{StaticResource Brush.TextPrimary}"
+                              RowBackground="{StaticResource Brush.Background}"
+                              AlternatingRowBackground="{StaticResource Brush.Surface}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="80"/>
+                            <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
+                            <DataGridTextColumn Header="Wins" Binding="{Binding Wins}" Width="100"/>
+                            <DataGridTextColumn Header="Losses" Binding="{Binding Losses}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+
+            <Border Grid.Row="3" Padding="24,12"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
+                <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                        Content="Close" HorizontalAlignment="Right" Click="BtnClose_Click"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
