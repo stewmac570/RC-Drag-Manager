@@ -12,6 +12,7 @@ namespace RCDragManagerProd.WPF.Windows
     {
         private readonly string _connectionString;
         private readonly LandingViewModel _vm;
+        private readonly LoadSessionService _loadService;
 
         public LandingWindow(string connectionString)
         {
@@ -22,9 +23,9 @@ namespace RCDragManagerProd.WPF.Windows
             var driverRepo = new DriverRepository(connectionString);
             var sessionRepo = new RaceSessionRepository(connectionString);
             var multiClassRepo = new MultiClassEventRepository(connectionString);
-            var loadService = new LoadSessionService(sessionRepo, multiClassRepo);
+            _loadService = new LoadSessionService(sessionRepo, multiClassRepo);
 
-            _vm = new LandingViewModel(loadService, driverRepo);
+            _vm = new LandingViewModel(_loadService, driverRepo);
             DataContext = _vm;
             _vm.Load();
         }
@@ -79,9 +80,17 @@ namespace RCDragManagerProd.WPF.Windows
 
         private void EventCard_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Source is FrameworkElement el && el.Tag is RecentEventRow row)
+            if (sender is FrameworkElement el && el.Tag is RecentEventRow row)
             {
-                MessageDialog.Info(this, $"Resume '{row.EventName}' — coming soon.");
+                var result = _loadService.LoadEvent(row.Id, row.IsMultiClass);
+                if (!result.Success)
+                {
+                    MessageDialog.Error(this, result.ErrorMessage, "Load error");
+                    _vm.Load();
+                    return;
+                }
+
+                OpenConsole(result.Event, restore: true);
             }
         }
 

@@ -181,6 +181,59 @@ public class LoadSessionServiceTests
     // ── DeleteSession ─────────────────────────────────────────────────────────
 
     [TestMethod]
+    public void LoadEvent_SingleClassCard_LoadsWrappedSession()
+    {
+        using var db = new TemporarySqliteDb();
+        var service = NewService(db);
+        var repo = new RaceSessionRepository(db.ConnectionString);
+        repo.SaveSession(MakeSession("Recent Single", "Sportsman", "Pro Ladder"));
+        int id = service.ListSessions()[0].Id;
+
+        var result = service.LoadEvent(id, isMultiClass: false);
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual("Recent Single", result.Event.EventName);
+        Assert.AreEqual(1, result.Event.ClassSessions.Count);
+    }
+
+    [TestMethod]
+    public void LoadEvent_MultiClassCard_LoadsSavedEvent()
+    {
+        using var db = new TemporarySqliteDb();
+        var service = NewService(db);
+        var repo = new MultiClassEventRepository(db.ConnectionString);
+        repo.SaveEvent(new MultiClassEvent
+        {
+            EventName = "Recent Multi",
+            EventDate = new DateTime(2026, 6, 22),
+            ClassSessions = new List<RaceSession>
+            {
+                MakeSession("Class A", "Open", "Round Robin"),
+                MakeSession("Class B", "Mod", "Round Robin")
+            }
+        });
+        int id = service.ListMultiClassEvents()[0].Id;
+
+        var result = service.LoadEvent(id, isMultiClass: true);
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual("Recent Multi", result.Event.EventName);
+        Assert.AreEqual(2, result.Event.ClassSessions.Count);
+    }
+
+    [TestMethod]
+    public void LoadEvent_MissingRecentCard_ReturnsFailure()
+    {
+        using var db = new TemporarySqliteDb();
+        var service = NewService(db);
+
+        var result = service.LoadEvent(999, isMultiClass: false);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.ErrorMessage));
+    }
+
+    [TestMethod]
     public void DeleteSession_RemovesRowFromList()
     {
         using var db = new TemporarySqliteDb();
