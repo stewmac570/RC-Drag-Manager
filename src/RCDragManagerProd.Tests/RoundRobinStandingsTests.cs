@@ -91,6 +91,7 @@ public class RoundRobinStandingsTests
         }
 
         var standings = adapter.GetStandings();
+        var detailed = adapter.GetRankedStandings();
         var topRanked = adapter.GetTopRankedDrivers(4);
 
         Assert.IsTrue(standings.Count > 0);
@@ -102,5 +103,8 @@ public class RoundRobinStandingsTests
 
         Assert.AreEqual(4, topRanked.Count);
         Assert.AreEqual(4, topRanked.Select(d => d.Id).Distinct().Count());
+        Assert.AreEqual(4, detailed.Count);
+        Assert.IsTrue(detailed.All(r => r.Points > 0));
+        Assert.IsTrue(detailed.All(r => r.Rank > 0));
     }
 }

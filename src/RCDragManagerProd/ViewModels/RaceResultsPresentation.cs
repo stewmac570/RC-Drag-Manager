@@ -50,5 +50,7 @@ namespace RCDragManagerProd.ViewModels
         public string Driver { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
+        public string Points { get; set; }
+        public string OpponentStrength { get; set; }
     }
 }

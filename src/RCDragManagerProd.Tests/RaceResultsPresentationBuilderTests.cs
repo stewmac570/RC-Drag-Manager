@@ -55,8 +55,16 @@ public class RaceResultsPresentationBuilderTests
             {
                 RoundRobinStandings = new List<RoundRobinStandingSnapshot>
                 {
-                    new RoundRobinStandingSnapshot { Rank = 2, DriverName = "Blake", Wins = 2, Losses = 1 },
-                    new RoundRobinStandingSnapshot { Rank = 1, DriverName = "Ava", Wins = 3, Losses = 0 }
+                    new RoundRobinStandingSnapshot
+                    {
+                        Rank = 2, DriverName = "Blake", Wins = 2, Losses = 1,
+                        Points = 9, OpponentStrength = 18
+                    },
+                    new RoundRobinStandingSnapshot
+                    {
+                        Rank = 1, DriverName = "Ava", Wins = 3, Losses = 0,
+                        Points = 12, OpponentStrength = 16
+                    }
                 }
             }
         };
@@ -66,6 +74,8 @@ public class RaceResultsPresentationBuilderTests
         Assert.IsTrue(view.HasResults);
         Assert.IsTrue(view.HasRoundRobinStandings);
         Assert.AreEqual("Ava", view.Standings[0].Driver);
+        Assert.AreEqual("12.00", view.Standings[0].Points);
+        Assert.AreEqual("16.00", view.Standings[0].OpponentStrength);
     }
 
     private static RaceResultMatchSnapshot Match(

@@ -188,6 +188,13 @@ namespace RCDragManagerProd.RaceEngines
             return top;
         }
 
+        public List<DriverRankResult> GetRankedStandings()
+        {
+            var ranked = _engine.GetRankedStandings();
+            Logger.Log($"[RR-ADAPTER] Detailed standings rows: {ranked.Count}");
+            return ranked;
+        }
+
         public bool IsBye(Driver d) =>
             ByePolicy.IsBye(d);
     }

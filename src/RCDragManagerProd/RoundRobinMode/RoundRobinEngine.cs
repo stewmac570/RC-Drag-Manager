@@ -326,13 +326,18 @@ namespace RCDragManagerProd.RoundRobinMode
 
         public List<Driver> GetTopRankedDrivers(int count)
         {
-            var ranker = new RoundRobinRanker();
-            var ranked = ranker.Rank(GetResults(), drivers, results);
+            var ranked = GetRankedStandings();
 
             return ranked.Take(count)
                          .Select(r => drivers.FirstOrDefault(d => d.Id == r.DriverId))
                          .Where(d => d != null)
                          .ToList();
+        }
+
+        public List<DriverRankResult> GetRankedStandings()
+        {
+            var ranker = new RoundRobinRanker();
+            return ranker.Rank(GetResults(), drivers, results);
         }
 
         // --------------------------------------------------------------

@@ -141,6 +141,9 @@
                             <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
                             <DataGridTextColumn Header="Wins" Binding="{Binding Wins}" Width="100"/>
                             <DataGridTextColumn Header="Losses" Binding="{Binding Losses}" Width="100"/>
+                            <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="100"/>
+                            <DataGridTextColumn Header="Opponent strength"
+                                                Binding="{Binding OpponentStrength}" Width="150"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>

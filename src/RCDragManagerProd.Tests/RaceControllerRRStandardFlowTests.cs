@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.Repositories;
 using RCDragManagerProd.Tests.Helpers;
 
 namespace RCDragManagerProd.Tests;
@@ -222,6 +224,24 @@ public class RaceControllerRRStandardFlowTests
             $"All RR headers must precede all LB headers in bracket. Headers: [{string.Join(", ", finalHeaders)}]");
         Assert.IsTrue(firstLbIndex < firstSFOrFIdx,
             $"All LB headers must precede Finals headers (SF/F) in bracket. Headers: [{string.Join(", ", finalHeaders)}]");
+
+        // Historical result archive must survive the real SQLite save/load path.
+        controller.SaveSession();
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+        var savedId = repository.SaveSession(session);
+        var loaded = repository.LoadSession(savedId);
+
+        Assert.IsNotNull(loaded);
+        Assert.IsTrue(loaded.ResultsArchive.Phases.Any(p => p.Phase == RaceTypes.RoundRobin));
+        Assert.IsTrue(loaded.ResultsArchive.Phases.Any(p => p.Phase == RaceTypes.LosersBracket));
+        Assert.IsTrue(loaded.ResultsArchive.Phases.Any(p => p.Phase == RaceTypes.Finals));
+        Assert.AreEqual(drivers.Count, loaded.ResultsArchive.RoundRobinStandings.Count);
+        Assert.IsTrue(loaded.ResultsArchive.RoundRobinStandings.All(s => s.Points > 0));
+        Assert.IsTrue(loaded.ResultsArchive.RoundRobinStandings.All(s => s.OpponentStrength >= 0));
+        Assert.AreEqual(completion.Winner.Id, loaded.ResultsArchive.ChampionDriverId);
+        Assert.AreEqual(completion.RunnerUp.Id, loaded.ResultsArchive.RunnerUpDriverId);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -231,5 +251,22 @@ public class RaceControllerRRStandardFlowTests
         var peek = controller.PeekUpcomingMatches(20).ToList();
         foreach (var match in peek)
             controller.SubmitWinner(match.MatchId, firstOption: true);
+    }
+
+    private sealed class TemporarySqliteDb : IDisposable
+    {
+        public TemporarySqliteDb() =>
+            DatabasePath = Path.Combine(
+                Path.GetTempPath(),
+                $"rcdragmanager-results-{Guid.NewGuid():N}.db");
+
+        public string DatabasePath { get; }
+        public string ConnectionString => $"Data Source={DatabasePath};Version=3;";
+
+        public void Dispose()
+        {
+            try { if (File.Exists(DatabasePath)) File.Delete(DatabasePath); }
+            catch { }
+        }
     }
 }
