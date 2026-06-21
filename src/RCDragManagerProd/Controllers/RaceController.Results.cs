@@ -69,6 +69,7 @@ namespace RCDragManagerProd.Controllers
                 Loser = loser?.Name ?? "BYE"
             });
 
+            CaptureCurrentResultSnapshot();
             WinnersUpdated?.Invoke(_winners);
 
             // advance UI/state first
@@ -181,6 +182,7 @@ namespace RCDragManagerProd.Controllers
 
             Logger.Log($"[CTRL][EDIT] Override: M{matchId} ({match.RoundLabel}) ? {newWinner.Name} over {(newLoser?.Name ?? "BYE")}.");
 
+            CaptureCurrentResultSnapshot();
             WinnersUpdated?.Invoke(_winners);
             PushNextMatch();
             PushAdvanceState();
