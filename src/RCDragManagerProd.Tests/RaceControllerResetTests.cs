@@ -210,6 +210,45 @@ public class RaceControllerResetTests
             "_rrStandingsCardCache must be null after Reset()");
     }
 
+    [TestMethod]
+    public void DialIn_IsUnlockedAfterReset_WhenPreviousRoundLockedIt()
+    {
+        var controller = new RaceController(NewSession());
+        controller.LockDialIn();
+        Assert.IsTrue(controller.DialInLocked, "Precondition: dial-in must be locked");
+
+        controller.Reset();
+
+        Assert.IsFalse(controller.DialInLocked,
+            "Reset must return the console to setup mode where dial-ins can be edited");
+    }
+
+    [TestMethod]
+    public void SavedResultDisplayState_IsClearedAfterReset()
+    {
+        var session = NewSession();
+        session.Resume = new ResumeSnapshot { CurrentPhase = "Main" };
+        session.SavedResults.Add(new MatchResultSave
+        {
+            MatchId = 1,
+            WinnerDriverId = 1,
+            LoserDriverId = 2
+        });
+        session.SavedRevealedRounds.Add("SF");
+        session.ResultsArchive.Phases.Add(new RacePhaseResultSnapshot
+        {
+            Phase = "Pro Ladder"
+        });
+
+        var controller = new RaceController(session);
+        controller.Reset();
+
+        Assert.IsNull(session.Resume);
+        Assert.AreEqual(0, session.SavedResults.Count);
+        Assert.AreEqual(0, session.SavedRevealedRounds.Count);
+        Assert.AreEqual(0, session.ResultsArchive.Phases.Count);
+    }
+
     // ── Second GenerateBracket() starts cleanly ───────────────────────────────
 
     [TestMethod]

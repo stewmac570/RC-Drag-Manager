@@ -99,4 +99,55 @@ public class SessionRosterServiceTests
         var driver = _svc.BuildNewDriver("Eve", 3.92, new List<Driver>());
         Assert.AreEqual(3.92, driver.QualTime);
     }
+
+    [TestMethod]
+    public void SyncSession_AddsNewDriverSoDialInCanBeStored()
+    {
+        var session = new RaceSession();
+        var roster = new List<Driver>
+        {
+            new Driver { Id = 1, Name = "Existing" },
+            new Driver { Id = 2, Name = "Added after reset" }
+        };
+
+        _svc.SyncSession(session, roster);
+        var controller = new Controllers.RaceController(session);
+        controller.UpdateDriverDialIn(2, 2.850);
+
+        Assert.AreEqual(2, session.DriverEntries.Count);
+        Assert.AreEqual(2.850, session.DriverEntries.Single(e => e.DriverID == 2).DialIn);
+    }
+
+    [TestMethod]
+    public void SyncSession_PreservesExistingDialInAndCarMetadata()
+    {
+        var session = new RaceSession
+        {
+            DriverEntries = new List<RaceSessionDriverEntry>
+            {
+                new RaceSessionDriverEntry
+                {
+                    DriverID = 7,
+                    DriverName = "Old name",
+                    DialIn = 3.125,
+                    CarID = 44,
+                    CarName = "Blue car",
+                    Seed = 2
+                }
+            }
+        };
+
+        _svc.SyncSession(session, new List<Driver>
+        {
+            new Driver { Id = 7, Name = "New name", QualTime = 3.010 }
+        });
+
+        var entry = session.DriverEntries.Single();
+        Assert.AreEqual("New name", entry.DriverName);
+        Assert.AreEqual(3.010, entry.QualifyingTime);
+        Assert.AreEqual(3.125, entry.DialIn);
+        Assert.AreEqual(44, entry.CarID);
+        Assert.AreEqual("Blue car", entry.CarName);
+        Assert.AreEqual(2, entry.Seed);
+    }
 }

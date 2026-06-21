@@ -52,5 +52,33 @@ namespace RCDragManagerProd.AppServices
             int newId = (roster == null || roster.Count == 0) ? 1 : roster.Max(d => d.Id) + 1;
             return new Driver { Id = newId, Name = name, QualTime = qualTime };
         }
+
+        /// <summary>
+        /// Synchronizes the editable console roster into the session while preserving
+        /// race-entry metadata such as dial-in, car, class and seed.
+        /// </summary>
+        public void SyncSession(RaceSession session, IReadOnlyCollection<Driver> roster)
+        {
+            if (session == null) throw new ArgumentNullException(nameof(session));
+
+            var drivers = (roster ?? Array.Empty<Driver>())
+                .Where(d => d != null)
+                .ToList();
+            var existing = (session.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                .Where(e => e != null)
+                .GroupBy(e => e.DriverID)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            session.DriverEntries = drivers.Select(d =>
+            {
+                if (!existing.TryGetValue(d.Id, out var entry))
+                    entry = new RaceSessionDriverEntry { DriverID = d.Id };
+                entry.DriverName = d.Name;
+                entry.QualifyingTime = d.QualTime;
+                return entry;
+            }).ToList();
+
+            session.Drivers = new List<Driver>(drivers);
+        }
     }
 }
