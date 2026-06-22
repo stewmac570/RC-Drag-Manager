@@ -45,6 +45,9 @@ namespace RCDragManagerProd.AppServices
         /// Loads a single-class session by id and wraps it into a one-class
         /// <see cref="MultiClassEvent"/> ready to open in <c>MultiClassRaceForm</c>.
         /// </summary>
+        public LoadResult LoadEvent(int id, bool isMultiClass) =>
+            isMultiClass ? LoadMultiClassEvent(id) : LoadSingleClassSession(id);
+
         public LoadResult LoadSingleClassSession(int id)
         {
             Logger.Log($"[SVC][LoadSession] LoadSingleClassSession(id={id})");
