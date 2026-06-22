@@ -410,7 +410,6 @@ namespace RCDragManagerProd.Controllers
                         {
                             var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                             _rrStandingsCardCache = card;
-                            _standingsDialogService.Show("Round Robin � Standings", card);
                         }
                         catch (Exception ex)
                         {
@@ -428,6 +427,11 @@ namespace RCDragManagerProd.Controllers
                         Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
 
                         CaptureRoundRobinResultSnapshot(rr);
+                        if (!_rrCompletionAnnounced)
+                        {
+                            _rrCompletionAnnounced = true;
+                            RoundRobinCompleted?.Invoke();
+                        }
                         InjectFinalsAllAdvance(rankedAll);
                         return;
                     }
@@ -463,13 +467,17 @@ namespace RCDragManagerProd.Controllers
                     {
                         var card = RoundRobinScorecardLogger.BuildScorecard(rr, _matchResult);
                         _rrStandingsCardCache = card;
-                        _standingsDialogService.Show("Round Robin � Standings", card);
                     }
                     catch (Exception ex)
                     {
                         Logger.Log($"[RR] Scorecard popup failed: {ex.Message}");
                     }
                     RoundRobinScorecardLogger.Log(rr, _matchResult);
+                    if (!_rrCompletionAnnounced)
+                    {
+                        _rrCompletionAnnounced = true;
+                        RoundRobinCompleted?.Invoke();
+                    }
 
                     var eligible = GetEligibleBuybackDrivers(); // uses _rrTop3 snapshot
                     if (eligible.Count >= 2)

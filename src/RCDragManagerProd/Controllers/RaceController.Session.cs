@@ -31,6 +31,7 @@ namespace RCDragManagerProd.Controllers
             _rrMatchesSnapshot = null;
             _rrRoundOrderSnapshot = null;
             _rrTop3 = null;
+            _rrCompletionAnnounced = false;
             _buybackChampionOverride = null;
             _rrStandingsCardCache = null;
             _rrLoggedRounds.Clear();

@@ -158,10 +158,7 @@ namespace RCDragManagerProd.WPF.Windows
             Logger.Log($"[WPF][MultiClass] RR gate: {_rrComplete.Count}/{_controllers.Count} complete");
 
             if (_controllers.Count > 0 && _rrComplete.Count == _controllers.Count)
-                MessageDialog.Info(this,
-                    "All classes have completed Round Robin.\nThe buyback phase is now open for every class.\n\n" +
-                    "Switch to each class tab to run buybacks.",
-                    "Buyback phase ready — all classes");
+                Logger.Log("[WPF][MultiClass] All classes completed Round Robin; buybacks are available.");
         }
 
         // ── Completion ─────────────────────────────────────────────────────────
@@ -175,9 +172,7 @@ namespace RCDragManagerProd.WPF.Windows
 
             var className = _multiEvent.ClassSessions[classIndex].ClassType;
             Logger.Log($"[RESULT][CLASS] '{className}' complete — winner={summary.Winner?.Name ?? "N/A"}, runner-up={summary.RunnerUp?.Name ?? "N/A"}");
-            MessageDialog.Info(this,
-                $"Class: {className}\nWinner: {summary.Winner?.Name ?? "N/A"}\nRunner-up: {summary.RunnerUp?.Name ?? "N/A"}",
-                "Class complete");
+            new ClassCompletionWindow(_multiEvent.ClassSessions[classIndex]) { Owner = this }.ShowDialog();
 
             _completed.Add(classIndex);
             UpdateAllTabStates();
@@ -185,7 +180,6 @@ namespace RCDragManagerProd.WPF.Windows
             if (_completed.Count == _controllers.Count)
             {
                 Logger.Log($"[RESULT][EVENT] '{_multiEvent.EventName}' complete — all {_controllers.Count} classes finished");
-                ShowCombinedSummary();
             }
         }
 

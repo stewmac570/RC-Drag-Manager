@@ -94,11 +94,13 @@ public class TestFoundationTests
     }
 
     [TestMethod]
-    public void Standings_SurfacedOnCompletion_AndReShownOnDemand()
+    public void Standings_CompletionEventRaisedOnce_AndReShownOnDemand()
     {
         var recorder = new RecordingStandingsDialogService();
         var controller = new RaceController(
             TestSessionFactory.RoundRobin(variant: "Standard"), recorder);
+        int completionEvents = 0;
+        controller.RoundRobinCompleted += () => completionEvents++;
 
         // 6 drivers (not 4): completion then leaves >=2 buyback-eligible drivers, so the
         // controller takes the buyback path. The standings auto-show fires on RR completion
@@ -107,8 +109,8 @@ public class TestFoundationTests
         // MessageBox that would block a headless test host.
         controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(6));
 
-        // Resolve every revealed match and advance until RR completion auto-surfaces standings.
-        for (int i = 0; i < 40 && recorder.ShowCount == 0; i++)
+        // Resolve every revealed match and advance until RR completion is announced.
+        for (int i = 0; i < 40 && completionEvents == 0; i++)
         {
             var matches = controller.PeekUpcomingMatches(50).ToList();
             if (matches.Count > 0)
@@ -118,14 +120,15 @@ public class TestFoundationTests
                 controller.AdvanceRound();
         }
 
-        Assert.IsTrue(recorder.ShowCount >= 1,
-            "RR completion must surface standings through the dialog service");
-        int afterAutoShow = recorder.ShowCount;
+        Assert.AreEqual(1, completionEvents,
+            "RR completion must raise exactly one event for the results UI");
+        Assert.AreEqual(0, recorder.ShowCount,
+            "RR completion must not open the legacy text standings dialog automatically");
 
         // The "Standings" button re-shows the cached card on demand.
         Assert.IsTrue(controller.TryShowRoundRobinStandings(),
             "Standings must be available on demand once RR is complete");
-        Assert.AreEqual(afterAutoShow + 1, recorder.ShowCount,
+        Assert.AreEqual(1, recorder.ShowCount,
             "On-demand Standings must route exactly one more call through the dialog service");
         Assert.IsFalse(string.IsNullOrWhiteSpace(recorder.LastShow?.Content),
             "Standings content must be non-empty");
