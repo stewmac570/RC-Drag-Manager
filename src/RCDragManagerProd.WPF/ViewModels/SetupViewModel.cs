@@ -55,6 +55,7 @@ namespace RCDragManagerProd.WPF.ViewModels
         }
 
         public bool HasSelection => _selectedClass != null;
+        public bool CanStart => _configs.Count > 0 && ValidateCanStart() == null;
 
         // ── Class list management ─────────────────────────────────────────────
 
@@ -67,6 +68,7 @@ namespace RCDragManagerProd.WPF.ViewModels
 
             _configs.Add(config);
             Classes.Add(ToRow(config));
+            OnPropertyChanged(nameof(CanStart));
             return null;
         }
 
@@ -78,6 +80,7 @@ namespace RCDragManagerProd.WPF.ViewModels
             if (index < 0 || index >= _configs.Count) return;
             _configs[index] = config;
             Classes[index] = ToRow(config);
+            OnPropertyChanged(nameof(CanStart));
         }
 
         public void RemoveClass(int index)
@@ -85,6 +88,7 @@ namespace RCDragManagerProd.WPF.ViewModels
             if (index < 0 || index >= _configs.Count) return;
             _configs.RemoveAt(index);
             Classes.RemoveAt(index);
+            OnPropertyChanged(nameof(CanStart));
         }
 
         public int IndexOf(ClassRow row) => Classes.IndexOf(row);
