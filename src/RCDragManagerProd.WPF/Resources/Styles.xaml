@@ -388,6 +388,14 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Style.TextBox.Compact"
+           TargetType="TextBox"
+           BasedOn="{StaticResource Style.TextBox}">
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
     <!-- ── Stat card (used in DriverStatsWindow) ─────────────────────────── -->
 
     <Style x:Key="Style.StatCard" TargetType="Border">
