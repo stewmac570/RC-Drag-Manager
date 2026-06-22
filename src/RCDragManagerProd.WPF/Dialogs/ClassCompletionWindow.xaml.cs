@@ -5,16 +5,20 @@ using RCDragManagerProd.Domain;
 
 namespace RCDragManagerProd.WPF.Dialogs
 {
-    public partial class RaceResultsWindow : Window
+    public partial class ClassCompletionWindow : Window
     {
-        public RaceResultsWindow(RaceSession session, bool showRoundRobinStandings = false)
+        private readonly RaceSession _session;
+
+        public ClassCompletionWindow(RaceSession session)
         {
+            _session = session;
             InitializeComponent();
             WindowSizing.RoundCorners(this);
-            DataContext = RaceResultsPresentationBuilder.Build(session);
-            if (showRoundRobinStandings)
-                ResultsTabs.SelectedIndex = 2;
+            DataContext = ClassCompletionPresentationBuilder.Build(session);
         }
+
+        private void BtnFullResults_Click(object sender, RoutedEventArgs e) =>
+            new RaceResultsWindow(_session) { Owner = this }.ShowDialog();
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
 

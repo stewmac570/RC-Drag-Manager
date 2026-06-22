@@ -79,6 +79,7 @@ namespace RCDragManagerProd.WPF.Views
             _controller.CanAdvanceChanged += OnCanAdvanceChanged;
             _controller.CanDeferChanged += OnCanDeferChanged;
             _controller.CanOfferBuybackChanged += OnCanOfferBuybackChanged;
+            _controller.RoundRobinCompleted += OnRoundRobinCompleted;
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
 
@@ -119,6 +120,7 @@ namespace RCDragManagerProd.WPF.Views
                 _controller.CanAdvanceChanged -= OnCanAdvanceChanged;
                 _controller.CanDeferChanged -= OnCanDeferChanged;
                 _controller.CanOfferBuybackChanged -= OnCanOfferBuybackChanged;
+                _controller.RoundRobinCompleted -= OnRoundRobinCompleted;
                 _controller.CanStartFinalsChanged -= OnCanStartFinalsChanged;
                 _controller.TournamentCompleted -= OnTournamentCompleted;
             }
@@ -253,9 +255,12 @@ namespace RCDragManagerProd.WPF.Views
         {
             BtnBuybacks.IsEnabled = enabled && !_controller.IsCompleted;
             BtnStandings.IsEnabled = enabled && !_controller.IsCompleted;
-            if (enabled && !IsHostedMode)
-                MessageDialog.Info(Host, "Round-Robin complete.\nClick 'Open buybacks' to add drivers to the Losers Bracket.",
-                    "Buyback phase ready");
+        });
+
+        private void OnRoundRobinCompleted() => Run(() =>
+        {
+            UpdateRaceResultsButton();
+            new RaceResultsWindow(_session, showRoundRobinStandings: true) { Owner = Host }.ShowDialog();
         });
 
         private void OnCanStartFinalsChanged(bool enabled) => Run(() =>
@@ -286,9 +291,7 @@ namespace RCDragManagerProd.WPF.Views
             var winner = summary.Winner?.Name ?? "N/A";
             var runnerUp = summary.RunnerUp?.Name ?? "N/A";
             Logger.Log($"[RESULT][EVENT] '{summary.EventName}' complete — winner={winner}, runner-up={runnerUp}, matches={summary.TotalMatches}");
-            MessageDialog.Info(Host,
-                $"Event: {summary.EventName}\nWinner: {winner}\nRunner-up: {runnerUp}\nMatches: {summary.TotalMatches}",
-                "Event complete");
+            new ClassCompletionWindow(_session) { Owner = Host }.ShowDialog();
             _raceConsole.RecordTournamentCompletion(summary, _drivers);
         });
 

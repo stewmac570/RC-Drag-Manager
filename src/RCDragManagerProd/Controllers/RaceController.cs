@@ -47,6 +47,7 @@ namespace RCDragManagerProd.Controllers
 
         // Round-robin snapshot (captured at completion)
         private List<Driver> _rrTop3;
+        private bool _rrCompletionAnnounced;
 
         // ────────────────────  EVENTS  ────────────────────
         public event Action<IReadOnlyList<PairingRow>> BracketRedrawn;
@@ -55,6 +56,7 @@ namespace RCDragManagerProd.Controllers
         public event Action<bool> CanAdvanceChanged;
         public event Action<bool> CanPickWinnerChanged;
         public event Action<bool> CanOfferBuybackChanged;
+        public event Action RoundRobinCompleted;
 
         // Finals gating
         public event Action<bool> CanStartFinalsChanged;

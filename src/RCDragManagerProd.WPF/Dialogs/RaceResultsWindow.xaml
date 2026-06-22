@@ -100,7 +100,7 @@
                 </StackPanel>
             </Border>
 
-            <TabControl Grid.Row="2" Margin="18,12"
+            <TabControl x:Name="ResultsTabs" Grid.Row="2" Margin="18,12"
                         Background="{StaticResource Brush.Background}"
                         Foreground="{StaticResource Brush.TextPrimary}">
                 <TabItem Header="Ladder">
