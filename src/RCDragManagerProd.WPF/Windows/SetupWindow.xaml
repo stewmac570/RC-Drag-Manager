@@ -89,8 +89,10 @@
                                    Foreground="{StaticResource Brush.TextHint}"
                                    VerticalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Style="{StaticResource Style.Button.Toolbar}"
-                                    Content="Add class" Click="BtnAddClass_Click" Margin="0,0,6,0"/>
+                            <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                                    Content="Add class" Click="BtnAddClass_Click"
+                                    MinWidth="118" MinHeight="38"
+                                    FontWeight="SemiBold" Margin="0,0,10,0"/>
                             <Button Style="{StaticResource Style.Button.Toolbar}"
                                     Content="Edit" Click="BtnEditClass_Click" Margin="0,0,6,0"
                                     IsEnabled="{Binding HasSelection}"/>
@@ -180,7 +182,8 @@
                         <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
                                 Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
                         <Button Style="{StaticResource Style.Button.Dialog.Primary}"
-                                Content="Start event" Click="BtnStart_Click"/>
+                                Content="Start event" Click="BtnStart_Click"
+                                IsEnabled="{Binding CanStart}"/>
                     </StackPanel>
                 </Grid>
             </Border>

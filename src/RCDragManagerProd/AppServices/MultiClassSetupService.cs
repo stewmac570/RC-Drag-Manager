@@ -71,7 +71,11 @@ namespace RCDragManagerProd.AppServices
         /// </summary>
         public string ValidateCanStart(IEnumerable<ClassConfigDto> classes)
         {
-            foreach (var cc in classes ?? Enumerable.Empty<ClassConfigDto>())
+            var configuredClasses = (classes ?? Enumerable.Empty<ClassConfigDto>()).ToList();
+            if (configuredClasses.Count == 0)
+                return "Add at least one class with drivers to start.";
+
+            foreach (var cc in configuredClasses)
             {
                 if (cc.DriverEntries == null || cc.DriverEntries.Count == 0)
                     return $"Class '{cc.ClassName}' has no drivers. Add at least one driver or remove the class.";

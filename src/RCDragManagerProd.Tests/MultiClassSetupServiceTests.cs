@@ -93,6 +93,18 @@ public class MultiClassSetupServiceTests
     // ── ValidateCanStart ──────────────────────────────────────────────────────
 
     [TestMethod]
+    public void ValidateCanStart_NoClasses_ReturnsError()
+    {
+        using var db = new TemporarySqliteDb();
+        var svc = NewService(db);
+
+        var error = svc.ValidateCanStart(Array.Empty<ClassConfigDto>());
+
+        Assert.IsNotNull(error);
+        StringAssert.Contains(error, "at least one class");
+    }
+
+    [TestMethod]
     public void ValidateCanStart_AllClassesHaveDrivers_ReturnsNull()
     {
         using var db = new TemporarySqliteDb();
