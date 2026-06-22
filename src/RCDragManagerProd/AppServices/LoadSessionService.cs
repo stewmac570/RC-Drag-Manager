@@ -51,13 +51,20 @@ namespace RCDragManagerProd.AppServices
         public LoadResult LoadSingleClassSession(int id)
         {
             Logger.Log($"[SVC][LoadSession] LoadSingleClassSession(id={id})");
-            var session = _sessionRepo.LoadSession(id);
-            if (session == null)
+            var repositoryResult = _sessionRepo.TryLoadSession(id);
+            if (!repositoryResult.Success)
             {
-                Logger.Log("[SVC][LoadSession][WARN] Repository returned null session");
-                return LoadResult.Fail("Unable to load the selected session.");
+                Logger.Log(
+                    $"[SVC][LoadSession][WARN] Session load failed with status " +
+                    $"{repositoryResult.Status}");
+                return repositoryResult.Status == RaceSessionLoadStatus.NotFound
+                    ? LoadResult.Fail("This saved race no longer exists.")
+                    : LoadResult.Fail(
+                        "This saved race is damaged or from an unsupported older version. " +
+                        "It has not been deleted.");
             }
 
+            var session = repositoryResult.Session;
             var wrapped = new MultiClassEvent
             {
                 EventName = session.EventName,

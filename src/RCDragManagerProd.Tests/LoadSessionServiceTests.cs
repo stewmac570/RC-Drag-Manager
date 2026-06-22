@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Data.SQLite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
@@ -122,6 +123,20 @@ public class LoadSessionServiceTests
         Assert.IsFalse(result.Success);
         Assert.IsNull(result.Event);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result.ErrorMessage));
+    }
+
+    [TestMethod]
+    public void LoadSingleClassSession_DamagedDataExplainsThatItWasNotDeleted()
+    {
+        using var db = new TemporarySqliteDb();
+        var service = NewService(db);
+        int id = InsertRawSession(db.ConnectionString, "{not-json");
+
+        var result = service.LoadSingleClassSession(id);
+
+        Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.ErrorMessage, "damaged");
+        StringAssert.Contains(result.ErrorMessage, "not been deleted");
     }
 
     [TestMethod]
@@ -303,6 +318,18 @@ public class LoadSessionServiceTests
             EventDate = new DateTime(2026, 1, 1),
             Drivers = new List<Driver>()
         };
+
+    private static int InsertRawSession(string connectionString, string sessionData)
+    {
+        using var connection = new SQLiteConnection(connectionString);
+        connection.Open();
+        using var command = new SQLiteCommand(@"
+INSERT INTO RaceSessions (EventName, EventDate, ClassType, RaceType, SessionData)
+VALUES ('Damaged Session', '2026-06-22 12:00:00', 'Open', 'Pro Ladder', @SessionData);
+SELECT last_insert_rowid();", connection);
+        command.Parameters.AddWithValue("@SessionData", sessionData);
+        return Convert.ToInt32(command.ExecuteScalar());
+    }
 
     private sealed class TemporarySqliteDb : IDisposable
     {

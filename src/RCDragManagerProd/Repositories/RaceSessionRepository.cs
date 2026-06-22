@@ -159,7 +159,7 @@ WHERE Id = @Id;";
             var list = new List<RaceSessionSummary>();
 
             const string sql = @"
-SELECT Id, EventName, EventDate, ClassType, RaceType
+SELECT Id, EventName, EventDate, ClassType, RaceType, SessionData
 FROM RaceSessions
 ORDER BY datetime(EventDate) DESC";
 
@@ -169,11 +169,28 @@ ORDER BY datetime(EventDate) DESC";
             {
                 while (rd.Read())
                 {
+                    int id = rd.GetInt32(0);
+                    string eventName = rd.IsDBNull(1) ? "" : rd.GetString(1);
+                    string json = rd.IsDBNull(5) ? null : rd.GetString(5);
+                    var loadResult = DeserializeSession(id, json);
+                    if (!loadResult.Success)
+                    {
+                        Logger.Log(
+                            $"[DB][SessionRepo][WARN] Skipping unloadable session " +
+                            $"Id={id}, EventName='{eventName}', Status={loadResult.Status}");
+                        continue;
+                    }
+
+                    DateTime eventDate;
+                    string rawEventDate = rd.IsDBNull(2) ? null : rd.GetString(2);
+                    if (!DateTime.TryParse(rawEventDate, out eventDate))
+                        eventDate = DateTime.MinValue;
+
                     var s = new RaceSessionSummary
                     {
-                        Id = rd.GetInt32(0),
-                        EventName = rd.IsDBNull(1) ? "" : rd.GetString(1),
-                        EventDate = rd.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(rd.GetString(2)),
+                        Id = id,
+                        EventName = eventName,
+                        EventDate = eventDate,
                         ClassType = rd.IsDBNull(3) ? "" : rd.GetString(3),
                         RaceType = rd.IsDBNull(4) ? "" : rd.GetString(4)
                     };
@@ -188,7 +205,13 @@ ORDER BY datetime(EventDate) DESC";
         // ---------- LOAD ----------
         public RaceSession LoadSession(int id)
         {
-            Logger.Log($"[DB][SessionRepo] LoadSession(id={id})");
+            var result = TryLoadSession(id);
+            return result.Session;
+        }
+
+        public RaceSessionLoadResult TryLoadSession(int id)
+        {
+            Logger.Log($"[DB][SessionRepo] TryLoadSession(id={id})");
 
             const string sql = "SELECT SessionData FROM RaceSessions WHERE Id = @Id";
 
@@ -197,26 +220,43 @@ ORDER BY datetime(EventDate) DESC";
             {
                 cmd.Parameters.AddWithValue("@Id", id);
 
-                var json = cmd.ExecuteScalar() as string;
-                if (string.IsNullOrWhiteSpace(json))
+                object value = cmd.ExecuteScalar();
+                if (value == null || value == DBNull.Value)
                 {
-                    Logger.Log("[DB][SessionRepo][WARN] No JSON session data found");
-                    return null;
+                    Logger.Log($"[DB][SessionRepo][WARN] Session Id={id} was not found");
+                    return RaceSessionLoadResult.Fail(RaceSessionLoadStatus.NotFound);
                 }
 
-                try
+                return DeserializeSession(id, value as string);
+            }
+        }
+
+        private static RaceSessionLoadResult DeserializeSession(int id, string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Logger.Log($"[DB][SessionRepo][WARN] Session Id={id} has no JSON session data");
+                return RaceSessionLoadResult.Fail(RaceSessionLoadStatus.MissingData);
+            }
+
+            try
+            {
+                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var session = JsonSerializer.Deserialize<RaceSession>(json, opts);
+                if (session == null)
                 {
-                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var session = JsonSerializer.Deserialize<RaceSession>(json, opts);
-                    if (session != null) session.Id = id;
-                    Logger.Log("[DB][SessionRepo] LoadSession → OK");
-                    return session;
+                    Logger.Log($"[DB][SessionRepo][WARN] Session Id={id} deserialized to null");
+                    return RaceSessionLoadResult.Fail(RaceSessionLoadStatus.InvalidData);
                 }
-                catch (Exception ex)
-                {
-                    Logger.Log($"[DB][SessionRepo][ERROR] Deserialize failed: {ex}");
-                    return null;
-                }
+
+                session.Id = id;
+                Logger.Log($"[DB][SessionRepo] Session Id={id} deserialized successfully");
+                return RaceSessionLoadResult.Ok(session);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[DB][SessionRepo][ERROR] Session Id={id} deserialize failed: {ex}");
+                return RaceSessionLoadResult.Fail(RaceSessionLoadStatus.InvalidData);
             }
         }
 
@@ -251,5 +291,34 @@ ORDER BY datetime(EventDate) DESC";
             Logger.Log("[DB][SessionRepo] DeleteSession → OK");
         }
 
+    }
+
+    public enum RaceSessionLoadStatus
+    {
+        Loaded,
+        NotFound,
+        MissingData,
+        InvalidData
+    }
+
+    public sealed class RaceSessionLoadResult
+    {
+        public bool Success => Status == RaceSessionLoadStatus.Loaded;
+        public RaceSessionLoadStatus Status { get; }
+        public RaceSession Session { get; }
+
+        private RaceSessionLoadResult(RaceSessionLoadStatus status, RaceSession session)
+        {
+            Status = status;
+            Session = session;
+        }
+
+        public static RaceSessionLoadResult Ok(RaceSession session) =>
+            new RaceSessionLoadResult(
+                RaceSessionLoadStatus.Loaded,
+                session ?? throw new ArgumentNullException(nameof(session)));
+
+        public static RaceSessionLoadResult Fail(RaceSessionLoadStatus status) =>
+            new RaceSessionLoadResult(status, null);
     }
 }

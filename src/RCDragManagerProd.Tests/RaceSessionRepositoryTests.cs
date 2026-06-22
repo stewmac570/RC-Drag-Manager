@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Data.SQLite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Repositories;
@@ -70,6 +71,45 @@ public class RaceSessionRepositoryTests
         Assert.AreEqual(newerId, sessions[0].Id);
         Assert.AreEqual("QA Newer Session", sessions[0].EventName);
         Assert.AreEqual(olderId, sessions[1].Id);
+    }
+
+    [TestMethod]
+    public void GetAllSessions_UnloadableRowsAreHiddenWithoutBeingDeleted()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+        int validId = repository.SaveSession(
+            CreateSession("QA Valid Session", new DateTime(2026, 6, 22), "Pro Ladder"));
+        int missingDataId = InsertRawSession(db.ConnectionString, "QA Missing Data", "");
+        int invalidDataId = InsertRawSession(db.ConnectionString, "QA Invalid Data", "{not-json");
+
+        var sessions = repository.GetAllSessions();
+
+        Assert.AreEqual(1, sessions.Count);
+        Assert.AreEqual(validId, sessions[0].Id);
+        Assert.AreEqual(3, CountSessionRows(db.ConnectionString),
+            "Listing sessions must never delete or overwrite damaged saved data");
+        Assert.AreEqual(
+            RaceSessionLoadStatus.MissingData,
+            repository.TryLoadSession(missingDataId).Status);
+        Assert.AreEqual(
+            RaceSessionLoadStatus.InvalidData,
+            repository.TryLoadSession(invalidDataId).Status);
+    }
+
+    [TestMethod]
+    public void TryLoadSession_MissingIdReportsNotFound()
+    {
+        using var db = new TemporarySqliteDb();
+        DatabaseInitializer.InitializeDatabase(db.ConnectionString);
+        var repository = new RaceSessionRepository(db.ConnectionString);
+
+        var result = repository.TryLoadSession(999);
+
+        Assert.IsFalse(result.Success);
+        Assert.AreEqual(RaceSessionLoadStatus.NotFound, result.Status);
+        Assert.IsNull(result.Session);
     }
 
     [TestMethod]
@@ -205,6 +245,28 @@ public class RaceSessionRepositoryTests
                 Seed = i + 1
             }).ToList()
         };
+    }
+
+    private static int InsertRawSession(string connectionString, string eventName, string sessionData)
+    {
+        using var connection = new SQLiteConnection(connectionString);
+        connection.Open();
+        using var command = new SQLiteCommand(@"
+INSERT INTO RaceSessions (EventName, EventDate, ClassType, RaceType, SessionData)
+VALUES (@EventName, @EventDate, 'Open', 'Pro Ladder', @SessionData);
+SELECT last_insert_rowid();", connection);
+        command.Parameters.AddWithValue("@EventName", eventName);
+        command.Parameters.AddWithValue("@EventDate", "2026-06-22 12:00:00");
+        command.Parameters.AddWithValue("@SessionData", sessionData);
+        return Convert.ToInt32(command.ExecuteScalar());
+    }
+
+    private static int CountSessionRows(string connectionString)
+    {
+        using var connection = new SQLiteConnection(connectionString);
+        connection.Open();
+        using var command = new SQLiteCommand("SELECT COUNT(*) FROM RaceSessions", connection);
+        return Convert.ToInt32(command.ExecuteScalar());
     }
 
     private sealed class TemporarySqliteDb : IDisposable
