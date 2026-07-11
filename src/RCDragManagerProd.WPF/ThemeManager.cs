@@ -36,6 +36,12 @@ namespace RCDragManagerProd.WPF
 
                 ["C.Success"]        = ("#2A8E60", "#1D7A50"),
                 ["C.Danger"]         = ("#C84040", "#B83030"),
+                ["C.Info"]           = ("#3A6EA5", "#2F6398"),
+
+                // Text on Primary/flame-orange fills — the button stays orange in
+                // both themes, so these do not vary by theme.
+                ["C.OnPrimary"]       = ("#FFFFFF", "#FFFFFF"),
+                ["C.OnPrimarySubtle"] = ("#A6FFFFFF", "#A6FFFFFF"),
 
                 ["C.TextPrimary"]    = ("#F0F0F0", "#141414"),
                 ["C.TextSecondary"]  = ("#909090", "#5A5A5A"),

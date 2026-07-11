@@ -116,11 +116,11 @@
                                 <TextBlock Text="Start new event"
                                            FontSize="{StaticResource FontSize.Xl}"
                                            FontWeight="Medium"
-                                           Foreground="White"
+                                           Foreground="{StaticResource Brush.OnPrimary}"
                                            Margin="0,0,0,4"/>
                                 <TextBlock Text="Create a new race session — single or multi-class"
                                            FontSize="{StaticResource FontSize.Sm}"
-                                           Foreground="#A6FFFFFF"/>
+                                           Foreground="{StaticResource Brush.OnPrimarySubtle}"/>
                             </StackPanel>
                         </Button>
 
