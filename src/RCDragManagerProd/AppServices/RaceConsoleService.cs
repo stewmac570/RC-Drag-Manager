@@ -280,7 +280,7 @@ namespace RCDragManagerProd.AppServices
 
             foreach (var d in participants)
             {
-                if (d?.Id <= 0) continue;
+                if (d == null || d.Id <= 0) continue;
                 var db = _driverRepo.GetDriverById(d.Id);
                 if (db == null) continue;
                 db.EventsWon = _driverRepo.ComputeEventsWonFromSavedSessions(d.Id);
