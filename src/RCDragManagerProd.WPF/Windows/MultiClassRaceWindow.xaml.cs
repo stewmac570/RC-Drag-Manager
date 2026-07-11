@@ -180,6 +180,7 @@ namespace RCDragManagerProd.WPF.Windows
             if (_completed.Count == _controllers.Count)
             {
                 Logger.Log($"[RESULT][EVENT] '{_multiEvent.EventName}' complete — all {_controllers.Count} classes finished");
+                ShowCombinedSummary();
             }
         }
 
