@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -73,7 +72,7 @@ namespace RCDragManagerProd.Integration
         {
             try
             {
-                var apiKey = ConfigurationManager.AppSettings["ApiKey"];
+                var apiKey = AppSettings.ApiKey;
                 var isNull = apiKey == null;
                 var isEmpty = apiKey != null && apiKey.Length == 0;
                 var isWhiteSpace = string.IsNullOrWhiteSpace(apiKey);
@@ -123,7 +122,7 @@ namespace RCDragManagerProd.Integration
         {
             try
             {
-                var apiKey = ConfigurationManager.AppSettings["ApiKey"];
+                var apiKey = AppSettings.ApiKey;
                 if (string.IsNullOrWhiteSpace(apiKey)) return;
 
                 var body = new { eventId, eventName };
@@ -149,7 +148,7 @@ namespace RCDragManagerProd.Integration
         {
             try
             {
-                var apiKey = ConfigurationManager.AppSettings["ApiKey"];
+                var apiKey = AppSettings.ApiKey;
                 if (string.IsNullOrWhiteSpace(apiKey)) return null;
 
                 var url = DialInPollUrl + "?eventId=" + Uri.EscapeDataString(eventId ?? string.Empty);

@@ -30,7 +30,7 @@ Both launch paths now explicitly force local binding to `http://localhost:5005` 
 
 Both launch paths also inject:
 - `ASPNETCORE_ENVIRONMENT=Development`
-- `ApiKey=86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+- `ApiKey=<your-api-key>`
 
 ## Startup Diagnostics Added
 During startup wait, all non-empty child process lines are captured and logged:

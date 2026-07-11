@@ -78,6 +78,14 @@
                           Content="Broadcast live results to stewmacrc.com" Margin="0,0,0,10"/>
                 <CheckBox x:Name="ChkDebugLogging" Style="{StaticResource Style.CheckBox}"
                           Content="Verbose live-broadcast logging" Margin="0,0,0,14"/>
+                <TextBlock Text="Live server API key"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtApiKey" Style="{StaticResource Style.TextBox}"
+                         Margin="0,0,0,4"/>
+                <TextBlock Text="Stored locally in appsettings.json — required for broadcasting."
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,14"/>
                 <Button Style="{StaticResource Style.Button.Toolbar}"
                         Content="Open live view ↗" Click="BtnOpenLiveView_Click"
                         HorizontalAlignment="Left" Padding="14,7"/>

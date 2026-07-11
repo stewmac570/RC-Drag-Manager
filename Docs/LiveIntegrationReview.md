@@ -60,7 +60,7 @@
   - Each trigger method calls `QueueLiveUpdate(...)` once at end of successful state transition.
 - Contract details to enforce in service:
   - `POST https://stewmacrc.com/api/update`
-  - Header `X-API-KEY: 86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+  - Header `X-API-KEY: <your-api-key>`
   - Send full-state payload every time (replacement semantics).
 
 ## 5. Failure Handling Strategy

@@ -32,12 +32,12 @@ Root cause:
   - Error message now explains where to configure key.
 - `C:\Users\Stewart McMillan\source\repos\RCDragLiveServer\src\RCDragLiveServer\Properties\launchSettings.json`
   - Added:
-    - `ApiKey=86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+    - `ApiKey=<your-api-key>`
   - Updated:
     - `applicationUrl=http://localhost:5005`
 - `C:\Users\Stewart McMillan\source\repos\RCDragLiveServer\src\RCDragLiveServer\appsettings.Development.json`
   - Added:
-    - `"ApiKey": "86561451-e7cf-4c01-87f1-0ae7e34e26d0"`
+    - `"ApiKey": "<your-api-key>"`
 
 ## Where ApiKey Is Now Defined
 - Primary local source (A):
@@ -87,7 +87,7 @@ Expected local URL:
 2. Point RC Drag Manager to local server:
 - Edit `src/RCDragManagerProd/App.config`:
   - `LiveUpdateUrl = http://localhost:5005/api/update`
-  - `LiveUpdateApiKey = 86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+  - `LiveUpdateApiKey = <your-api-key>`
 
 3. Run RC Drag Manager and trigger updates (Generate Bracket / Submit Winner / Advance Round).
 
@@ -100,11 +100,11 @@ curl -i http://localhost:5005/api/live
 ## How To Switch Local vs Production Endpoints
 ### Local
 - `LiveUpdateUrl = http://localhost:5005/api/update`
-- `LiveUpdateApiKey = 86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+- `LiveUpdateApiKey = <your-api-key>`
 
 ### Production
 - `LiveUpdateUrl = https://stewmacrc.com/api/update`
-- `LiveUpdateApiKey = 86561451-e7cf-4c01-87f1-0ae7e34e26d0`
+- `LiveUpdateApiKey = <your-api-key>`
 
 No code changes are required in RC Drag Manager to switch endpoints; config-only change.
 
