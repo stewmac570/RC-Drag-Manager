@@ -516,21 +516,9 @@ namespace RCDragManagerProd.WPF.Views
             var round = _controller.GetMatch(matchId)?.RoundLabel ?? "?";
             Logger.Log($"[RESULT] M{matchId} ({round}): {winner?.Name ?? "?"} defeated {loser?.Name ?? "BYE"}");
 
-            // In hosted mode the multi-class window records win/loss stats on completion.
-            if (IsHostedMode) return;
-
-            if (winner != null && loser != null && !IsBye(winner.Name) && !IsBye(loser.Name))
-                PersistStats(winner, loser, matchId);
-        }
-
-        private void PersistStats(Driver winner, Driver loser, int matchId)
-        {
-            var match = _controller.GetMatch(matchId);
-            _controller.PersistMatchStats(winner, loser, App.ConnectionString);
-            var round = match?.RoundLabel ?? "";
-            if (string.Equals(round, "F", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(round, "Final", StringComparison.OrdinalIgnoreCase))
-                _controller.PersistEventWon(winner, App.ConnectionString);
+            // Stats are persisted once, at tournament completion (RecordTournamentCompletion,
+            // or the multi-class window in hosted mode) — never per match, so result edits
+            // before completion can't leave stale increments behind (#379).
         }
 
         private void BtnWinner1_RightClick(object sender, MouseButtonEventArgs e) => EditButtonDialIn(true);
