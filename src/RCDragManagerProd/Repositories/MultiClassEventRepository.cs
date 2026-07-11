@@ -70,14 +70,19 @@ SELECT last_insert_rowid();";
                 {
                     if (evt.Id <= 0)
                     {
+                        // The embedded JSON id is 0 here; harmless — LoadEvent overwrites
+                        // evt.Id with the row id.
                         using (var cmd = new SQLiteCommand(insertSql, cn, tx))
                         {
                             AddSaveParameters(cmd, eventName, eventDate, classCount, Serialize(evt));
                             evt.Id = Convert.ToInt32(cmd.ExecuteScalar());
                         }
                     }
+                    else
+                    {
+                        UpdateExistingEvent(cn, tx, evt, eventName, eventDate, classCount);
+                    }
 
-                    UpdateExistingEvent(cn, tx, evt, eventName, eventDate, classCount);
                     tx.Commit();
                     Logger.Log("[TX] COMMIT SaveEvent");
                 }

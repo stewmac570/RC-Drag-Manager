@@ -77,14 +77,19 @@ SELECT last_insert_rowid();";
                     {
                         if (session.Id <= 0)
                         {
+                            // The embedded JSON id is 0 here; harmless — every load path
+                            // overwrites session.Id with the row id (DeserializeSession).
                             using (var cmd = new SQLiteCommand(insertSql, cn, tx))
                             {
                                 AddSaveParameters(cmd, eventName, eventDate, classType, raceType, Serialize(session));
                                 session.Id = Convert.ToInt32(cmd.ExecuteScalar());
                             }
                         }
+                        else
+                        {
+                            UpdateExistingSession(cn, tx, session, eventName, eventDate, classType, raceType);
+                        }
 
-                        UpdateExistingSession(cn, tx, session, eventName, eventDate, classType, raceType);
                         tx.Commit();
                         Logger.Log("[TX] COMMIT SaveSession");
                     }
