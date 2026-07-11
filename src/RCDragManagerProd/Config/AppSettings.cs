@@ -18,6 +18,10 @@ namespace RCDragManagerProd.Config
             public bool LiveBroadcastEnabled { get; set; } = false;
             public bool LiveBroadcastDebugLogging { get; set; } = false;
 
+            // Per-query/per-push Logger.Debug chatter; off by default so race-day
+            // logs stay small even with EnableLogging on.
+            public bool VerboseLogging { get; set; } = false;
+
             // UI theme for the WPF app: "Dark" (default) or "Light".
             public string Theme { get; set; } = "Dark";
         }
@@ -80,6 +84,12 @@ namespace RCDragManagerProd.Config
         {
             get => _model.LiveBroadcastDebugLogging;
             set { _model.LiveBroadcastDebugLogging = value; Save(); }
+        }
+
+        public static bool VerboseLogging
+        {
+            get => _model.VerboseLogging;
+            set { _model.VerboseLogging = value; Save(); }
         }
 
         public static string Theme

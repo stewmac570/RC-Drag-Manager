@@ -18,7 +18,7 @@ namespace RCDragManagerProd.Repositories
                 throw new ArgumentNullException(nameof(connectionOrPath));
 
             _connStr = NormalizeConnString(connectionOrPath);
-            Logger.Log($"[DB][DriverRepo] ctor | conn='{_connStr}'");
+            Logger.Debug($"[DB][DriverRepo] ctor | conn='{_connStr}'");
         }
 
         private static string NormalizeConnString(string input)
@@ -50,7 +50,7 @@ namespace RCDragManagerProd.Repositories
 
         public List<Driver> GetAllDrivers()
         {
-            Logger.Log("[DB][DriverRepo] GetAllDrivers()");
+            Logger.Debug("[DB][DriverRepo] GetAllDrivers()");
             var drivers = new List<Driver>();
 
             using (var connection = Open())
@@ -76,23 +76,23 @@ namespace RCDragManagerProd.Repositories
                     drivers.Add(d);
                 }
 
-                Logger.Log($"[DB][DriverRepo] GetAllDrivers drivers loaded: {drivers.Count}");
+                Logger.Debug($"[DB][DriverRepo] GetAllDrivers drivers loaded: {drivers.Count}");
                 if (drivers.Count > 0)
                 {
                     var carsByDriver = GetCarsByDriverIds(connection, drivers.ConvertAll(d => d.Id));
                     foreach (var d in drivers)
                         d.Cars = carsByDriver.TryGetValue(d.Id, out var cars) ? cars : new List<Car>();
-                    Logger.Log($"[DB][DriverRepo] GetAllDrivers batch cars loaded: {carsByDriver.Count} driver groups");
+                    Logger.Debug($"[DB][DriverRepo] GetAllDrivers batch cars loaded: {carsByDriver.Count} driver groups");
                 }
             }
 
-            Logger.Log($"[DB][DriverRepo] GetAllDrivers → {drivers.Count} rows");
+            Logger.Debug($"[DB][DriverRepo] GetAllDrivers → {drivers.Count} rows");
             return drivers;
         }
 
         public Driver GetDriverById(int id)
         {
-            Logger.Log($"[DB][DriverRepo] GetDriverById(id={id})");
+            Logger.Debug($"[DB][DriverRepo] GetDriverById(id={id})");
             Driver driver = null;
 
             using (var connection = Open())
@@ -120,20 +120,20 @@ namespace RCDragManagerProd.Repositories
                 }
             }
 
-            Logger.Log($"[DB][DriverRepo] GetDriverById({id}) → {(driver == null ? "null" : "found")}");
+            Logger.Debug($"[DB][DriverRepo] GetDriverById({id}) → {(driver == null ? "null" : "found")}");
             return driver;
         }
 
         public void AddDriver(Driver driver)
         {
             if (driver == null) throw new ArgumentNullException(nameof(driver));
-            Logger.Log($"[DB][DriverRepo] AddDriver(Name='{driver.Name}')");
+            Logger.Debug($"[DB][DriverRepo] AddDriver(Name='{driver.Name}')");
 
             using (var connection = Open())
             {
                 using (var tx = connection.BeginTransaction())
                 {
-                    Logger.Log("[DB][DriverRepo][TX] AddDriver begin");
+                    Logger.Debug("[DB][DriverRepo][TX] AddDriver begin");
                     try
                     {
                         const string sql = @"
@@ -162,7 +162,7 @@ SELECT last_insert_rowid();";
                         }
 
                         tx.Commit();
-                        Logger.Log("[DB][DriverRepo][TX] AddDriver commit");
+                        Logger.Debug("[DB][DriverRepo][TX] AddDriver commit");
                     }
                     catch (Exception ex)
                     {
@@ -173,19 +173,19 @@ SELECT last_insert_rowid();";
                 }
             }
 
-            Logger.Log($"[DB][DriverRepo] AddDriver → new Id={driver.Id}");
+            Logger.Debug($"[DB][DriverRepo] AddDriver → new Id={driver.Id}");
         }
 
         public void UpdateDriver(Driver driver)
         {
             if (driver == null) throw new ArgumentNullException(nameof(driver));
-            Logger.Log($"[DB][DriverRepo] UpdateDriver(Id={driver.Id}, Name='{driver.Name}')");
+            Logger.Debug($"[DB][DriverRepo] UpdateDriver(Id={driver.Id}, Name='{driver.Name}')");
 
             using (var connection = Open())
             {
                 using (var tx = connection.BeginTransaction())
                 {
-                    Logger.Log("[DB][DriverRepo][TX] UpdateDriver begin");
+                    Logger.Debug("[DB][DriverRepo][TX] UpdateDriver begin");
                     try
                     {
                         const string sql = @"
@@ -286,7 +286,7 @@ SELECT last_insert_rowid();";
                         }
 
                         tx.Commit();
-                        Logger.Log("[DB][DriverRepo][TX] UpdateDriver commit");
+                        Logger.Debug("[DB][DriverRepo][TX] UpdateDriver commit");
                     }
                     catch (Exception ex)
                     {
@@ -297,18 +297,18 @@ SELECT last_insert_rowid();";
                 }
             }
 
-            Logger.Log("[DB][DriverRepo] UpdateDriver → OK");
+            Logger.Debug("[DB][DriverRepo] UpdateDriver → OK");
         }
 
         public void DeleteDriver(int id)
         {
-            Logger.Log($"[DB][DriverRepo] DeleteDriver(Id={id})");
+            Logger.Debug($"[DB][DriverRepo] DeleteDriver(Id={id})");
 
             using (var connection = Open())
             {
                 using (var tx = connection.BeginTransaction())
                 {
-                    Logger.Log("[DB][DriverRepo][TX] DeleteDriver begin");
+                    Logger.Debug("[DB][DriverRepo][TX] DeleteDriver begin");
                     try
                     {
                         using (var cmd = new SQLiteCommand("DELETE FROM Cars WHERE DriverId = @DriverId", connection, tx))
@@ -324,7 +324,7 @@ SELECT last_insert_rowid();";
                         }
 
                         tx.Commit();
-                        Logger.Log("[DB][DriverRepo][TX] DeleteDriver commit");
+                        Logger.Debug("[DB][DriverRepo][TX] DeleteDriver commit");
                     }
                     catch (Exception ex)
                     {
@@ -335,13 +335,13 @@ SELECT last_insert_rowid();";
                 }
             }
 
-            Logger.Log("[DB][DriverRepo] DeleteDriver → OK");
+            Logger.Debug("[DB][DriverRepo] DeleteDriver → OK");
         }
 
         public void AddCar(int driverId, Car car)
         {
             if (car == null) throw new ArgumentNullException(nameof(car));
-            Logger.Log($"[DB][DriverRepo] AddCar(driverId={driverId}, Car='{car.CarName}')");
+            Logger.Debug($"[DB][DriverRepo] AddCar(driverId={driverId}, Car='{car.CarName}')");
 
             using (var conn = Open())
             {
@@ -384,7 +384,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
         private List<Car> GetCarsByDriverId(int driverId)
         {
             var cars = new List<Car>();
-            Logger.Log($"[DB][DriverRepo] GetCarsByDriverId(driverId={driverId})");
+            Logger.Debug($"[DB][DriverRepo] GetCarsByDriverId(driverId={driverId})");
 
             using (var connection = Open())
             using (var cmd = new SQLiteCommand("SELECT * FROM Cars WHERE DriverId = @DriverId", connection))
@@ -406,13 +406,13 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                 }
             }
 
-            Logger.Log($"[DB][DriverRepo] GetCarsByDriverId → {cars.Count} rows");
+            Logger.Debug($"[DB][DriverRepo] GetCarsByDriverId → {cars.Count} rows");
             return cars;
         }
 
         public void UpdateQualifyingTime(int driverId, double qualTime)
         {
-            Logger.Log($"[DB][DriverRepo] UpdateQualifyingTime(id={driverId}, time={qualTime})");
+            Logger.Debug($"[DB][DriverRepo] UpdateQualifyingTime(id={driverId}, time={qualTime})");
 
             using (var connection = Open())
             using (var command = connection.CreateCommand())
@@ -423,7 +423,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                 command.ExecuteNonQuery();
             }
 
-            Logger.Log("[DB][DriverRepo] UpdateQualifyingTime → OK");
+            Logger.Debug("[DB][DriverRepo] UpdateQualifyingTime → OK");
         }
 
         public void IncrementEventsEntered(int driverId, int delta = 1)
@@ -456,7 +456,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
             using (var connection = Open())
             using (var tx = connection.BeginTransaction())
             {
-                Logger.Log("[DB][DriverRepo][TX] IncrementWinsAndLosses begin");
+                Logger.Debug("[DB][DriverRepo][TX] IncrementWinsAndLosses begin");
                 try
                 {
                     using (var winCmd = new SQLiteCommand("UPDATE Drivers SET TotalWins = TotalWins + @Delta WHERE Id = @Id", connection, tx))
@@ -474,7 +474,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                     }
 
                     tx.Commit();
-                    Logger.Log("[DB][DriverRepo][TX] IncrementWinsAndLosses commit");
+                    Logger.Debug("[DB][DriverRepo][TX] IncrementWinsAndLosses commit");
                 }
                 catch (Exception ex)
                 {
@@ -511,7 +511,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                             // may be PascalCase, so property lookups must ignore case.
                             if (!TryGetPropertyIgnoreCase(root, "SavedResults", out var arr) || arr.ValueKind != JsonValueKind.Array)
                             {
-                                Logger.Log("[STATS] Session skipped: no SavedResults array.");
+                                Logger.Debug("[STATS] Session skipped: no SavedResults array.");
                                 continue;
                             }
 
@@ -531,7 +531,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                         }
                         catch (Exception ex)
                         {
-                            Logger.Log($"[STATS] Session parse failed: {ex.Message}");
+                            Logger.Debug($"[STATS] Session parse failed: {ex.Message}");
                         }
                     }
                 }
