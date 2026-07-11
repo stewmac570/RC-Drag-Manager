@@ -38,8 +38,9 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore $env:SOLUTION
 
-      # Release build of the WinForms app through real MSBuild — this is the actual
-      # release path and the app must compile before tests are worth running.
+      # Release build of both apps (legacy WinForms + the shipped WPF UI; the src
+      # solution includes both) through real MSBuild — this is the actual release
+      # path and the apps must compile before tests are worth running.
       - name: Build solution
         run: msbuild $env:SOLUTION -p:Configuration=$env:CONFIGURATION -m -v:minimal -nologo
 

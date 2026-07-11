@@ -1,6 +1,26 @@
 # RC Drag Manager — Codebase Map
 
-All source files in `src/RCDragManagerProd/`, organised by folder.
+All source files in `src/RCDragManagerProd/`, organised by folder. The WPF UI
+lives in `src/RCDragManagerProd.WPF/` (see the section at the end and the WPF
+UI section of `CLAUDE.md`).
+
+---
+
+## AppServices/
+
+UI-agnostic services extracted from the forms (issues #284–#291); both the
+legacy WinForms UI and the WPF UI bind to these.
+
+| File | Description |
+|------|-------------|
+| `RaceConsoleService.cs` | Race-console orchestration: winner submission, primary action, buybacks, edit-result validation, save/close, completion stats (`RecordTournamentCompletion`, `RecomputeEventsWon`) |
+| `RaceConsoleViewModel.cs` / `RaceConsoleViewModelBuilder.cs` | Console state snapshot + builder |
+| `LoadSessionService.cs` | Lists/loads saved sessions and multi-class events with typed failure results |
+| `MultiClassSetupService.cs` | Multi-class event setup validation and construction |
+| `MultiClassRaceService.cs` | Multi-class coordination helpers (per-class completion stats) |
+| `SessionRosterService.cs` | Roster validation/sync between the console grid and the session |
+| `DriverManagerService.cs` / `DriverStatsService.cs` | Driver registry and stats screens' logic |
+| `RaceResultsPresentationBuilder.cs` / `ClassCompletionPresentationBuilder.cs` | Build result/ladder presentations from a saved session |
 
 ---
 
@@ -36,7 +56,14 @@ All source files in `src/RCDragManagerProd/`, organised by folder.
 | `RaceController.Persistence.cs` | `SaveSession()` — collects match results and round state into the `RaceSession` object |
 | `RaceController.Logging.cs` | `TryLogCompletedRound()` — emits RR per-round scorecard logs |
 | `RaceController.EngineCalls.cs` | `EngineGetMatches()`, `EngineSetWinner()`, `EngineHasWinner()`, etc. — thin adapters isolating engine type casts |
-| `RaceController.LiveUpdate.cs` | `QueueLiveUpdate()`, `BuildLiveRaceUpdateDto()` — optional HTTP live feed push |
+| `RaceController.LiveUpdate.cs` | `QueueLiveUpdate()`, `BuildLiveRaceUpdateDto()`, `BroadcastLiveSnapshot()` — optional HTTP live feed push |
+| `RaceController.DialIn.cs` | Dial-in state: `GetDriverDialIn()`, `UpdateDriverDialIn()`, lock/unlock, live-site poll timer, `DialInsChanged` event |
+| `RaceController.Resume.cs` | `RestoreFromSave()` — rebuilds engine state from a saved session (mid-event resume) |
+| `RaceController.MultiClass.cs` | Multi-class coordination helpers (`IsRrComplete()`, pending-match queries) |
+| `RaceController.SaveClose.cs` | `SaveProgress()` / close-race orchestration |
+| `RaceController.ResultSnapshots.cs` | Captures completed-result snapshots for results-only viewing |
+| `RaceController.RoundFlow.Defer.cs` | `PushCurrentMatchToEndOfRound()` — "more time" deferral |
+| `RaceController.Stats.cs` | `PersistTournamentStats()`, `PersistMatchStats()`, `PersistEventWon()`, `RecomputeEventsWon()` (legacy Form1 path; WPF uses `RaceConsoleService`) |
 | `LaneFairnessManager.cs` | Tracks lane (left/right) history per driver; `GetLane()` returns the fairer assignment |
 | `IStandingsDialogService.cs` | Interface for showing the RR standings popup; default impl uses `ScrollableTextDialog` |
 
@@ -49,6 +76,7 @@ All source files in `src/RCDragManagerProd/`, organised by folder.
 | `Drivers.cs` | `Driver` entity: Id, Name, QualTime, TotalWins, TotalLosses, EventsEntered, EventsWon, Seed, State, Cars |
 | `Car.cs` | `Car` entity: Id/CarID alias, DriverId, CarName, ClassType, DefaultDialIn |
 | `RaceSession.cs` | `RaceSession` (full session state), `RaceSessionDriverEntry` (per-driver snapshot), `MatchResultSave` (serializable result record) |
+| `MultiClassEvent.cs` | Parent object for multi-class events: EventName, EventDate, `ClassSessions` (one `RaceSession` per class) |
 | `MatchResult.cs` | In-memory result store: `SetWinner`, `GetWinner`, `GetLoser`, `HasResult`, `ClearFromMatch`, `IsTournamentComplete` |
 | `ByePolicy.cs` | `IsBye(Driver d)` — true if `d == null` |
 | `RoundLabels.cs` | Round label normalization (`"R1"`, `"SF"`, `"F"`, `"LB-R1"`, `"LB-F"`, `"RR1"`, …), compare/sort keys |
@@ -92,7 +120,8 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 
 | File | Description |
 |------|-------------|
-| `Logger.cs` | Static logger; writes timestamped lines to `%APPDATA%\RC_Drag_Manager\app.log`; respects `AppSettings.EnableLogging` |
+| `Logger.cs` | Static facade: `Log` (info) + `Debug` (gated by `AppSettings.VerboseLogging`); respects `AppSettings.EnableLogging` |
+| `LogWriter.cs` | Shared lock-guarded writer: one file handle, AutoFlush, 5 MB roll to `app.log.1` in `%APPDATA%\RC_Drag_Manager` |
 
 ---
 
@@ -125,10 +154,12 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 
 | File | Description |
 |------|-------------|
-| `DatabaseInitializer.cs` | Idempotent schema creation: `CREATE TABLE IF NOT EXISTS` for Drivers, Cars, RaceSessions; `ALTER TABLE` for new columns |
+| `DatabaseInitializer.cs` | Idempotent schema creation: `CREATE TABLE IF NOT EXISTS` for Drivers, Cars, RaceSessions, MultiClassEvents |
 | `DriverRepository.cs` | Full CRUD for Drivers + Cars; stat increment methods; `ComputeEventsWonFromSavedSessions()` |
 | `CarRepository.cs` | Lightweight Car-only CRUD (partial overlap with DriverRepository) |
-| `RaceSessionRepository.cs` | `SaveSession()` (INSERT), `GetAllSessions()` (summary list), `LoadSession(id)` (deserialize JSON), `DeleteSession(id)` |
+| `RaceSessionRepository.cs` | `SaveSession()` (INSERT first save / UPDATE after), `GetAllSessions()` (summary list), `TryLoadSession(id)` (typed load result), `DeleteSession(id)` |
+| `MultiClassEventRepository.cs` | Same pattern for `MultiClassEvent` parent objects (`SaveEvent`/`GetAllEvents`/`LoadEvent`/`DeleteEvent`) |
+| `DbDate.cs` | Invariant-culture format/parse for stored EventDate strings |
 
 ---
 
@@ -272,3 +303,30 @@ Scans the main project's source files and generates Markdown/JSON reports of cla
 | `Models/` | Data models: `ClassInfo`, `MethodInfo`, `EventInfo`, `RepositoryInfo`, `UIControlInfo`, `DependencyInfo`, `ClassRelationInfo`, `ProjectMap` |
 | `Modules/` | Scanners and exporters: `ClassScanner`, `MethodScanner`, `EventScanner`, `RepositoryScanner`, `UIControlScanner`, `ClassRelationAnalyzer`, `DependencyGraphAnalyzer`, `CircularDependencyDetector`, `ProjectMapBuilder`, `JsonExporter`, `MarkdownExporter`, `UIEventMapExporter` |
 | `Program.cs` | Entry point: orchestrates scan and export |
+
+> `src/ProjectAnalysis/` holds this tool's **generated output** (ProjectMap.json,
+> Methods.md, …). It is a point-in-time snapshot and its line numbers drift from
+> the source — regenerate before trusting it; prefer reading the code directly.
+
+---
+
+## src/RCDragManagerProd.WPF/ (current UI — v2.0.0)
+
+The shipped WPF app. Views hold no race logic; they bind to the AppServices
+above and subscribe to `RaceController` events. See the "WPF UI" section of
+`CLAUDE.md` for conventions (themed dialogs, `Brush.*` resources, Dispatcher
+marshalling).
+
+| Path | Description |
+|------|-------------|
+| `App.xaml(.cs)` | Startup: settings, theme, DB init, global exception handler, opens `LandingWindow` |
+| `Windows/` | Top-level windows: Landing, Setup, LoadSession, DriverManager, DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard |
+| `Views/RaceConsoleView.xaml(.cs)` | One class's race console; hosted standalone or one-per-tab in `MultiClassRaceWindow` |
+| `Dialogs/` | Themed modal dialogs incl. `MessageDialog` (the dark `MessageBox` replacement), results/buyback/edit dialogs |
+| `ViewModels/` | INotifyPropertyChanged view models + display-row types |
+| `Resources/Theme.xaml` | Brushes (`Brush.*` bound to `C.*` colours), radii, font sizes |
+| `Resources/Styles.xaml` | Control styles (buttons, grids, title-bar traffic lights) |
+| `ThemeManager.cs` | Dark/light palette (`C.*` colour dictionary swap at runtime) |
+| `WindowSizing.cs` | Work-area clamping, borderless-maximize constraints, Win11 rounded corners |
+| `WpfStandingsDialogService.cs` | `IStandingsDialogService` implementation using themed dialogs |
+| `Converters.cs` | Value converters used by the XAML views |
