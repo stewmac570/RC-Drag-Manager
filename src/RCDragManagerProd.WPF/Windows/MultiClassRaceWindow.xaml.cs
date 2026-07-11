@@ -243,8 +243,8 @@ namespace RCDragManagerProd.WPF.Windows
         private Brush CompletedBrush => Res("Brush.TextHint");
         private Brush RrCompleteBrush => Res("Brush.Primary");
         private Brush NextActiveBrush => Res("Brush.Success");
-        private static readonly Brush StartedBrush = new SolidColorBrush(Color.FromRgb(0x3A, 0x6E, 0xA5));
-        private static readonly Brush IdleBrush = new SolidColorBrush(Color.FromRgb(0x40, 0x40, 0x40));
+        private Brush StartedBrush => Res("Brush.Info");
+        private Brush IdleBrush => Res("Brush.TextGhost");
 
         // ── Title bar ─────────────────────────────────────────────────────────
 

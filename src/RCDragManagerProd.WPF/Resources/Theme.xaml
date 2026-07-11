@@ -19,6 +19,10 @@
 
     <SolidColorBrush x:Key="Brush.Success"        Color="{DynamicResource C.Success}"/>
     <SolidColorBrush x:Key="Brush.Danger"         Color="{DynamicResource C.Danger}"/>
+    <SolidColorBrush x:Key="Brush.Info"           Color="{DynamicResource C.Info}"/>
+
+    <SolidColorBrush x:Key="Brush.OnPrimary"       Color="{DynamicResource C.OnPrimary}"/>
+    <SolidColorBrush x:Key="Brush.OnPrimarySubtle" Color="{DynamicResource C.OnPrimarySubtle}"/>
 
     <SolidColorBrush x:Key="Brush.TextPrimary"    Color="{DynamicResource C.TextPrimary}"/>
     <SolidColorBrush x:Key="Brush.TextSecondary"  Color="{DynamicResource C.TextSecondary}"/>
