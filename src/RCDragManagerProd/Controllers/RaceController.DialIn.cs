@@ -16,6 +16,11 @@ namespace RCDragManagerProd.Controllers
 
         public bool DialInLocked => _dialInLocked;
 
+        /// <summary>Raised after one or more driver dial-ins change, including changes
+        /// applied by the background live-site poll. May fire on a non-UI thread —
+        /// subscribers must marshal to their dispatcher.</summary>
+        public event Action DialInsChanged;
+
         public double? GetDriverDialIn(int driverId)
         {
             if (_session == null) return null;
@@ -37,6 +42,7 @@ namespace RCDragManagerProd.Controllers
                 entry.DialIn = dialIn;
             }
             Logger.Log($"[DIALIN] Updated driverId={driverId} dialIn={dialIn?.ToString("F3") ?? "null"}");
+            DialInsChanged?.Invoke();
             QueueLiveUpdate("dialin-edit");
         }
 
@@ -107,7 +113,10 @@ namespace RCDragManagerProd.Controllers
                 }
 
                 if (changed)
+                {
+                    DialInsChanged?.Invoke();
                     QueueLiveUpdate("dialin-poll");
+                }
             }
             catch (Exception ex)
             {
