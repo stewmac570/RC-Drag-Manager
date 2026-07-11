@@ -507,7 +507,9 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                             using var doc = JsonDocument.Parse(json);
                             var root = doc.RootElement;
 
-                            if (!root.TryGetProperty("SavedResults", out var arr) || arr.ValueKind != JsonValueKind.Array)
+                            // Session JSON is written camelCase ("savedResults") but older rows
+                            // may be PascalCase, so property lookups must ignore case.
+                            if (!TryGetPropertyIgnoreCase(root, "SavedResults", out var arr) || arr.ValueKind != JsonValueKind.Array)
                             {
                                 Logger.Log("[STATS] Session skipped: no SavedResults array.");
                                 continue;
@@ -540,7 +542,7 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
 
             static int? TryReadInt(JsonElement obj, string name)
             {
-                if (!obj.TryGetProperty(name, out var el)) return null;
+                if (!TryGetPropertyIgnoreCase(obj, name, out var el)) return null;
                 try
                 {
                     if (el.ValueKind == JsonValueKind.Number && el.TryGetInt32(out var n)) return n;
@@ -549,6 +551,26 @@ VALUES (@DriverId, @CarName, @ClassType, @DefaultDialIn);";
                 catch { }
                 return null;
             }
+        }
+
+        private static bool TryGetPropertyIgnoreCase(JsonElement obj, string name, out JsonElement value)
+        {
+            if (obj.ValueKind == JsonValueKind.Object)
+            {
+                if (obj.TryGetProperty(name, out value)) return true;
+
+                foreach (var property in obj.EnumerateObject())
+                {
+                    if (string.Equals(property.Name, name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        value = property.Value;
+                        return true;
+                    }
+                }
+            }
+
+            value = default;
+            return false;
         }
 
         private Dictionary<int, List<Car>> GetCarsByDriverIds(SQLiteConnection connection, List<int> driverIds)
