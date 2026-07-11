@@ -134,7 +134,7 @@ namespace RCDragManagerProd.Controllers
             {
                 if (!AppSettings.LiveBroadcastEnabled)
                 {
-                    Logger.Log("[LIVE][SKIP] reason=" + reason + " disabled=true");
+                    Logger.Debug("[LIVE][SKIP] reason=" + reason + " disabled=true");
                     return;
                 }
                 if (_session == null || _session.EventDate == default)
@@ -175,7 +175,7 @@ namespace RCDragManagerProd.Controllers
             {
                 if (!AppSettings.LiveBroadcastEnabled)
                 {
-                    Logger.Log("[LIVE][SKIP] reason=" + reason + " disabled=true");
+                    Logger.Debug("[LIVE][SKIP] reason=" + reason + " disabled=true");
                     return;
                 }
 

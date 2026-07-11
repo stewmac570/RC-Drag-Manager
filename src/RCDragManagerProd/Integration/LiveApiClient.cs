@@ -52,7 +52,8 @@ namespace RCDragManagerProd.Integration
         {
             if (!AppSettings.LiveBroadcastEnabled)
             {
-                Logger.Log("[LIVE][FAIL] Live updates disabled by config.");
+                // Not a failure — broadcast is simply off; this fires per match action.
+                Logger.Debug("[LIVE][SKIP] Live updates disabled by config.");
                 return Task.CompletedTask;
             }
 
@@ -77,7 +78,7 @@ namespace RCDragManagerProd.Integration
                 var isEmpty = apiKey != null && apiKey.Length == 0;
                 var isWhiteSpace = string.IsNullOrWhiteSpace(apiKey);
                 var keyLength = apiKey?.Length ?? 0;
-                Logger.Log("[LIVE][AUTH] X-API-KEY loaded from ApiKey: null=" + isNull + ", empty=" + isEmpty + ", whitespace=" + isWhiteSpace + ", length=" + keyLength);
+                Logger.Debug("[LIVE][AUTH] X-API-KEY loaded from ApiKey: null=" + isNull + ", empty=" + isEmpty + ", whitespace=" + isWhiteSpace + ", length=" + keyLength);
                 if (string.IsNullOrWhiteSpace(apiKey))
                 {
                     Logger.Log("[LIVE][FAIL] Missing config key ApiKey.");
