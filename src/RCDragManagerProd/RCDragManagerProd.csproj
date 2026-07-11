@@ -225,6 +225,7 @@
     <Compile Include="Integration\LiveApiClient.cs" />
     <Compile Include="Integration\LiveRaceUpdateDto.cs" />
     <Compile Include="Repositories\DatabaseInitializer.cs" />
+    <Compile Include="Repositories\DbDate.cs" />
     <Compile Include="Repositories\MultiClassEventRepository.cs" />
     <Compile Include="UI\Forms\Drivers\DriverManagerForm.cs">
       <SubType>Form</SubType>
