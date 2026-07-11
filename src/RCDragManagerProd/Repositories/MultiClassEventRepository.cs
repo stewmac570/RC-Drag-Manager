@@ -127,7 +127,7 @@ WHERE Id = @Id;";
             string json)
         {
             cmd.Parameters.AddWithValue("@EventName", eventName);
-            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@EventDate", DbDate.ToDbString(eventDate));
             cmd.Parameters.AddWithValue("@ClassCount", classCount);
             cmd.Parameters.AddWithValue("@EventData", json ?? "{}");
         }
@@ -160,7 +160,7 @@ ORDER BY datetime(EventDate) DESC";
                     {
                         Id = rd.GetInt32(0),
                         EventName = rd.IsDBNull(1) ? "" : rd.GetString(1),
-                        EventDate = rd.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(rd.GetString(2)),
+                        EventDate = rd.IsDBNull(2) ? DateTime.MinValue : DbDate.ParseOrMinValue(rd.GetString(2)),
                         ClassCount = rd.IsDBNull(3) ? 0 : rd.GetInt32(3)
                     });
                 }

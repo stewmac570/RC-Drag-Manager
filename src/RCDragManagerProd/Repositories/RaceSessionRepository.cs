@@ -139,7 +139,7 @@ WHERE Id = @Id;";
             string json)
         {
             cmd.Parameters.AddWithValue("@EventName", eventName);
-            cmd.Parameters.AddWithValue("@EventDate", eventDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@EventDate", DbDate.ToDbString(eventDate));
             cmd.Parameters.AddWithValue("@ClassType", classType);
             cmd.Parameters.AddWithValue("@RaceType", raceType);
             cmd.Parameters.AddWithValue("@SessionData", json ?? "{}");
@@ -181,10 +181,8 @@ ORDER BY datetime(EventDate) DESC";
                         continue;
                     }
 
-                    DateTime eventDate;
                     string rawEventDate = rd.IsDBNull(2) ? null : rd.GetString(2);
-                    if (!DateTime.TryParse(rawEventDate, out eventDate))
-                        eventDate = DateTime.MinValue;
+                    DateTime eventDate = DbDate.ParseOrMinValue(rawEventDate);
 
                     var s = new RaceSessionSummary
                     {
