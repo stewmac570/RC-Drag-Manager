@@ -177,12 +177,14 @@ ORDER BY datetime(EventDate) DESC";
                     int id = rd.GetInt32(0);
                     string eventName = rd.IsDBNull(1) ? "" : rd.GetString(1);
                     string json = rd.IsDBNull(5) ? null : rd.GetString(5);
-                    var loadResult = DeserializeSession(id, json);
-                    if (!loadResult.Success)
+                    // Cheap parse-only validation: binding the full RaceSession here made
+                    // opening the list screens O(rows x JSON size) (#384). Rows that parse
+                    // but fail full deserialization surface a friendly error on load instead.
+                    if (!IsLoadableSessionJson(json))
                     {
                         Logger.Log(
                             $"[DB][SessionRepo][WARN] Skipping unloadable session " +
-                            $"Id={id}, EventName='{eventName}', Status={loadResult.Status}");
+                            $"Id={id}, EventName='{eventName}'");
                         continue;
                     }
 
@@ -231,6 +233,20 @@ ORDER BY datetime(EventDate) DESC";
                 }
 
                 return DeserializeSession(id, value as string);
+            }
+        }
+
+        private static bool IsLoadableSessionJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return false;
+            try
+            {
+                using (var doc = JsonDocument.Parse(json))
+                    return doc.RootElement.ValueKind == JsonValueKind.Object;
+            }
+            catch (JsonException)
+            {
+                return false;
             }
         }
 
