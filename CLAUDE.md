@@ -56,8 +56,9 @@ Use MSBuild or Visual Studio only. Command-line example:
 `MSBuild RCDragManagerProd.sln /t:Build /p:Configuration=Debug`.
 
 > Note: there are two `.sln` files. The repo-root `RCDragManagerProd.sln` is the
-> one to use — it includes `RCDragManagerProd.WPF`. The older
-> `src/RCDragManagerProd/RCDragManagerProd.sln` predates the WPF project.
+> one to use — it includes the app projects **and** `RCDragManagerProd.Tests`.
+> The older `src/RCDragManagerProd/RCDragManagerProd.sln` also includes the WPF
+> project (CI builds it) but not the test project.
 
 > Gotcha: a clean rebuild of the WinForms project needs
 > `System.Resources.Extensions` present at its `HintPath`
@@ -153,13 +154,15 @@ deviation will be caught in code review.
   `"Round Robin"` → `"Losers Bracket"` → `"Finals"`. Code that reads
   `RaceType` must handle all three values.
 
-- **`RaceController` is a sealed partial class** split across 11 files.
+- **`RaceController` is a sealed partial class** split across ~19 files.
   Adding new methods to the controller means either adding to the most
   relevant existing partial file or creating a new partial file named
   `RaceController.{Concern}.cs`.
 
-- **All saves are INSERT, never UPDATE.** `RaceSessionRepository` and
-  (new) `MultiClassEventRepository` are append-only. This is by design.
+- **Saves are INSERT-on-first-save, then UPDATE in place.**
+  `RaceSessionRepository.SaveSession` and `MultiClassEventRepository.SaveEvent`
+  assign the row id on the first save and update the same row on later saves.
+  List/load paths never delete or overwrite damaged rows.
 
 - **`System.Text.Json` only** — no Newtonsoft.Json. For any type that
   `System.Text.Json` cannot serialize (e.g. `HashSet<(int,int)>`), add a

@@ -23,19 +23,15 @@ All 12 issues raised in March 2026 have been closed and merged.
 
 ## Known Architectural Weaknesses
 
-### 1. Session Save is Always INSERT (No Update)
+### 1. ~~Session Save is Always INSERT (No Update)~~ — RESOLVED
 
-`RaceSessionRepository.SaveSession` always does an INSERT. There is no UPDATE path. Saving an in-progress session multiple times creates multiple rows. The user must manually pick the correct (latest) row when resuming. Old rows accumulate indefinitely.
-
-**Impact:** Minor UX inconvenience; no data corruption. Fix would require an UPDATE path and a way to identify the "canonical" save for a session.
+`SaveSession` now INSERTs on first save (assigning the row id) and UPDATEs the same row on later saves; `MultiClassEventRepository.SaveEvent` follows the same pattern. Re-saving no longer creates duplicate rows (see `SaveSession_WhenAlreadyPersisted_UpdatesExistingRow` and `RepositorySaveRoundTripTests`).
 
 ---
 
-### 2. Bracket State Not Persisted — Sessions Don't Resume Mid-Bracket
+### 2. ~~Bracket State Not Persisted — Sessions Don't Resume Mid-Bracket~~ — RESOLVED
 
-When a session is loaded from the database, the `RaceSession` JSON is deserialized but the **engine state is not rebuilt**. The bracket (match tree, driver positions, seeds) is not stored — only the scalar match results (`SavedResults`) and revealed round labels are. Resuming a session effectively means restarting from scratch: the Race Director must regenerate the bracket and re-enter results.
-
-**Impact:** Significant for mid-event saves. Workaround: don't save until the event is done, or manually reconstruct.
+Mid-event resume now exists: `RaceController.Resume.cs` (`RestoreFromSave()`) rebuilds engine state from the saved session (`SavedResults`, `SavedRevealedRounds`, bracket snapshots) when a saved event is reopened — `MultiClassRaceWindow.OnLoadedRestore` calls it for every class on load.
 
 ---
 
@@ -57,7 +53,7 @@ Both `DriverRepository` and `CarRepository` handle car records. `DriverRepositor
 
 ### 5. `RaceController` Has Significant Length and Complexity
 
-The controller is split across 11 partial files. While the split helps navigate individual concerns, the total size and the number of distinct responsibilities (session lifecycle, RR standings, LB flow, finals injection, live feed, persistence) make it a complex class to reason about as a whole.
+The controller is split across ~19 partial files. While the split helps navigate individual concerns, the total size and the number of distinct responsibilities (session lifecycle, RR standings, LB flow, finals injection, live feed, persistence) make it a complex class to reason about as a whole.
 
 **Impact:** High cognitive load for new developers. Future refactor could extract the phase-transition logic (RR→LB→Finals) into a dedicated state machine.
 
@@ -71,11 +67,9 @@ Despite the controller layer, `Form1` still does some non-trivial things: it cal
 
 ---
 
-### 7. No Session Update / Resume Architecture
+### 7. ~~No Session Update / Resume Architecture~~ — RESOLVED
 
-Related to point 2: the architecture has no concept of "resume session". `LoadSession` deserializes the JSON and hands the `RaceSession` object to `Form1`, but `Form1` then calls `GenerateBracket` fresh. The `SavedResults` and `SavedRevealedRounds` fields exist on `RaceSession` but there is no code path that uses them to reconstruct the engine from a saved state.
-
-**Impact:** Sessions cannot be practically resumed mid-event.
+Superseded with point 2: save now updates in place, and `RaceController.RestoreFromSave()` reconstructs engine state from `SavedResults` / `SavedRevealedRounds` when a session is loaded (WPF flow; legacy `Form1` still regenerates fresh).
 
 ---
 
@@ -104,6 +98,6 @@ From the original `_PROJECT_STATUS_SUMMARY.md` Phase 7 plan:
 3. **Online Sync (optional)** — cloud backup of driver stats and session history.
 4. **UI Themes** — dark/light modes.
 5. **Performance Profiling** — especially for large driver registries.
-6. **Session Resume** — proper bracket reconstruction from saved state.
+6. ~~**Session Resume** — proper bracket reconstruction from saved state.~~ Done — `RaceController.Resume.cs`.
 7. **CarRepository consolidation** — retire `CarRepository`; all car logic in `DriverRepository`.
 8. **ProLadder extended to 32** — currently only up to L24 (24 drivers) has a tested template. Files L25–L32 may not exist or may need validation.
