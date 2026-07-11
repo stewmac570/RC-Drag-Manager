@@ -82,6 +82,7 @@ namespace RCDragManagerProd.WPF.Views
             _controller.RoundRobinCompleted += OnRoundRobinCompleted;
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
+            _controller.DialInsChanged += OnDialInsChanged;
 
             if (!_controller.IsCompleted)
                 _controller.StartDialInPolling();
@@ -123,6 +124,7 @@ namespace RCDragManagerProd.WPF.Views
                 _controller.RoundRobinCompleted -= OnRoundRobinCompleted;
                 _controller.CanStartFinalsChanged -= OnCanStartFinalsChanged;
                 _controller.TournamentCompleted -= OnTournamentCompleted;
+                _controller.DialInsChanged -= OnDialInsChanged;
             }
             catch { }
             _controller.StopDialInPolling();
@@ -278,6 +280,15 @@ namespace RCDragManagerProd.WPF.Views
             }
             else _finalsPopupShown = false;
             UpdatePrimaryButtons();
+        });
+
+        // Fires for local edits and for changes the background live-site poll applies;
+        // without this the grid and winner buttons showed stale dial-ins until the
+        // operator touched them (#381).
+        private void OnDialInsChanged() => Run(() =>
+        {
+            RefreshDriverGrid();
+            RefreshWinnerButtonDialIns();
         });
 
         private void OnTournamentCompleted(RaceController.RaceSummary summary) => Run(() =>
