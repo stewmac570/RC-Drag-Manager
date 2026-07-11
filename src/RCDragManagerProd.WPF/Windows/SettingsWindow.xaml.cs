@@ -24,6 +24,7 @@ namespace RCDragManagerProd.WPF.Windows
             ChkLogging.IsChecked = AppSettings.EnableLogging;
             ChkLiveBroadcast.IsChecked = AppSettings.LiveBroadcastEnabled;
             ChkDebugLogging.IsChecked = AppSettings.LiveBroadcastDebugLogging;
+            TxtApiKey.Text = AppSettings.ApiKey;
             TxtLogPath.Text = AppSettings.LogFilePath;
         }
 
@@ -32,6 +33,7 @@ namespace RCDragManagerProd.WPF.Windows
             AppSettings.EnableLogging = ChkLogging.IsChecked == true;
             AppSettings.LiveBroadcastEnabled = ChkLiveBroadcast.IsChecked == true;
             AppSettings.LiveBroadcastDebugLogging = ChkDebugLogging.IsChecked == true;
+            AppSettings.ApiKey = TxtApiKey.Text;
             if (AppSettings.EnableLogging) Logger.Log("[SETTINGS] Logging enabled.");
 
             var newTheme = RbLight.IsChecked == true ? "Light" : "Dark";

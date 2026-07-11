@@ -24,6 +24,12 @@ namespace RCDragManagerProd.Config
 
             // UI theme for the WPF app: "Dark" (default) or "Light".
             public string Theme { get; set; } = "Dark";
+
+            // X-API-KEY for the live scoreboard server. Deliberately NOT in
+            // App.config: the repo is public and a committed key was exposed
+            // (#377). Set once via the Settings dialog; empty disables auth'd
+            // live calls.
+            public string ApiKey { get; set; } = "";
         }
 
         private static readonly string AppFolder =
@@ -55,6 +61,24 @@ namespace RCDragManagerProd.Config
             {
                 _model = new Model(); // fail-safe defaults
             }
+
+            MigrateApiKeyFromExeConfig();
+        }
+
+        // One-time adoption for installs that predate #377, where the key lived in
+        // the exe.config. Copies it into appsettings.json so removing it from the
+        // repo (and future installers) doesn't break an already-configured machine.
+        private static void MigrateApiKeyFromExeConfig()
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_model.ApiKey)) return;
+                var legacy = System.Configuration.ConfigurationManager.AppSettings["ApiKey"];
+                if (string.IsNullOrWhiteSpace(legacy)) return;
+                _model.ApiKey = legacy;
+                Save();
+            }
+            catch { /* no exe.config access — nothing to migrate */ }
         }
 
         public static void Save()
@@ -90,6 +114,12 @@ namespace RCDragManagerProd.Config
         {
             get => _model.VerboseLogging;
             set { _model.VerboseLogging = value; Save(); }
+        }
+
+        public static string ApiKey
+        {
+            get => _model.ApiKey ?? "";
+            set { _model.ApiKey = (value ?? "").Trim(); Save(); }
         }
 
         public static string Theme
