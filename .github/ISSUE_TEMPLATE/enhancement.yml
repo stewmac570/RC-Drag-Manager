@@ -1,0 +1,33 @@
+name: Enhancement
+description: New capability, UX improvement, performance or cleanup work
+title: "[Area] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should change, and why is it worth doing?
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: Detail
+      description: >-
+        Current behaviour, desired behaviour, and relevant files. Write enough
+        for another contributor (or an AI agent) to pick it up cold.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How we know it's done.
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: >-
+        Anything off-limits (see the "What Not to Touch" list in CLAUDE.md),
+        compatibility notes, or sequencing with other issues.
