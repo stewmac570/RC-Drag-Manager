@@ -242,20 +242,16 @@
                 <Border Grid.Row="2" Padding="12,12"
                         BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
                     <StackPanel>
-                        <UniformGrid Columns="3" Margin="0,0,0,6">
-                            <Button x:Name="BtnEditResult" Style="{StaticResource Style.Button.Toolbar}"
-                                    Content="Edit result" Click="BtnEditResult_Click" Margin="0,0,3,0"/>
+                        <Button x:Name="BtnEditResult" Style="{StaticResource Style.Button.Toolbar}"
+                                Content="Edit result" Click="BtnEditResult_Click" Margin="0,0,0,6"/>
+                        <UniformGrid Columns="3">
                             <Button x:Name="BtnStandings" Style="{StaticResource Style.Button.Toolbar}"
-                                    Content="Standings" Click="BtnStandings_Click" Margin="3,0" IsEnabled="False"/>
+                                    Content="Standings" Click="BtnStandings_Click" Margin="0,0,3,0" IsEnabled="False"/>
                             <Button x:Name="BtnRaceResults" Style="{StaticResource Style.Button.Toolbar}"
-                                    Content="Results" Click="BtnRaceResults_Click" Margin="3,0,0,0"
+                                    Content="Results" Click="BtnRaceResults_Click" Margin="3,0"
                                     IsEnabled="False"/>
-                        </UniformGrid>
-                        <UniformGrid Columns="2">
                             <Button x:Name="BtnBuybacks" Style="{StaticResource Style.Button.Toolbar}"
-                                    Content="Open buybacks" Click="BtnBuybacks_Click" Margin="0,0,3,0" IsEnabled="False"/>
-                            <Button x:Name="BtnReset" Style="{StaticResource Style.Button.Toolbar.Danger}"
-                                    Content="Reset" Click="BtnReset_Click" Margin="3,0,0,0"/>
+                                    Content="Buybacks" Click="BtnBuybacks_Click" Margin="3,0,0,0" IsEnabled="False"/>
                         </UniformGrid>
                     </StackPanel>
                 </Border>

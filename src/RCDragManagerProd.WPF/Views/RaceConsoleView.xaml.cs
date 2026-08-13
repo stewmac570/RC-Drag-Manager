@@ -99,7 +99,6 @@ namespace RCDragManagerProd.WPF.Views
             BtnEditResult.IsEnabled = false;
             BtnStandings.IsEnabled = false;
             BtnBuybacks.IsEnabled = false;
-            BtnReset.IsEnabled = false;
             BtnWinner1.IsEnabled = false;
             BtnWinner2.IsEnabled = false;
             BtnMoreTime.IsEnabled = false;
@@ -584,31 +583,6 @@ namespace RCDragManagerProd.WPF.Views
                 Logger.Log($"[WPF][CONSOLE] AdvanceRound failed: {ex}");
                 MessageDialog.Error(Host, "Failed to advance the round. Check the log.", "Advance round");
             }
-        }
-
-        private void BtnReset_Click(object sender, RoutedEventArgs e)
-        {
-            if (RejectCompletedRaceEdit()) return;
-
-            if (_controller.HasBracketStarted)
-            {
-                if (!MessageDialog.Confirm(Host,
-                        "Reset this active race? This clears bracket progress, winners and round state. This cannot be undone.",
-                        "Reset active race", destructive: true))
-                    return;
-                if (_session != null) { try { _raceConsole.SaveProgress(); } catch { } }
-            }
-
-            _controller.Reset();
-            IcPairings.ItemsSource = null;
-            IcWinners.ItemsSource = null;
-            UpdateQueue();
-            BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
-            BtnGenerateBracket.Content = "Generate bracket";
-            BtnNextRound.IsEnabled = false;
-            BtnStandings.IsEnabled = false;
-            BtnBuybacks.IsEnabled = false;
-            UpdatePrimaryButtons();
         }
 
         private void BtnStandings_Click(object sender, RoutedEventArgs e)
