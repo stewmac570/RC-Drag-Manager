@@ -369,12 +369,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
+                    <!-- No Padding on this Border: WPF already applies TextBox.Padding to
+                         PART_ContentHost, so binding it here doubled it and left the compact
+                         box with ~0px vertical headroom (text clipped below the box, #418). -->
                     <Border x:Name="bd"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{StaticResource Radius.Button}"
-                            Padding="{TemplateBinding Padding}">
+                            CornerRadius="{StaticResource Radius.Button}">
                         <ScrollViewer x:Name="PART_ContentHost"
                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </Border>
