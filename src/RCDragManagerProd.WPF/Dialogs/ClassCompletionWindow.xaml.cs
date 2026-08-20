@@ -13,7 +13,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         {
             _session = session;
             InitializeComponent();
-            WindowSizing.RoundCorners(this);
+            WindowSizing.FitToScreen(this);
             DataContext = ClassCompletionPresentationBuilder.Build(session);
         }
 

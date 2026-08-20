@@ -10,6 +10,24 @@ namespace RCDragManagerProd.WPF
     /// buttons) stay visible — both for normal sizing and when a borderless
     /// (WindowStyle=None) window is maximized (which otherwise overflows past the
     /// taskbar). Call FitToScreen after InitializeComponent.
+    ///
+    /// <para><b>Window sizing standard (#420/#421).</b> The minimum supported
+    /// display is the race-day laptop: 1920x1080 at 150% scaling = 1280x720 DIU,
+    /// or 1280x688 usable once the taskbar is subtracted. Every window must be
+    /// designed to work at that size, not merely clamped into it.</para>
+    ///
+    /// <list type="bullet">
+    /// <item><b>Workspace windows</b> — Landing, Setup, Load, Driver Manager,
+    /// Race Console, Multi-Class — open at 1180x660 (min 980x620) so navigating
+    /// between them never changes the window footprint.</item>
+    /// <item><b>Utility windows</b> — Driver Stats, Settings, Live Scoreboard —
+    /// share a 600 width; height may be content-sized.</item>
+    /// <item>Anything that docks a footer of buttons calls
+    /// <see cref="FitToScreen"/>, never <see cref="RoundCorners"/> alone.</item>
+    /// </list>
+    ///
+    /// <para>WindowSizingStandardTests in the test project enforces the numbers
+    /// by reading the XAML, so new windows are caught before review.</para>
     /// </summary>
     public static class WindowSizing
     {
