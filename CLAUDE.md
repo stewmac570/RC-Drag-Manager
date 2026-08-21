@@ -105,6 +105,24 @@ Conventions:
 - Reference theme colours via `{StaticResource Brush.*}`; never hardcode hex.
 - Marshal controller-event handlers to the UI thread (`Dispatcher`).
 
+### Window sizing standard
+
+The **minimum supported display** is the race-day laptop: 1920×1080 at 150%
+scaling = 1280×720 DIU, leaving **1280×688 usable** after the taskbar. Design
+every window for that canvas — don't rely on `FitToScreen` clamping to rescue an
+oversized layout.
+
+| Tier | Windows | Size |
+|------|---------|------|
+| Workspace | Landing, Setup, Load, Driver Manager, Race Console, Multi-Class | `1180×660`, min `980×620` |
+| Utility | Driver Stats, Settings, Live Scoreboard | width `600`; height content-sized or explicit |
+
+Workspace windows all share one footprint so navigating between them never
+resizes the window. Anything that docks a footer of buttons must call
+`WindowSizing.FitToScreen`, not `RoundCorners` alone, or the footer can end up
+under the taskbar. `WindowSizingStandardTests` enforces the numbers by parsing
+the XAML, so a new window that breaks the standard fails the build.
+
 ---
 
 ## Architecture Rules — Do Not Violate

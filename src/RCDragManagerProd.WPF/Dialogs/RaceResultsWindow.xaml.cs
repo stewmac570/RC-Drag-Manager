@@ -10,7 +10,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public RaceResultsWindow(RaceSession session, bool showRoundRobinStandings = false)
         {
             InitializeComponent();
-            WindowSizing.RoundCorners(this);
+            WindowSizing.FitToScreen(this);
             DataContext = RaceResultsPresentationBuilder.Build(session);
             if (showRoundRobinStandings)
                 ResultsTabs.SelectedIndex = 2;
