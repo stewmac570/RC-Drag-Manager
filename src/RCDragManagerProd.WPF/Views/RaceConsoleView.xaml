@@ -122,19 +122,8 @@
                 </Border>
 
                 <StackPanel Grid.Row="1" Margin="12,10">
-                    <TextBox x:Name="TxtName" Style="{StaticResource Style.TextBox.Compact}"
-                             Margin="0,0,0,6"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" x:Name="TxtTime"
-                                 Style="{StaticResource Style.TextBox.Compact}"/>
-                        <Button Grid.Column="2" Style="{StaticResource Style.Button.Toolbar}"
-                                Content="Add" Click="BtnAddDriver_Click" Width="56"/>
-                    </Grid>
+                    <Button x:Name="BtnAddDriver" Style="{StaticResource Style.Button.Toolbar}"
+                            Content="Add driver" Click="BtnAddDriver_Click"/>
                 </StackPanel>
 
                 <DataGrid Grid.Row="2" x:Name="DgDrivers"
