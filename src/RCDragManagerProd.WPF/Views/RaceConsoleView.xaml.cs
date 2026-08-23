@@ -93,8 +93,7 @@ namespace RCDragManagerProd.WPF.Views
             if (!_controller.IsCompleted) return;
 
             LblEventTitle.Text = $"{_raceConsole.GetState().EventTitle} — completed (results only)";
-            TxtName.IsEnabled = false;
-            TxtTime.IsEnabled = false;
+            BtnAddDriver.IsEnabled = false;
             DgDrivers.IsHitTestVisible = false;
             BtnEditResult.IsEnabled = false;
             BtnStandings.IsEnabled = false;
@@ -381,32 +380,22 @@ namespace RCDragManagerProd.WPF.Views
                 return;
             }
 
-            string name = (TxtName.Text ?? "").Trim();
-            string timeText = (TxtTime.Text ?? "").Trim();
-            string error = _rosterService.Validate(name, timeText);
-            if (error != null)
-            {
-                MessageDialog.Warn(Host, error, "Add driver");
-                return;
-            }
+            // Stays open for bulk entry, so each entry commits through this callback
+            // rather than on close (#417).
+            new AddDriverDialog(TryAddDriver) { Owner = Host }.ShowDialog();
+        }
 
-            double? qual = _rosterService.ParseQualTime(timeText);
-            var existing = _drivers.FirstOrDefault(d => string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
-            if (existing != null)
-            {
-                if (qual.HasValue) existing.QualTime = qual.Value;
-            }
-            else
-            {
-                _drivers.Add(_rosterService.BuildNewDriver(name, qual, _drivers));
-            }
+        /// <summary>Commits one add-driver entry; returns an error message, or null on success.</summary>
+        private string TryAddDriver(string name, string qualTimeText)
+        {
+            var result = _rosterService.AddOrUpdate(name, qualTimeText, _drivers);
+            if (!result.Success) return result.Error;
 
             SyncSessionRoster();
             RefreshDriverGrid();
-            TxtName.Clear();
-            TxtTime.Clear();
             BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
             UpdatePrimaryButtons();
+            return null;
         }
 
         private void BtnEditDriver_Click(object sender, RoutedEventArgs e)

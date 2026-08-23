@@ -1,0 +1,79 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.AddDriverDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add driver"
+        Width="380"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Surface}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}"
+            BorderThickness="1">
+        <StackPanel Margin="24,22">
+
+            <TextBlock Text="Add driver"
+                       FontSize="{StaticResource FontSize.Lg}"
+                       FontWeight="Medium"
+                       Foreground="{StaticResource Brush.TextPrimary}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Enter adds the driver and stays here for the next one."
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.TextMuted}"
+                       Margin="0,0,0,18"/>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="Driver name"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           Margin="0,0,0,5"/>
+                <TextBox x:Name="TxtName" Style="{StaticResource Style.TextBox}"
+                         TextChanged="Field_TextChanged"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="Qual time (optional)"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           Margin="0,0,0,5"/>
+                <TextBox x:Name="TxtQual" Style="{StaticResource Style.TextBox}"
+                         TextChanged="Field_TextChanged"/>
+            </StackPanel>
+
+            <!-- Inline validation: the dialog never closes to report a problem. -->
+            <TextBlock x:Name="ErrorText"
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.Danger}"
+                       TextWrapping="Wrap"
+                       Visibility="Collapsed"
+                       Margin="0,0,0,12"/>
+
+            <TextBlock x:Name="AddedText"
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.TextMuted}"
+                       Visibility="Collapsed"
+                       Margin="0,0,0,12"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                        Content="Close" Click="BtnClose_Click"
+                        IsCancel="True" Margin="0,0,8,0"/>
+                <Button x:Name="BtnAddNext"
+                        Style="{StaticResource Style.Button.Dialog.Primary}"
+                        Content="Add &amp; next" Click="BtnAddNext_Click"
+                        IsDefault="True"/>
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</Window>

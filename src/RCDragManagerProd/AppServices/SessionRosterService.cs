@@ -54,6 +54,37 @@ namespace RCDragManagerProd.AppServices
         }
 
         /// <summary>
+        /// Validates and applies one add-driver entry to <paramref name="roster"/>.
+        /// A name that already exists (case-insensitive) is treated as the same
+        /// driver: only the qual time is updated, and only when one was supplied.
+        /// The roster is left untouched when validation fails.
+        /// </summary>
+        public RosterAddResult AddOrUpdate(string name, string qualTimeText, IList<Driver> roster)
+        {
+            if (roster == null) throw new ArgumentNullException(nameof(roster));
+
+            name = (name ?? "").Trim();
+            qualTimeText = (qualTimeText ?? "").Trim();
+
+            var error = Validate(name, qualTimeText);
+            if (error != null) return RosterAddResult.Failed(error);
+
+            var qual = ParseQualTime(qualTimeText);
+            var existing = roster.FirstOrDefault(
+                d => d != null && string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
+
+            if (existing != null)
+            {
+                if (qual.HasValue) existing.QualTime = qual.Value;
+                return RosterAddResult.Updated(existing);
+            }
+
+            var driver = BuildNewDriver(name, qual, (IReadOnlyCollection<Driver>)roster);
+            roster.Add(driver);
+            return RosterAddResult.Added(driver);
+        }
+
+        /// <summary>
         /// Synchronizes the editable console roster into the session while preserving
         /// race-entry metadata such as dial-in, car, class and seed.
         /// </summary>
