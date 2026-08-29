@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using RCDragManagerProd.AppServices;
@@ -18,7 +19,19 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         public ObservableCollection<RecentEventRow> RecentEvents { get; } = new ObservableCollection<RecentEventRow>();
 
-        public string VersionText => "v2.0.0 · .NET Framework 4.8";
+        /// <summary>
+        /// Read from the assembly rather than hardcoded — the literal here still said
+        /// v2.0.0 throughout the v2.1.0 release, so the operator was shown the wrong
+        /// version. Driven by &lt;Version&gt; in RCDragManagerProd.WPF.csproj.
+        /// </summary>
+        public string VersionText
+        {
+            get
+            {
+                var v = Assembly.GetExecutingAssembly().GetName().Version;
+                return $"v{v.Major}.{v.Minor}.{v.Build} · .NET Framework 4.8";
+            }
+        }
 
         private string _driverCountText = "";
         public string DriverCountText
