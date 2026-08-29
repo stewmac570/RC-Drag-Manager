@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
@@ -30,6 +31,26 @@ namespace RCDragManagerProd.AppServices
 
         /// <summary>Current console state snapshot.</summary>
         public RaceConsoleViewModel GetState() => RaceConsoleViewModelBuilder.Build(_controller);
+
+        /// <summary>
+        /// Parses operator-typed dial-in text (#416). Blank clears the dial-in; anything
+        /// else must be a positive number. Shared by the inline grid cell and the
+        /// dial-in dialog so both accept exactly the same input.
+        /// </summary>
+        public static DialInParseResult ParseDialIn(string text)
+        {
+            text = (text ?? "").Trim();
+            if (text.Length == 0) return DialInParseResult.Clear();
+
+            if (!double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed) ||
+                double.IsNaN(parsed) || double.IsInfinity(parsed))
+                return DialInParseResult.Invalid("Dial-in must be a number, or blank to clear it.");
+
+            if (parsed <= 0)
+                return DialInParseResult.Invalid("Dial-in must be greater than zero.");
+
+            return DialInParseResult.Value(parsed);
+        }
 
         /// <summary>
         /// Lane-correct winner-button info for a match: the left/right names (after lane swap),
@@ -357,6 +378,33 @@ namespace RCDragManagerProd.AppServices
         public int RightDriverId { get; }
         public bool LeftIsBye { get; }
         public bool RightIsBye { get; }
+    }
+
+    /// <summary>Result of <see cref="RaceConsoleService.ParseDialIn"/>.</summary>
+    public sealed class DialInParseResult
+    {
+        private DialInParseResult(bool ok, bool cleared, double? dialIn, string error)
+        {
+            Success = ok;
+            Cleared = cleared;
+            DialIn = dialIn;
+            Error = error;
+        }
+
+        public bool Success { get; }
+
+        /// <summary>True when the operator blanked the field, meaning "no dial-in".</summary>
+        public bool Cleared { get; }
+
+        /// <summary>The parsed dial-in; null when <see cref="Cleared"/>.</summary>
+        public double? DialIn { get; }
+
+        /// <summary>Operator-facing reason the text was rejected; null on success.</summary>
+        public string Error { get; }
+
+        public static DialInParseResult Clear() => new DialInParseResult(true, true, null, null);
+        public static DialInParseResult Value(double v) => new DialInParseResult(true, false, v, null);
+        public static DialInParseResult Invalid(string error) => new DialInParseResult(false, false, null, error);
     }
 
     /// <summary>Result of <see cref="RaceConsoleService.ValidateEditable"/>.</summary>

@@ -129,7 +129,11 @@
                 <DataGrid Grid.Row="2" x:Name="DgDrivers"
                           AutoGenerateColumns="False" CanUserAddRows="False"
                           CanUserDeleteRows="False" CanUserReorderColumns="False"
-                          CanUserResizeRows="False" IsReadOnly="True" SelectionMode="Single"
+                          CanUserResizeRows="False" SelectionMode="Single"
+                          BeginningEdit="DgDrivers_BeginningEdit"
+                          PreparingCellForEdit="DgDrivers_PreparingCellForEdit"
+                          CellEditEnding="DgDrivers_CellEditEnding"
+                          PreviewMouseLeftButtonDown="DgDrivers_PreviewClick"
                           HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                           HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
                           Background="{StaticResource Brush.Background}"
@@ -173,9 +177,29 @@
                         </Style>
                     </DataGrid.CellStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Driver"  Binding="{Binding Name}"       Width="*"/>
-                        <DataGridTextColumn Header="Qual"    Binding="{Binding QualText}"   Width="60"/>
-                        <DataGridTextColumn Header="Dial-in" Binding="{Binding DialInText}" Width="65"/>
+                        <DataGridTextColumn Header="Driver"  Binding="{Binding Name}"     Width="*"  IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Qual"    Binding="{Binding QualText}" Width="60" IsReadOnly="True"/>
+                        <!-- Click the value once and type: the dial-in changes constantly
+                             during a meet and used to need row-select then a button (#416). -->
+                        <DataGridTemplateColumn x:Name="ColDialIn" Header="Dial-in" Width="65">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DialInText}"
+                                               ToolTip="Click to edit — Enter saves, Esc cancels"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox x:Name="TxtDialInCell"
+                                             Text="{Binding DialInEdit, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" Padding="0"
+                                             Background="Transparent"
+                                             Foreground="{StaticResource Brush.TextPrimary}"
+                                             CaretBrush="{StaticResource Brush.Primary}"
+                                             VerticalContentAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 

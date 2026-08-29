@@ -29,6 +29,14 @@ namespace RCDragManagerProd.WPF.ViewModels
         public int DriverId { get; set; }
         public string Name { get; set; }
         public string QualText { get; set; }
+
+        /// <summary>Display form — an em dash when the driver has no dial-in.</summary>
         public string DialInText { get; set; }
+
+        /// <summary>
+        /// Edit form of the same value: the bare number, or empty when unset, so the
+        /// operator isn't editing around a "—" placeholder (#416).
+        /// </summary>
+        public string DialInEdit { get; set; }
     }
 }
