@@ -800,4 +800,35 @@
         </Setter>
     </Style>
 
+    <!-- ── Tab item (event windows) ───────────────────────────────────────── -->
+
+    <Style x:Key="Style.TabItem" TargetType="TabItem">
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextSecondary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Md}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="bd" Background="{StaticResource Brush.Chrome}"
+                            Padding="16,9" Margin="0,0,2,0"
+                            BorderBrush="Transparent" BorderThickness="0,0,0,2"
+                            CornerRadius="6,6,0,0">
+                        <ContentPresenter ContentSource="Header"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource Brush.Surface}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
