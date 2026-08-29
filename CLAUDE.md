@@ -89,6 +89,10 @@ Layout:
   DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard)
 - `Views/RaceConsoleView` — the console UserControl, hosted standalone by
   `RaceConsoleWindow` and one-per-tab by `MultiClassRaceWindow`
+- `Views/EventSettingsView` — the first tab of every event: reset a class (typed
+  confirmation), buybacks on/off per class, and live theme switching. Both host
+  windows build its rows with `EventSettingsRowBuilder`; the rules for what may
+  change mid-event live in `EventSettingsService`
 - `Dialogs/` — themed modal dialogs (incl. `MessageDialog`, the dark replacement
   for `MessageBox`)
 - `ViewModels/` — INotifyPropertyChanged view models + display-row types
@@ -203,6 +207,11 @@ deviation will be caught in code review.
   `MULTI-CLASS-EVENT-SPEC.md`.
 - **WPF UI rebuild** — shipped in **v2.0.0** (see the WPF UI section above). All
   screens reimplemented; WinForms UI is legacy.
+- **Race-day feedback fixes** (Aug 2026 meet, tracked under #293) — shipped:
+  destructive Reset removed from the console (#413), Event/Class/Race wording
+  (#414), per-event Settings tab (#415), one-click dial-in editing (#416),
+  add-driver modal (#417), shared TextBox clipping fix (#418), two-pane class
+  driver picker (#419), window sizing standard (#420/#421).
 
 No active feature in flight. New UI work goes in `RCDragManagerProd.WPF`.
 

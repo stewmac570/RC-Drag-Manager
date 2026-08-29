@@ -11,6 +11,7 @@ using RCDragManagerProd.Domain;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 using RCDragManagerProd.WPF.Dialogs;
+using RCDragManagerProd.WPF.ViewModels;
 using RCDragManagerProd.WPF.Views;
 
 namespace RCDragManagerProd.WPF.Windows
@@ -35,6 +36,7 @@ namespace RCDragManagerProd.WPF.Windows
         private readonly Dictionary<int, RaceController.RaceSummary> _summaries =
             new Dictionary<int, RaceController.RaceSummary>();
 
+        private EventSettingsView _settingsView;
         private int _activeIndex;
         private bool _resumeApplied;
 
@@ -65,6 +67,8 @@ namespace RCDragManagerProd.WPF.Windows
 
         private void BuildTabs()
         {
+            BuildSettingsTab();
+
             for (int i = 0; i < _controllers.Count; i++)
             {
                 var session = _multiEvent.ClassSessions[i];
@@ -85,8 +89,124 @@ namespace RCDragManagerProd.WPF.Windows
                 Tabs.Items.Add(new TabItem { Header = header, Content = view });
             }
 
-            if (Tabs.Items.Count > 0) Tabs.SelectedIndex = 0;
+            // Settings sits first positionally, but the operator lands on the first
+            // class — opening an event is nearly always about racing it.
+            if (_controllers.Count > 0) Tabs.SelectedIndex = FirstClassTabIndex;
+            else if (Tabs.Items.Count > 0) Tabs.SelectedIndex = 0;
             UpdateAllTabStates();
+        }
+
+        /// <summary>Tab index of class 0 — the settings tab occupies index 0.</summary>
+        private const int FirstClassTabIndex = 1;
+
+        // ── Event settings tab (#415) ─────────────────────────────────────────
+
+        private void BuildSettingsTab()
+        {
+            _settingsView = new EventSettingsView
+            {
+                ResetClass = ResetClassAt,
+                SetBuybacks = SetBuybacksAt,
+                RequestRefresh = RefreshSettingsTab
+            };
+
+            var header = new StackPanel { Orientation = Orientation.Horizontal };
+            header.Children.Add(new TextBlock
+            {
+                Text = "",                     // Segoe MDL2 settings gear
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                FontSize = 12,
+                Margin = new Thickness(0, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            header.Children.Add(new TextBlock
+            {
+                Text = "Event settings",
+                VerticalAlignment = VerticalAlignment.Center
+            });
+
+            Tabs.Items.Add(new TabItem { Header = header, Content = _settingsView });
+            RefreshSettingsTab();
+        }
+
+        private void RefreshSettingsTab()
+        {
+            if (_settingsView == null) return;
+
+            _settingsView.SetHeader(
+                _multiEvent.EventName,
+                $"{_multiEvent.EventDate:ddd d MMM yyyy} · " +
+                $"{_controllers.Count} {(_controllers.Count == 1 ? "class" : "classes")}");
+
+            var rows = new List<EventSettingsRow>();
+            for (int i = 0; i < _controllers.Count; i++)
+                rows.Add(EventSettingsRowBuilder.Build(
+                    i, _multiEvent.ClassSessions[i], $"Class {i + 1}",
+                    complete: _completed.Contains(i),
+                    roundRobinComplete: _rrComplete.Contains(i),
+                    bracketStarted: _controllers[i].HasBracketStarted));
+
+            _settingsView.SetClasses(rows);
+        }
+
+        private string ResetClassAt(int index)
+        {
+            if (index < 0 || index >= _controllers.Count) return "That class no longer exists.";
+
+            var session = _multiEvent.ClassSessions[index];
+            var check = EventSettingsService.CanResetClass(_completed.Contains(index));
+            if (!check.IsAllowed) return check.Reason;
+
+            _views[index].ResetClass();
+
+            // The class is back to "not started", so drop the state the window tracks
+            // for it or its tab dot and the RR gate would still count it as done.
+            _completed.Remove(index);
+            _rrComplete.Remove(index);
+            _summaries.Remove(index);
+
+            PersistEvent($"reset class '{session.ClassType}'");
+            UpdateAllTabStates();
+            LblStatus.Text = $"'{session.ClassType}' was reset.";
+            return null;
+        }
+
+        private string SetBuybacksAt(int index, bool enabled)
+        {
+            if (index < 0 || index >= _controllers.Count) return "That class no longer exists.";
+
+            var session = _multiEvent.ClassSessions[index];
+            bool currentlyOn = EventSettingsService.BuybacksEnabledIn(session.RoundRobinVariant);
+            if (currentlyOn == enabled) return null;
+
+            var check = EventSettingsService.CanChangeBuybacks(
+                session.RaceType,
+                _completed.Contains(index),
+                _rrComplete.Contains(index),
+                (session.BuybackDrivers?.Count ?? 0) > 0,
+                turningOff: !enabled,
+                roundsToRun: session.RoundsToRun);
+            if (!check.IsAllowed) return check.Reason;
+
+            session.RoundRobinVariant = EventSettingsService.VariantFor(enabled);
+            PersistEvent($"buybacks {(enabled ? "on" : "off")} for class '{session.ClassType}'");
+            LblStatus.Text = $"Buybacks {(enabled ? "enabled" : "disabled")} for '{session.ClassType}'.";
+            return null;
+        }
+
+        private void PersistEvent(string what)
+        {
+            try
+            {
+                _multiRepo.SaveEvent(_multiEvent);
+                Logger.Log($"[WPF][SETTINGS] Saved event after {what}.");
+            }
+            catch (Exception ex)
+            {
+                // The change still holds in memory for this sitting; surfacing a modal
+                // here would interrupt the operator mid-event.
+                Logger.Log($"[WPF][SETTINGS] Save failed after {what}: {ex}");
+            }
         }
 
         private void OnLoadedRestore(object sender, RoutedEventArgs e)
@@ -140,8 +260,14 @@ namespace RCDragManagerProd.WPF.Windows
             if (e.OriginalSource != Tabs) return;
 
             // Free navigation — the operator can switch to any class tab at any time.
-            _activeIndex = Tabs.SelectedIndex;
+            // Index 0 is the settings tab, so class indices are offset by one.
+            _activeIndex = Tabs.SelectedIndex - FirstClassTabIndex;
             LblStatus.Text = "";
+
+            // Class state moves while the operator is racing, so rebuild the settings
+            // rows each time they come back to the tab.
+            if (Tabs.SelectedIndex == 0) RefreshSettingsTab();
+
             UpdateAllTabStates();
         }
 

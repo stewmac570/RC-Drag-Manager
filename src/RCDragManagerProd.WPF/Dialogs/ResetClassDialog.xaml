@@ -1,0 +1,59 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.ResetClassDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Reset class"
+        Width="440"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown"
+        Background="{StaticResource Brush.Surface}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}"
+            BorderThickness="1">
+        <StackPanel Margin="24,22">
+
+            <TextBlock Text="Reset this class?"
+                       FontSize="{StaticResource FontSize.Lg}"
+                       FontWeight="Medium"
+                       Foreground="{StaticResource Brush.TextPrimary}"
+                       Margin="0,0,0,10"/>
+
+            <TextBlock x:Name="BodyText"
+                       FontSize="{StaticResource FontSize.Sm}"
+                       Foreground="{StaticResource Brush.TextSecondary}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,16"/>
+
+            <TextBlock x:Name="PromptText"
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.TextMuted}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,5"/>
+
+            <TextBox x:Name="TxtConfirm" Style="{StaticResource Style.TextBox}"
+                     TextChanged="TxtConfirm_TextChanged"
+                     Margin="0,0,0,20"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                        Content="Cancel" Click="BtnCancel_Click"
+                        IsCancel="True" Margin="0,0,8,0"/>
+                <Button x:Name="BtnReset"
+                        Style="{StaticResource Style.Button.Dialog.Primary}"
+                        Content="Reset class" Click="BtnReset_Click"
+                        IsEnabled="False"/>
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</Window>

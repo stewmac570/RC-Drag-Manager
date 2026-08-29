@@ -38,8 +38,11 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Console content -->
-            <Border Grid.Row="1" x:Name="ViewHost"/>
+            <!-- Settings tab first, then the class console (#415) -->
+            <TabControl x:Name="Tabs" Grid.Row="1"
+                        Background="{StaticResource Brush.Background}"
+                        BorderThickness="0"
+                        ItemContainerStyle="{StaticResource Style.TabItem}"/>
         </Grid>
     </Border>
 </Window>

@@ -113,6 +113,54 @@ namespace RCDragManagerProd.WPF.Views
             Logger.Log($"[WPF][CONSOLE] Completed race '{_session?.EventName}' opened results-only.");
         }
 
+        /// <summary>
+        /// Clears this class's bracket progress and returns the console to its
+        /// pre-bracket state. Driven from the event Settings tab (#415), which is the
+        /// only place reset lives now — it was removed from this console in #413
+        /// after a one-click reset wiped a class at a meet.
+        /// </summary>
+        public void ResetClass()
+        {
+            if (_session != null) { try { _raceConsole.SaveProgress(); } catch { } }
+
+            // Reset blanks RaceType, which would leave the class unable to generate a
+            // bracket again — and mid-event RaceType has already mutated away from
+            // what the class was configured with, so restore the captured original.
+            var restoreType = _session == null
+                ? null
+                : EventSettingsService.RaceTypeToRestoreOnReset(
+                    _session.OriginalRaceType, _session.RaceType);
+
+            _controller.Reset();
+
+            if (_session != null && restoreType != null)
+                _session.RaceType = restoreType;
+
+            IcPairings.ItemsSource = null;
+            IcWinners.ItemsSource = null;
+            UpdateQueue();
+            RefreshDriverGrid();
+            BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
+            BtnGenerateBracket.Content = "Generate bracket";
+            BtnNextRound.IsEnabled = false;
+            BtnStandings.IsEnabled = false;
+            BtnBuybacks.IsEnabled = false;
+            UpdatePrimaryButtons();
+
+            Logger.Log($"[WPF][SETTINGS] Class reset: '{_session?.ClassType ?? "(unsaved)"}'");
+        }
+
+        /// <summary>
+        /// Persists progress without the "saved" confirmation, for host-driven saves
+        /// such as a settings change (#415). No-op for a class with no saved file.
+        /// </summary>
+        public void SaveProgressQuiet()
+        {
+            if (_session == null) return;
+            try { _raceConsole.SaveProgress(); }
+            catch (Exception ex) { Logger.Log($"[WPF][SETTINGS] Quiet save failed: {ex}"); }
+        }
+
         /// <summary>Explicit cleanup — called by the host window on close (not on tab
         /// switches, which would unload the control prematurely).</summary>
         public void Teardown()

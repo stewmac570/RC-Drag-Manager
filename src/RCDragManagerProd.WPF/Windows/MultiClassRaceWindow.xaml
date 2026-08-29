@@ -16,38 +16,6 @@
                       UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
-    <Window.Resources>
-        <!-- Dark tab item -->
-        <Style x:Key="DarkTabItem" TargetType="TabItem">
-            <Setter Property="Foreground" Value="{StaticResource Brush.TextSecondary}"/>
-            <Setter Property="FontSize" Value="{StaticResource FontSize.Md}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TabItem">
-                        <Border x:Name="bd" Background="{StaticResource Brush.Chrome}"
-                                Padding="16,9" Margin="0,0,2,0"
-                                BorderBrush="Transparent" BorderThickness="0,0,0,2"
-                                CornerRadius="6,6,0,0">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="{StaticResource Brush.Surface}"/>
-                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
-                                <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
     <Border Background="{StaticResource Brush.Background}"
             BorderBrush="{StaticResource Brush.WindowEdge}" BorderThickness="1">
         <Grid>
@@ -83,7 +51,7 @@
             <TabControl x:Name="Tabs" Grid.Row="2"
                         Background="{StaticResource Brush.Background}"
                         BorderThickness="0"
-                        ItemContainerStyle="{StaticResource DarkTabItem}"
+                        ItemContainerStyle="{StaticResource Style.TabItem}"
                         SelectionChanged="Tabs_SelectionChanged"/>
         </Grid>
     </Border>
