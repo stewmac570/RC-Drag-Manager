@@ -24,8 +24,19 @@ namespace RCDragManagerProd.WPF.Dialogs
 
             TbarTitle.Text = _vm.IsEdit ? "Edit class" : "Add class";
             BtnOk.Content = _vm.IsEdit ? "Save class" : "Add class";
+
+            _vm.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(ClassConfigViewModel.OverrideColumnVisibility))
+                    SyncOverrideColumn();
+            };
+            SyncOverrideColumn();
+
             Loaded += (_, __) => TxtClassName.Focus();
         }
+
+        private void SyncOverrideColumn() =>
+            ColOverride.Visibility = _vm.OverrideColumnVisibility;
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
         private void BtnCancel_Click(object sender, RoutedEventArgs e) => Close();
@@ -41,19 +52,31 @@ namespace RCDragManagerProd.WPF.Dialogs
         private void CardRoundRobin_Click(object sender, RoutedEventArgs e) =>
             _vm.SelectedRaceType = ClassConfigViewModel.RoundRobin;
 
-        // ── Roster double-click toggles inclusion ────────────────────────────
+        // ── Click a row to move a driver in or out of the class ──────────────
 
-        private void DgRoster_DoubleClick(object sender, MouseButtonEventArgs e)
+        private void DgRoster_RowClick(object sender, MouseButtonEventArgs e) =>
+            _vm.Include(RowUnder(e.OriginalSource as DependencyObject));
+
+        private void DgSelected_RowClick(object sender, MouseButtonEventArgs e)
         {
-            // Ignore double-clicks that land on the editable Override cell so the
-            // user can edit it without toggling the row.
-            if (FindParentCell(e.OriginalSource as DependencyObject) is DataGridCell cell &&
+            var d = e.OriginalSource as DependencyObject;
+
+            // The Override cell is editable, so a click there must edit it rather
+            // than pull the driver back out of the class.
+            if (FindParentCell(d) is DataGridCell cell &&
                 cell.Column?.Header is string header &&
                 header == "Override")
                 return;
 
-            if (DgRoster.SelectedItem is DriverRosterRow row)
-                row.IsChecked = !row.IsChecked;
+            _vm.Exclude(RowUnder(d));
+        }
+
+        /// <summary>The roster row under a clicked element, or null for header/empty space.</summary>
+        private static DriverRosterRow RowUnder(DependencyObject d)
+        {
+            while (d != null && !(d is DataGridRow))
+                d = VisualTreeHelper.GetParent(d);
+            return (d as DataGridRow)?.Item as DriverRosterRow;
         }
 
         private static DataGridCell FindParentCell(DependencyObject d)
