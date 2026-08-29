@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
@@ -34,6 +36,10 @@ namespace RCDragManagerProd.WPF.Views
         private List<Driver> _drivers = new List<Driver>();
         private MatchButtons? _currentButtons;
         private bool _finalsPopupShown;
+
+        /// <summary>True while a dial-in cell editor is open, so background dial-in
+        /// polls don't rebuild the grid out from under the operator (#416).</summary>
+        private bool _dialInCellEditing;
 
         /// <summary>True when hosted in MultiClassRaceWindow; suppresses the buyback +
         /// completion popups so the parent coordinates them across all classes.</summary>
@@ -285,7 +291,10 @@ namespace RCDragManagerProd.WPF.Views
         // operator touched them (#381).
         private void OnDialInsChanged() => Run(() =>
         {
-            RefreshDriverGrid();
+            // Rebuilding ItemsSource tears down an open cell editor, so a poll that
+            // lands mid-typing would silently discard what the operator was entering
+            // (#416). The edit's own commit refreshes the grid when it finishes.
+            if (!_dialInCellEditing) RefreshDriverGrid();
             RefreshWinnerButtonDialIns();
         });
 
@@ -336,12 +345,17 @@ namespace RCDragManagerProd.WPF.Views
         private void RefreshDriverGrid()
         {
             DgDrivers.ItemsSource = _drivers
-                .Select(d => new ConsoleDriverRow
+                .Select(d =>
                 {
-                    DriverId = d.Id,
-                    Name = d.Name,
-                    QualText = d.QualTime.HasValue ? d.QualTime.Value.ToString("0.000") : "—",
-                    DialInText = FormatDialInPlain(_controller.GetDriverDialIn(d.Id))
+                    var dialIn = _controller.GetDriverDialIn(d.Id);
+                    return new ConsoleDriverRow
+                    {
+                        DriverId = d.Id,
+                        Name = d.Name,
+                        QualText = d.QualTime.HasValue ? d.QualTime.Value.ToString("0.000") : "—",
+                        DialInText = FormatDialInPlain(dialIn),
+                        DialInEdit = dialIn.HasValue ? dialIn.Value.ToString("0.000") : ""
+                    };
                 })
                 .ToList();
         }
@@ -460,6 +474,128 @@ namespace RCDragManagerProd.WPF.Views
             if (RejectCompletedRaceEdit()) return;
 
             if (DgDrivers.SelectedItem is ConsoleDriverRow row) EditDialIn(row.DriverId, row.Name);
+        }
+
+        // ── Inline dial-in editing (#416) ────────────────────────────────────
+        //
+        // The dial-in changes constantly during a meet, so one click on the value
+        // starts editing it. The "Dial-in" button and its dialog stay as the
+        // keyboard/discoverable path; both commit through the same parser.
+
+        /// <summary>First click into the Dial-in cell opens the editor, rather than only selecting it.</summary>
+        private void DgDrivers_PreviewClick(object sender, MouseButtonEventArgs e)
+        {
+            var cell = FindParent<DataGridCell>(e.OriginalSource as DependencyObject);
+            if (cell == null || cell.Column != ColDialIn || cell.IsEditing) return;
+
+            var row = FindParent<DataGridRow>(cell);
+            if (row?.Item == null) return;
+
+            // Deliberately not handling the event: the DataGrid needs to run its own
+            // click handling (selection, focus) first, or the editor opens without
+            // the caret in it. Opening the editor is queued behind that.
+            var item = row.Item;
+            var column = cell.Column;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DgDrivers.CurrentCell = new DataGridCellInfo(item, column);
+                DgDrivers.BeginEdit();
+            }), DispatcherPriority.Input);
+        }
+
+        /// <summary>Puts the caret in the dial-in editor so the operator can just type.</summary>
+        private void DgDrivers_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            if (e.Column != ColDialIn) return;
+
+            _dialInCellEditing = true;
+
+            var box = e.EditingElement as TextBox ?? FindChild<TextBox>(e.EditingElement);
+            if (box == null) return;
+            box.Focus();
+            box.SelectAll();
+        }
+
+        private void DgDrivers_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            if (e.Column != ColDialIn) { e.Cancel = true; return; }
+
+            if (_controller.IsCompleted) { e.Cancel = true; RejectCompletedRaceEdit(); return; }
+
+            var row = e.Row?.Item as ConsoleDriverRow;
+            if (row == null) { e.Cancel = true; return; }
+
+            // Same guard the dialog path uses: changing a dial-in mid-round is
+            // allowed, but never silently.
+            if (_controller.DialInLocked &&
+                !MessageDialog.Confirm(Host,
+                    $"This round is in progress.\n\nEdit {row.Name}'s dial-in anyway? It won't affect pairs that already raced.",
+                    "Round in progress", destructive: true))
+                e.Cancel = true;
+        }
+
+        private void DgDrivers_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.Column != ColDialIn) return;
+
+            if (e.EditAction != DataGridEditAction.Commit || !(e.Row?.Item is ConsoleDriverRow row))
+            {
+                _dialInCellEditing = false;   // Escape / abandoned edit
+                return;
+            }
+
+            // For a template column EditingElement is the ContentPresenter hosting the
+            // editing template, not the TextBox — reading it directly yields "", which
+            // parses as "clear the dial-in".
+            var box = e.EditingElement as TextBox ?? FindChild<TextBox>(e.EditingElement);
+            var parsed = RaceConsoleService.ParseDialIn(box?.Text ?? "");
+
+            if (!parsed.Success)
+            {
+                // Keep the operator in the cell with what they typed so a typo can be
+                // corrected, rather than discarding the entry. Escape still backs out.
+                // The dialog is deferred so it doesn't run inside the edit-ending event.
+                e.Cancel = true;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    MessageDialog.Warn(Host, parsed.Error, "Dial-in");
+                    box?.Focus();
+                    box?.SelectAll();
+                }), DispatcherPriority.Background);
+                return;
+            }
+
+            _dialInCellEditing = false;
+            _controller.UpdateDriverDialIn(row.DriverId, parsed.Cleared ? (double?)null : parsed.DialIn);
+
+            // The controller raises DialInsChanged, but that fires before this edit
+            // commits, so refresh once the DataGrid has finished with the cell.
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                RefreshDriverGrid();
+                RefreshWinnerButtonDialIns();
+            }));
+        }
+
+        private static T FindParent<T>(DependencyObject d) where T : DependencyObject
+        {
+            while (d != null && !(d is T))
+                d = VisualTreeHelper.GetParent(d);
+            return d as T;
+        }
+
+        private static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T hit) return hit;
+                var nested = FindChild<T>(child);
+                if (nested != null) return nested;
+            }
+            return null;
         }
 
         private void EditDialIn(int driverId, string name)

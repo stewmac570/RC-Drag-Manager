@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using RCDragManagerProd.AppServices;
 
 namespace RCDragManagerProd.WPF.Dialogs
 {
@@ -19,19 +20,17 @@ namespace RCDragManagerProd.WPF.Dialogs
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            var val = TxtDialIn.Text.Trim();
-            if (string.IsNullOrEmpty(val))
-            {
-                Cleared = true;
-                DialogResult = true;
-                return;
-            }
-            if (!double.TryParse(val, out var parsed) || parsed <= 0)
+            // Same parser as the inline grid cell (#416), so both entry points accept
+            // exactly the same input.
+            var parsed = RaceConsoleService.ParseDialIn(TxtDialIn.Text);
+            if (!parsed.Success)
             {
                 TxtDialIn.BorderBrush = FindResource("Brush.Danger") as System.Windows.Media.Brush;
                 return;
             }
-            DialIn = parsed;
+
+            Cleared = parsed.Cleared;
+            DialIn = parsed.DialIn ?? 0;
             DialogResult = true;
         }
 
