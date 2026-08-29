@@ -24,7 +24,15 @@ namespace RCDragManagerProd.WPF.ViewModels
         private readonly MultiClassSetupService _service;
         private readonly List<DriverRosterRow> _allRows = new List<DriverRosterRow>();
 
+        /// <summary>Drivers not yet in the class, filtered by <see cref="Search"/>.</summary>
         public ObservableCollection<DriverRosterRow> Roster { get; } = new ObservableCollection<DriverRosterRow>();
+
+        /// <summary>
+        /// Drivers already in the class. Deliberately never filtered by the search
+        /// box — hiding them behind a search is what made it impossible to check
+        /// the class against a paper sign-up sheet (#419).
+        /// </summary>
+        public ObservableCollection<DriverRosterRow> Selected { get; } = new ObservableCollection<DriverRosterRow>();
 
         public bool IsEdit { get; }
 
@@ -103,12 +111,17 @@ namespace RCDragManagerProd.WPF.ViewModels
         {
             OnPropertyChanged(nameof(FixedDialInVisibility));
             OnPropertyChanged(nameof(OverrideColumnEnabled));
+            OnPropertyChanged(nameof(OverrideColumnVisibility));
         }
 
         public Visibility FixedDialInVisibility =>
             _isBracket ? Visibility.Visible : Visibility.Collapsed;
 
         public bool OverrideColumnEnabled => _isDialIn;
+
+        /// <summary>Dial-in overrides only mean anything for a Dial-In class.</summary>
+        public Visibility OverrideColumnVisibility =>
+            _isDialIn ? Visibility.Visible : Visibility.Collapsed;
 
         private string _fixedDialInText = "";
         public string FixedDialInText
@@ -146,6 +159,31 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         public int CheckedCount => _allRows.Count(r => r.IsChecked);
 
+        /// <summary>Live count for the "In this class" header, checked against the sign-up sheet.</summary>
+        public string SelectedSummary =>
+            CheckedCount == 1 ? "1 driver in this class" : $"{CheckedCount} drivers in this class";
+
+        public bool HasSelection => CheckedCount > 0;
+
+        // ── Include / exclude ─────────────────────────────────────────────────
+
+        /// <summary>Puts a driver in the class. Safe to call on a driver already in it.</summary>
+        public void Include(DriverRosterRow row)
+        {
+            if (row == null || row.IsChecked) return;
+            row.IsChecked = true;
+            RefreshRoster();
+        }
+
+        /// <summary>Takes a driver out of the class, discarding any dial-in override.</summary>
+        public void Exclude(DriverRosterRow row)
+        {
+            if (row == null || !row.IsChecked) return;
+            row.IsChecked = false;
+            row.OverrideText = "";
+            RefreshRoster();
+        }
+
         // ── Roster loading ────────────────────────────────────────────────────
 
         private void LoadRoster()
@@ -170,10 +208,21 @@ namespace RCDragManagerProd.WPF.ViewModels
         {
             Roster.Clear();
             foreach (var r in _allRows
+                         .Where(r => !r.IsChecked)
                          .Where(r => string.IsNullOrWhiteSpace(_search) ||
                                      (r.Name ?? "").IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0)
                          .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase))
                 Roster.Add(r);
+
+            Selected.Clear();
+            foreach (var r in _allRows
+                         .Where(r => r.IsChecked)
+                         .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase))
+                Selected.Add(r);
+
+            OnPropertyChanged(nameof(CheckedCount));
+            OnPropertyChanged(nameof(SelectedSummary));
+            OnPropertyChanged(nameof(HasSelection));
         }
 
         public void QuickAddDriver(string name, Car car)

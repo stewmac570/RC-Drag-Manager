@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Configure class — RC Drag Manager"
-        Width="740" Height="660"
-        MinWidth="640" MinHeight="520"
+        Width="1040" Height="660"
+        MinWidth="900" MinHeight="520"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
@@ -181,8 +181,13 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
 
-                <Border Grid.Row="0" Padding="24,12"
+                <Border Grid.Row="0" Grid.Column="0" Padding="24,12"
                         BorderBrush="{StaticResource Brush.BorderSubtle}"
                         BorderThickness="0,0,0,1">
                     <Grid>
@@ -192,7 +197,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="Drivers"
+                        <TextBlock Grid.Column="0" Text="Available drivers"
                                    FontSize="{StaticResource FontSize.Xs}"
                                    FontWeight="Medium"
                                    Foreground="{StaticResource Brush.TextHint}"
@@ -222,15 +227,16 @@
                     </Grid>
                 </Border>
 
-                <DataGrid Grid.Row="1"
+                <DataGrid Grid.Row="1" Grid.Column="0"
                           x:Name="DgRoster"
                           ItemsSource="{Binding Roster}"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserReorderColumns="False" CanUserResizeRows="False"
                           SelectionMode="Single"
+                          IsReadOnly="True"
                           HeadersVisibility="Column"
-                          MouseDoubleClick="DgRoster_DoubleClick"
+                          PreviewMouseLeftButtonUp="DgRoster_RowClick"
                           GridLinesVisibility="Horizontal"
                           HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
                           Background="{StaticResource Brush.Background}"
@@ -270,22 +276,93 @@
                         </Style>
                     </DataGrid.CellStyle>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="" Width="40" IsReadOnly="False">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox Style="{StaticResource Style.CheckBox}"
-                                              HorizontalAlignment="Center"
-                                              IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Driver"   Binding="{Binding Name}"            Width="*"  IsReadOnly="True"/>
                         <DataGridTextColumn Header="Car"      Binding="{Binding CarName}"         Width="150" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Class"    Binding="{Binding ClassType}"       Width="90" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Dial-in"  Binding="{Binding DefaultDialInText}" Width="70" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Override" Binding="{Binding OverrideText, UpdateSourceTrigger=LostFocus}" Width="80" IsReadOnly="False"/>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                        Background="{StaticResource Brush.BorderSubtle}"/>
+
+                <!-- In this class: never filtered by the search box, so the operator
+                     can always check the class against the sign-up sheet (#419). -->
+                <Border Grid.Row="0" Grid.Column="2" Padding="16,12"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel>
+                        <TextBlock Text="In this class"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"/>
+                        <TextBlock Text="{Binding SelectedSummary}"
+                                   FontSize="{StaticResource FontSize.Sm}"
+                                   Foreground="{StaticResource Brush.TextPrimary}"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Grid Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Click a driver on the left to add them."
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               TextWrapping="Wrap" Margin="16,14"
+                               VerticalAlignment="Top">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelection}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid x:Name="DgSelected"
+                              ItemsSource="{Binding Selected}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserDeleteRows="False"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column"
+                              PreviewMouseLeftButtonUp="DgSelected_RowClick"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
+                              Background="{StaticResource Brush.Background}"
+                              RowBackground="{StaticResource Brush.Background}"
+                              AlternatingRowBackground="{StaticResource Brush.Surface}"
+                              Foreground="{StaticResource Brush.TextPrimary}"
+                              FontSize="{StaticResource FontSize.Sm}"
+                              BorderThickness="0" RowHeight="34"
+                              ColumnHeaderStyle="{Binding ColumnHeaderStyle, ElementName=DgRoster}"
+                              CellStyle="{Binding CellStyle, ElementName=DgRoster}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Driver" Binding="{Binding Name}"
+                                                Width="*" IsReadOnly="True"/>
+                            <!-- Visibility is driven from code-behind: a DataGridColumn
+                                 is not in the visual tree, so RelativeSource bindings
+                                 on it silently never resolve. -->
+                            <DataGridTextColumn x:Name="ColOverride" Header="Override"
+                                                Binding="{Binding OverrideText, UpdateSourceTrigger=LostFocus}"
+                                                Width="80" IsReadOnly="False"
+                                                Visibility="Collapsed"/>
+                            <DataGridTemplateColumn Header="" Width="34" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip="Remove from this class"
+                                                   Foreground="{StaticResource Brush.TextMuted}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </Grid>
 
             <!-- Footer -->
