@@ -20,7 +20,7 @@ namespace RCDragManagerProd.Controllers
             if (_session == null || _engine == null) return null;
             if (_session.EventDate == default) return null;
 
-            var eventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Quick Session" : _session.EventName;
+            var eventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Unsaved class" : _session.EventName;
             var eventDate = _session.EventDate.ToString("yyyy-MM-dd");
 
             string currentRound;
@@ -143,7 +143,7 @@ namespace RCDragManagerProd.Controllers
                     return;
                 }
 
-                var eventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Quick Session" : _session.EventName;
+                var eventName = string.IsNullOrWhiteSpace(_session.EventName) ? "Unsaved class" : _session.EventName;
                 var dto = new LiveRaceUpdateDto
                 {
                     EventId      = _session.EventId.ToString("N"),

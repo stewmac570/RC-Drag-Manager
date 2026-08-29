@@ -1,5 +1,32 @@
 # RC Drag Manager — Domain Model
 
+## Glossary — the words the UI uses (#414)
+
+Agreed with the Race Director after the August 2026 meet, where mixed wording
+contributed to a class bracket being wiped (#413). **All user-facing text uses
+these three words.** Code identifiers deliberately still use the older names —
+renaming `RaceSession` and friends would churn the do-not-touch layer for no
+operator benefit — so this table is the map between them.
+
+| UI word | Means | Code type |
+|---------|-------|-----------|
+| **Event** | The whole thing: one day's tournament, containing one or more classes. | `MultiClassEvent` (a single-class event is just an event with one class) |
+| **Class** | One field of drivers racing among themselves — one bracket, one tab in the console. | `RaceSession` |
+| **Race** | Two drivers running against each other. | `EngineMatch` / "match" in code |
+| **Round** | A stage within a class: RR1, RR2, SF, F, … | `RoundLabels` constants |
+
+Rules that follow from this:
+
+- Never say "session" or "match" in user-facing text — say "class" or "race".
+- Destructive confirmations must name their scope: "Close **this class**?",
+  not "Close this race?".
+- "Race" in the singular means two drivers. If it covers a whole bracket, the
+  word wanted is "class".
+- Bracket cards still label races `M1`, `M2`, … The `M` is kept on purpose:
+  `R1` would read as a round next to the `RR1`/`RR2` round labels.
+
+---
+
 ## Core Entities
 
 ### Driver (`Domain/Drivers.cs`)

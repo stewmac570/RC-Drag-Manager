@@ -83,7 +83,7 @@
                 <Border Grid.Row="0" Padding="20,10,20,8"
                         BorderBrush="{StaticResource Brush.BorderSubtle}"
                         BorderThickness="0,0,0,1">
-                    <TextBlock Text="Match history"
+                    <TextBlock Text="Race history"
                                FontSize="{StaticResource FontSize.Xs}"
                                FontWeight="Medium"
                                Foreground="{StaticResource Brush.TextHint}"/>

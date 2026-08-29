@@ -25,7 +25,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Select the match result to change"
+            <TextBlock Grid.Row="0" Text="Select the race result to change"
                        FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
                        Foreground="{StaticResource Brush.TextPrimary}" Margin="0,0,0,12"/>
 

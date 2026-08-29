@@ -192,7 +192,7 @@ namespace RCDragManagerProd.WPF.Views
                 _currentButtons = null;
                 SetWinnerButton(BtnWinner1, "—", false);
                 SetWinnerButton(BtnWinner2, "—", false);
-                LblNowRacing.Text = "No active match";
+                LblNowRacing.Text = "No active race";
                 UpdateQueue();
                 return;
             }
@@ -364,8 +364,8 @@ namespace RCDragManagerProd.WPF.Views
         {
             if (!_controller.IsCompleted) return false;
             MessageDialog.Info(Host,
-                "This race is complete and is available for viewing only. Use Results to view the saved winners and ladder.",
-                "Race complete");
+                "This class is complete and is available for viewing only. Use Results to view the saved winners and ladder.",
+                "Class complete");
             return true;
         }
 
@@ -375,8 +375,8 @@ namespace RCDragManagerProd.WPF.Views
 
             if (_controller.HasBracketStarted)
             {
-                MessageDialog.Info(Host, "This race has already started — drivers can't be added to the active race.",
-                    "Race in progress");
+                MessageDialog.Info(Host, "This class has already started — drivers can't be added once racing begins.",
+                    "Class in progress");
                 return;
             }
 
@@ -404,8 +404,8 @@ namespace RCDragManagerProd.WPF.Views
 
             if (_controller.HasBracketStarted)
             {
-                MessageDialog.Info(Host, "This race has already started — driver identity is fixed.",
-                    "Race in progress");
+                MessageDialog.Info(Host, "This class has already started — driver identity is fixed.",
+                    "Class in progress");
                 return;
             }
             var row = DgDrivers.SelectedItem as ConsoleDriverRow;
@@ -539,8 +539,8 @@ namespace RCDragManagerProd.WPF.Views
         {
             if (_controller.IsCompleted)
             {
-                MessageDialog.Info(Host, "This race is complete. Use Results to view the saved winners and ladder.",
-                    "Race complete");
+                MessageDialog.Info(Host, "This class is complete. Use Results to view the saved winners and ladder.",
+                    "Class complete");
                 return;
             }
 
@@ -586,7 +586,7 @@ namespace RCDragManagerProd.WPF.Views
             var presentation = RaceResultsPresentationBuilder.Build(_session);
             if (!presentation.HasResults)
             {
-                MessageDialog.Info(Host, "No race results have been recorded yet.", "Race results");
+                MessageDialog.Info(Host, "No race results have been recorded yet.", "Class results");
                 return;
             }
 
@@ -648,9 +648,9 @@ namespace RCDragManagerProd.WPF.Views
             switch (_raceConsole.ValidateEditable(matchId))
             {
                 case EditResultStatus.MatchNotFound:
-                    MessageDialog.Info(Host, "Match not found.", "Edit result"); return;
+                    MessageDialog.Info(Host, "Race not found.", "Edit result"); return;
                 case EditResultStatus.NoResultYet:
-                    MessageDialog.Info(Host, "That match has not run yet.", "Edit result"); return;
+                    MessageDialog.Info(Host, "That race hasn't run yet.", "Edit result"); return;
                 case EditResultStatus.NotInActiveRound:
                     MessageDialog.Info(Host, "You can only change results for the active round.", "Edit result"); return;
             }
@@ -664,7 +664,7 @@ namespace RCDragManagerProd.WPF.Views
 
             bool setFirst = dlg.Choice == 1;
             if (!_raceConsole.ApplyEditResult(matchId, setFirst))
-                MessageDialog.Info(Host, "Edit rejected. Only active-round matches can change and BYE can't win.",
+                MessageDialog.Info(Host, "Edit rejected. Only races in the active round can change, and a BYE can't win.",
                     "Edit result");
         }
 
@@ -676,18 +676,18 @@ namespace RCDragManagerProd.WPF.Views
 
             if (_session == null)
             {
-                MessageDialog.Info(Host, "Quick session has no saved file to update.", "Nothing to save");
+                MessageDialog.Info(Host, "This class has no saved file to update.", "Nothing to save");
                 return;
             }
             _raceConsole.SaveProgress();
-            MessageDialog.Info(Host, "Race progress saved. You can resume this race later.", "Progress saved");
+            MessageDialog.Info(Host, "Class progress saved. You can resume this class later.", "Progress saved");
         }
 
         private void BtnCloseRace_Click(object sender, RoutedEventArgs e)
         {
             if (!MessageDialog.Confirm(Host,
-                    "Close this race? Make sure progress is saved if you want to resume it later.",
-                    "Close race", destructive: true))
+                    "Close this class? Make sure progress is saved if you want to resume it later.",
+                    "Close class", destructive: true))
                 return;
 
             if (_session != null)

@@ -63,7 +63,7 @@ namespace RCDragManagerProd.AppServices
             PrimaryActionLabel = primaryActionLabel;
         }
 
-        /// <summary>Header title, e.g. "Event: Spring Shootout" or "Quick Session".</summary>
+        /// <summary>Header title, e.g. "Event: Spring Shootout" or "Unsaved class".</summary>
         public string EventTitle { get; }
 
         /// <summary>True once a bracket has been generated for this session.</summary>

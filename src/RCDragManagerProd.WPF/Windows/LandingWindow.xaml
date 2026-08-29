@@ -118,7 +118,7 @@
                                            FontWeight="Medium"
                                            Foreground="{StaticResource Brush.OnPrimary}"
                                            Margin="0,0,0,4"/>
-                                <TextBlock Text="Create a new race session — single or multi-class"
+                                <TextBlock Text="Create a new event — one class or several"
                                            FontSize="{StaticResource FontSize.Sm}"
                                            Foreground="{StaticResource Brush.OnPrimarySubtle}"/>
                             </StackPanel>
@@ -147,7 +147,7 @@
                                                FontWeight="Medium"
                                                Foreground="{StaticResource Brush.TextPrimary}"
                                                Margin="0,0,0,2"/>
-                                    <TextBlock Text="Resume a previously saved race session"
+                                    <TextBlock Text="Resume a previously saved event"
                                                FontSize="{StaticResource FontSize.Xs}"
                                                Foreground="{StaticResource Brush.TextMuted}"/>
                                 </StackPanel>
@@ -204,7 +204,7 @@
                         </ItemsControl>
 
                         <!-- Empty state -->
-                        <TextBlock Text="No saved events yet. Start your first race above."
+                        <TextBlock Text="No saved events yet. Start your first event above."
                                    FontSize="{StaticResource FontSize.Sm}"
                                    Foreground="{StaticResource Brush.TextHint}"
                                    Visibility="{Binding EmptyEventsVisibility}"

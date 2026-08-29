@@ -1,7 +1,7 @@
 <Window x:Class="RCDragManagerProd.WPF.Dialogs.RaceResultsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Race results"
+        Title="Class results"
         Width="1040" Height="660" MinWidth="760" MinHeight="520"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
@@ -80,7 +80,7 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
-                <TextBlock Text="Race results"
+                <TextBlock Text="Class results"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            FontSize="12" Foreground="{StaticResource Brush.TextHint}" FontWeight="Medium"/>
                 <Button Style="{StaticResource Style.WinCtrl.Close}"
@@ -120,7 +120,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Phase" Binding="{Binding Phase}" Width="150"/>
                             <DataGridTextColumn Header="Round" Binding="{Binding Round}" Width="100"/>
-                            <DataGridTextColumn Header="Match" Binding="{Binding Match}" Width="65"/>
+                            <DataGridTextColumn Header="Race" Binding="{Binding Match}" Width="65"/>
                             <DataGridTextColumn Header="Pairing" Binding="{Binding Pairing}" Width="*"/>
                             <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="160"/>
                             <DataGridTextColumn Header="Loser" Binding="{Binding Loser}" Width="160"/>

@@ -161,6 +161,13 @@ deviation will be caught in code review.
 
 ## Key Conventions
 
+- **Event / Class / Race is the user-facing vocabulary.** An *event* is the whole
+  tournament, a *class* is one field of drivers (one bracket, one console tab),
+  a *race* is two drivers head to head. Never write "session" or "match" in
+  user-facing text, and make destructive confirmations name their scope ("Close
+  this class?"). Code identifiers keep the older names on purpose — the glossary
+  mapping UI words to types is at the top of `DOMAIN-MODEL.md`.
+
 - **Round labels are strings**, not enums. Canonical values defined in
   `RoundLabels.cs`. Always use `RoundLabels` constants — never hardcode
   `"SF"`, `"F"`, `"RR1"`, etc. as raw strings.
