@@ -577,7 +577,7 @@ namespace RCDragManagerProd.Controllers
 
                     var summary = new RaceSummary
                     {
-                        EventName = _session?.EventName ?? "Quick Session",
+                        EventName = _session?.EventName ?? "Unsaved class",
                         Bracket = "Finals (Pro Ladder)",
                         Winner = winner,
                         RunnerUp = runnerUp,

@@ -59,7 +59,7 @@ namespace RCDragManagerProd.WPF.ViewModels
                 {
                     Id = s.Id,
                     IsMultiClass = false,
-                    EventName = string.IsNullOrWhiteSpace(s.EventName) ? "Untitled session" : s.EventName,
+                    EventName = string.IsNullOrWhiteSpace(s.EventName) ? "Untitled event" : s.EventName,
                     Kind = "Single class",
                     Detail = BuildDetail(s.RaceType, s.ClassType),
                     EventDate = s.EventDate

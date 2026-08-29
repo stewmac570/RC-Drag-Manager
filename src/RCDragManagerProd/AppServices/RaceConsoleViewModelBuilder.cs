@@ -22,6 +22,9 @@ namespace RCDragManagerProd.AppServices
         private const string StartFinalsLabel = "Start Finals";
         private const string NoCurrentMatch = "No current match.";
 
+        // Shown when a class is being run without a saved event behind it.
+        internal const string UnsavedClassTitle = "Unsaved class";
+
         public static RaceConsoleViewModel Build(RaceController controller)
         {
             if (controller == null) throw new ArgumentNullException(nameof(controller));
@@ -82,7 +85,7 @@ namespace RCDragManagerProd.AppServices
         private static string BuildEventTitle(RaceController controller)
         {
             var session = controller.Session;
-            return session != null ? $"Event: {session.EventName}" : "Quick Session";
+            return session != null ? $"Event: {session.EventName}" : UnsavedClassTitle;
         }
 
         // Mirrors RaceController.BuildNextUpLabelText: the next up to three unresolved

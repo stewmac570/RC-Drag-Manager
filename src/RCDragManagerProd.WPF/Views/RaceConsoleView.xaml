@@ -91,7 +91,7 @@
                     <Button Style="{StaticResource Style.Button.Toolbar}"
                             Content="Save progress" Click="BtnSaveProgress_Click" Margin="0,0,8,0"/>
                     <Button Style="{StaticResource Style.Button.Toolbar.Danger}"
-                            Content="Close race" Click="BtnCloseRace_Click"/>
+                            Content="Close class" Click="BtnCloseRace_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -282,7 +282,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0">
-                    <TextBlock x:Name="LblNowRacing" Text="No active match"
+                    <TextBlock x:Name="LblNowRacing" Text="No active race"
                                FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
                                Foreground="{StaticResource Brush.TextHint}"
                                HorizontalAlignment="Center" Margin="0,0,0,8"/>

@@ -61,7 +61,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             if (evt?.ClassSessions == null || evt.ClassSessions.Count == 0)
             {
-                MessageDialog.Warn(this, "This event has no class sessions to race.");
+                MessageDialog.Warn(this, "This event has no classes to race.");
                 return;
             }
 
