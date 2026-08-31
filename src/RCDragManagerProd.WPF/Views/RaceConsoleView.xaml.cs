@@ -100,6 +100,7 @@ namespace RCDragManagerProd.WPF.Views
 
             LblEventTitle.Text = $"{_raceConsole.GetState().EventTitle} — completed (results only)";
             BtnAddDriver.IsEnabled = false;
+            BtnEditRoster.IsEnabled = false;
             DgDrivers.IsHitTestVisible = false;
             BtnEditResult.IsEnabled = false;
             BtnStandings.IsEnabled = false;
@@ -431,16 +432,52 @@ namespace RCDragManagerProd.WPF.Views
             return true;
         }
 
+        /// <summary>Stops an unrun bracket and returns the console to roster setup.
+        /// Once any winner is recorded, driver identity is permanently locked.</summary>
+        private bool EnsureRosterCanBeEdited()
+        {
+            if (RejectCompletedRaceEdit()) return false;
+            if (!_controller.HasBracketStarted) return true;
+
+            if (_controller.HasRaceRun)
+            {
+                MessageDialog.Info(Host,
+                    "A race result has already been recorded. The driver roster can no longer be changed.",
+                    "Racing has started");
+                return false;
+            }
+
+            if (!MessageDialog.Confirm(Host,
+                    "The bracket has been generated, but no race has run.\n\nStop this bracket so you can change the drivers? You will need to generate a new bracket.",
+                    "Edit race roster", destructive: true))
+                return false;
+
+            if (!_controller.TryDiscardUnrunBracket()) return false;
+
+            IcPairings.ItemsSource = null;
+            IcWinners.ItemsSource = null;
+            _currentButtons = null;
+            UpdateQueue();
+            BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
+            BtnGenerateBracket.Content = "Generate bracket";
+            BtnNextRound.IsEnabled = false;
+            BtnStandings.IsEnabled = false;
+            BtnBuybacks.IsEnabled = false;
+            UpdatePrimaryButtons();
+            return true;
+        }
+
+        private void BtnEditRoster_Click(object sender, RoutedEventArgs e)
+        {
+            if (!EnsureRosterCanBeEdited()) return;
+            MessageDialog.Info(Host,
+                "Select a driver to edit or remove, or add a new driver.",
+                "Edit race roster");
+        }
+
         private void BtnAddDriver_Click(object sender, RoutedEventArgs e)
         {
-            if (RejectCompletedRaceEdit()) return;
-
-            if (_controller.HasBracketStarted)
-            {
-                MessageDialog.Info(Host, "This class has already started — drivers can't be added once racing begins.",
-                    "Class in progress");
-                return;
-            }
+            if (!EnsureRosterCanBeEdited()) return;
 
             // Stays open for bulk entry, so each entry commits through this callback
             // rather than on close (#417).
@@ -462,14 +499,7 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnEditDriver_Click(object sender, RoutedEventArgs e)
         {
-            if (RejectCompletedRaceEdit()) return;
-
-            if (_controller.HasBracketStarted)
-            {
-                MessageDialog.Info(Host, "This class has already started — driver identity is fixed.",
-                    "Class in progress");
-                return;
-            }
+            if (!EnsureRosterCanBeEdited()) return;
             var row = DgDrivers.SelectedItem as ConsoleDriverRow;
             if (row == null) return;
             var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
@@ -482,6 +512,32 @@ namespace RCDragManagerProd.WPF.Views
                 SyncSessionRoster();
                 RefreshDriverGrid();
             }
+        }
+
+        private void BtnRemoveDriver_Click(object sender, RoutedEventArgs e)
+        {
+            if (!EnsureRosterCanBeEdited()) return;
+
+            var row = DgDrivers.SelectedItem as ConsoleDriverRow;
+            if (row == null)
+            {
+                MessageDialog.Info(Host, "Select the driver you want to remove.", "Remove driver");
+                return;
+            }
+
+            var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
+            if (driver == null) return;
+
+            if (!MessageDialog.Confirm(Host,
+                    $"Remove {driver.Name} from this race?",
+                    "Remove driver", destructive: true))
+                return;
+
+            _drivers.Remove(driver);
+            SyncSessionRoster();
+            RefreshDriverGrid();
+            BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
+            UpdatePrimaryButtons();
         }
 
         private void BtnSetQual_Click(object sender, RoutedEventArgs e)

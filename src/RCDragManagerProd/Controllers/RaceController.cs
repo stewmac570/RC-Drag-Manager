@@ -35,6 +35,10 @@ namespace RCDragManagerProd.Controllers
 
         public bool HasBracketStarted => _engine != null;
 
+        /// <summary>True once at least one match result has been recorded. A generated
+        /// bracket with no result is still safe to discard so the roster can be fixed.</summary>
+        public bool HasRaceRun => _matchResult.GetAllResults().Count > 0;
+
         private Driver _buybackChampionOverride;
 
         // Active round for RR: gates winner input to only the current pace-gated round.

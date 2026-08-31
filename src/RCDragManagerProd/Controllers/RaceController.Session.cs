@@ -60,6 +60,29 @@ namespace RCDragManagerProd.Controllers
             Logger.Log("[RESET] Controller cleared — ready for new class.");
         }
 
+        /// <summary>Discards a generated bracket only while it has no results.</summary>
+        public bool TryDiscardUnrunBracket()
+        {
+            if (_engine == null) return true;
+            if (IsCompleted || HasRaceRun)
+            {
+                Logger.Log("[RESET][REJECT] Roster edit requested after a race result was recorded.");
+                return false;
+            }
+
+            var configuredRaceType = !string.IsNullOrWhiteSpace(_session?.OriginalRaceType)
+                ? _session.OriginalRaceType
+                : _session?.RaceType;
+
+            Reset();
+
+            if (_session != null)
+                _session.RaceType = configuredRaceType ?? string.Empty;
+
+            Logger.Log("[RESET] Unrun bracket discarded — roster editing re-enabled.");
+            return true;
+        }
+
 
         public void SetBuybackDrivers(List<Driver> drivers)
         {
