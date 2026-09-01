@@ -327,13 +327,32 @@ namespace RCDragManagerProd.WPF.Views
                 if (!_finalsPopupShown && !IsHostedMode)
                 {
                     _finalsPopupShown = true;
-                    MessageDialog.Info(Host, "Losers Bracket complete.\nClick 'Start finals' to run the Finals.",
-                        "Finals ready");
+                    MessageDialog.Info(Host, FinalsReadyMessage(), "Finals ready");
                 }
             }
             else _finalsPopupShown = false;
             UpdatePrimaryButtons();
         });
+
+        /// <summary>Explains why the Finals are waiting. Every route ends the same way —
+        /// nothing starts until the RD clicks "Start finals".</summary>
+        private string FinalsReadyMessage()
+        {
+            switch (_controller.FinalsPendingReason)
+            {
+                case RaceController.FinalsReasonRoundRobinAllAdvance:
+                    return "Round Robin complete.\nEvery driver advances. Click 'Start finals' to run the Finals.";
+
+                case RaceController.FinalsReasonBuybackSkipped:
+                    var wildcard = _controller.FinalsPendingWildcardName;
+                    return "Round Robin complete.\nNot enough drivers for a buyback" +
+                           (string.IsNullOrWhiteSpace(wildcard) ? "" : $", so {wildcard} goes through as the wildcard") +
+                           ".\nClick 'Start finals' to run the Finals.";
+
+                default:
+                    return "Losers Bracket complete.\nClick 'Start finals' to run the Finals.";
+            }
+        }
 
         // Fires for local edits and for changes the background live-site poll applies;
         // without this the grid and winner buttons showed stale dial-ins until the

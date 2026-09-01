@@ -67,6 +67,25 @@ namespace RCDragManagerProd.Controllers
         private bool _finalsPending;
         public bool IsFinalsPending => _finalsPending;
 
+        /// <summary>Why the Finals are waiting, so the console can explain the gate
+        /// without knowing how the class got here. One of the FinalsReason* values.</summary>
+        public const string FinalsReasonLosersBracketComplete = "LosersBracketComplete";
+        public const string FinalsReasonRoundRobinAllAdvance = "RoundRobinAllAdvance";
+        public const string FinalsReasonBuybackSkipped = "BuybackSkipped";
+
+        public string FinalsPendingReason { get; private set; }
+
+        /// <summary>The wildcard promoted when there were too few drivers for a buyback;
+        /// null otherwise. Shown to the RD before they commit to the Finals.</summary>
+        public string FinalsPendingWildcardName { get; private set; }
+
+        /// <summary>
+        /// Round Robin finishing order captured when the Finals gate went up on an
+        /// all-advance (QMDRA) class. Held rather than injected so the RD starts the
+        /// Finals themselves; recomputed from the engine if a resume cleared it.
+        /// </summary>
+        private List<Driver> _pendingFinalsRanking;
+
         // ── Event: tournament complete ───────────────────────────────────────
         public class RaceSummary
         {
