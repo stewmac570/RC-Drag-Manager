@@ -281,4 +281,34 @@ public class RaceControllerResetTests
         Assert.AreEqual(2, matches.Count,
             "4 drivers → Pro Ladder → R1 must expose exactly 2 matches on the second run");
     }
+
+    [TestMethod]
+    public void TryDiscardUnrunBracket_AllowsRosterEditingBeforeFirstResult()
+    {
+        var session = NewSession();
+        session.OriginalRaceType = "Pro Ladder";
+        var controller = new RaceController(session);
+        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
+
+        Assert.IsTrue(controller.HasBracketStarted);
+        Assert.IsFalse(controller.HasRaceRun);
+
+        Assert.IsTrue(controller.TryDiscardUnrunBracket());
+        Assert.IsFalse(controller.HasBracketStarted);
+        Assert.AreEqual("Pro Ladder", session.RaceType);
+    }
+
+    [TestMethod]
+    public void TryDiscardUnrunBracket_RejectsAfterFirstResultWithoutLosingBracket()
+    {
+        var controller = new RaceController(NewSession());
+        controller.GenerateBracket("Pro Ladder", TestDriverFactory.CreateProLadderPack());
+        var firstMatch = controller.PeekUpcomingMatches(1)[0];
+        controller.SubmitWinner(firstMatch.MatchId, firstOption: true);
+
+        Assert.IsTrue(controller.HasRaceRun);
+        Assert.IsFalse(controller.TryDiscardUnrunBracket());
+        Assert.IsTrue(controller.HasBracketStarted);
+        Assert.IsNotNull(controller.GetWinner(firstMatch.MatchId));
+    }
 }
