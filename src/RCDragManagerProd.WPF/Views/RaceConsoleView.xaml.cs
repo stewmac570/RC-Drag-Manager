@@ -99,7 +99,6 @@ namespace RCDragManagerProd.WPF.Views
             if (!_controller.IsCompleted) return;
 
             LblEventTitle.Text = $"{_raceConsole.GetState().EventTitle} — completed (results only)";
-            BtnAddDriver.IsEnabled = false;
             BtnEditRoster.IsEnabled = false;
             DgDrivers.IsHitTestVisible = false;
             BtnEditResult.IsEnabled = false;
@@ -470,77 +469,10 @@ namespace RCDragManagerProd.WPF.Views
         private void BtnEditRoster_Click(object sender, RoutedEventArgs e)
         {
             if (!EnsureRosterCanBeEdited()) return;
-            EditSelectedDriver();
-        }
+            var dlg = new RaceRosterDialog(_drivers) { Owner = Host };
+            if (dlg.ShowDialog() != true) return;
 
-        private void BtnAddDriver_Click(object sender, RoutedEventArgs e)
-        {
-            if (!EnsureRosterCanBeEdited()) return;
-
-            // Stays open for bulk entry, so each entry commits through this callback
-            // rather than on close (#417).
-            new AddDriverDialog(TryAddDriver) { Owner = Host }.ShowDialog();
-        }
-
-        /// <summary>Commits one add-driver entry; returns an error message, or null on success.</summary>
-        private string TryAddDriver(string name, string qualTimeText)
-        {
-            var result = _rosterService.AddOrUpdate(name, qualTimeText, _drivers);
-            if (!result.Success) return result.Error;
-
-            SyncSessionRoster();
-            RefreshDriverGrid();
-            BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;
-            UpdatePrimaryButtons();
-            return null;
-        }
-
-        private void BtnEditDriver_Click(object sender, RoutedEventArgs e)
-        {
-            if (!EnsureRosterCanBeEdited()) return;
-            EditSelectedDriver();
-        }
-
-        private void EditSelectedDriver()
-        {
-            var row = DgDrivers.SelectedItem as ConsoleDriverRow;
-            if (row == null)
-            {
-                MessageDialog.Info(Host, "Select the driver you want to edit.", "Edit driver");
-                return;
-            }
-            var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
-            if (driver == null) return;
-
-            var dlg = new AddEditDriverDialog(driver.Name, "") { Owner = Host };
-            if (dlg.ShowDialog() == true)
-            {
-                driver.Name = dlg.DriverName;
-                SyncSessionRoster();
-                RefreshDriverGrid();
-            }
-        }
-
-        private void BtnRemoveDriver_Click(object sender, RoutedEventArgs e)
-        {
-            if (!EnsureRosterCanBeEdited()) return;
-
-            var row = DgDrivers.SelectedItem as ConsoleDriverRow;
-            if (row == null)
-            {
-                MessageDialog.Info(Host, "Select the driver you want to remove.", "Remove driver");
-                return;
-            }
-
-            var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
-            if (driver == null) return;
-
-            if (!MessageDialog.Confirm(Host,
-                    $"Remove {driver.Name} from this race?",
-                    "Remove driver", destructive: true))
-                return;
-
-            _drivers.Remove(driver);
+            _drivers = dlg.Drivers;
             SyncSessionRoster();
             RefreshDriverGrid();
             BtnGenerateBracket.IsEnabled = _drivers.Count >= 2;

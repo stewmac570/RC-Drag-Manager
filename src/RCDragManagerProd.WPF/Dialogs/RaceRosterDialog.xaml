@@ -1,0 +1,71 @@
+<Window x:Class="RCDragManagerProd.WPF.Dialogs.RaceRosterDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Edit race roster" Width="560" Height="520"
+        WindowStartupLocation="CenterOwner" WindowStyle="None"
+        ResizeMode="NoResize" Background="{StaticResource Brush.Surface}"
+        FontFamily="Segoe UI" ShowInTaskbar="False">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource Brush.Surface}"
+            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+        <Grid Margin="24,22">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Edit race roster" FontSize="{StaticResource FontSize.Lg}"
+                       FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
+            <TextBlock Grid.Row="1" Text="Add or remove drivers for this race, then save the roster."
+                       FontSize="{StaticResource FontSize.Xs}"
+                       Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,16"/>
+
+            <DataGrid Grid.Row="2" x:Name="DgRoster" AutoGenerateColumns="False"
+                      CanUserAddRows="False" CanUserDeleteRows="False"
+                      SelectionMode="Single" HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal" RowHeight="34"
+                      Background="{StaticResource Brush.Background}"
+                      Foreground="{StaticResource Brush.TextPrimary}"
+                      BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                      MouseDoubleClick="BtnEdit_Click">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Driver" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Qual time" Binding="{Binding QualTime, StringFormat=0.000}" Width="100" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Grid Grid.Row="3" Margin="0,12,0,18">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource Style.Button.Toolbar}"
+                            Content="Add driver" Click="BtnAdd_Click" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource Style.Button.Toolbar}"
+                            Content="Edit name" Click="BtnEdit_Click" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource Style.Button.Toolbar.Danger}"
+                            Content="Remove selected" Click="BtnRemove_Click"/>
+                </StackPanel>
+                <TextBlock x:Name="CountText" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}"/>
+            </Grid>
+
+            <Grid Grid.Row="4">
+                <TextBlock x:Name="ErrorText" VerticalAlignment="Center"
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.Danger}" Visibility="Collapsed"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                            Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                            Content="Save roster" Click="BtnSave_Click" IsDefault="True"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
