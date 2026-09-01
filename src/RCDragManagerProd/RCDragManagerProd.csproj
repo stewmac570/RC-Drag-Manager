@@ -117,6 +117,7 @@
     <Compile Include="AppServices\MultiClassSetupService.cs" />
     <Compile Include="AppServices\EventSettingsService.cs" />
     <Compile Include="AppServices\RosterAddResult.cs" />
+    <Compile Include="AppServices\RaceRosterService.cs" />
     <Compile Include="AppServices\SessionRosterService.cs" />
     <Compile Include="AppServices\RaceConsoleService.cs" />
     <Compile Include="AppServices\RaceConsoleViewModel.cs" />

@@ -122,8 +122,6 @@
                 </Border>
 
                 <StackPanel Grid.Row="1" Margin="12,10" Orientation="Horizontal">
-                    <Button x:Name="BtnAddDriver" Style="{StaticResource Style.Button.Toolbar}"
-                            Content="Add driver" Click="BtnAddDriver_Click" Margin="0,0,6,0"/>
                     <Button x:Name="BtnEditRoster" Style="{StaticResource Style.Button.Toolbar}"
                             Content="Edit roster" Click="BtnEditRoster_Click"/>
                 </StackPanel>
@@ -208,10 +206,6 @@
                 <Border Grid.Row="3" Padding="12,10"
                         BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource Style.Button.Toolbar}"
-                                Content="Edit" Click="BtnEditDriver_Click" Margin="0,0,6,0"/>
-                        <Button Style="{StaticResource Style.Button.Toolbar}"
-                                Content="Remove" Click="BtnRemoveDriver_Click" Margin="0,0,6,0"/>
                         <Button Style="{StaticResource Style.Button.Toolbar}"
                                 Content="Qual time" Click="BtnSetQual_Click" Margin="0,0,6,0"/>
                         <Button Style="{StaticResource Style.Button.Toolbar}"

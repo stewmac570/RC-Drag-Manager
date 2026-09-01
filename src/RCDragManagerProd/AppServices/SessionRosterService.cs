@@ -100,16 +100,46 @@ namespace RCDragManagerProd.AppServices
                 .GroupBy(e => e.DriverID)
                 .ToDictionary(g => g.Key, g => g.First());
 
+            // Read off the class's dial-in convention before the roster is rewritten,
+            // so a driver joining mid-setup is seeded the same way their rivals were.
+            bool classUsesDialIns = session.FixedDialIn.HasValue ||
+                                    existing.Values.Any(e => e.DialIn.HasValue);
+
             session.DriverEntries = drivers.Select(d =>
             {
                 if (!existing.TryGetValue(d.Id, out var entry))
-                    entry = new RaceSessionDriverEntry { DriverID = d.Id };
+                    entry = NewEntry(session, d, classUsesDialIns);
                 entry.DriverName = d.Name;
                 entry.QualifyingTime = d.QualTime;
                 return entry;
             }).ToList();
 
             session.Drivers = new List<Driver>(drivers);
+        }
+
+        /// <summary>
+        /// Builds the race entry for a driver who was not in this class before — a late
+        /// entry added at the console. Mirrors what
+        /// <c>MultiClassSetupService.BuildDriverEntries</c> would have produced at setup:
+        /// a Bracket Class hands every driver the same fixed dial-in, a Dial-In class
+        /// starts them on their car default, and a Heads Up class has no dial-in at all.
+        /// </summary>
+        private static RaceSessionDriverEntry NewEntry(RaceSession session, Driver driver, bool classUsesDialIns)
+        {
+            var car = driver.Cars?.FirstOrDefault();
+
+            double? dialIn = null;
+            if (session.FixedDialIn.HasValue) dialIn = session.FixedDialIn;
+            else if (classUsesDialIns) dialIn = car?.DefaultDialIn;
+
+            return new RaceSessionDriverEntry
+            {
+                DriverID  = driver.Id,
+                CarID     = car?.CarID ?? 0,
+                CarName   = car?.CarName ?? "",
+                ClassType = session.ClassType ?? "",
+                DialIn    = dialIn
+            };
         }
     }
 }
