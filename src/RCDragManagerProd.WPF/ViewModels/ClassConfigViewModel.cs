@@ -132,7 +132,9 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         // ── Round Robin options ───────────────────────────────────────────────
 
-        private bool _buybackEnabled = true;
+        // Off by default: most classes run without a buyback, so the RD had to
+        // remember to untick it every time. Ticking it in is the deliberate act.
+        private bool _buybackEnabled;
         public bool BuybackEnabled
         {
             get => _buybackEnabled;
