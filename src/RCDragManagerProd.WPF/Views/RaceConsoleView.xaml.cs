@@ -29,6 +29,7 @@ namespace RCDragManagerProd.WPF.Views
         private readonly RaceController _controller;
         private readonly RaceConsoleService _raceConsole;
         private readonly SessionRosterService _rosterService = new SessionRosterService();
+        private readonly RaceRosterService _rosterEditService;
         private readonly RaceSessionRepository _sessionRepo;
         private readonly RaceSession _session;
         private readonly MultiClassEvent _multiEvent;
@@ -62,7 +63,9 @@ namespace RCDragManagerProd.WPF.Views
             InitializeComponent();
 
             _sessionRepo = new RaceSessionRepository(connectionString);
-            _raceConsole = new RaceConsoleService(_controller, this, new DriverRepository(connectionString));
+            var driverRepo = new DriverRepository(connectionString);
+            _rosterEditService = new RaceRosterService(driverRepo);
+            _raceConsole = new RaceConsoleService(_controller, this, driverRepo);
             _session = _controller.Session;
 
             LblEventTitle.Text = _raceConsole.GetState().EventTitle;
@@ -469,7 +472,7 @@ namespace RCDragManagerProd.WPF.Views
         private void BtnEditRoster_Click(object sender, RoutedEventArgs e)
         {
             if (!EnsureRosterCanBeEdited()) return;
-            var dlg = new RaceRosterDialog(_drivers) { Owner = Host };
+            var dlg = new RaceRosterDialog(_rosterEditService, _drivers, _session?.ClassType) { Owner = Host };
             if (dlg.ShowDialog() != true) return;
 
             _drivers = dlg.Drivers;

@@ -1,71 +1,312 @@
 <Window x:Class="RCDragManagerProd.WPF.Dialogs.RaceRosterDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Edit race roster" Width="560" Height="520"
-        WindowStartupLocation="CenterOwner" WindowStyle="None"
-        ResizeMode="NoResize" Background="{StaticResource Brush.Surface}"
-        FontFamily="Segoe UI" ShowInTaskbar="False">
+        Title="Edit race roster — RC Drag Manager"
+        Width="1000" Height="620"
+        MinWidth="860" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI"
+        ShowInTaskbar="False">
+
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
-                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+        <WindowChrome CaptionHeight="38" CornerRadius="0"
+                      GlassFrameThickness="0" ResizeBorderThickness="5"
+                      UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
-    <Border Background="{StaticResource Brush.Surface}"
-            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
-        <Grid Margin="24,22">
+    <Border Background="{StaticResource Brush.Background}"
+            BorderBrush="{StaticResource Brush.WindowEdge}" BorderThickness="1">
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="38"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Edit race roster" FontSize="{StaticResource FontSize.Lg}"
-                       FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
-            <TextBlock Grid.Row="1" Text="Add or remove drivers for this race, then save the roster."
-                       FontSize="{StaticResource FontSize.Xs}"
-                       Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,16"/>
-
-            <DataGrid Grid.Row="2" x:Name="DgRoster" AutoGenerateColumns="False"
-                      CanUserAddRows="False" CanUserDeleteRows="False"
-                      SelectionMode="Single" HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal" RowHeight="34"
-                      Background="{StaticResource Brush.Background}"
-                      Foreground="{StaticResource Brush.TextPrimary}"
-                      BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
-                      MouseDoubleClick="BtnEdit_Click">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Driver" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Qual time" Binding="{Binding QualTime, StringFormat=0.000}" Width="100" IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
-
-            <Grid Grid.Row="3" Margin="0,12,0,18">
-                <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource Style.Button.Toolbar}"
-                            Content="Add driver" Click="BtnAdd_Click" Margin="0,0,8,0"/>
-                    <Button Style="{StaticResource Style.Button.Toolbar}"
-                            Content="Edit name" Click="BtnEdit_Click" Margin="0,0,8,0"/>
-                    <Button Style="{StaticResource Style.Button.Toolbar.Danger}"
-                            Content="Remove selected" Click="BtnRemove_Click"/>
-                </StackPanel>
-                <TextBlock x:Name="CountText" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           FontSize="{StaticResource FontSize.Xs}"
-                           Foreground="{StaticResource Brush.TextMuted}"/>
-            </Grid>
-
-            <Grid Grid.Row="4">
-                <TextBlock x:Name="ErrorText" VerticalAlignment="Center"
-                           FontSize="{StaticResource FontSize.Xs}"
-                           Foreground="{StaticResource Brush.Danger}" Visibility="Collapsed"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
-                            Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
-                    <Button Style="{StaticResource Style.Button.Dialog.Primary}"
-                            Content="Save roster" Click="BtnSave_Click" IsDefault="True"/>
+            <!-- Title bar -->
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Chrome}">
+                <TextBlock Text="Edit race roster"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource Brush.TextHint}"
+                           FontWeight="Medium"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="0,0,14,0">
+                    <Button Style="{StaticResource Style.WinCtrl.Close}" Click="BtnClose_Click"/>
                 </StackPanel>
             </Grid>
+
+            <!-- Intro -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource Brush.Surface}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,0,0,1"
+                    Padding="24,16">
+                <StackPanel>
+                    <TextBlock x:Name="LblClass" Text="Edit race roster"
+                               FontSize="{StaticResource FontSize.Lg}"
+                               FontWeight="Medium"
+                               Foreground="{StaticResource Brush.TextPrimary}"/>
+                    <TextBlock Text="Click a driver on the left to enter them, or a driver on the right to take them out. Save when the roster matches the sign-up sheet."
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Two panes: driver database | this race -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="340"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Row="0" Grid.Column="0" Padding="24,12"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Driver database"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"
+                                   VerticalAlignment="Center"/>
+
+                        <Border Grid.Column="1"
+                                Background="{StaticResource Brush.Chrome}"
+                                BorderBrush="{StaticResource Brush.Border}"
+                                BorderThickness="1" CornerRadius="5"
+                                Padding="8,4" Margin="16,0" HorizontalAlignment="Stretch"
+                                MaxWidth="280">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="13" Foreground="{StaticResource Brush.TextHint}"
+                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox x:Name="TxtSearch" Width="220" BorderThickness="0"
+                                         Background="Transparent"
+                                         Foreground="{StaticResource Brush.TextPrimary}"
+                                         FontSize="{StaticResource FontSize.Sm}"
+                                         VerticalAlignment="Center"
+                                         Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Grid.Column="2"
+                                Style="{StaticResource Style.Button.Toolbar}"
+                                Content="New driver" Click="BtnNewDriver_Click"/>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="1" Grid.Column="0"
+                          x:Name="DgAvailable"
+                          ItemsSource="{Binding Available}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserReorderColumns="False" CanUserResizeRows="False"
+                          SelectionMode="Single"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          PreviewMouseLeftButtonUp="DgAvailable_RowClick"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
+                          Background="{StaticResource Brush.Background}"
+                          RowBackground="{StaticResource Brush.Background}"
+                          AlternatingRowBackground="{StaticResource Brush.Surface}"
+                          Foreground="{StaticResource Brush.TextPrimary}"
+                          FontSize="{StaticResource FontSize.Sm}"
+                          BorderThickness="0" RowHeight="34">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource Brush.Chrome}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Brush.TextHint}"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSize.Xs}"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="Padding" Value="12,0"/>
+                            <Setter Property="Height" Value="30"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="SeparatorBrush" Value="{StaticResource Brush.BorderSubtle}"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="12,0"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Driver" Binding="{Binding Name}"    Width="*"   IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Car"    Binding="{Binding CarName}" Width="170" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="State"  Binding="{Binding State}"   Width="80"  IsReadOnly="True"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- The driver database can legitimately be empty on a fresh install. -->
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                           Text="No drivers left to add. Use New driver to enter someone who is not in the database yet."
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           TextWrapping="Wrap" Margin="24,44,24,0"
+                           VerticalAlignment="Top" IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Available.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                        Background="{StaticResource Brush.BorderSubtle}"/>
+
+                <!-- In this race: never filtered by the search box, so the operator can
+                     always check the roster against the sign-up sheet (#419). -->
+                <Border Grid.Row="0" Grid.Column="2" Padding="16,12"
+                        BorderBrush="{StaticResource Brush.BorderSubtle}"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel>
+                        <TextBlock Text="In this race"
+                                   FontSize="{StaticResource FontSize.Xs}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource Brush.TextHint}"/>
+                        <TextBlock Text="{Binding EnteredSummary}"
+                                   FontSize="{StaticResource FontSize.Sm}"
+                                   Foreground="{StaticResource Brush.TextPrimary}"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Grid Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Click a driver on the left to enter them in this race."
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.TextMuted}"
+                               TextWrapping="Wrap" Margin="16,14"
+                               VerticalAlignment="Top">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasEntries}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid x:Name="DgEntered"
+                              ItemsSource="{Binding Entered}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserDeleteRows="False"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              PreviewMouseLeftButtonUp="DgEntered_RowClick"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource Brush.BorderSubtle}"
+                              Background="{StaticResource Brush.Background}"
+                              RowBackground="{StaticResource Brush.Background}"
+                              AlternatingRowBackground="{StaticResource Brush.Surface}"
+                              Foreground="{StaticResource Brush.TextPrimary}"
+                              FontSize="{StaticResource FontSize.Sm}"
+                              BorderThickness="0" RowHeight="34"
+                              ColumnHeaderStyle="{Binding ColumnHeaderStyle, ElementName=DgAvailable}"
+                              CellStyle="{Binding CellStyle, ElementName=DgAvailable}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Driver" Binding="{Binding Name}"
+                                                Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Qual" Binding="{Binding QualText}"
+                                                Width="64" IsReadOnly="True"/>
+                            <!-- Named so the click handler can tell "rename this driver"
+                                 from "take them out of the race"; a DataGridColumn is not
+                                 in the visual tree, so it cannot decide that itself. -->
+                            <DataGridTemplateColumn x:Name="ColRename" Header="" Width="34" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip="Rename this driver"
+                                                   Foreground="{StaticResource Brush.TextMuted}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="" Width="34" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip="Take out of this race"
+                                                   Foreground="{StaticResource Brush.TextMuted}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Grid>
+
+            <!-- Footer -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource Brush.Chrome}"
+                    BorderBrush="{StaticResource Brush.BorderSubtle}"
+                    BorderThickness="0,1,0,0"
+                    Padding="24,14">
+                <Grid>
+                    <TextBlock Text="{Binding Error}" VerticalAlignment="Center"
+                               HorizontalAlignment="Left" TextWrapping="Wrap"
+                               MaxWidth="520"
+                               FontSize="{StaticResource FontSize.Xs}"
+                               Foreground="{StaticResource Brush.Danger}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasError}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
+                                Content="Cancel" Click="BtnCancel_Click" Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource Style.Button.Dialog.Primary}"
+                                Content="Save roster" Click="BtnSave_Click" IsDefault="True"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </Window>
