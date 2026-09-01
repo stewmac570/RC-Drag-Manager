@@ -470,9 +470,7 @@ namespace RCDragManagerProd.WPF.Views
         private void BtnEditRoster_Click(object sender, RoutedEventArgs e)
         {
             if (!EnsureRosterCanBeEdited()) return;
-            MessageDialog.Info(Host,
-                "Select a driver to edit or remove, or add a new driver.",
-                "Edit race roster");
+            EditSelectedDriver();
         }
 
         private void BtnAddDriver_Click(object sender, RoutedEventArgs e)
@@ -500,8 +498,17 @@ namespace RCDragManagerProd.WPF.Views
         private void BtnEditDriver_Click(object sender, RoutedEventArgs e)
         {
             if (!EnsureRosterCanBeEdited()) return;
+            EditSelectedDriver();
+        }
+
+        private void EditSelectedDriver()
+        {
             var row = DgDrivers.SelectedItem as ConsoleDriverRow;
-            if (row == null) return;
+            if (row == null)
+            {
+                MessageDialog.Info(Host, "Select the driver you want to edit.", "Edit driver");
+                return;
+            }
             var driver = _drivers.FirstOrDefault(d => d.Id == row.DriverId);
             if (driver == null) return;
 
