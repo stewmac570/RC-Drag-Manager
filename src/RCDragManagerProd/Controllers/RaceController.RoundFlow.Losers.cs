@@ -31,6 +31,7 @@ namespace RCDragManagerProd.Controllers
                 _session.BuybackDrivers = new List<Driver>(selectedDrivers);
                 _buybackChampionOverride = single;
                 _finalsPending = true;
+                FinalsPendingReason = FinalsReasonLosersBracketComplete;
                 CanStartFinalsChanged?.Invoke(true);
                 Logger.Log("[LB] Finals gate raised — single LB representative ready.");
                 return;

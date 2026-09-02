@@ -20,6 +20,9 @@ namespace RCDragManagerProd.Controllers
 
             _inLosersPhase = false;
             _finalsPending = false;
+            FinalsPendingReason = null;
+            FinalsPendingWildcardName = null;
+            _pendingFinalsRanking = null;
             _tournamentClosed = false;
 
             _revealedRounds.Clear();

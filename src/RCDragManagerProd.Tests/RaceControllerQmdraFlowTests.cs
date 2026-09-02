@@ -52,6 +52,14 @@ public class RaceControllerQmdraFlowTests
 
         ResolveVisibleMatches(controller);
 
+        // The Finals are gated on the RD now: the class stays in Round Robin until
+        // StartFinals is called, so closing the standings window cannot drop the
+        // operator into the Finals.
+        Assert.IsTrue(controller.IsFinalsPending);
+        Assert.AreEqual("Round Robin", session.RaceType);
+
+        controller.StartFinals();
+
         Assert.AreEqual("Finals", session.RaceType);
         Assert.IsTrue(controller.PeekUpcomingMatches(1).Count > 0);
     }
@@ -94,7 +102,8 @@ public class RaceControllerQmdraFlowTests
 
         controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
 
-        ResolveVisibleMatches(controller); // Completes RR and auto-injects Finals.
+        ResolveVisibleMatches(controller); // Completes RR and raises the Finals gate.
+        controller.StartFinals();          // The RD starts the Finals.
         Assert.AreEqual("Finals", session.RaceType);
         Assert.AreEqual("SF", controller.GetActiveRoundLabel());
 
@@ -122,7 +131,8 @@ public class RaceControllerQmdraFlowTests
 
         controller.GenerateBracket("Round Robin", TestDriverFactory.CreateRoundRobinPack(4));
 
-        ResolveVisibleMatches(controller); // RR complete -> finals injected
+        ResolveVisibleMatches(controller); // RR complete -> Finals gate raised
+        controller.StartFinals();          // RD starts the Finals
         ResolveVisibleMatches(controller); // SF complete
         controller.AdvanceRound();         // Reveal F
         ResolveVisibleMatches(controller); // F complete -> tournament complete
@@ -151,7 +161,8 @@ public class RaceControllerQmdraFlowTests
 
         ResolveVisibleMatches(controller); // RR1
         controller.AdvanceRound();         // reveal RR2
-        ResolveVisibleMatches(controller); // RR2 complete -> auto-injects Finals
+        ResolveVisibleMatches(controller); // RR2 complete -> Finals gate raised
+        controller.StartFinals();          // RD starts the Finals
 
         Assert.AreEqual("Finals", session.RaceType);
 

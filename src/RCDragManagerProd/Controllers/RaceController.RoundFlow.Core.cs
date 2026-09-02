@@ -1,4 +1,4 @@
-// RaceController.RoundFlow.Core.cs
+﻿// RaceController.RoundFlow.Core.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -432,7 +432,16 @@ namespace RCDragManagerProd.Controllers
                             _rrCompletionAnnounced = true;
                             RoundRobinCompleted?.Invoke();
                         }
-                        InjectFinalsAllAdvance(rankedAll);
+
+                        // Gate the Finals behind an explicit click. This used to call
+                        // InjectFinalsAllAdvance here, and because RoundRobinCompleted
+                        // opens a modal standings window, closing that window dropped the
+                        // RD straight into the Finals with no way to stop.
+                        _pendingFinalsRanking = rankedAll;
+                        _finalsPending = true;
+                        FinalsPendingReason = FinalsReasonRoundRobinAllAdvance;
+                        CanStartFinalsChanged?.Invoke(true);
+                        Logger.Log("[RR][QMDRA] Finals pending — waiting for the RD to start them.");
                         return;
                     }
 
@@ -486,7 +495,7 @@ namespace RCDragManagerProd.Controllers
                         return; // wait for user action
                     }
 
-                    // Not enough for buyback ? auto-advance to Finals with wildcard
+                    // Not enough for buyback ? Finals with a wildcard, on the RD's click
                     Driver wildcard = null;
                     if (eligible.Count == 1)
                         wildcard = eligible[0];
@@ -499,23 +508,20 @@ namespace RCDragManagerProd.Controllers
 
                     if (wildcard == null)
                     {
-                        Logger.Log("? Auto-advance failed � could not determine wildcard finalist.");
+                        Logger.Log("? Finals gate not raised � could not determine wildcard finalist.");
                         return;
                     }
 
-                    Logger.Log($"[RR] Not enough drivers for buyback (eligible={eligible.Count}). Auto-advancing with wildcard: {wildcard.Name}.");
-                    try
-                    {
-                        MessageBox.Show(
-                            $"Not enough drivers for Buyback.\nAdvancing directly to Finals with wildcard: {wildcard.Name}.",
-                            "Buyback Skipped",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                    }
-                    catch { /* ignore UI errors in headless runs */ }
-
+                    // Gate the Finals behind an explicit click. This used to pop a raw
+                    // WinForms MessageBox from the controller and then call
+                    // InjectFinal4Bracket outright; the RD never got to choose.
+                    Logger.Log($"[RR] Not enough drivers for buyback (eligible={eligible.Count}). Wildcard finalist: {wildcard.Name}.");
                     _buybackChampionOverride = wildcard;   // consumed by InjectFinal4Bracket()
-                    InjectFinal4Bracket();                 // swaps to ProLadder and draws SF
+                    _finalsPending = true;
+                    FinalsPendingReason = FinalsReasonBuybackSkipped;
+                    FinalsPendingWildcardName = wildcard.Name;
+                    CanStartFinalsChanged?.Invoke(true);
+                    Logger.Log("[RR] Finals pending — waiting for the RD to start them.");
                     return;
                 }
             }
@@ -532,6 +538,7 @@ namespace RCDragManagerProd.Controllers
                     _inLosersPhase = false;
 
                     _finalsPending = true;
+                    FinalsPendingReason = FinalsReasonLosersBracketComplete;
                     CanStartFinalsChanged?.Invoke(true);
                     Logger.Log("?? Finals pending � waiting for 'Generate Bracket' to seed finals.");
                     return;

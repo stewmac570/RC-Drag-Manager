@@ -106,6 +106,28 @@ namespace RCDragManagerProd.Controllers
                 return;
             }
 
+            // All-advance (QMDRA) classes seed every driver in Round Robin finishing
+            // order, so they never have — or need — a Top-3 snapshot.
+            if (string.Equals(FinalsPendingReason, FinalsReasonRoundRobinAllAdvance, StringComparison.Ordinal))
+            {
+                var ranked = ResolvePendingFinalsRanking();
+                if (ranked == null || ranked.Count < 2)
+                {
+                    Logger.Log("❌ Finals cannot start — all-advance ranking unavailable. Keeping Finals pending.");
+                    CanStartFinalsChanged?.Invoke(true);
+                    return;
+                }
+
+                Logger.Log($"[FINALS][ALL-ADVANCE] Start request accepted. Seed order: {string.Join(", ", ranked.Select(d => d.Name))}");
+                InjectFinalsAllAdvance(ranked);
+
+                _pendingFinalsRanking = null;
+                FinalsPendingReason = null;
+                CanStartFinalsChanged?.Invoke(false);
+                Logger.Log("[FINALS] Finals gate lowered (button disabled).");
+                return;
+            }
+
             if (_rrTop3 == null || _rrTop3.Count < 3)
             {
                 Logger.Log("❌ Finals cannot start — RR Top-3 snapshot missing. Keeping Finals pending.");
@@ -119,8 +141,38 @@ namespace RCDragManagerProd.Controllers
             InjectFinal4Bracket();
 
             _finalsPending = false;
+            FinalsPendingReason = null;
+            FinalsPendingWildcardName = null;
             CanStartFinalsChanged?.Invoke(false);
             Logger.Log("[FINALS] Finals gate lowered (button disabled).");
+        }
+
+        /// <summary>
+        /// The Round Robin finishing order for an all-advance Finals. Uses the list
+        /// captured when the gate went up; after a resume that list is gone, so it is
+        /// recomputed from the still-loaded Round Robin engine.
+        /// </summary>
+        private List<Driver> ResolvePendingFinalsRanking()
+        {
+            if (_pendingFinalsRanking != null && _pendingFinalsRanking.Count >= 2)
+                return _pendingFinalsRanking;
+
+            if (!(_engine is RoundRobinEngineAdapter rr))
+            {
+                Logger.Log("[FINALS][ALL-ADVANCE] No Round Robin engine loaded — cannot rebuild the seed order.");
+                return null;
+            }
+
+            int total = _session?.Drivers?.Count ?? 0;
+            if (total <= 0)
+                total = EngineGetMatches(_engine)
+                    .SelectMany(m => new[] { m.Driver1, m.Driver2 })
+                    .Where(d => d != null).Distinct().Count();
+
+            Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
+            var ranked = rr.GetTopRankedDrivers(total);
+            Logger.Log($"[FINALS][ALL-ADVANCE] Seed order rebuilt after resume: {ranked?.Count ?? 0} drivers.");
+            return ranked;
         }
 
         public void StartFinalsTop3NoBuyback()
