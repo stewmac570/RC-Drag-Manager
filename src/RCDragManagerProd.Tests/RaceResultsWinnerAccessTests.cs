@@ -69,6 +69,28 @@ public class RaceResultsWinnerAccessTests
         Assert.AreEqual(2, view.Standings.Count);
     }
 
+    [TestMethod]
+    public void WinnerBoard_BuildsWithoutThrowing_ForAClassThatHasNoArchive()
+    {
+        // The results window builds the Winner tab's context on every open, including
+        // for a class that has not raced. It must come back empty, not throw.
+        var completion = ClassCompletionPresentationBuilder.Build(
+            new RaceSession { EventName = "Fresh", ClassType = "Pro Mod" });
+
+        Assert.IsNotNull(completion);
+        Assert.AreEqual("Winner not recorded", completion.ChampionName);
+        Assert.AreEqual(0, completion.OtherFinishers.Count);
+    }
+
+    [TestMethod]
+    public void WinnerBoard_BuildsWithoutThrowing_ForANullSession()
+    {
+        var completion = ClassCompletionPresentationBuilder.Build(null);
+
+        Assert.IsNotNull(completion);
+        Assert.AreEqual("Race complete", completion.EventName);
+    }
+
     // ── Fixtures ──────────────────────────────────────────────────────────────
 
     private static RaceSession CompletedSession() => new RaceSession
