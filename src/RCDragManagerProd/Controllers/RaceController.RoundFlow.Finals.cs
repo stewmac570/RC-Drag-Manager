@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;            // still used for a couple of info popups
 
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.ViewModels;

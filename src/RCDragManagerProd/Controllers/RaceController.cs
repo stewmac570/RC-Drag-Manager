@@ -62,6 +62,13 @@ namespace RCDragManagerProd.Controllers
         public event Action<bool> CanOfferBuybackChanged;
         public event Action RoundRobinCompleted;
 
+        /// <summary>
+        /// A message for the operator: (title, body). Raised so the view can show it in
+        /// the app's own themed dialog — the controller owns no UI. May fire on a
+        /// non-UI thread; subscribers marshal to their dispatcher.
+        /// </summary>
+        public event Action<string, string> OperatorNotice;
+
         // Finals gating
         public event Action<bool> CanStartFinalsChanged;
         private bool _finalsPending;

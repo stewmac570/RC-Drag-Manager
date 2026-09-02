@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;            // still used for a couple of info popups
 
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.ViewModels;
@@ -90,16 +89,14 @@ namespace RCDragManagerProd.Controllers
 
                 if (_drivers.Count < 3 || _drivers.Count > 32)
                 {
-                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3�32)");
-                    try
-                    {
-                        MessageBox.Show(
-                            "Pro Ladder supports 3�32 drivers. Please adjust the driver count.",
-                            "Invalid Driver Count",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                    }
-                    catch { /* ignore UI errors in headless runs */ }
+                    Logger.Log($"[ProLadderValidate] driverCount={_drivers.Count} out of supported range (3-32)");
+
+                    // Raised for the view to render in the app's own dialog. This used
+                    // to be a raw WinForms MessageBox called from the controller, which
+                    // put a grey Windows box in front of the themed WPF app.
+                    OperatorNotice?.Invoke(
+                        "Invalid driver count",
+                        "Pro Ladder supports 3-32 drivers. Please adjust the driver count.");
 
                     CanAdvanceChanged?.Invoke(false);
                     CanPickWinnerChanged?.Invoke(false);

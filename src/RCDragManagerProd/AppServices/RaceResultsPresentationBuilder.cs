@@ -76,6 +76,7 @@ namespace RCDragManagerProd.AppServices
                 .ToList();
 
             result.HasRoundRobinStandings = result.Standings.Count > 0;
+            result.HasWinner = !string.IsNullOrWhiteSpace(archive.ChampionName);
             result.HasResults = result.Phases.Count > 0 || result.HasRoundRobinStandings;
             if (!result.HasResults && string.IsNullOrWhiteSpace(result.Summary))
                 result.Summary = "No saved race results are available.";
