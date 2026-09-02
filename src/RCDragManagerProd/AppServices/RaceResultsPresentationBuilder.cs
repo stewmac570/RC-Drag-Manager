@@ -62,6 +62,7 @@ namespace RCDragManagerProd.AppServices
                 result.Phases.Add(phaseView);
             }
 
+            var byesByDriver = CountByes(archive);
             result.Standings = (archive.RoundRobinStandings ?? new List<RoundRobinStandingSnapshot>())
                 .OrderBy(s => s.Rank)
                 .Select(s => new RaceResultsStandingRow
@@ -70,18 +71,68 @@ namespace RCDragManagerProd.AppServices
                     Driver = s.DriverName,
                     Wins = s.Wins,
                     Losses = s.Losses,
+                    Byes = byesByDriver.TryGetValue(s.DriverId, out var byes) ? byes : 0,
                     Points = s.Points.ToString("0.00"),
                     OpponentStrength = s.OpponentStrength.ToString("0.00")
                 })
                 .ToList();
 
             result.HasRoundRobinStandings = result.Standings.Count > 0;
+            result.ScoringNote = ScoringNote;
             result.HasWinner = !string.IsNullOrWhiteSpace(archive.ChampionName);
             result.HasResults = result.Phases.Count > 0 || result.HasRoundRobinStandings;
             if (!result.HasResults && string.IsNullOrWhiteSpace(result.Summary))
                 result.Summary = "No saved race results are available.";
             return result;
         }
+
+        /// <summary>
+        /// How the numbers in the standings table are made. Kept in step with
+        /// <c>RoundRobinRanker</c>, which is the only thing that actually decides rank
+        /// and the Finals seeding order.
+        /// </summary>
+        private const string ScoringNote =
+            "Points: a win scores 4, a bye 2, a loss 1 — every round is worth the same. " +
+            "Opponent strength is the total points of the drivers someone actually raced, " +
+            "so it rewards a hard draw; byes are not counted in it. " +
+            "Level on points, the higher place goes to more wins, then to the winner of " +
+            "their head-to-head race, then to the stronger opponents.";
+
+        /// <summary>
+        /// Byes per driver, read back off the saved Round Robin matches — a bye is a
+        /// match with only one driver in it, and the archive is the only place that
+        /// survives to be counted later. The ranked standings carry the points a bye
+        /// earned but not the tally itself.
+        /// </summary>
+        private static Dictionary<int, int> CountByes(RaceResultsArchive archive)
+        {
+            var byes = new Dictionary<int, int>();
+
+            var roundRobinMatches = (archive.Phases ?? new List<RacePhaseResultSnapshot>())
+                .Where(p => p != null &&
+                            string.Equals(p.Phase, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(p => p.Matches ?? new List<RaceResultMatchSnapshot>())
+                .Where(m => m != null);
+
+            foreach (var match in roundRobinMatches)
+            {
+                if (!IsBye(match) || match.WinnerDriverId == null) continue;
+
+                var id = match.WinnerDriverId.Value;
+                byes[id] = byes.TryGetValue(id, out var n) ? n + 1 : 1;
+            }
+
+            return byes;
+        }
+
+        /// <summary>A match with nobody on one side of it.</summary>
+        private static bool IsBye(RaceResultMatchSnapshot match) =>
+            match.Driver1Id == null || match.Driver2Id == null ||
+            IsByeName(match.Driver1Name) || IsByeName(match.Driver2Name);
+
+        private static bool IsByeName(string name) =>
+            string.IsNullOrWhiteSpace(name) ||
+            string.Equals(name.Trim(), "BYE", StringComparison.OrdinalIgnoreCase);
 
         private static string BuildSummary(RaceResultsArchive archive)
         {
