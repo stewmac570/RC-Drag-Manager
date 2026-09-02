@@ -130,22 +130,49 @@
 
                 <TabItem Header="Round Robin standings"
                          IsEnabled="{Binding HasRoundRobinStandings}">
-                    <DataGrid ItemsSource="{Binding Standings}" AutoGenerateColumns="False"
-                              IsReadOnly="True" CanUserAddRows="False" Margin="8,14"
-                              Background="{StaticResource Brush.Background}"
-                              Foreground="{StaticResource Brush.TextPrimary}"
-                              RowBackground="{StaticResource Brush.Background}"
-                              AlternatingRowBackground="{StaticResource Brush.Surface}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="80"/>
-                            <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
-                            <DataGridTextColumn Header="Wins" Binding="{Binding Wins}" Width="100"/>
-                            <DataGridTextColumn Header="Losses" Binding="{Binding Losses}" Width="100"/>
-                            <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="100"/>
-                            <DataGridTextColumn Header="Opponent strength"
-                                                Binding="{Binding OpponentStrength}" Width="150"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid Margin="8,14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Without this the table reads as arbitrary: a driver on one
+                             win and one loss sits on 7 points only because a bye is
+                             worth 2. -->
+                        <Border Grid.Row="0" Padding="14,11" Margin="0,0,0,12"
+                                Background="{StaticResource Brush.Surface}"
+                                BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Panel}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14" VerticalAlignment="Top" Margin="0,1,10,0"
+                                           Foreground="{StaticResource Brush.TextHint}"/>
+                                <TextBlock Text="{Binding ScoringNote}" TextWrapping="Wrap"
+                                           MaxWidth="880"
+                                           FontSize="{StaticResource FontSize.Sm}"
+                                           Foreground="{StaticResource Brush.TextSecondary}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding Standings}" AutoGenerateColumns="False"
+                                  IsReadOnly="True" CanUserAddRows="False"
+                                  Background="{StaticResource Brush.Background}"
+                                  Foreground="{StaticResource Brush.TextPrimary}"
+                                  RowBackground="{StaticResource Brush.Background}"
+                                  AlternatingRowBackground="{StaticResource Brush.Surface}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="70"/>
+                                <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
+                                <DataGridTextColumn Header="Wins" Binding="{Binding Wins}" Width="80"/>
+                                <DataGridTextColumn Header="Losses" Binding="{Binding Losses}" Width="80"/>
+                                <DataGridTextColumn Header="Byes" Binding="{Binding Byes}" Width="80"/>
+                                <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="90"/>
+                                <DataGridTextColumn Header="Opponent strength"
+                                                    Binding="{Binding OpponentStrength}" Width="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </TabItem>
                 <!-- Winner: the completion board, reachable for the life of the class
                      and not only in the moment the last race is called. Its DataContext

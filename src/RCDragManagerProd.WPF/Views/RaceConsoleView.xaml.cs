@@ -787,11 +787,11 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnStandings_Click(object sender, RoutedEventArgs e)
         {
-            // The live scorecard is the richer view, but it only exists in memory for
-            // the class that is running. Fall back to the saved archive so standings
-            // are still there after a resume or once the class is finished.
-            if (_raceConsole.TryShowStandings()) return;
-
+            // One standings table, not two. This used to open a monospace scorecard
+            // popup that scored each round on a decaying scale (R1 4/1/2, R2
+            // 3.5/0.75/1.5, R3 3/0.5/1) while RoundRobinRanker — the only thing that
+            // actually decides rank and the Finals seeding — scores every round 4/1/2.
+            // The two disagreed on both points and finishing order.
             if (RaceResultsPresentationBuilder.Build(_session).HasRoundRobinStandings)
             {
                 new RaceResultsWindow(_session, ResultsTab.RoundRobinStandings) { Owner = Host }.ShowDialog();

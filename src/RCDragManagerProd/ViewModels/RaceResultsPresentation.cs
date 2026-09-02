@@ -13,6 +13,14 @@ namespace RCDragManagerProd.ViewModels
         /// to show. The winner board is reachable from here for the life of the class,
         /// not just in the moment the last race is called.</summary>
         public bool HasWinner { get; set; }
+
+        /// <summary>
+        /// Plain-English explanation of how the standings points are earned and how
+        /// ties are broken, shown above the table. Without it the numbers look
+        /// arbitrary — a driver on one win and one loss sits on 7 points only because
+        /// a bye is worth 2.
+        /// </summary>
+        public string ScoringNote { get; set; }
         public List<RaceResultsPhaseView> Phases { get; set; } = new List<RaceResultsPhaseView>();
         public List<RaceResultsListRow> ResultRows { get; set; } = new List<RaceResultsListRow>();
         public List<RaceResultsStandingRow> Standings { get; set; } = new List<RaceResultsStandingRow>();
@@ -55,6 +63,11 @@ namespace RCDragManagerProd.ViewModels
         public string Driver { get; set; }
         public int Wins { get; set; }
         public int Losses { get; set; }
+
+        /// <summary>Byes received. Shown because they carry points: without the column
+        /// a one-win, one-loss driver on 7 points looks like a mistake.</summary>
+        public int Byes { get; set; }
+
         public string Points { get; set; }
         public string OpponentStrength { get; set; }
     }
