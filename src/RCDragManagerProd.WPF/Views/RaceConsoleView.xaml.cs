@@ -79,7 +79,7 @@ namespace RCDragManagerProd.WPF.Views
                 BtnGenerateBracket.IsEnabled = true;
             }
             UpdatePrimaryButtons();
-            UpdateRaceResultsButton();
+            UpdateResultsButtons();
             ApplyCompletedRaceState();
 
             _controller.BracketRedrawn += OnBracketRedrawn;
@@ -92,6 +92,7 @@ namespace RCDragManagerProd.WPF.Views
             _controller.CanStartFinalsChanged += OnCanStartFinalsChanged;
             _controller.TournamentCompleted += OnTournamentCompleted;
             _controller.DialInsChanged += OnDialInsChanged;
+            _controller.OperatorNotice += OnOperatorNotice;
 
             if (!_controller.IsCompleted)
                 _controller.StartDialInPolling();
@@ -105,13 +106,16 @@ namespace RCDragManagerProd.WPF.Views
             BtnEditRoster.IsEnabled = false;
             DgDrivers.IsHitTestVisible = false;
             BtnEditResult.IsEnabled = false;
-            BtnStandings.IsEnabled = false;
             BtnBuybacks.IsEnabled = false;
             BtnWinner1.IsEnabled = false;
             BtnWinner2.IsEnabled = false;
             BtnMoreTime.IsEnabled = false;
             BtnGenerateBracket.IsEnabled = false;
             BtnNextRound.IsEnabled = false;
+
+            // Results and Standings are read-only, so a finished class keeps them —
+            // that is how the RD gets the winner board back after the popup is gone.
+            UpdateResultsButtons();
             UpdatePrimaryButtons();
             Logger.Log($"[WPF][CONSOLE] Completed race '{_session?.EventName}' opened results-only.");
         }
@@ -180,6 +184,7 @@ namespace RCDragManagerProd.WPF.Views
                 _controller.CanStartFinalsChanged -= OnCanStartFinalsChanged;
                 _controller.TournamentCompleted -= OnTournamentCompleted;
                 _controller.DialInsChanged -= OnDialInsChanged;
+                _controller.OperatorNotice -= OnOperatorNotice;
             }
             catch { }
             _controller.StopDialInPolling();
@@ -295,7 +300,7 @@ namespace RCDragManagerProd.WPF.Views
                 });
             }
             IcWinners.ItemsSource = list;
-            UpdateRaceResultsButton();
+            UpdateResultsButtons();
         });
 
         private void OnCanAdvanceChanged(bool can) => Run(() =>
@@ -311,13 +316,13 @@ namespace RCDragManagerProd.WPF.Views
         private void OnCanOfferBuybackChanged(bool enabled) => Run(() =>
         {
             BtnBuybacks.IsEnabled = enabled && !_controller.IsCompleted;
-            BtnStandings.IsEnabled = enabled && !_controller.IsCompleted;
+            UpdateResultsButtons();
         });
 
         private void OnRoundRobinCompleted() => Run(() =>
         {
-            UpdateRaceResultsButton();
-            new RaceResultsWindow(_session, showRoundRobinStandings: true) { Owner = Host }.ShowDialog();
+            UpdateResultsButtons();
+            new RaceResultsWindow(_session) { Owner = Host }.ShowDialog();
         });
 
         private void OnCanStartFinalsChanged(bool enabled) => Run(() =>
@@ -359,6 +364,11 @@ namespace RCDragManagerProd.WPF.Views
         // Fires for local edits and for changes the background live-site poll applies;
         // without this the grid and winner buttons showed stale dial-ins until the
         // operator touched them (#381).
+        /// <summary>Shows a controller message in the app's own dialog, so nothing the
+        /// engine has to say arrives as a grey Windows message box.</summary>
+        private void OnOperatorNotice(string title, string message) =>
+            Run(() => MessageDialog.Info(Host, message, title));
+
         private void OnDialInsChanged() => Run(() =>
         {
             // Rebuilding ItemsSource tears down an open cell editor, so a poll that
@@ -370,7 +380,7 @@ namespace RCDragManagerProd.WPF.Views
 
         private void OnTournamentCompleted(RaceController.RaceSummary summary) => Run(() =>
         {
-            UpdateRaceResultsButton();
+            UpdateResultsButtons();
             ApplyCompletedRaceState();
 
             // In hosted mode the multi-class window records stats and shows the popup.
@@ -777,9 +787,19 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BtnStandings_Click(object sender, RoutedEventArgs e)
         {
-            if (!_raceConsole.TryShowStandings())
-                MessageDialog.Info(Host, "Standings aren't available yet — they appear after Round Robin completes.",
-                    "Standings not ready");
+            // The live scorecard is the richer view, but it only exists in memory for
+            // the class that is running. Fall back to the saved archive so standings
+            // are still there after a resume or once the class is finished.
+            if (_raceConsole.TryShowStandings()) return;
+
+            if (RaceResultsPresentationBuilder.Build(_session).HasRoundRobinStandings)
+            {
+                new RaceResultsWindow(_session, ResultsTab.RoundRobinStandings) { Owner = Host }.ShowDialog();
+                return;
+            }
+
+            MessageDialog.Info(Host, "Standings aren't available yet — they appear after Round Robin completes.",
+                "Standings not ready");
         }
 
         private void BtnRaceResults_Click(object sender, RoutedEventArgs e)
@@ -794,10 +814,17 @@ namespace RCDragManagerProd.WPF.Views
             new RaceResultsWindow(_session) { Owner = Host }.ShowDialog();
         }
 
-        private void UpdateRaceResultsButton()
+        /// <summary>
+        /// Results and Standings are read-only views of the saved archive, so they stay
+        /// available whenever there is something to show — including on a class that has
+        /// finished. The winner board lives on the Results window's Winner tab, which is
+        /// how a completed class gets its champion back after the popup is dismissed.
+        /// </summary>
+        private void UpdateResultsButtons()
         {
-            if (BtnRaceResults != null)
-                BtnRaceResults.IsEnabled = RaceResultsPresentationBuilder.Build(_session).HasResults;
+            var presentation = RaceResultsPresentationBuilder.Build(_session);
+            if (BtnRaceResults != null) BtnRaceResults.IsEnabled = presentation.HasResults;
+            if (BtnStandings != null) BtnStandings.IsEnabled = presentation.HasRoundRobinStandings;
         }
 
         private void BtnBuybacks_Click(object sender, RoutedEventArgs e)

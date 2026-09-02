@@ -8,6 +8,11 @@ namespace RCDragManagerProd.ViewModels
         public string Summary { get; set; }
         public bool HasResults { get; set; }
         public bool HasRoundRobinStandings { get; set; }
+
+        /// <summary>True once a champion is recorded, so the Winner tab has something
+        /// to show. The winner board is reachable from here for the life of the class,
+        /// not just in the moment the last race is called.</summary>
+        public bool HasWinner { get; set; }
         public List<RaceResultsPhaseView> Phases { get; set; } = new List<RaceResultsPhaseView>();
         public List<RaceResultsListRow> ResultRows { get; set; } = new List<RaceResultsListRow>();
         public List<RaceResultsStandingRow> Standings { get; set; } = new List<RaceResultsStandingRow>();

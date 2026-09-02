@@ -147,6 +147,111 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
+                <!-- Winner: the completion board, reachable for the life of the class
+                     and not only in the moment the last race is called. Its DataContext
+                     is set in code-behind from ClassCompletionPresentationBuilder —
+                     that builder reads this one, so it cannot be nested here. -->
+                <TabItem x:Name="WinnerTab" Header="Winner"
+                         IsEnabled="{Binding HasWinner}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14,16">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.4*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Padding="26,24"
+                                        Background="{StaticResource Brush.Primary}"
+                                        CornerRadius="{StaticResource Radius.Panel}">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="★" FontSize="34" Foreground="White"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="CLASS CHAMPION" Margin="0,8,0,7"
+                                                   FontSize="{StaticResource FontSize.Sm}" FontWeight="SemiBold"
+                                                   Foreground="#CCFFFFFF" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ChampionName}" TextWrapping="Wrap"
+                                                   FontSize="30" FontWeight="Bold" Foreground="White"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid Grid.Column="2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.Row="0" Padding="18,15"
+                                            Background="{StaticResource Brush.Surface}"
+                                            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                                            CornerRadius="{StaticResource Radius.Panel}">
+                                        <StackPanel>
+                                            <TextBlock Text="2ND PLACE"
+                                                       FontSize="{StaticResource FontSize.Xs}" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource Brush.TextHint}"/>
+                                            <TextBlock Text="{Binding RunnerUpName}" Margin="0,6,0,0"
+                                                       FontSize="{StaticResource FontSize.Xl}" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource Brush.TextPrimary}" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Row="2" Padding="18,15"
+                                            Background="{StaticResource Brush.Surface}"
+                                            BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                                            CornerRadius="{StaticResource Radius.Panel}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding ThirdLabel}"
+                                                       FontSize="{StaticResource FontSize.Xs}" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource Brush.TextHint}"/>
+                                            <TextBlock Text="{Binding ThirdName}" Margin="0,6,0,0"
+                                                       FontSize="{StaticResource FontSize.Lg}" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource Brush.TextSecondary}" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+
+                            <TextBlock Text="Finals results" Margin="2,20,0,6"
+                                       FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                                       Foreground="{StaticResource Brush.TextHint}"/>
+                            <DataGrid ItemsSource="{Binding FinalsResults}" AutoGenerateColumns="False"
+                                      IsReadOnly="True" CanUserAddRows="False"
+                                      HeadersVisibility="Column" MaxHeight="200"
+                                      Background="{StaticResource Brush.Background}"
+                                      Foreground="{StaticResource Brush.TextPrimary}"
+                                      RowBackground="{StaticResource Brush.Background}"
+                                      AlternatingRowBackground="{StaticResource Brush.Surface}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Round" Binding="{Binding Round}" Width="130"/>
+                                    <DataGridTextColumn Header="Pairing" Binding="{Binding Pairing}" Width="*"/>
+                                    <DataGridTextColumn Header="Winner" Binding="{Binding Winner}" Width="170"/>
+                                    <DataGridTextColumn Header="Loser" Binding="{Binding Loser}" Width="170"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <TextBlock Text="Other finishers" Margin="2,18,0,6"
+                                       FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                                       Foreground="{StaticResource Brush.TextHint}"/>
+                            <DataGrid ItemsSource="{Binding OtherFinishers}" AutoGenerateColumns="False"
+                                      IsReadOnly="True" CanUserAddRows="False"
+                                      HeadersVisibility="Column" MaxHeight="200"
+                                      Background="{StaticResource Brush.Background}"
+                                      Foreground="{StaticResource Brush.TextPrimary}"
+                                      RowBackground="{StaticResource Brush.Background}"
+                                      AlternatingRowBackground="{StaticResource Brush.Surface}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="70"/>
+                                    <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
+                                    <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="65"/>
+                                    <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="65"/>
+                                    <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="90"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
             </TabControl>
 
             <Border Grid.Row="3" Padding="24,12"
