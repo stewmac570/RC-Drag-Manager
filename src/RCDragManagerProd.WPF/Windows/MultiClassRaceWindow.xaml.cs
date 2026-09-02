@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -310,31 +309,20 @@ namespace RCDragManagerProd.WPF.Windows
             }
         }
 
+        /// <summary>
+        /// The end-of-event board, once every class has finished. A single-class event
+        /// skips it — ClassCompletionWindow has just shown that same champion, and
+        /// stacking a second popup on top of it was pure noise.
+        /// </summary>
         private void ShowCombinedSummary()
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("═══════════════════════════════");
-            sb.AppendLine($"  {_multiEvent.EventName} — {_multiEvent.EventDate:yyyy-MM-dd}");
-            sb.AppendLine("  FINAL RESULTS");
-            sb.AppendLine("═══════════════════════════════");
-            sb.AppendLine();
-
-            for (int i = 0; i < _controllers.Count; i++)
+            if (_controllers.Count <= 1)
             {
-                var className = _multiEvent.ClassSessions[i].ClassType;
-                sb.AppendLine($"  {className}");
-                sb.AppendLine($"  {new string('─', Math.Max(1, className?.Length ?? 1))}");
-                if (_summaries.TryGetValue(i, out var s))
-                {
-                    sb.AppendLine($"  Champion:   {s.Winner?.Name ?? "N/A"}");
-                    sb.AppendLine($"  Runner-up:  {s.RunnerUp?.Name ?? "N/A"}");
-                }
-                else sb.AppendLine("  (no result recorded)");
-                sb.AppendLine();
+                Logger.Log("[WPF][MultiClass] Single-class event — class completion board already shown.");
+                return;
             }
-            sb.AppendLine("═══════════════════════════════");
 
-            new TextSummaryWindow("Event complete — final results", sb.ToString()) { Owner = this }.ShowDialog();
+            new EventCompletionWindow(_multiEvent) { Owner = this }.ShowDialog();
         }
 
         // ── Tab state colouring ────────────────────────────────────────────────
