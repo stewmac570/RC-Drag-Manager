@@ -140,18 +140,48 @@
                         <!-- Without this the table reads as arbitrary: a driver on one
                              win and one loss sits on 7 points only because a bye is
                              worth 2. -->
-                        <Border Grid.Row="0" Padding="14,11" Margin="0,0,0,12"
+                        <Border Grid.Row="0" Padding="16,13" Margin="0,0,0,12"
                                 Background="{StaticResource Brush.Surface}"
                                 BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
                                 CornerRadius="{StaticResource Radius.Panel}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets"
-                                           FontSize="14" VerticalAlignment="Top" Margin="0,1,10,0"
+                            <StackPanel>
+                                <TextBlock Text="HOW POINTS WORK" Margin="0,0,0,9"
+                                           FontSize="{StaticResource FontSize.Xs}" FontWeight="SemiBold"
                                            Foreground="{StaticResource Brush.TextHint}"/>
+
+                                <!-- The reason column is the whole point. "Loss 1" on its
+                                     own reads as a mistake; "you raced and lost - still
+                                     scores, because you ran the round" does not. -->
+                                <ItemsControl ItemsSource="{Binding ScoringLegend}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="58"/>
+                                                    <ColumnDefinition Width="42"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Result}"
+                                                           FontSize="{StaticResource FontSize.Sm}"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource Brush.TextPrimary}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Points}"
+                                                           FontSize="{StaticResource FontSize.Md}"
+                                                           FontWeight="Bold"
+                                                           Foreground="{StaticResource Brush.Primary}"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Why}"
+                                                           TextWrapping="Wrap" MaxWidth="740"
+                                                           FontSize="{StaticResource FontSize.Sm}"
+                                                           Foreground="{StaticResource Brush.TextSecondary}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
                                 <TextBlock Text="{Binding ScoringNote}" TextWrapping="Wrap"
-                                           MaxWidth="880"
+                                           MaxWidth="880" Margin="0,7,0,0"
                                            FontSize="{StaticResource FontSize.Sm}"
-                                           Foreground="{StaticResource Brush.TextSecondary}"/>
+                                           Foreground="{StaticResource Brush.TextPrimary}"/>
                             </StackPanel>
                         </Border>
 
