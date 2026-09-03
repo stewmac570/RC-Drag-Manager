@@ -15,11 +15,17 @@ namespace RCDragManagerProd.ViewModels
         public bool HasWinner { get; set; }
 
         /// <summary>
-        /// One line saying what a win, bye and loss are worth. Everything else about
-        /// the scoring is shown as arithmetic on the rows themselves rather than
-        /// explained in prose.
+        /// What decides the class, in one sentence: most points, and how a level
+        /// finish is settled.
         /// </summary>
         public string ScoringNote { get; set; }
+
+        /// <summary>
+        /// A legend giving each result its value <em>and the reason for it</em>. Saying
+        /// "loss 1" on its own reads as a mistake — you lost, so why score anything?
+        /// The reason column is what makes the table stop looking arbitrary.
+        /// </summary>
+        public List<ScoringLegendRow> ScoringLegend { get; set; } = new List<ScoringLegendRow>();
 
         /// <summary>
         /// Plain sentences for the places that were level on points, naming the rule
@@ -63,6 +69,14 @@ namespace RCDragManagerProd.ViewModels
         public string Winner { get; set; }
         public string Loser { get; set; }
         public string Pairing { get; set; }
+    }
+
+    /// <summary>One line of the scoring legend: the result, its value, and why.</summary>
+    public sealed class ScoringLegendRow
+    {
+        public string Result { get; set; }
+        public string Points { get; set; }
+        public string Why { get; set; }
     }
 
     public sealed class RaceResultsStandingRow

@@ -86,13 +86,59 @@ public class RoundRobinStandingsPresentationTests
     }
 
     [TestMethod]
-    public void ScoringNote_StatesWhatEachResultIsWorth()
+    public void ScoringLegend_GivesEachResultAValueAndAReason()
     {
         var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
 
-        // Whole numbers, not "4.00" — nobody reads that as four.
-        Assert.AreEqual("Every race scores: win 4, bye 2, loss 1. Every round is worth the same.",
-            view.ScoringNote);
+        Assert.AreEqual(3, view.ScoringLegend.Count);
+
+        var win = view.ScoringLegend[0];
+        Assert.AreEqual("Win", win.Result);
+        Assert.AreEqual("4", win.Points);   // whole numbers: nobody reads "4.00" as four
+
+        var bye = view.ScoringLegend[1];
+        Assert.AreEqual("Bye", bye.Result);
+        Assert.AreEqual("2", bye.Points);
+
+        var loss = view.ScoringLegend[2];
+        Assert.AreEqual("Loss", loss.Result);
+        Assert.AreEqual("1", loss.Points);
+
+        // The reason is the point of the legend: a value with no reason is what made
+        // the table read as arbitrary in the first place.
+        foreach (var row in view.ScoringLegend)
+            Assert.IsFalse(string.IsNullOrWhiteSpace(row.Why), $"{row.Result} needs a reason.");
+    }
+
+    [TestMethod]
+    public void ScoringLegend_ExplainsWhyALossScoresAtAll()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+        var loss = view.ScoringLegend.Single(r => r.Result == "Loss");
+
+        StringAssert.Contains(loss.Why, "raced");
+    }
+
+    [TestMethod]
+    public void ScoringNote_SaysWhatDecidesTheClass()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        StringAssert.Contains(view.ScoringNote, "Most points wins");
+        StringAssert.Contains(view.ScoringNote, "Most wins");
+    }
+
+    [TestMethod]
+    public void ScoringLegend_TakesItsNumbersFromTheRanker()
+    {
+        // Guards against the legend drifting from the values that actually decide
+        // rank and the Finals seeding order.
+        var pts = RCDragManagerProd.RoundRobinMode.RoundRobinRanker.PointsForRound("RR1");
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        Assert.AreEqual(pts.Win.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Win").Points);
+        Assert.AreEqual(pts.Bye.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Bye").Points);
+        Assert.AreEqual(pts.Loss.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Loss").Points);
     }
 
     [TestMethod]

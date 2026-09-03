@@ -87,7 +87,8 @@ namespace RCDragManagerProd.AppServices
                 .ToList();
 
             result.HasRoundRobinStandings = result.Standings.Count > 0;
-            result.ScoringNote = BuildScoringNote();
+            result.ScoringNote = ScoringNote;
+            result.ScoringLegend = BuildScoringLegend();
             result.TieNotes = DescribeTies(ranked, archive);
             result.HasWinner = !string.IsNullOrWhiteSpace(archive.ChampionName);
             result.HasResults = result.Phases.Count > 0 || result.HasRoundRobinStandings;
@@ -96,16 +97,47 @@ namespace RCDragManagerProd.AppServices
             return result;
         }
 
+        /// <summary>What actually decides the class.</summary>
+        private const string ScoringNote =
+            "Most points wins the class. Level on points? Most wins takes it, then " +
+            "whoever won when those two raced each other.";
+
         /// <summary>
-        /// The scoring in one line, read out of <c>RoundRobinRanker</c> itself so it
-        /// cannot drift from the values that actually decide rank and Finals seeding.
+        /// Each result with its value and the reason for that value, read out of
+        /// <c>RoundRobinRanker</c> so the numbers cannot drift from the ones that
+        /// decide rank and Finals seeding.
+        ///
+        /// The reasons are the point of this. "Loss 1" on its own reads as a mistake —
+        /// you lost, so why score at all? Because you turned up and raced, and a driver
+        /// who races and loses has done more than one who never left the pits.
         /// </summary>
-        private static string BuildScoringNote()
+        private static List<ScoringLegendRow> BuildScoringLegend()
         {
             // Scoring is constant across rounds, so any round label gives the same answer.
             var pts = RoundRobinRanker.PointsForRound("RR1");
-            return $"Every race scores: win {Plain(pts.Win)}, bye {Plain(pts.Bye)}, loss {Plain(pts.Loss)}. " +
-                   "Every round is worth the same.";
+
+            return new List<ScoringLegendRow>
+            {
+                new ScoringLegendRow
+                {
+                    Result = "Win",
+                    Points = Plain(pts.Win),
+                    Why = "you beat the driver in the other lane"
+                },
+                new ScoringLegendRow
+                {
+                    Result = "Bye",
+                    Points = Plain(pts.Bye),
+                    Why = "the draw left you with nobody to race — worth more than a loss " +
+                          "because it was not your doing, less than a win because you beat nobody"
+                },
+                new ScoringLegendRow
+                {
+                    Result = "Loss",
+                    Points = Plain(pts.Loss),
+                    Why = "you raced and lost — still scores, because you ran the round"
+                }
+            };
         }
 
         /// <summary>Writes a driver's points out as a sum: "2 wins (8) + 1 bye (2)".</summary>
