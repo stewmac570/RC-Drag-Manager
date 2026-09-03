@@ -86,15 +86,107 @@ public class RoundRobinStandingsPresentationTests
     }
 
     [TestMethod]
-    public void ScoringNote_ExplainsThePointsAndTheTiebreaks()
+    public void ScoringNote_StatesWhatEachResultIsWorth()
     {
         var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
 
-        Assert.IsFalse(string.IsNullOrWhiteSpace(view.ScoringNote));
-        StringAssert.Contains(view.ScoringNote, "win scores 4");
-        StringAssert.Contains(view.ScoringNote, "bye 2");
-        StringAssert.Contains(view.ScoringNote, "loss 1");
-        StringAssert.Contains(view.ScoringNote, "head-to-head");
+        // Whole numbers, not "4.00" — nobody reads that as four.
+        Assert.AreEqual("Every race scores: win 4, bye 2, loss 1. Every round is worth the same.",
+            view.ScoringNote);
+    }
+
+    [TestMethod]
+    public void PointsWorking_WritesTheSumOut()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        // 1 win + 1 loss + 1 bye = 7.00, and the row says so rather than asking for trust.
+        Assert.AreEqual("1 win (4) + 1 bye (2) + 1 loss (1)",
+            view.Standings.Single(s => s.Driver == "Aaron Deluca").PointsWorking);
+
+        Assert.AreEqual("2 wins (8) + 1 loss (1)",
+            view.Standings.Single(s => s.Driver == "Ava").PointsWorking);
+    }
+
+    [TestMethod]
+    public void PointsWorking_OmitsWhatDidNotHappen()
+    {
+        var session = SessionWithByes();
+        session.ResultsArchive.RoundRobinStandings = new List<RoundRobinStandingSnapshot>
+        {
+            new RoundRobinStandingSnapshot
+            {
+                Rank = 1, DriverId = 9, DriverName = "Unbeaten",
+                Wins = 3, Losses = 0, Points = 12.00
+            }
+        };
+
+        var view = RaceResultsPresentationBuilder.Build(session);
+
+        Assert.AreEqual("3 wins (12)", view.Standings.Single().PointsWorking);
+    }
+
+    [TestMethod]
+    public void PointsWorking_HandlesADriverWithNoRacesYet()
+    {
+        var session = SessionWithByes();
+        session.ResultsArchive.RoundRobinStandings = new List<RoundRobinStandingSnapshot>
+        {
+            new RoundRobinStandingSnapshot { Rank = 1, DriverId = 9, DriverName = "Late entry" }
+        };
+
+        var view = RaceResultsPresentationBuilder.Build(session);
+
+        Assert.AreEqual("No races yet", view.Standings.Single().PointsWorking);
+    }
+
+    [TestMethod]
+    public void TieNotes_AreEmptyWhenNobodyFinishedLevel()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        Assert.IsFalse(view.HasTieNotes,
+            "The tiebreak rules stay out of sight until one actually decides a place.");
+    }
+
+    [TestMethod]
+    public void TieNotes_ExplainAHeadToHeadDecision()
+    {
+        var view = RaceResultsPresentationBuilder.Build(TiedOnPointsAndWins());
+
+        Assert.IsTrue(view.HasTieNotes);
+        var note = view.TieNotes.Single();
+        StringAssert.Contains(note, "both finished on 9");
+        StringAssert.Contains(note, "Ava");
+        StringAssert.Contains(note, "winning their");
+        StringAssert.Contains(note, "Tyler Nguyen");
+    }
+
+    [TestMethod]
+    public void TieNotes_ExplainAWinCountDecision()
+    {
+        var session = TiedOnPointsAndWins();
+        // Same points, different win counts: 2W/1L against 1W/1BYE/1L both make 9.
+        session.ResultsArchive.RoundRobinStandings[1].Wins = 1;
+        session.ResultsArchive.RoundRobinStandings[1].Losses = 1;
+
+        var view = RaceResultsPresentationBuilder.Build(session);
+
+        StringAssert.Contains(view.TieNotes.Single(), "more wins");
+    }
+
+    [TestMethod]
+    public void TieNotes_FallBackToOpponentStrength()
+    {
+        var session = TiedOnPointsAndWins();
+        // Strip the head-to-head race so only opponent strength can separate them.
+        session.ResultsArchive.Phases.Single().Matches.Clear();
+
+        var view = RaceResultsPresentationBuilder.Build(session);
+
+        var note = view.TieNotes.Single();
+        StringAssert.Contains(note, "stronger field");
+        StringAssert.Contains(note, "20");
     }
 
     [TestMethod]
@@ -111,6 +203,47 @@ public class RoundRobinStandingsPresentationTests
         Assert.AreEqual(2.0, r1.Bye);
         Assert.AreEqual(r1, r3, "Every round is worth the same — the note says so.");
     }
+
+    /// <summary>Ava and Tyler both on 9.00 with two wins each; Ava won their RR1 race.</summary>
+    private static RaceSession TiedOnPointsAndWins() => new RaceSession
+    {
+        EventName = "Club Round 4",
+        ClassType = "Pro Mod",
+        ResultsArchive = new RaceResultsArchive
+        {
+            Phases = new List<RacePhaseResultSnapshot>
+            {
+                new RacePhaseResultSnapshot
+                {
+                    Phase = RaceTypes.RoundRobin,
+                    Matches = new List<RaceResultMatchSnapshot>
+                    {
+                        new RaceResultMatchSnapshot
+                        {
+                            MatchId = 1, RoundLabel = "RR1",
+                            Driver1Id = 1, Driver1Name = "Ava",
+                            Driver2Id = 3, Driver2Name = "Tyler Nguyen",
+                            WinnerDriverId = 1, WinnerName = "Ava",
+                            LoserDriverId = 3, LoserName = "Tyler Nguyen"
+                        }
+                    }
+                }
+            },
+            RoundRobinStandings = new List<RoundRobinStandingSnapshot>
+            {
+                new RoundRobinStandingSnapshot
+                {
+                    Rank = 1, DriverId = 1, DriverName = "Ava",
+                    Wins = 2, Losses = 1, Points = 9.00, OpponentStrength = 20.00
+                },
+                new RoundRobinStandingSnapshot
+                {
+                    Rank = 2, DriverId = 3, DriverName = "Tyler Nguyen",
+                    Wins = 2, Losses = 1, Points = 9.00, OpponentStrength = 19.00
+                }
+            }
+        }
+    };
 
     // ── Fixture ───────────────────────────────────────────────────────────────
 
