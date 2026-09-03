@@ -134,6 +134,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Without this the table reads as arbitrary: a driver on one
@@ -162,16 +163,52 @@
                                   RowBackground="{StaticResource Brush.Background}"
                                   AlternatingRowBackground="{StaticResource Brush.Surface}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="70"/>
+                                <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="60"/>
                                 <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="*"/>
-                                <DataGridTextColumn Header="Wins" Binding="{Binding Wins}" Width="80"/>
-                                <DataGridTextColumn Header="Losses" Binding="{Binding Losses}" Width="80"/>
-                                <DataGridTextColumn Header="Byes" Binding="{Binding Byes}" Width="80"/>
-                                <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="90"/>
-                                <DataGridTextColumn Header="Opponent strength"
-                                                    Binding="{Binding OpponentStrength}" Width="150"/>
+                                <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="50"/>
+                                <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="50"/>
+                                <DataGridTextColumn Header="Byes" Binding="{Binding Byes}" Width="60"/>
+                                <DataGridTextColumn Header="Points" Binding="{Binding Points}" Width="80"/>
+                                <!-- The sum written out, so the Points column can be
+                                     checked rather than taken on trust. Replaces the
+                                     "Opponent strength" column, which was a bare number
+                                     that meant nothing on its own. -->
+                                <DataGridTextColumn Header="How that adds up"
+                                                    Binding="{Binding PointsWorking}" Width="260"/>
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <!-- Only appears when drivers actually finished level. The
+                             tiebreak rules stay out of sight until one decides a place. -->
+                        <Border Grid.Row="2" Padding="14,11" Margin="0,12,0,0"
+                                Background="{StaticResource Brush.Surface}"
+                                BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Panel}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasTieNotes}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="Drivers who finished level"
+                                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,6"/>
+                                <ItemsControl ItemsSource="{Binding TieNotes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,3"
+                                                       FontSize="{StaticResource FontSize.Sm}"
+                                                       Foreground="{StaticResource Brush.TextSecondary}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </TabItem>
                 <!-- Winner: the completion board, reachable for the life of the class

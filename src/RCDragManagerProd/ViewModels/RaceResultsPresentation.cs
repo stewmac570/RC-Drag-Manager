@@ -15,12 +15,20 @@ namespace RCDragManagerProd.ViewModels
         public bool HasWinner { get; set; }
 
         /// <summary>
-        /// Plain-English explanation of how the standings points are earned and how
-        /// ties are broken, shown above the table. Without it the numbers look
-        /// arbitrary — a driver on one win and one loss sits on 7 points only because
-        /// a bye is worth 2.
+        /// One line saying what a win, bye and loss are worth. Everything else about
+        /// the scoring is shown as arithmetic on the rows themselves rather than
+        /// explained in prose.
         /// </summary>
         public string ScoringNote { get; set; }
+
+        /// <summary>
+        /// Plain sentences for the places that were level on points, naming the rule
+        /// that separated them. Empty when nothing was tied — which is the point: the
+        /// tiebreak machinery only shows up when it actually decided something.
+        /// </summary>
+        public List<string> TieNotes { get; set; } = new List<string>();
+
+        public bool HasTieNotes => TieNotes != null && TieNotes.Count > 0;
         public List<RaceResultsPhaseView> Phases { get; set; } = new List<RaceResultsPhaseView>();
         public List<RaceResultsListRow> ResultRows { get; set; } = new List<RaceResultsListRow>();
         public List<RaceResultsStandingRow> Standings { get; set; } = new List<RaceResultsStandingRow>();
@@ -69,6 +77,18 @@ namespace RCDragManagerProd.ViewModels
         public int Byes { get; set; }
 
         public string Points { get; set; }
+
+        /// <summary>
+        /// The sum written out — "2 wins (8) + 1 bye (2)" — so the points column can
+        /// be checked at a glance instead of taken on trust.
+        /// </summary>
+        public string PointsWorking { get; set; }
+
+        /// <summary>
+        /// Kept for the record, but no longer a column: "opponent strength 20.00" told
+        /// a race director nothing. It now appears only inside a tie note, and only
+        /// when it is what actually settled a placing.
+        /// </summary>
         public string OpponentStrength { get; set; }
     }
 }

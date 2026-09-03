@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.RoundRobinMode;
 using RCDragManagerProd.ViewModels;
 
 namespace RCDragManagerProd.AppServices
@@ -63,22 +64,31 @@ namespace RCDragManagerProd.AppServices
             }
 
             var byesByDriver = CountByes(archive);
-            result.Standings = (archive.RoundRobinStandings ?? new List<RoundRobinStandingSnapshot>())
+            var ranked = (archive.RoundRobinStandings ?? new List<RoundRobinStandingSnapshot>())
                 .OrderBy(s => s.Rank)
-                .Select(s => new RaceResultsStandingRow
+                .ToList();
+
+            result.Standings = ranked
+                .Select(s =>
                 {
-                    Rank = s.Rank,
-                    Driver = s.DriverName,
-                    Wins = s.Wins,
-                    Losses = s.Losses,
-                    Byes = byesByDriver.TryGetValue(s.DriverId, out var byes) ? byes : 0,
-                    Points = s.Points.ToString("0.00"),
-                    OpponentStrength = s.OpponentStrength.ToString("0.00")
+                    var byes = byesByDriver.TryGetValue(s.DriverId, out var b) ? b : 0;
+                    return new RaceResultsStandingRow
+                    {
+                        Rank = s.Rank,
+                        Driver = s.DriverName,
+                        Wins = s.Wins,
+                        Losses = s.Losses,
+                        Byes = byes,
+                        Points = s.Points.ToString("0.00"),
+                        PointsWorking = DescribePoints(s.Wins, byes, s.Losses),
+                        OpponentStrength = s.OpponentStrength.ToString("0.00")
+                    };
                 })
                 .ToList();
 
             result.HasRoundRobinStandings = result.Standings.Count > 0;
-            result.ScoringNote = ScoringNote;
+            result.ScoringNote = BuildScoringNote();
+            result.TieNotes = DescribeTies(ranked, archive);
             result.HasWinner = !string.IsNullOrWhiteSpace(archive.ChampionName);
             result.HasResults = result.Phases.Count > 0 || result.HasRoundRobinStandings;
             if (!result.HasResults && string.IsNullOrWhiteSpace(result.Summary))
@@ -87,16 +97,109 @@ namespace RCDragManagerProd.AppServices
         }
 
         /// <summary>
-        /// How the numbers in the standings table are made. Kept in step with
-        /// <c>RoundRobinRanker</c>, which is the only thing that actually decides rank
-        /// and the Finals seeding order.
+        /// The scoring in one line, read out of <c>RoundRobinRanker</c> itself so it
+        /// cannot drift from the values that actually decide rank and Finals seeding.
         /// </summary>
-        private const string ScoringNote =
-            "Points: a win scores 4, a bye 2, a loss 1 — every round is worth the same. " +
-            "Opponent strength is the total points of the drivers someone actually raced, " +
-            "so it rewards a hard draw; byes are not counted in it. " +
-            "Level on points, the higher place goes to more wins, then to the winner of " +
-            "their head-to-head race, then to the stronger opponents.";
+        private static string BuildScoringNote()
+        {
+            // Scoring is constant across rounds, so any round label gives the same answer.
+            var pts = RoundRobinRanker.PointsForRound("RR1");
+            return $"Every race scores: win {Plain(pts.Win)}, bye {Plain(pts.Bye)}, loss {Plain(pts.Loss)}. " +
+                   "Every round is worth the same.";
+        }
+
+        /// <summary>Writes a driver's points out as a sum: "2 wins (8) + 1 bye (2)".</summary>
+        private static string DescribePoints(int wins, int byes, int losses)
+        {
+            var pts = RoundRobinRanker.PointsForRound("RR1");
+            var parts = new List<string>();
+
+            if (wins > 0) parts.Add($"{wins} {Plural(wins, "win")} ({Plain(wins * pts.Win)})");
+            if (byes > 0) parts.Add($"{byes} {Plural(byes, "bye")} ({Plain(byes * pts.Bye)})");
+            if (losses > 0) parts.Add($"{losses} {Plural(losses, "loss", "losses")} ({Plain(losses * pts.Loss)})");
+
+            return parts.Count == 0 ? "No races yet" : string.Join(" + ", parts);
+        }
+
+        /// <summary>
+        /// A sentence for each pair of drivers who finished level on points, naming the
+        /// rule that separated them. This is the only place opponent strength appears —
+        /// as a bare number in a column it told a race director nothing.
+        /// </summary>
+        private static List<string> DescribeTies(
+            List<RoundRobinStandingSnapshot> ranked, RaceResultsArchive archive)
+        {
+            var notes = new List<string>();
+            var headToHead = BuildHeadToHead(archive);
+
+            foreach (var tied in ranked.GroupBy(s => s.Points).Where(g => g.Count() > 1))
+            {
+                var inOrder = tied.OrderBy(s => s.Rank).ToList();
+                for (int i = 0; i + 1 < inOrder.Count; i++)
+                {
+                    var ahead = inOrder[i];
+                    var behind = inOrder[i + 1];
+                    var lead = $"{ahead.DriverName} and {behind.DriverName} both finished on {Plain(ahead.Points)}";
+
+                    if (ahead.Wins != behind.Wins)
+                    {
+                        notes.Add($"{lead} — {ahead.DriverName} placed higher on more wins " +
+                                  $"({ahead.Wins} to {behind.Wins}).");
+                    }
+                    else if (headToHead.TryGetValue(Pair(ahead.DriverId, behind.DriverId), out var decider) &&
+                             decider.WinnerId == ahead.DriverId)
+                    {
+                        notes.Add($"{lead} — {ahead.DriverName} placed higher for winning their " +
+                                  $"{decider.Round} race against {behind.DriverName}.");
+                    }
+                    else if (ahead.OpponentStrength > behind.OpponentStrength)
+                    {
+                        notes.Add($"{lead} — {ahead.DriverName} placed higher for racing the stronger field " +
+                                  $"(opponents totalling {Plain(ahead.OpponentStrength)} against " +
+                                  $"{Plain(behind.OpponentStrength)}).");
+                    }
+                    else
+                    {
+                        notes.Add($"{lead} — nothing separated them, so they are listed in entry order.");
+                    }
+                }
+            }
+
+            return notes;
+        }
+
+        /// <summary>Who beat whom, and in which round, for the head-to-head tiebreak.</summary>
+        private static Dictionary<(int, int), (int WinnerId, string Round)> BuildHeadToHead(
+            RaceResultsArchive archive)
+        {
+            var map = new Dictionary<(int, int), (int, string)>();
+
+            foreach (var m in RoundRobinMatches(archive))
+            {
+                if (IsBye(m) || m.WinnerDriverId == null || m.LoserDriverId == null) continue;
+                map[Pair(m.WinnerDriverId.Value, m.LoserDriverId.Value)] =
+                    (m.WinnerDriverId.Value, DisplayRound(RoundLabels.Normalize(m.RoundLabel ?? "")));
+            }
+
+            return map;
+        }
+
+        private static (int, int) Pair(int a, int b) => a < b ? (a, b) : (b, a);
+
+        /// <summary>Every saved Round Robin match, ignoring the Finals and Losers phases.</summary>
+        private static IEnumerable<RaceResultMatchSnapshot> RoundRobinMatches(RaceResultsArchive archive) =>
+            (archive.Phases ?? new List<RacePhaseResultSnapshot>())
+                .Where(p => p != null &&
+                            string.Equals(p.Phase, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(p => p.Matches ?? new List<RaceResultMatchSnapshot>())
+                .Where(m => m != null);
+
+        /// <summary>Drops a trailing ".00" — nobody reads "4.00" as four.</summary>
+        private static string Plain(double value) =>
+            value == Math.Floor(value) ? value.ToString("0") : value.ToString("0.##");
+
+        private static string Plural(int count, string one, string many = null) =>
+            count == 1 ? one : (many ?? one + "s");
 
         /// <summary>
         /// Byes per driver, read back off the saved Round Robin matches — a bye is a
@@ -108,13 +211,7 @@ namespace RCDragManagerProd.AppServices
         {
             var byes = new Dictionary<int, int>();
 
-            var roundRobinMatches = (archive.Phases ?? new List<RacePhaseResultSnapshot>())
-                .Where(p => p != null &&
-                            string.Equals(p.Phase, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(p => p.Matches ?? new List<RaceResultMatchSnapshot>())
-                .Where(m => m != null);
-
-            foreach (var match in roundRobinMatches)
+            foreach (var match in RoundRobinMatches(archive))
             {
                 if (!IsBye(match) || match.WinnerDriverId == null) continue;
 
