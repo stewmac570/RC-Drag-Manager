@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using RCDragManagerProd.Controllers;
@@ -142,6 +142,14 @@ namespace RCDragManagerProd.AppServices
 
         /// <summary>Drivers currently eligible for a buyback into the Losers Bracket.</summary>
         public IReadOnlyList<Driver> GetEligibleBuybacks() => _controller.GetEligibleBuybackDrivers();
+
+        /// <summary>Who would take the wildcard Finals slot if nobody buys back, without
+        /// committing to it. Used to name the driver in the confirmation prompt.</summary>
+        public Driver PeekNoBuybackWildcard() => _controller.ResolveWildcardFinalist();
+
+        /// <summary>Buybacks were offered and nobody entered: promote the wildcard
+        /// finalist and open the Finals. False if no wildcard could be determined.</summary>
+        public bool SkipBuybacks() => _controller.SkipBuybacksToFinals();
 
         /// <summary>
         /// Applies the operator's buyback selection and reports what happened: a single pick

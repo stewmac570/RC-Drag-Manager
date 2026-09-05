@@ -493,15 +493,7 @@ namespace RCDragManagerProd.Controllers
                     }
 
                     // Not enough for buyback ? Finals with a wildcard, on the RD's click
-                    Driver wildcard = null;
-                    if (eligible.Count == 1)
-                        wildcard = eligible[0];
-                    else
-                    {
-                        Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
-                        var top4 = rr.GetTopRankedDrivers(4);
-                        if (top4 != null && top4.Count >= 4) wildcard = top4[3];
-                    }
+                    Driver wildcard = ResolveWildcardFinalist();
 
                     if (wildcard == null)
                     {
