@@ -54,5 +54,16 @@ namespace RCDragManagerProd.Domain
         public int Losses { get; set; }
         public double Points { get; set; }
         public double OpponentStrength { get; set; }
+
+        /// <summary>Bonus banked for beating drivers level on points. Added 2026-09-05;
+        /// events saved before that reload as 0.</summary>
+        public double HeadToHeadBonus { get; set; }
+
+        /// <summary>
+        /// The number the placing is sorted on: points + head-to-head bonus + the
+        /// beaten-drivers score scaled down. Added 2026-09-05; older saves reload as 0,
+        /// so fall back to Points when it is missing.
+        /// </summary>
+        public double TotalScore { get; set; }
     }
 }

@@ -121,7 +121,7 @@ Pure logic, no UI or database dependencies:
 | `LosersBracketEngine` | Simple single-elim runner used internally (callback-based) |
 | `LosersBracketBuilder` | Builds the `List<RandomMatch>` tree for the Losers Bracket, with rematch avoidance |
 | `RoundRobinEngine` | Circle-method round-robin scheduler + results store |
-| `RoundRobinRanker` | Points-based ranking: Win=4, Loss=1, BYE=2; tiebreaks by H2H then Opponent Strength |
+| `RoundRobinRanker` | Points-based ranking: Win=4, Loss=1, BYE=2; tiebreaks by H2H then opponent score (the points of the drivers you **beat**) |
 | `RoundRobinMatch` | Match record for RR |
 | `ByePolicy` | `IsBye(Driver d)` — true if `d == null` |
 | `RoundLabels` | Normalizes round label strings and provides sort keys |

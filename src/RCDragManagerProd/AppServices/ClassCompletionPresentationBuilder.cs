@@ -64,8 +64,9 @@ namespace RCDragManagerProd.AppServices
                     Driver = s.DriverName,
                     Wins = s.Wins,
                     Losses = s.Losses,
-                    Points = s.Points.ToString("0.00"),
-                    OpponentStrength = s.OpponentStrength.ToString("0.00")
+                    // Whole numbers, matching the standings table. The winner board shows
+                    // no tiebreak columns, so nothing here needs its contribution.
+                    Points = s.Points.ToString("0.##")
                 })
                 .ToList();
 

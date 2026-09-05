@@ -212,7 +212,7 @@ Output of the RR ranking process. One entry per driver.
 | `Wins` | `int` | |
 | `Losses` | `int` | |
 | `DefeatedIds` | `int[]` | IDs of drivers beaten |
-| `OpponentStrength` | `double` | Sum of final points of opponents faced (strength-of-schedule) |
+| `OpponentStrength` | `double` | Sum of the final points of the drivers this one **beat**. Changed 2026-09-04: it used to add every opponent faced, win or lose, which meant losing to good drivers raised your score — the 5th-placed driver had the highest number on the sheet. |
 
 ---
 
