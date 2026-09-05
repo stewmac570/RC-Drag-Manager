@@ -140,6 +140,9 @@ namespace RCDragManagerProd.AppServices
         /// </summary>
         public bool TryShowStandings() => _controller.TryShowRoundRobinStandings();
 
+        /// <summary>Send the current roster to the live site after it has been edited.</summary>
+        public void PublishRosterChange() => _controller.PublishRosterChange();
+
         /// <summary>Drivers currently eligible for a buyback into the Losers Bracket.</summary>
         public IReadOnlyList<Driver> GetEligibleBuybacks() => _controller.GetEligibleBuybackDrivers();
 
