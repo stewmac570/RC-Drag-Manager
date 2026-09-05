@@ -197,6 +197,31 @@ namespace RCDragManagerProd.Controllers
             }
         }
 
+        /// <summary>
+        /// The roster changed outside a race action -- a driver added or removed, a
+        /// qual time set. Push it so the live site's dial-in list matches the sign-up
+        /// sheet immediately, instead of the added driver being unable to log in
+        /// until somebody happens to generate a bracket.
+        ///
+        /// QueueLiveUpdate alone is not enough: it deliberately skips when there is
+        /// no bracket yet, which is exactly when a driver is most likely to be added.
+        /// </summary>
+        public void PublishRosterChange()
+        {
+            if (!AppSettings.LiveBroadcastEnabled) return;
+
+            var dto = BuildLiveRaceUpdateDto();
+            bool hasBracket = dto != null &&
+                              !string.IsNullOrWhiteSpace(dto.CurrentRound) &&
+                              dto.Matches != null &&
+                              dto.Matches.Count > 0;
+
+            if (hasBracket)
+                QueueLiveUpdate("roster-edit");
+            else
+                BroadcastInitialState("roster-edit");
+        }
+
         private void QueueLiveUpdate(string reason)
         {
             try

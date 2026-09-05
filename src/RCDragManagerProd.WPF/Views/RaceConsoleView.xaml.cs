@@ -533,6 +533,10 @@ namespace RCDragManagerProd.WPF.Views
         {
             if (_session == null) return;
             _rosterService.SyncSession(_session, _drivers);
+
+            // The live site builds its driver list from what we push, so a roster it
+            // never hears about leaves the added driver unable to set a dial-in.
+            _raceConsole.PublishRosterChange();
         }
 
         private void BtnSetDialIn_Click(object sender, RoutedEventArgs e)
