@@ -27,6 +27,7 @@ namespace RCDragManagerProd.ViewModels
         /// </summary>
         public List<ScoringLegendRow> ScoringLegend { get; set; } = new List<ScoringLegendRow>();
 
+
         /// <summary>
         /// Plain sentences for the places that were level on points, naming the rule
         /// that separated them. Empty when nothing was tied — which is the point: the
@@ -93,16 +94,20 @@ namespace RCDragManagerProd.ViewModels
         public string Points { get; set; }
 
         /// <summary>
-        /// The sum written out — "2 wins (8) + 1 bye (2)" — so the points column can
-        /// be checked at a glance instead of taken on trust.
+        /// What the beaten-drivers score contributes to the total — already divided
+        /// down. The column shows the contribution, not the raw sum, so the row adds up
+        /// on the page: Points + H2H + Beaten = TOTAL, exactly.
         /// </summary>
-        public string PointsWorking { get; set; }
+        public string Beaten { get; set; }
+
+        /// <summary>The head-to-head contribution. Shown as 0.0 rather than blank for
+        /// the same reason: the row has to add up.</summary>
+        public string HeadToHead { get; set; }
 
         /// <summary>
-        /// Kept for the record, but no longer a column: "opponent strength 20.00" told
-        /// a race director nothing. It now appears only inside a tie note, and only
-        /// when it is what actually settled a placing.
+        /// The three parts added together. This is what the order is sorted on, so it
+        /// is the last column and the only one that decides anything.
         /// </summary>
-        public string OpponentStrength { get; set; }
+        public string Total { get; set; }
     }
 }

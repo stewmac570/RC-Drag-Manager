@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.RoundRobinMode;
 
 namespace RCDragManagerProd.Tests;
 
@@ -41,7 +42,7 @@ public class RoundRobinStandingsPresentationTests
         Assert.AreEqual(1, aaron.Wins);
         Assert.AreEqual(1, aaron.Losses);
         Assert.AreEqual(1, aaron.Byes);
-        Assert.AreEqual("7.00", aaron.Points);
+        Assert.AreEqual("7", aaron.Points);
     }
 
     [TestMethod]
@@ -83,107 +84,6 @@ public class RoundRobinStandingsPresentationTests
         var view = RaceResultsPresentationBuilder.Build(session);
 
         Assert.AreEqual(1, view.Standings.Single(s => s.Driver == "Aaron Deluca").Byes);
-    }
-
-    [TestMethod]
-    public void ScoringLegend_GivesEachResultAValueAndAReason()
-    {
-        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
-
-        Assert.AreEqual(3, view.ScoringLegend.Count);
-
-        var win = view.ScoringLegend[0];
-        Assert.AreEqual("Win", win.Result);
-        Assert.AreEqual("4", win.Points);   // whole numbers: nobody reads "4.00" as four
-
-        var bye = view.ScoringLegend[1];
-        Assert.AreEqual("Bye", bye.Result);
-        Assert.AreEqual("2", bye.Points);
-
-        var loss = view.ScoringLegend[2];
-        Assert.AreEqual("Loss", loss.Result);
-        Assert.AreEqual("1", loss.Points);
-
-        // The reason is the point of the legend: a value with no reason is what made
-        // the table read as arbitrary in the first place.
-        foreach (var row in view.ScoringLegend)
-            Assert.IsFalse(string.IsNullOrWhiteSpace(row.Why), $"{row.Result} needs a reason.");
-    }
-
-    [TestMethod]
-    public void ScoringLegend_ExplainsWhyALossScoresAtAll()
-    {
-        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
-        var loss = view.ScoringLegend.Single(r => r.Result == "Loss");
-
-        StringAssert.Contains(loss.Why, "raced");
-    }
-
-    [TestMethod]
-    public void ScoringNote_SaysWhatDecidesTheClass()
-    {
-        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
-
-        StringAssert.Contains(view.ScoringNote, "Most points wins");
-        StringAssert.Contains(view.ScoringNote, "Most wins");
-    }
-
-    [TestMethod]
-    public void ScoringLegend_TakesItsNumbersFromTheRanker()
-    {
-        // Guards against the legend drifting from the values that actually decide
-        // rank and the Finals seeding order.
-        var pts = RCDragManagerProd.RoundRobinMode.RoundRobinRanker.PointsForRound("RR1");
-        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
-
-        Assert.AreEqual(pts.Win.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Win").Points);
-        Assert.AreEqual(pts.Bye.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Bye").Points);
-        Assert.AreEqual(pts.Loss.ToString("0"), view.ScoringLegend.Single(r => r.Result == "Loss").Points);
-    }
-
-    [TestMethod]
-    public void PointsWorking_WritesTheSumOut()
-    {
-        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
-
-        // 1 win + 1 loss + 1 bye = 7.00, and the row says so rather than asking for trust.
-        Assert.AreEqual("1 win (4) + 1 bye (2) + 1 loss (1)",
-            view.Standings.Single(s => s.Driver == "Aaron Deluca").PointsWorking);
-
-        Assert.AreEqual("2 wins (8) + 1 loss (1)",
-            view.Standings.Single(s => s.Driver == "Ava").PointsWorking);
-    }
-
-    [TestMethod]
-    public void PointsWorking_OmitsWhatDidNotHappen()
-    {
-        var session = SessionWithByes();
-        session.ResultsArchive.RoundRobinStandings = new List<RoundRobinStandingSnapshot>
-        {
-            new RoundRobinStandingSnapshot
-            {
-                Rank = 1, DriverId = 9, DriverName = "Unbeaten",
-                Wins = 3, Losses = 0, Points = 12.00
-            }
-        };
-
-        var view = RaceResultsPresentationBuilder.Build(session);
-
-        Assert.AreEqual("3 wins (12)", view.Standings.Single().PointsWorking);
-    }
-
-    [TestMethod]
-    public void PointsWorking_HandlesADriverWithNoRacesYet()
-    {
-        var session = SessionWithByes();
-        session.ResultsArchive.RoundRobinStandings = new List<RoundRobinStandingSnapshot>
-        {
-            new RoundRobinStandingSnapshot { Rank = 1, DriverId = 9, DriverName = "Late entry" }
-        };
-
-        var view = RaceResultsPresentationBuilder.Build(session);
-
-        Assert.AreEqual("No races yet", view.Standings.Single().PointsWorking);
     }
 
     [TestMethod]
@@ -231,7 +131,7 @@ public class RoundRobinStandingsPresentationTests
         var view = RaceResultsPresentationBuilder.Build(session);
 
         var note = view.TieNotes.Single();
-        StringAssert.Contains(note, "stronger field");
+        StringAssert.Contains(note, "stronger drivers");
         StringAssert.Contains(note, "20");
     }
 
@@ -290,6 +190,74 @@ public class RoundRobinStandingsPresentationTests
             }
         }
     };
+
+    [TestMethod]
+    public void ScoringLegend_ExplainsEveryColumnOfTheTotal()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        // One line per column heading, in the order the columns appear.
+        CollectionAssert.AreEqual(
+            new[] { "Points", "H2H", "Beaten", "TOTAL" },
+            view.ScoringLegend.Select(r => r.Result).ToArray());
+
+        foreach (var row in view.ScoringLegend)
+            Assert.IsFalse(string.IsNullOrWhiteSpace(row.Why), $"{row.Result} needs a reason.");
+    }
+
+    [TestMethod]
+    public void ScoringLegend_TakesItsNumbersFromTheRanker()
+    {
+        // Guards the footer against drifting from the values that decide placings.
+        var pts = RoundRobinRanker.PointsForRound("RR1");
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        var points = view.ScoringLegend.Single(r => r.Result == "Points");
+        Assert.AreEqual($"{pts.Win:0} / {pts.Bye:0} / {pts.Loss:0}", points.Points);
+
+        var h2h = view.ScoringLegend.Single(r => r.Result == "H2H");
+        Assert.AreEqual($"+{RoundRobinRanker.HeadToHeadBonus:0.0}", h2h.Points);
+    }
+
+    [TestMethod]
+    public void ScoringNote_SaysTheTotalDecidesTheClass()
+    {
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        StringAssert.Contains(view.ScoringNote, "Highest TOTAL");
+    }
+
+    [TestMethod]
+    public void OldEventsWithNoSavedTotalStillAddUp()
+    {
+        // Events saved before TotalScore existed reload it as 0. The total is added from
+        // the parts on the row, so those rows still balance instead of showing 0.000.
+        var session = SessionWithByes();
+        foreach (var row in session.ResultsArchive.RoundRobinStandings)
+            row.TotalScore = 0;
+
+        var view = RaceResultsPresentationBuilder.Build(session);
+        var ava = view.Standings.Single(s => s.Driver == "Ava");
+
+        Assert.AreEqual(
+            double.Parse(ava.Points) + double.Parse(ava.HeadToHead) + double.Parse(ava.Beaten),
+            double.Parse(ava.Total), 1e-9);
+    }
+
+    [TestMethod]
+    public void EveryRowAddsUpToItsTotal()
+    {
+        // The reason both tiebreak columns show their contribution rather than the raw
+        // number: a race director must be able to add the row across and get TOTAL.
+        var view = RaceResultsPresentationBuilder.Build(SessionWithByes());
+
+        foreach (var row in view.Standings)
+        {
+            var sum = double.Parse(row.Points) + double.Parse(row.HeadToHead) + double.Parse(row.Beaten);
+            Assert.AreEqual(double.Parse(row.Total), sum, 1e-9,
+                $"{row.Driver}: {row.Points} + {row.HeadToHead} + {row.Beaten} should equal {row.Total}");
+        }
+    }
 
     // ── Fixture ───────────────────────────────────────────────────────────────
 

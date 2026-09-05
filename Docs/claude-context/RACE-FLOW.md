@@ -196,7 +196,7 @@ New Session
 - The roster is shuffled before scheduling to avoid predictable BYE assignment.
 - An optional pre-rotation further randomizes R1 layout.
 - Odd field: null Driver2 = BYE. BYE receiver gets BYE points (2 pts).
-- `RoundRobinRanker.Rank()` scores: Win=4, Loss=1, BYE=2. Tiebreakers: head-to-head → opponent strength.
+- `RoundRobinRanker.Rank()` scores: Win=4, Loss=1, BYE=2. Tiebreakers: head-to-head → opponent score (the points of the drivers you beat, byes excluded).
 - Standard mode runs min(3, n-1) rounds. QMDRA mode runs exactly `RoundsToRun` rounds (can exceed n-1, causing deliberate rematches).
 
 ### Losers Bracket (post-RR)

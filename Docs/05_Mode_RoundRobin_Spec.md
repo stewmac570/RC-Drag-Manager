@@ -156,7 +156,7 @@ Performed by `RoundRobinRanker` at Round 3 completion.
 #### Ranking Priority
 1. **Total Points**  
 2. **Head-to-Head Result**  
-3. **Opponent Strength**  
+3. **Opponent Score** — the win/loss points of the drivers you **beat**, added up (not everyone you raced)  
 4. **Points Differential (Wins − Losses)**  
 5. **Alphabetical Order** (fallback)
 

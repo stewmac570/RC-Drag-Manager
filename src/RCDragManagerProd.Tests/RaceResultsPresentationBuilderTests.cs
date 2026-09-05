@@ -74,8 +74,10 @@ public class RaceResultsPresentationBuilderTests
         Assert.IsTrue(view.HasResults);
         Assert.IsTrue(view.HasRoundRobinStandings);
         Assert.AreEqual("Ava", view.Standings[0].Driver);
-        Assert.AreEqual("12.00", view.Standings[0].Points);
-        Assert.AreEqual("16.00", view.Standings[0].OpponentStrength);
+        // Whole numbers now: a race director reads "12", not "12.00".
+        Assert.AreEqual("12", view.Standings[0].Points);
+        // The tiebreak column shows what it contributes, so the row adds up.
+        Assert.AreEqual("0.016", view.Standings[0].Beaten);
     }
 
     [TestMethod]
