@@ -79,9 +79,20 @@ namespace RCDragManagerProd.AppServices
                         Wins = s.Wins,
                         Losses = s.Losses,
                         Byes = byes,
-                        Points = s.Points.ToString("0.00"),
-                        PointsWorking = DescribePoints(s.Wins, byes, s.Losses),
-                        OpponentStrength = s.OpponentStrength.ToString("0.00")
+                        Points = Plain(s.Points),
+                        // Both tiebreak columns show what they add, so Points + H2H +
+                        // Beaten is TOTAL on the page rather than a claim to trust.
+                        HeadToHead = s.HeadToHeadBonus.ToString("0.0"),
+                        Beaten = (s.OpponentStrength * RoundRobinRanker.BeatenDriversWeight)
+                            .ToString("0.000"),
+                        // Added from the parts on the row rather than read from the saved
+                        // TotalScore. Same arithmetic the ranker used, and it keeps the
+                        // row adding up on events saved before TotalScore existed, where
+                        // the stored value is 0.
+                        Total = (s.Points +
+                                 s.HeadToHeadBonus +
+                                 s.OpponentStrength * RoundRobinRanker.BeatenDriversWeight)
+                            .ToString("0.000")
                     };
                 })
                 .ToList();
@@ -99,8 +110,9 @@ namespace RCDragManagerProd.AppServices
 
         /// <summary>What actually decides the class.</summary>
         private const string ScoringNote =
-            "Most points wins the class. Level on points? Most wins takes it, then " +
-            "whoever won when those two raced each other.";
+            "Highest TOTAL wins the class. Each part is small enough that it can only " +
+            "separate drivers the part before it left level — so a driver never passes " +
+            "someone who scored more points than them.";
 
         /// <summary>
         /// Each result with its value and the reason for that value, read out of
@@ -120,43 +132,37 @@ namespace RCDragManagerProd.AppServices
             {
                 new ScoringLegendRow
                 {
-                    Result = "Win",
-                    Points = Plain(pts.Win),
-                    Why = "you beat the driver in the other lane"
+                    Result = "Points",
+                    Points = $"{Plain(pts.Win)} / {Plain(pts.Bye)} / {Plain(pts.Loss)}",
+                    Why = $"a win scores {Plain(pts.Win)}, a bye {Plain(pts.Bye)}, a loss " +
+                          $"{Plain(pts.Loss)}. Every round is worth the same"
                 },
                 new ScoringLegendRow
                 {
-                    Result = "Bye",
-                    Points = Plain(pts.Bye),
-                    Why = "the draw left you with nobody to race — worth more than a loss " +
-                          "because it was not your doing, less than a win because you beat nobody"
+                    Result = "H2H",
+                    Points = $"+{RoundRobinRanker.HeadToHeadBonus:0.0}",
+                    Why = "beat a driver you finished level with on points and you take the " +
+                          "place. Too small to pass anyone who scored more than you"
                 },
                 new ScoringLegendRow
                 {
-                    Result = "Loss",
-                    Points = Plain(pts.Loss),
-                    Why = "you raced and lost — still scores, because you ran the round"
+                    Result = "Beaten",
+                    Points = "÷1000",
+                    Why = "the points of the drivers you beat, added up. Splits drivers still " +
+                          "level after H2H — usually two who never raced each other"
+                },
+                new ScoringLegendRow
+                {
+                    Result = "TOTAL",
+                    Points = "=",
+                    Why = "the three added together. The class is ordered on this and nothing else"
                 }
             };
         }
 
-        /// <summary>Writes a driver's points out as a sum: "2 wins (8) + 1 bye (2)".</summary>
-        private static string DescribePoints(int wins, int byes, int losses)
-        {
-            var pts = RoundRobinRanker.PointsForRound("RR1");
-            var parts = new List<string>();
-
-            if (wins > 0) parts.Add($"{wins} {Plural(wins, "win")} ({Plain(wins * pts.Win)})");
-            if (byes > 0) parts.Add($"{byes} {Plural(byes, "bye")} ({Plain(byes * pts.Bye)})");
-            if (losses > 0) parts.Add($"{losses} {Plural(losses, "loss", "losses")} ({Plain(losses * pts.Loss)})");
-
-            return parts.Count == 0 ? "No races yet" : string.Join(" + ", parts);
-        }
-
         /// <summary>
         /// A sentence for each pair of drivers who finished level on points, naming the
-        /// rule that separated them. This is the only place opponent strength appears —
-        /// as a bare number in a column it told a race director nothing.
+        /// rule that separated them.
         /// </summary>
         private static List<string> DescribeTies(
             List<RoundRobinStandingSnapshot> ranked, RaceResultsArchive archive)
@@ -186,9 +192,9 @@ namespace RCDragManagerProd.AppServices
                     }
                     else if (ahead.OpponentStrength > behind.OpponentStrength)
                     {
-                        notes.Add($"{lead} — {ahead.DriverName} placed higher for racing the stronger field " +
-                                  $"(opponents totalling {Plain(ahead.OpponentStrength)} against " +
-                                  $"{Plain(behind.OpponentStrength)}).");
+                        notes.Add($"{lead} — {ahead.DriverName} placed higher for beating the stronger drivers " +
+                                  $"(the drivers they beat scored {Plain(ahead.OpponentStrength)} between them, " +
+                                  $"against {Plain(behind.OpponentStrength)}).");
                     }
                     else
                     {

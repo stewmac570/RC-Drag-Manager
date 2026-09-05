@@ -53,7 +53,9 @@ namespace RCDragManagerProd.Controllers
                     Wins = row.Wins,
                     Losses = row.Losses,
                     Points = row.Points,
-                    OpponentStrength = row.OpponentStrength
+                    OpponentStrength = row.OpponentStrength,
+                    HeadToHeadBonus = row.HeadToHeadBonus,
+                    TotalScore = row.TotalScore
                 })
                 .ToList();
         }

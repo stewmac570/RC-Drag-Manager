@@ -169,7 +169,7 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 |------|-------------|
 | `RoundRobinMatch.cs` | Match data class: MatchId, RoundLabel, Driver1, Driver2 |
 | `RoundRobinEngine.cs` | Circle-method scheduler: `GenerateMatches()`, `GetMatches()`, `SetWinner()`, `GetStandings()`, `GetTopN()`, `GetTopRankedDrivers()` |
-| `RoundRobinRanker.cs` | `Rank()` — computes `DriverRankResult` list sorted by points → wins → H2H → opponent strength |
+| `RoundRobinRanker.cs` | `Rank()` — computes `DriverRankResult` list sorted by points → wins → H2H → opponent score (points of drivers beaten) |
 
 ### RoundRobinMode/RoundRobinScorecardLogger/
 

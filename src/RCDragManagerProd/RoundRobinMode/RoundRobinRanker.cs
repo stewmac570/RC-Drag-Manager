@@ -17,10 +17,40 @@ namespace RCDragManagerProd.RoundRobinMode
         public int Losses { get; set; }
         public int[] DefeatedIds { get; set; } = Array.Empty<int>();
         public double OpponentStrength { get; set; }
+
+        /// <summary>
+        /// <see cref="RoundRobinRanker.HeadToHeadBonus"/> for each driver level with this
+        /// one on <see cref="Points"/> that this one beat.
+        /// </summary>
+        public double HeadToHeadBonus { get; set; }
+
+        /// <summary>
+        /// What the placing is actually sorted on: points, plus the head-to-head bonus,
+        /// plus the beaten-drivers score scaled down. Every part is shown as its own
+        /// column, so the order on screen is arithmetic the operator can check rather
+        /// than a sequence of hidden tiebreak rules.
+        /// </summary>
+        public double TotalScore { get; set; }
     }
 
     public sealed class RoundRobinRanker
     {
+        /// <summary>
+        /// Banked once per driver you are level with on points and beat.
+        ///
+        /// Sized so it can never overturn a whole win/loss point: a driver races three
+        /// times, so the most they can bank is 0.3, and the beaten-drivers part adds at
+        /// most 0.03 on top. A driver on 10 points can never be caught by one on 9.
+        /// </summary>
+        public const double HeadToHeadBonus = 0.1;
+
+        /// <summary>
+        /// Scales the beaten-drivers score into the total. Their combined points top out
+        /// around 30, so this contributes at most 0.03 — small enough that it can only
+        /// separate drivers the head-to-head bonus left level.
+        /// </summary>
+        public const double BeatenDriversWeight = 0.001;
+
         // STEP 1: Public points accessor
         public static (double Win, double Loss, double Bye) PointsForRound(string lbl)
         {
@@ -64,10 +94,6 @@ namespace RCDragManagerProd.RoundRobinMode
             var idToName = new Dictionary<int, string>();
             var stats = new Dictionary<int, Aggregate>();
 
-            // Opponents actually faced (BYEs ignored)
-            var faced = new Dictionary<int, HashSet<int>>();
-
-
             if (drivers != null)
             {
                 foreach (var d in drivers)
@@ -77,8 +103,6 @@ namespace RCDragManagerProd.RoundRobinMode
                     {
                         idToName[d.Id] = d.Name;
                         stats[d.Id] = new Aggregate();
-                        faced[d.Id] = new HashSet<int>();
-
                     }
                     else
                     {
@@ -94,18 +118,6 @@ namespace RCDragManagerProd.RoundRobinMode
 
                 // BYE if either side missing
                 bool isBye = m.Driver1 == null || m.Driver2 == null;
-
-                {
-                    int a = m.Driver1?.Id ?? 0;
-                    int b = m.Driver2?.Id ?? 0;
-
-                    if (a != 0 && b != 0 && faced.ContainsKey(a) && faced.ContainsKey(b))
-                    {
-                        faced[a].Add(b);
-                        faced[b].Add(a);
-                    }
-                }
-
 
                 var winner = results.GetWinner(m.MatchId);
                 var loser = results.GetLoser(m.MatchId);
@@ -179,43 +191,47 @@ namespace RCDragManagerProd.RoundRobinMode
                 OpponentStrength = 0
             }).ToList();
 
-            // Opponent Strength (SoS) = sum of FINAL points of opponents actually faced (BYEs ignored)
+            // Opponent score = the final win/loss points of the drivers you BEAT.
+            //
+            // This used to add every driver you raced, win or lose. That rewarded losing
+            // to good drivers: in one meet the driver placed 5th with a single win had
+            // the highest opponent score on the sheet, purely from who beat him. Counting
+            // only your wins makes the number mean "I beat good drivers", which is worth
+            // something. Beating the same driver twice still counts once.
             var pointsById = table.ToDictionary(x => x.DriverId, x => x.Points);
 
             foreach (var r in table)
             {
-                if (!faced.TryGetValue(r.DriverId, out var opps) || opps.Count == 0)
-                {
-                    r.OpponentStrength = 0;
-                    continue;
-                }
-
                 double sum = 0;
-                foreach (var oppId in opps)
+                foreach (var beatenId in r.DefeatedIds)
                 {
-                    if (pointsById.TryGetValue(oppId, out var pts))
+                    if (pointsById.TryGetValue(beatenId, out var pts))
                         sum += pts;
                 }
                 r.OpponentStrength = sum;
             }
 
+            // Head-to-head as a scored column rather than a hidden sort step: a driver
+            // banks the bonus once for each driver they are level with on points and
+            // beat. A three-way tie therefore rewards beating two of them more than
+            // beating one, which the old pairwise comparison could not express.
+            var levelOnPoints = table.GroupBy(r => r.Points)
+                                     .ToDictionary(g => g.Key, g => g.Select(r => r.DriverId).ToHashSet());
 
-            // STEP 2 — Opponent Strength (SoS) = sum of FINAL points of opponents actually faced (BYEs ignored)
+            foreach (var r in table)
+            {
+                var level = levelOnPoints[r.Points];
+                int beatenAndLevel = r.DefeatedIds.Count(id => id != r.DriverId && level.Contains(id));
+                r.HeadToHeadBonus = beatenAndLevel * HeadToHeadBonus;
+                r.TotalScore = r.Points + r.HeadToHeadBonus + (r.OpponentStrength * BeatenDriversWeight);
+            }
 
+            // One number decides the order. The weights above guarantee each part can
+            // only ever separate drivers the part above it left level.
             table.Sort((a, b) =>
             {
-                int cmp = b.Points.CompareTo(a.Points); if (cmp != 0) return cmp;
-                cmp = b.Wins.CompareTo(a.Wins); if (cmp != 0) return cmp;
-
-                if (_h2h.TryGetValue(PairKey(a.DriverId, b.DriverId), out int winner))
-                {
-                    if (winner == a.DriverId) return -1;
-                    if (winner == b.DriverId) return 1;
-                }
-
-                cmp = b.OpponentStrength.CompareTo(a.OpponentStrength); if (cmp != 0) return cmp;
-
-                return a.DriverId.CompareTo(b.DriverId);
+                int cmp = b.TotalScore.CompareTo(a.TotalScore);
+                return cmp != 0 ? cmp : a.DriverId.CompareTo(b.DriverId);
             });
 
             for (int i = 0; i < table.Count; i++)
