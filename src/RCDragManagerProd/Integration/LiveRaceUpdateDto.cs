@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace RCDragManagerProd.Integration
 {
@@ -12,9 +12,17 @@ namespace RCDragManagerProd.Integration
         public string CurrentRound { get; set; }
         public string NextUp { get; set; }
         public string RRStandings { get; set; }
+        public List<LiveDriverEntryDto> Drivers { get; set; }
         public List<LiveMatchDto> Matches { get; set; }
         public List<LiveWinnerDto> Winners { get; set; }
         public bool DialInLocked { get; set; }
+    }
+
+    public class LiveDriverEntryDto
+    {
+        public int DriverId { get; set; }
+        public string DriverName { get; set; }
+        public double? DialIn { get; set; }
     }
 
     public class LiveMatchDto
