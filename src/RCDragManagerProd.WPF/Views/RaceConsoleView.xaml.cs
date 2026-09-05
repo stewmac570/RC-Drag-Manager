@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -844,7 +844,7 @@ namespace RCDragManagerProd.WPF.Views
             switch (_raceConsole.ApplyBuybackSelection(dlg.SelectedDrivers))
             {
                 case BuybackSelectionOutcome.Invalid:
-                    MessageDialog.Warn(Host, "At least one driver must be selected.", "Invalid selection");
+                    OfferNoBuybackFinals();
                     break;
                 case BuybackSelectionOutcome.SingleToFinals:
                     break;
@@ -855,6 +855,39 @@ namespace RCDragManagerProd.WPF.Views
                     UpdatePrimaryButtons();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Nobody entered the buyback. Rather than leaving the event with no route to
+        /// the Final, offer the wildcard slot to the next driver down -- 4th on Round
+        /// Robin ranking -- and open the Finals.
+        /// </summary>
+        private void OfferNoBuybackFinals()
+        {
+            var wildcard = _raceConsole.PeekNoBuybackWildcard();
+            if (wildcard == null)
+            {
+                MessageDialog.Warn(Host,
+                    "No drivers were selected, and no wildcard finalist could be worked out from the standings.",
+                    "No entries");
+                return;
+            }
+
+            if (!MessageDialog.Confirm(Host,
+                    $"No one bought back.\n\nGive the wildcard Finals slot to {wildcard.Name} and run the Finals?",
+                    "No buyback entries"))
+            {
+                return;
+            }
+
+            if (!_raceConsole.SkipBuybacks())
+            {
+                MessageDialog.Warn(Host, "Could not open the Finals from here.", "No entries");
+                return;
+            }
+
+            BtnBuybacks.Content = "Edit buybacks";
+            UpdatePrimaryButtons();
         }
 
         private void BtnEditResult_Click(object sender, RoutedEventArgs e)

@@ -174,6 +174,62 @@ namespace RCDragManagerProd.Controllers
             return ranked;
         }
 
+        /// <summary>
+        /// The wildcard finalist when no buyback race is run: the single eligible
+        /// driver if only one could have bought back, otherwise 4th on Round Robin
+        /// ranking. This is the rule the "not enough drivers for buyback" path in
+        /// AdvanceRound already applied; it lives here so the no-entries path can
+        /// not drift away from it.
+        /// </summary>
+        public Driver ResolveWildcardFinalist()
+        {
+            var eligible = GetEligibleBuybackDrivers();
+            if (eligible != null && eligible.Count == 1)
+                return eligible[0];
+
+            if (_engine is RoundRobinEngineAdapter rr)
+            {
+                Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
+                var top4 = rr.GetTopRankedDrivers(4);
+                if (top4 != null && top4.Count >= 4)
+                    return top4[3];
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Buybacks were offered and nobody entered. Promote the wildcard finalist
+        /// and raise the Finals gate, rather than leaving the event stuck with no
+        /// way through to the Final. Returns false if the wildcard cannot be
+        /// determined, in which case nothing changes.
+        /// </summary>
+        public bool SkipBuybacksToFinals()
+        {
+            if (_rrTop3 == null || _rrTop3.Count != 3)
+            {
+                Logger.Log("[FINALS][NOENTRIES] Top-3 snapshot missing or incomplete — cannot promote a wildcard.");
+                return false;
+            }
+
+            var wildcard = ResolveWildcardFinalist();
+            if (wildcard == null)
+            {
+                Logger.Log("[FINALS][NOENTRIES] Could not determine a wildcard finalist — Finals gate not raised.");
+                return false;
+            }
+
+            _session.BuybackDrivers = new List<Driver>();
+            _buybackChampionOverride = wildcard;   // consumed by InjectFinal4Bracket()
+            _finalsPending = true;
+            FinalsPendingReason = FinalsReasonBuybackSkipped;
+            FinalsPendingWildcardName = wildcard.Name;
+            CanOfferBuybackChanged?.Invoke(false);
+            CanStartFinalsChanged?.Invoke(true);
+            Logger.Log($"[FINALS][NOENTRIES] No buyback entries. Wildcard finalist: {wildcard.Name}. Finals gate raised.");
+            return true;
+        }
+
         public void StartFinalsTop3NoBuyback()
         {
             Logger.Log("[FINALS][NOBUYBACK] Starting Finals with Top-3 only (no buyback entries).");
