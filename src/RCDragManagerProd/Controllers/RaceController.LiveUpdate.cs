@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RCDragManagerProd.Config;
@@ -14,6 +14,32 @@ namespace RCDragManagerProd.Controllers
     public partial class RaceController
     {
         private readonly LiveApiClient _liveApiClient = new LiveApiClient();
+
+        /// <summary>Entry list for the loaded class. This is the only source of
+        /// driver names before a round is generated -- the match list is empty
+        /// until then, so without this the live site has nobody to offer.</summary>
+        private List<LiveDriverEntryDto> BuildDriverEntryDtos()
+        {
+            if (_session == null || _session.DriverEntries == null)
+                return new List<LiveDriverEntryDto>();
+
+            var classType = _session.ClassType;
+
+            return _session.DriverEntries
+                .Where(e => e != null && e.DriverID > 0 && !string.IsNullOrWhiteSpace(e.DriverName))
+                .Where(e => string.IsNullOrWhiteSpace(classType) ||
+                            string.IsNullOrWhiteSpace(e.ClassType) ||
+                            string.Equals(e.ClassType, classType, StringComparison.OrdinalIgnoreCase))
+                .GroupBy(e => e.DriverID)
+                .Select(g => g.First())
+                .Select(e => new LiveDriverEntryDto
+                {
+                    DriverId = e.DriverID,
+                    DriverName = e.DriverName,
+                    DialIn = e.DialIn
+                })
+                .ToList();
+        }
 
         private LiveRaceUpdateDto BuildLiveRaceUpdateDto()
         {
@@ -102,6 +128,7 @@ namespace RCDragManagerProd.Controllers
                 RaceType = _session.RaceType,
                 CurrentRound = currentRound,
                 NextUp = nextUp,
+                Drivers = BuildDriverEntryDtos(),
                 Matches = matches,
                 Winners = winners,
                 RRStandings = rrStandings,
@@ -153,6 +180,7 @@ namespace RCDragManagerProd.Controllers
                     RaceType     = _session.RaceType,
                     CurrentRound = string.Empty,
                     NextUp       = string.Empty,
+                    Drivers      = BuildDriverEntryDtos(),
                     Matches      = new List<LiveMatchDto>(),
                     Winners      = new List<LiveWinnerDto>(),
                     RRStandings  = null,

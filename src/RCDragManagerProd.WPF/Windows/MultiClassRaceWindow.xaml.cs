@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +7,7 @@ using System.Windows.Shapes;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Controllers;
 using RCDragManagerProd.Domain;
+using RCDragManagerProd.Integration;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
 using RCDragManagerProd.WPF.Dialogs;
@@ -305,7 +306,24 @@ namespace RCDragManagerProd.WPF.Windows
             if (_completed.Count == _controllers.Count)
             {
                 Logger.Log($"[RESULT][EVENT] '{_multiEvent.EventName}' complete — all {_controllers.Count} classes finished");
+                ClearFromLiveSite();
                 ShowCombinedSummary();
+            }
+        }
+
+        /// <summary>Every class has finished, so the event is over. Take it off the
+        /// live site now instead of leaving it up until the server's two-hour
+        /// expiry, where it sits above the event people are actually racing.</summary>
+        private void ClearFromLiveSite()
+        {
+            try
+            {
+                _ = new LiveApiClient().ResetAsync(string.Empty, null, _multiEvent.EventName);
+                Logger.Log($"[LIVE][RESET] event '{_multiEvent.EventName}' finished — cleared from live site");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[LIVE][RESET] failed to clear '{_multiEvent.EventName}': {ex.Message}");
             }
         }
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
@@ -7,6 +7,11 @@
     <AssemblyName>RCDragManagerProd.WPF</AssemblyName>
     <LangVersion>9.0</LangVersion>
     <Nullable>disable</Nullable>
+    <!-- Without this the generated exe.config carries no binding redirects, and
+         System.Text.Json fails to load Unsafe 4.0.4.1 at startup. The WinForms
+         project has always set it; this one did not. -->
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <ApplicationIcon>..\RCDragManagerProd\Assets\rcdrag_icon.ico</ApplicationIcon>
     <Version>2.2.0</Version>
     <AssemblyVersion>2.2.0.0</AssemblyVersion>
