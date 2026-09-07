@@ -35,6 +35,7 @@ on this codebase:
 | `TECHNICAL-DEBT.md` | Before any refactor — known issues, closed bugs, weaknesses |
 | `CURRENT-SESSION-SETUP-AUDIT.md` | Touching session setup or multi-class work |
 | `MULTI-CLASS-EVENT-SPEC.md` | Working on the multi-class feature — full specification |
+| `TIMING-CAPTURE-SPEC.md` | Working on Portatree timing capture — how run times attach to a race and reach the results form |
 
 ---
 
