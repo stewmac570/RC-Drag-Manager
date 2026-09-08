@@ -81,6 +81,10 @@ namespace RCDragManagerProd.Domain
 
     public class RaceSessionDriverEntry
     {
+        // Unique within a class. Standard classes may leave this as zero; the
+        // multi-car RR setup assigns one so two cars from the same driver are
+        // distinct competitors in the engine and standings.
+        public int RaceEntryId { get; set; }
         public int DriverID { get; set; }
         public string DriverName { get; set; }
         public int CarID { get; set; }

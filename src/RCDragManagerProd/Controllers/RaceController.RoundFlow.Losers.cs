@@ -6,6 +6,7 @@ using System.Linq;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.RandomMode;
+using RCDragManagerProd.RoundRobinMode;
 using RCDragManagerProd.Logging;
 
 namespace RCDragManagerProd.Controllers
@@ -68,6 +69,15 @@ namespace RCDragManagerProd.Controllers
                 _session.BuybackDrivers,
                 _session.PairingHistory,
                 1000);
+
+            if (IsMultiCarRoundRobin)
+            {
+                new MultiCarOpeningRoundPlanner().Arrange(
+                    lbMatches,
+                    _session.BuybackDrivers,
+                    OwnerDriverId,
+                    _session.PairingHistory);
+            }
 
             Logger.Log($"📊 LB matches generated: {lbMatches.Count}");
 

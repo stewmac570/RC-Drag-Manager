@@ -37,7 +37,7 @@ namespace RCDragManagerProd.Controllers
                     }
                 }
 
-                var winnerId = summary.Winner?.Id ?? 0;
+                var winnerId = summary.WinnerDriverId > 0 ? summary.WinnerDriverId : summary.Winner?.Id ?? 0;
                 if (winnerId > 0)
                 {
                     var wdb = repo.GetDriverById(winnerId);

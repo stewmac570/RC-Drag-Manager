@@ -67,7 +67,7 @@ namespace RCDragManagerProd.Controllers
             EnsureResultsArchive();
             var entryById = (_session.DriverEntries ?? new List<RaceSessionDriverEntry>())
                 .Where(e => e != null)
-                .GroupBy(e => e.DriverID)
+                .GroupBy(EntryIdentity)
                 .ToDictionary(g => g.Key, g => g.First());
 
             var snapshot = new RacePhaseResultSnapshot
@@ -113,9 +113,9 @@ namespace RCDragManagerProd.Controllers
         private void CaptureCompletedResult(Driver champion, Driver runnerUp, DateTime completedAt)
         {
             EnsureResultsArchive();
-            _session.ResultsArchive.ChampionDriverId = champion?.Id;
+            _session.ResultsArchive.ChampionDriverId = OwnerDriverId(champion);
             _session.ResultsArchive.ChampionName = champion?.Name;
-            _session.ResultsArchive.RunnerUpDriverId = runnerUp?.Id;
+            _session.ResultsArchive.RunnerUpDriverId = OwnerDriverId(runnerUp);
             _session.ResultsArchive.RunnerUpName = runnerUp?.Name;
             _session.ResultsArchive.CompletedAt = completedAt;
         }

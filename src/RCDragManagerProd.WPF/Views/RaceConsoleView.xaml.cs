@@ -72,8 +72,18 @@ namespace RCDragManagerProd.WPF.Views
 
             if (_session?.DriverEntries != null && _session.DriverEntries.Count > 0)
             {
+                var isMultiCarRoundRobin = RaceTypes.IsRoundRobinFormat(_session.OriginalRaceType ?? _session.RaceType) &&
+                                          string.Equals(_session.OriginalRaceType ?? _session.RaceType,
+                                              RaceTypes.MultiCarRoundRobin, StringComparison.OrdinalIgnoreCase);
                 _drivers = _session.DriverEntries
-                    .Select(e => new Driver { Id = e.DriverID, Name = e.DriverName, QualTime = e.QualifyingTime })
+                    .Select(e => new Driver
+                    {
+                        Id = isMultiCarRoundRobin && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID,
+                        Name = isMultiCarRoundRobin && !string.IsNullOrWhiteSpace(e.CarName)
+                            ? e.DriverName + " — " + e.CarName
+                            : e.DriverName,
+                        QualTime = e.QualifyingTime
+                    })
                     .ToList();
                 RefreshDriverGrid();
                 BtnGenerateBracket.IsEnabled = true;

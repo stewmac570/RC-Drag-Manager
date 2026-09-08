@@ -309,11 +309,12 @@ namespace RCDragManagerProd.Controllers
             {
                 foreach (var e in _session.DriverEntries)
                 {
-                    if (e == null || e.DriverID == 0 || map.ContainsKey(e.DriverID)) continue;
-                    map[e.DriverID] = new Driver
+                    var entryId = IsMultiCarRoundRobin ? e?.RaceEntryId ?? 0 : e?.DriverID ?? 0;
+                    if (e == null || entryId == 0 || map.ContainsKey(entryId)) continue;
+                    map[entryId] = new Driver
                     {
-                        Id = e.DriverID,
-                        Name = e.DriverName,
+                        Id = entryId,
+                        Name = IsMultiCarRoundRobin ? e.DriverName + " \u2014 " + e.CarName : e.DriverName,
                         QualTime = e.QualifyingTime
                     };
                 }

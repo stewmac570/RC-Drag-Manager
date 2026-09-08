@@ -293,7 +293,7 @@ namespace RCDragManagerProd.AppServices
                     Logger.Log($"[STATS] +Wins/Losses → winner={wId}, loser={lId}");
                 }
 
-            var winnerId = summary.Winner?.Id ?? 0;
+            var winnerId = summary.WinnerDriverId > 0 ? summary.WinnerDriverId : summary.Winner?.Id ?? 0;
             if (winnerId > 0)
             {
                 _driverRepo.IncrementEventsWon(winnerId);

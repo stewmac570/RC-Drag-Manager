@@ -158,6 +158,38 @@ namespace RCDragManagerProd.Controllers
             EngineGenerateBracket(_engine);
             Logger.Log("[ENGINE] Bracket generated.");
 
+            // This mode deliberately uses the established RR adapter for scoring,
+            // standings, buybacks and Finals. Only the fixture is different: cars
+            // share a real-driver owner, so it is planned before injection rather
+            // than using the ordinary circle-method order.
+            if (RaceTypes.IsRoundRobinFormat(rt) &&
+                string.Equals(rt, RaceTypes.MultiCarRoundRobin, StringComparison.OrdinalIgnoreCase) &&
+                _engine is RoundRobinEngineAdapter multiCarAdapter)
+            {
+                var entries = (_session.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                    .Where(e => e != null && e.RaceEntryId > 0)
+                    .Select(e => new MultiCarRaceEntry
+                    {
+                        RaceEntryId = e.RaceEntryId,
+                        DriverId = e.DriverID,
+                        DriverName = e.DriverName,
+                        CarId = e.CarID,
+                        CarName = e.CarName,
+                        QualifyingTime = e.QualifyingTime,
+                        DialIn = e.DialIn
+                    })
+                    .ToList();
+
+                int rounds = string.Equals(_session.RoundRobinVariant, "QMDRA", StringComparison.OrdinalIgnoreCase)
+                    ? (_session.RoundsToRun ?? 3)
+                    : Math.Min(_session.RoundsToRun ?? 3, Math.Max(1, entries.Count - 1));
+                var fixture = new MultiCarRoundRobinScheduler().Build(entries, rounds);
+                multiCarAdapter.InjectMatches(fixture);
+                _drivers = entries.Select(e => e.ToCompetitor()).ToList();
+                _session.Drivers = new List<Driver>(_drivers);
+                Logger.Log($"[MULTI-CAR-RR] Injected {fixture.Count} scheduled race(s) across {rounds} round(s).");
+            }
+
             var roundOrder = EngineGetRoundOrder(_engine);
             if (roundOrder == null || roundOrder.Count == 0)
             {
@@ -170,7 +202,7 @@ namespace RCDragManagerProd.Controllers
 
 
             _revealedRounds.Clear();
-            if (string.Equals(rt, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
+            if (RaceTypes.IsRoundRobinFormat(rt))
             {
                 // Pre-reveal all RR rounds upfront so the full schedule is visible immediately.
                 // Winner input is gated by _activeRound, not by _revealedRounds.
@@ -577,10 +609,11 @@ namespace RCDragManagerProd.Controllers
                         Bracket = "Finals (Pro Ladder)",
                         Winner = winner,
                         RunnerUp = runnerUp,
+                        WinnerDriverId = OwnerDriverId(winner),
                         TotalDrivers = _session?.Drivers?.Count ?? 0,
                         TotalMatches = all.Count,
                         CompletedAt = DateTime.Now,
-                        MatchResults = _matchResult.GetAllResults()
+                        MatchResults = GetStatResults()
                     };
 
                     CaptureCurrentResultSnapshot();

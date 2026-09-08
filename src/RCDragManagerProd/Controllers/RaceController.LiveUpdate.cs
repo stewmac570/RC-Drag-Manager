@@ -25,17 +25,20 @@ namespace RCDragManagerProd.Controllers
 
             var classType = _session.ClassType;
 
+            bool multiCar = IsMultiCarRoundRobin;
             return _session.DriverEntries
                 .Where(e => e != null && e.DriverID > 0 && !string.IsNullOrWhiteSpace(e.DriverName))
                 .Where(e => string.IsNullOrWhiteSpace(classType) ||
                             string.IsNullOrWhiteSpace(e.ClassType) ||
                             string.Equals(e.ClassType, classType, StringComparison.OrdinalIgnoreCase))
-                .GroupBy(e => e.DriverID)
+                .GroupBy(e => multiCar && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID)
                 .Select(g => g.First())
                 .Select(e => new LiveDriverEntryDto
                 {
-                    DriverId = e.DriverID,
-                    DriverName = e.DriverName,
+                    DriverId = multiCar && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID,
+                    DriverName = multiCar && !string.IsNullOrWhiteSpace(e.CarName)
+                        ? e.DriverName + " — " + e.CarName
+                        : e.DriverName,
                     DialIn = e.DialIn
                 })
                 .ToList();

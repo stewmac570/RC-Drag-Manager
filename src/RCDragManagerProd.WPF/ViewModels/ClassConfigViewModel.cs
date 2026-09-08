@@ -20,6 +20,7 @@ namespace RCDragManagerProd.WPF.ViewModels
         public const string ProLadder  = "Pro Ladder";
         public const string RandomDraw  = "Random Draw";
         public const string RoundRobin  = "Round Robin";
+        public const string MultiCarRoundRobin = "Multi-Car Round Robin";
 
         private readonly MultiClassSetupService _service;
         private readonly List<DriverRosterRow> _allRows = new List<DriverRosterRow>();
@@ -68,21 +69,29 @@ namespace RCDragManagerProd.WPF.ViewModels
             get => _selectedRaceType;
             set
             {
+                if (string.Equals(_selectedRaceType, value, StringComparison.OrdinalIgnoreCase)) return;
                 _selectedRaceType = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsProLadderSelected));
                 OnPropertyChanged(nameof(IsRandomDrawSelected));
                 OnPropertyChanged(nameof(IsRoundRobinSelected));
+                OnPropertyChanged(nameof(IsMultiCarRoundRobinSelected));
                 OnPropertyChanged(nameof(RrConfigVisibility));
+                if (_allRows.Count > 0)
+                {
+                    LoadRoster();
+                    RefreshRoster();
+                }
             }
         }
 
         public bool IsProLadderSelected  => _selectedRaceType == ProLadder;
         public bool IsRandomDrawSelected => _selectedRaceType == RandomDraw;
         public bool IsRoundRobinSelected => _selectedRaceType == RoundRobin;
+        public bool IsMultiCarRoundRobinSelected => _selectedRaceType == MultiCarRoundRobin;
 
         public Visibility RrConfigVisibility =>
-            IsRoundRobinSelected ? Visibility.Visible : Visibility.Collapsed;
+            (IsRoundRobinSelected || IsMultiCarRoundRobinSelected) ? Visibility.Visible : Visibility.Collapsed;
 
         // ── Class type (radio) ────────────────────────────────────────────────
 
@@ -163,7 +172,7 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         /// <summary>Live count for the "In this class" header, checked against the sign-up sheet.</summary>
         public string SelectedSummary =>
-            CheckedCount == 1 ? "1 driver in this class" : $"{CheckedCount} drivers in this class";
+            CheckedCount == 1 ? "1 entry in this class" : $"{CheckedCount} entries in this class";
 
         public bool HasSelection => CheckedCount > 0;
 
@@ -193,10 +202,14 @@ namespace RCDragManagerProd.WPF.ViewModels
             _allRows.Clear();
             foreach (var d in _service.GetAllDrivers())
             {
-                var car = d.Cars?.FirstOrDefault();
-                _allRows.Add(new DriverRosterRow
+                IEnumerable<Car> cars = IsMultiCarRoundRobinSelected
+                    ? (d.Cars ?? new List<Car>())
+                    : new[] { d.Cars?.FirstOrDefault() };
+                foreach (var car in IsMultiCarRoundRobinSelected ? cars.Where(c => c != null) : cars)
+                    _allRows.Add(new DriverRosterRow
                 {
                     DriverId = d.Id,
+                    CarId = car?.CarID ?? 0,
                     Name = d.Name,
                     CarName = car?.CarName ?? "",
                     ClassType = car?.ClassType ?? "",
@@ -231,14 +244,14 @@ namespace RCDragManagerProd.WPF.ViewModels
         {
             _service.QuickAddDriver(name, car);
             // Preserve current checked/override state by reloading then re-applying.
-            var checkedIds = new HashSet<int>(_allRows.Where(r => r.IsChecked).Select(r => r.DriverId));
+            var checkedIds = new HashSet<int>(_allRows.Where(r => r.IsChecked).Select(r => r.CarId));
             var overrides = _allRows.Where(r => !string.IsNullOrWhiteSpace(r.OverrideText))
-                                    .ToDictionary(r => r.DriverId, r => r.OverrideText);
+                                    .ToDictionary(r => r.CarId, r => r.OverrideText);
             LoadRoster();
             foreach (var r in _allRows)
             {
-                if (checkedIds.Contains(r.DriverId)) r.IsChecked = true;
-                if (overrides.TryGetValue(r.DriverId, out var ov)) r.OverrideText = ov;
+                if (checkedIds.Contains(r.CarId)) r.IsChecked = true;
+                if (overrides.TryGetValue(r.CarId, out var ov)) r.OverrideText = ov;
             }
             RefreshRoster();
         }
@@ -274,7 +287,9 @@ namespace RCDragManagerProd.WPF.ViewModels
             bool wasDialIn = string.Equals(c.ClassType, "Dial-In", StringComparison.OrdinalIgnoreCase);
             foreach (var entry in c.DriverEntries ?? new List<RaceSessionDriverEntry>())
             {
-                var row = _allRows.FirstOrDefault(r => r.DriverId == entry.DriverID);
+                var row = _allRows.FirstOrDefault(r => IsMultiCarRoundRobinSelected
+                    ? r.CarId == entry.CarID
+                    : r.DriverId == entry.DriverID);
                 if (row == null) continue;
                 row.IsChecked = true;
                 if (wasDialIn && entry.DialIn.HasValue)
@@ -320,11 +335,24 @@ namespace RCDragManagerProd.WPF.ViewModels
             if (_isDialIn)
                 foreach (var r in _allRows.Where(r => r.IsChecked && !string.IsNullOrWhiteSpace(r.OverrideText)))
                     if (double.TryParse(r.OverrideText.Trim(), out var ov))
-                        overrides[r.DriverId] = ov;
+                    overrides[IsMultiCarRoundRobinSelected ? r.CarId : r.DriverId] = ov;
 
             var allDrivers = _service.GetAllDrivers();
-            var entries = _service.BuildDriverEntries(
-                checkedIds, allDrivers, classType, fixedDialIn, overrides, ClassName.Trim());
+            List<RaceSessionDriverEntry> entries;
+            try
+            {
+                entries = IsMultiCarRoundRobinSelected
+                    ? _service.BuildMultiCarRoundRobinEntries(
+                        _allRows.Where(r => r.IsChecked).Select(r => r.CarId), allDrivers,
+                        classType, fixedDialIn, overrides, ClassName.Trim())
+                    : _service.BuildDriverEntries(
+                        checkedIds, allDrivers, classType, fixedDialIn, overrides, ClassName.Trim());
+            }
+            catch (ArgumentException ex)
+            {
+                error = ex.Message;
+                return null;
+            }
 
             return new ClassConfigDto
             {
