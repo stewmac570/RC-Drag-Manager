@@ -223,6 +223,7 @@
       <DependentUpon>BuybackDriverSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Domain\Car.cs" />
+    <Compile Include="Domain\MultiCarRaceEntry.cs" />
     <Compile Include="Domain\MultiClassEvent.cs" />
     <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
@@ -327,6 +328,8 @@
     <Compile Include="RandomMode\RandomMatch.cs" />
     <Compile Include="RandomMode\RandomMatchEngine.cs" />
     <Compile Include="RoundRobinMode\RoundRobinEngine.cs" />
+    <Compile Include="RoundRobinMode\MultiCarRoundRobinScheduler.cs" />
+    <Compile Include="RoundRobinMode\MultiCarOpeningRoundPlanner.cs" />
     <Compile Include="RoundRobinMode\RoundRobinMatch.cs" />
     <Compile Include="RoundRobinMode\RoundRobinRanker.cs" />
     <Compile Include="RoundRobinMode\RoundRobinScorecardLogger\RoundRobinScorecardLogger.cs" />

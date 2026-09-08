@@ -38,8 +38,12 @@ namespace RCDragManagerProd.AppServices
                 var session = _sessionRepo.LoadSession(summary.Id);
                 if (session == null) continue;
 
-                var entry = session.DriverEntries?.FirstOrDefault(d => d.DriverID == driver.Id);
-                if (entry == null) continue;
+                bool isMultiCarRoundRobin = string.Equals(
+                    session.OriginalRaceType ?? session.RaceType,
+                    RaceTypes.MultiCarRoundRobin,
+                    StringComparison.OrdinalIgnoreCase);
+                var entries = session.DriverEntries ?? new List<RaceSessionDriverEntry>();
+                if (!entries.Any(d => d.DriverID == driver.Id)) continue;
 
                 var savedResults = session.SavedResults ?? new List<Domain.MatchResultSave>();
                 foreach (var result in savedResults)
@@ -47,23 +51,28 @@ namespace RCDragManagerProd.AppServices
                     bool isWin;
                     int opponentId;
 
-                    if (result.WinnerDriverId == driver.Id)
+                    var winnerEntry = entries.FirstOrDefault(d => EntryIdentity(d, isMultiCarRoundRobin) == result.WinnerDriverId);
+                    var loserEntry = entries.FirstOrDefault(d => EntryIdentity(d, isMultiCarRoundRobin) == result.LoserDriverId);
+
+                    if (winnerEntry?.DriverID == driver.Id)
                     {
                         isWin = true;
-                        opponentId = result.LoserDriverId;
+                        opponentId = loserEntry?.DriverID ?? 0;
                     }
-                    else if (result.LoserDriverId == driver.Id)
+                    else if (loserEntry?.DriverID == driver.Id)
                     {
                         isWin = false;
-                        opponentId = result.WinnerDriverId;
+                        opponentId = winnerEntry?.DriverID ?? 0;
                     }
                     else
                     {
                         continue;
                     }
 
-                    var opponentEntry = session.DriverEntries?.FirstOrDefault(d => d.DriverID == opponentId);
-                    string opponentName = opponentEntry != null ? opponentEntry.DriverName : "BYE";
+                    var opponentEntry = entries.FirstOrDefault(d => d.DriverID == opponentId);
+                    string opponentName = opponentEntry != null
+                        ? isMultiCarRoundRobin ? opponentEntry.DriverName + " \u2014 " + opponentEntry.CarName : opponentEntry.DriverName
+                        : "BYE";
 
                     var match = MatchLookupHelper.FindMatchInSession(session, result.MatchId);
                     string roundLabel = match?.RoundLabel ?? "";
@@ -78,6 +87,12 @@ namespace RCDragManagerProd.AppServices
             }
 
             return rows;
+        }
+
+        private static int EntryIdentity(RaceSessionDriverEntry entry, bool isMultiCarRoundRobin)
+        {
+            if (entry == null) return 0;
+            return isMultiCarRoundRobin ? entry.RaceEntryId : entry.DriverID;
         }
     }
 

@@ -52,6 +52,9 @@ namespace RCDragManagerProd.WPF.Dialogs
         private void CardRoundRobin_Click(object sender, RoutedEventArgs e) =>
             _vm.SelectedRaceType = ClassConfigViewModel.RoundRobin;
 
+        private void CardMultiCarRoundRobin_Click(object sender, RoutedEventArgs e) =>
+            _vm.SelectedRaceType = ClassConfigViewModel.MultiCarRoundRobin;
+
         // ── Click a row to move a driver in or out of the class ──────────────
 
         private void DgRoster_RowClick(object sender, MouseButtonEventArgs e) =>

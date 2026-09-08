@@ -61,7 +61,7 @@
                                FontSize="{StaticResource FontSize.Xs}"
                                Foreground="{StaticResource Brush.TextMuted}"
                                Margin="0,0,0,6"/>
-                    <UniformGrid Columns="3" Margin="0,0,0,16">
+                    <UniformGrid Columns="4" Margin="0,0,0,16">
                         <Button Click="CardProLadder_Click" Margin="0,0,8,0">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource Style.RaceCard}">
@@ -113,6 +113,24 @@
                                 <TextBlock Text="Round Robin" FontSize="{StaticResource FontSize.Md}"
                                            FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
                                 <TextBlock Text="Points based" FontSize="{StaticResource FontSize.Xs}"
+                                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CardMultiCarRoundRobin_Click">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Style.RaceCard}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsMultiCarRoundRobinSelected}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Primary}"/>
+                                            <Setter Property="Background" Value="{StaticResource Brush.Raised}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel>
+                                <TextBlock Text="Multi-Car RR" FontSize="{StaticResource FontSize.Md}"
+                                           FontWeight="Medium" Foreground="{StaticResource Brush.TextPrimary}"/>
+                                <TextBlock Text="Multiple cars per driver" FontSize="{StaticResource FontSize.Xs}"
                                            Foreground="{StaticResource Brush.TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Button>

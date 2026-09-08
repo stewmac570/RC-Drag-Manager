@@ -27,7 +27,7 @@ namespace RCDragManagerProd.Controllers
             lock (_dialInLock)
             {
                 return _session.DriverEntries
-                    ?.FirstOrDefault(e => e.DriverID == driverId)
+                    ?.FirstOrDefault(e => EntryIdentity(e) == driverId)
                     ?.DialIn;
             }
         }
@@ -37,7 +37,7 @@ namespace RCDragManagerProd.Controllers
             if (_session == null) return;
             lock (_dialInLock)
             {
-                var entry = _session.DriverEntries?.FirstOrDefault(e => e.DriverID == driverId);
+                var entry = _session.DriverEntries?.FirstOrDefault(e => EntryIdentity(e) == driverId);
                 if (entry == null) return;
                 entry.DialIn = dialIn;
             }
@@ -100,7 +100,7 @@ namespace RCDragManagerProd.Controllers
                     foreach (var kv in updates)
                     {
                         if (_session?.DriverEntries == null) break;
-                        var entry = _session.DriverEntries.FirstOrDefault(e => e.DriverID == kv.Key);
+                        var entry = _session.DriverEntries.FirstOrDefault(e => EntryIdentity(e) == kv.Key);
                         if (entry == null) continue;
 
                         if (entry.DialIn != kv.Value)
@@ -123,5 +123,14 @@ namespace RCDragManagerProd.Controllers
                 Logger.Log("[DIALIN][POLL][ERROR] " + ex.Message);
             }
         }
+
+        private int EntryIdentity(Domain.RaceSessionDriverEntry entry) =>
+            IsMultiCarRoundRobin && entry != null && entry.RaceEntryId > 0
+                ? entry.RaceEntryId
+                : entry?.DriverID ?? 0;
+
+        private bool IsMultiCarRoundRobin =>
+            string.Equals(_session?.OriginalRaceType ?? _session?.RaceType,
+                Domain.RaceTypes.MultiCarRoundRobin, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -80,7 +80,7 @@ namespace RCDragManagerProd.Controllers
                     {
                         var existingByDriverId = (_session.DriverEntries ?? new List<RaceSessionDriverEntry>())
                             .Where(e => e != null)
-                            .GroupBy(e => e.DriverID)
+                            .GroupBy(EntryIdentity)
                             .ToDictionary(g => g.Key, g => g.First());
 
                         var synchronizedEntries = new List<RaceSessionDriverEntry>(_drivers.Count);
@@ -89,7 +89,9 @@ namespace RCDragManagerProd.Controllers
                             if (d == null) continue;
 
                             if (!existingByDriverId.TryGetValue(d.Id, out var entry))
-                                entry = new RaceSessionDriverEntry { DriverID = d.Id };
+                                entry = IsMultiCarRoundRobin
+                                    ? new RaceSessionDriverEntry { RaceEntryId = d.Id }
+                                    : new RaceSessionDriverEntry { DriverID = d.Id };
 
                             // The controller owns identity/qualifying time. The session
                             // entry owns race metadata such as DialIn, car, class and seed,

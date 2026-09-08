@@ -100,6 +100,9 @@ namespace RCDragManagerProd.Controllers
             public string Bracket { get; set; }   // e.g., "Finals (Pro Ladder)"
             public Driver Winner { get; set; }
             public Driver RunnerUp { get; set; }
+            /// <summary>Registered-driver identity for the champion; differs from
+            /// Winner.Id only in Multi-Car Round Robin where Winner.Id is a car entry.</summary>
+            public int WinnerDriverId { get; set; }
             public int TotalDrivers { get; set; }
             public int TotalMatches { get; set; }
             public DateTime CompletedAt { get; set; }

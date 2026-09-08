@@ -139,6 +139,48 @@ namespace RCDragManagerProd.AppServices
             return entries;
         }
 
+        /// <summary>
+        /// Builds the car-level roster for Multi-Car Round Robin. A registered
+        /// driver may race any number of distinct cars in the class; the persisted entry id
+        /// becomes the unique in-race identity used by the fixture and standings.
+        /// </summary>
+        public List<RaceSessionDriverEntry> BuildMultiCarRoundRobinEntries(
+            IEnumerable<int> selectedCarIds,
+            IReadOnlyList<Driver> allDrivers,
+            string classType,
+            double? fixedDialIn,
+            IDictionary<int, double?> dialInOverrides,
+            string className)
+        {
+            var selected = new HashSet<int>(selectedCarIds ?? Enumerable.Empty<int>());
+            var candidates = (allDrivers ?? Array.Empty<Driver>())
+                .Where(d => d != null)
+                .SelectMany(d => (d.Cars ?? new List<Car>()).Select(c => new { Driver = d, Car = c }))
+                .Where(x => x.Car != null && selected.Contains(x.Car.CarID))
+                .OrderBy(x => x.Driver.Name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(x => x.Car.CarID)
+                .ToList();
+
+            bool isHeadsUp = string.Equals(classType, "Heads Up", StringComparison.OrdinalIgnoreCase);
+            bool isBracket = string.Equals(classType, "Bracket Class", StringComparison.OrdinalIgnoreCase);
+            int entryId = 1;
+
+            return candidates.Select(x => new RaceSessionDriverEntry
+            {
+                RaceEntryId = entryId++,
+                DriverID = x.Driver.Id,
+                DriverName = x.Driver.Name,
+                CarID = x.Car.CarID,
+                CarName = x.Car.CarName,
+                ClassType = className,
+                QualifyingTime = x.Driver.QualTime,
+                DialIn = isHeadsUp ? null : isBracket ? fixedDialIn :
+                    (dialInOverrides != null && dialInOverrides.TryGetValue(x.Car.CarID, out var value)
+                        ? value
+                        : x.Car.DefaultDialIn)
+            }).ToList();
+        }
+
         // ── Event construction ────────────────────────────────────────────────
 
         /// <summary>
@@ -150,8 +192,11 @@ namespace RCDragManagerProd.AppServices
             var classesList = (classes ?? throw new ArgumentNullException(nameof(classes))).ToList();
 
             foreach (var cc in classesList)
-                foreach (var entry in cc.DriverEntries ?? Enumerable.Empty<RaceSessionDriverEntry>())
-                    _driverRepo.IncrementEventsEntered(entry.DriverID);
+                foreach (var driverId in (cc.DriverEntries ?? Enumerable.Empty<RaceSessionDriverEntry>())
+                    .Where(entry => entry != null && entry.DriverID > 0)
+                    .Select(entry => entry.DriverID)
+                    .Distinct())
+                    _driverRepo.IncrementEventsEntered(driverId);
 
             var multiEvent = new MultiClassEvent
             {
@@ -169,7 +214,7 @@ namespace RCDragManagerProd.AppServices
 
             foreach (var cc in classesList)
             {
-                bool isRR = string.Equals(cc.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase);
+                bool isRR = RaceTypes.IsRoundRobinFormat(cc.RaceType);
 
                 var session = new RaceSession
                 {

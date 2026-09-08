@@ -11,6 +11,7 @@ namespace RCDragManagerProd.WPF.ViewModels
     public sealed class DriverRosterRow : INotifyPropertyChanged
     {
         public int DriverId { get; set; }
+        public int CarId { get; set; }
         public string Name { get; set; }
         public string CarName { get; set; }
         public string ClassType { get; set; }

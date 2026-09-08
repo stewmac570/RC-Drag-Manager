@@ -26,6 +26,7 @@ namespace RCDragManagerProd.RaceEngines
                     return new ProLadderEngineAdapter();
 
                 case "round robin":
+                case "multi-car round robin":
                     Logger.Log("[ENGINE FACTORY] Creating RoundRobinEngineAdapter");
                     return new RoundRobinEngineAdapter();
 

@@ -33,13 +33,36 @@ namespace RCDragManagerProd.Controllers
         /// </summary>
         public bool IsRrComplete()
         {
-            if (_session.RaceType != RaceTypes.RoundRobin) return true;
+            if (!RaceTypes.IsRoundRobinFormat(_session.RaceType)) return true;
 
             var allMatches = EngineGetMatches(_engine);
             return allMatches.All(m =>
                 _matchResult.HasResult(m.MatchId) ||
                 ByePolicy.IsBye(m.Driver1) ||
                 ByePolicy.IsBye(m.Driver2));
+        }
+
+        private int OwnerDriverId(Driver competitor)
+        {
+            if (competitor == null) return 0;
+            if (!string.Equals(_session?.OriginalRaceType ?? _session?.RaceType,
+                               RaceTypes.MultiCarRoundRobin,
+                               System.StringComparison.OrdinalIgnoreCase))
+                return competitor.Id;
+
+            return _session.DriverEntries
+                ?.FirstOrDefault(entry => entry != null && entry.RaceEntryId == competitor.Id)
+                ?.DriverID ?? 0;
+        }
+
+        private System.Collections.Generic.IReadOnlyList<(int WinnerId, int LoserId)> GetStatResults()
+        {
+            return _matchResult.GetAllResults()
+                .Select(result => (WinnerId: OwnerDriverId(new Driver { Id = result.WinnerId }),
+                                   LoserId: OwnerDriverId(new Driver { Id = result.LoserId })))
+                .Where(result => result.WinnerId > 0 && result.LoserId > 0 &&
+                                 result.WinnerId != result.LoserId)
+                .ToList();
         }
     }
 }
