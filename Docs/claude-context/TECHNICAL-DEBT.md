@@ -31,15 +31,15 @@ All 12 issues raised in March 2026 have been closed and merged.
 
 ### 2. ~~Bracket State Not Persisted — Sessions Don't Resume Mid-Bracket~~ — RESOLVED
 
-Mid-event resume now exists: `RaceController.Resume.cs` (`RestoreFromSave()`) rebuilds engine state from the saved session (`SavedResults`, `SavedRevealedRounds`, bracket snapshots) when a saved event is reopened — `MultiClassRaceWindow.OnLoadedRestore` calls it for every class on load.
+Mid-event resume now exists: `RaceController.Resume.cs` (`RestoreFromSave()`) rebuilds engine state from the saved session's `ResumeSnapshot` (captured by `CaptureResumeSnapshot` in `RaceController.Persistence.cs`) and replays the snapshot's own matches when a saved event is reopened — `MultiClassRaceWindow.OnLoadedRestore` calls it for every class on load.
 
 ---
 
-### 3. Two Overlapping Car Access Paths
+### 3. `CarRepository` Is Dead Code
 
-Both `DriverRepository` and `CarRepository` handle car records. `DriverRepository` does it more completely (create/update/delete with transactions), while `CarRepository` is a lightweight subset. Some forms use one, some use the other. There is no single authoritative car repository.
+`CarRepository` is unused dead code: it has zero code references. Both UIs go through `DriverManagerService` into `DriverRepository`, which is the only live car path (create/update/delete with transactions).
 
-**Impact:** Maintenance overhead. Fix: consolidate all car access into `DriverRepository` and retire `CarRepository`.
+**Impact:** Dead code to delete. Tracked by issue #410, "[Architecture] Consolidate car access into DriverRepository; retire CarRepository".
 
 ---
 
@@ -53,31 +53,29 @@ Both `DriverRepository` and `CarRepository` handle car records. `DriverRepositor
 
 ### 5. `RaceController` Has Significant Length and Complexity
 
-The controller is split across ~19 partial files. While the split helps navigate individual concerns, the total size and the number of distinct responsibilities (session lifecycle, RR standings, LB flow, finals injection, live feed, persistence) make it a complex class to reason about as a whole.
+The controller is split across 18 files (`RaceController.cs` plus 17 partials). While the split helps navigate individual concerns, the total size and the number of distinct responsibilities (session lifecycle, RR standings, LB flow, finals injection, live feed, persistence) make it a complex class to reason about as a whole.
 
 **Impact:** High cognitive load for new developers. Future refactor could extract the phase-transition logic (RR→LB→Finals) into a dedicated state machine.
 
 ---
 
-### 6. `Form1` Still Contains Some Business Logic
+### 6. ~~`Form1` Still Contains Some Business Logic~~ — RESOLVED
 
-Despite the controller layer, `Form1` still does some non-trivial things: it calls `DriverRepository.IncrementWinsAndLosses` directly when processing `TournamentCompleted`, and it constructs `RaceSessionDriverEntry` objects during session save. These should ideally live in the controller.
-
-**Impact:** Violation of the "no direct DB access from UI" rule. Minor but worth cleaning up.
+Resolved: stat recording moved into `RaceConsoleService` (`RecordTournamentCompletion`).
 
 ---
 
 ### 7. ~~No Session Update / Resume Architecture~~ — RESOLVED
 
-Superseded with point 2: save now updates in place, and `RaceController.RestoreFromSave()` reconstructs engine state from `SavedResults` / `SavedRevealedRounds` when a session is loaded (WPF flow; legacy `Form1` still regenerates fresh).
+Superseded with point 2: save now updates in place, and `RaceController.RestoreFromSave()` reconstructs engine state from the session's `ResumeSnapshot` when a session is loaded (WPF flow; legacy `Form1` still regenerates fresh).
 
 ---
 
 ### 8. `RandomBracket.byeGiven` is Static Mutable State
 
-`RandomBracket.byeGiven` is a `static readonly HashSet<int>` tracking who received a BYE. This is shared across all instances and sessions in the same app process. `ResetByeTracker()` must be called at the start of each new event. If missed, BYE tracking leaks across sessions.
+`RandomBracket.byeGiven` is a `static readonly HashSet<int>` tracking who received a BYE, shared across all instances and sessions in the same app process; the `Random` instance in `RandomBracket` is static too. The static mutable state is real, but it is currently unreachable in production: `RandomBracket` has no production callers (production Random mode runs through `RandomEngineAdapter` / `RandomMatchEngine`), and `ResetByeTracker()` is called only from tests. The leak is therefore confined to tests today.
 
-**Impact:** Bug risk if a new session is started without calling `ResetByeTracker()`. The `Random` instance in `RandomBracket` is also static.
+**Impact:** Becomes a bug risk as soon as production code calls `RandomBracket` without resetting. Tracked by issue #411, "[Architecture] Remove static mutable BYE state from RandomBracket".
 
 ---
 
@@ -94,9 +92,9 @@ Superseded with point 2: save now updates in place, and `RaceController.RestoreF
 From the original `_PROJECT_STATUS_SUMMARY.md` Phase 7 plan:
 
 1. **Race Results Export** — CSV/PDF export for event summaries and driver stats.
-2. **Session History Viewer** — sortable, filterable table of past events.
+2. **Session History Viewer** — partly done: the Load screen has a table of past events (`LoadSessionWindow` DataGrid, ordered by `EventDate`), but filtering and explicit sorting are not built.
 3. **Online Sync (optional)** — cloud backup of driver stats and session history.
-4. **UI Themes** — dark/light modes.
+4. ~~**UI Themes** — dark/light modes.~~ Done — WPF `ThemeManager` (`AppTheme` Dark/Light), persisted via `AppSettings.Theme`.
 5. **Performance Profiling** — especially for large driver registries.
 6. ~~**Session Resume** — proper bracket reconstruction from saved state.~~ Done — `RaceController.Resume.cs`.
 7. **CarRepository consolidation** — retire `CarRepository`; all car logic in `DriverRepository`.

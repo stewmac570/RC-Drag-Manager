@@ -1,11 +1,13 @@
 # RC Drag Manager — Session Setup Audit
 
+**Note:** this audit covers the legacy WinForms UI. The current event flow lives in the WPF project (`Windows/LandingWindow`, `Windows/SetupWindow`, `Views/RaceConsoleView`).
+
 ## Scope
 
 This audit covers the full "create event" flow from the landing page through to the race console opening. Files examined:
 
 - `UI/Forms/Session/LandingPageForm.cs`
-- `UI/Forms/Session/SessionSetupForm.cs` + `.UI.cs` + `.Events.cs` + `.Designer.cs`
+- `AppServices/MultiClassSetupService.cs` (`ValidateCanStart`, `BuildDriverEntries`, `StartEvent`) + `UI/Forms/Session/MultiClassSetupForm.cs`
 - `Domain/RaceSession.cs`
 - `UI/Forms/Main/Form1.cs` + `.UI.cs` + `.WinnerButtons.cs` + `.Display.cs`
 
@@ -15,37 +17,25 @@ This audit covers the full "create event" flow from the landing page through to 
 
 ### What the user sees / does
 
-The landing page presents four buttons: **New Event**, **Load Event**, **Manage Drivers**, and **Exit**.
+The landing page presents five buttons: **Create Race Session**, **Load Saved Event**, **Driver Lists**, **Settings**, and **Exit**.
 
 ### Two separate paths to Form1
 
 There are two distinct code paths that open the race console:
 
-**Path A — "Quick Session" (btnNewEvent_Click)**
+**Path B — "Create Race Session" (btnCreateRaceSession_Click)**
 
 ```csharp
-var session = new RaceSession();
-var controller = new RaceController(session, _connectionString);
-var form1 = new Form1(controller, _connectionString);
-form1.Show();
-```
-
-Creates an empty `new RaceSession()` with no event name, no class type, no drivers. Opens `Form1` directly, bypassing `SessionSetupForm` entirely. This path appears to be either a legacy shortcut or unfinished feature — it results in a race console with no drivers loaded.
-
-**Path B — "Create Session" (btnCreateSession_Click)**
-
-```csharp
-var setup = new SessionSetupForm(_connectionString);
+var setup = new MultiClassSetupForm(_connStr);
 if (setup.ShowDialog() == DialogResult.OK)
 {
-    var session = setup.RaceSessionResult;
-    var controller = new RaceController(session, _connectionString);
-    var form1 = new Form1(controller, _connectionString);
-    form1.Show();
+    var multiEvent = setup.MultiClassEventResult;
+    var form = new MultiClassRaceForm(multiEvent, _connStr);
+    form.Show();
 }
 ```
 
-The standard path. Opens `SessionSetupForm` modally; on OK, takes the fully configured `RaceSession` from `setup.RaceSessionResult`.
+The standard path. Opens `MultiClassSetupForm` modally; on OK, takes the configured `MultiClassEvent` from `setup.MultiClassEventResult`. The setup logic lives in `AppServices/MultiClassSetupService.cs` (`ValidateCanStart`, `BuildDriverEntries`, `StartEvent`), not in the form.
 
 **Path C — Load Event (btnLoadEvent_Click)**
 
@@ -53,12 +43,13 @@ Loads a previously saved session from the DB. Not part of the "create" flow but 
 
 ### Hardcoded assumptions
 
-- There is no visible label distinction between "Quick Session" (empty) and "Create Session" (configured) — both buttons may appear as "New Event" depending on Designer wiring.
 - A new controller is always created fresh; there is no controller reuse across forms.
 
 ---
 
-## 2. SessionSetupForm
+## 2. Session Setup (retired `SessionSetupForm`)
+
+The form described below was retired. The current WinForms setup is `MultiClassSetupForm` + `MultiClassConfigDialog` (one configuration dialog per class) over `AppServices/MultiClassSetupService.cs` (`ValidateCanStart`, `BuildDriverEntries`, `StartEvent`). See `MULTI-CLASS-EVENT-SPEC.md` for the shipped multi-class flow.
 
 ### What the user sees / does
 
@@ -82,11 +73,13 @@ The setup form collects:
 | `EventName` | Text box |
 | `EventDate` | Date picker |
 | `RaceType` | Combo box value (normalized) |
-| `ClassType` | Derived from the selected radio button (`"Heads Up"` / `"Bracket"` / `"Dial-In"`) |
+| `ClassType` | Derived from the selected radio button (`"Heads Up"` / `"Bracket Class"` / `"Dial-In"`) |
 | `FixedDialIn` | Numeric field — only set for Bracket Class, otherwise `null` |
-| `RoundRobinVariant` | Radio button on RR panel (`"Standard"` / `"QMDRA"`) |
+| `RoundRobinVariant` | Selector on RR panel (`"Standard"` / `"QMDRA"`) |
 | `RoundsToRun` | Spinner on RR panel (QMDRA only) |
 | `DriverEntries` | One `RaceSessionDriverEntry` per checked driver |
+
+Two spellings are in play: the session-level `ClassType` uses `"Bracket Class"` and `"Dial-In"`, while the driver-list filter matches the car record's `ClassType` with `"Bracket"` and `"Dial In"` (a space). The two sets do not line up — a latent mismatch.
 
 Per-driver `DialIn` assignment in `DriverEntries`:
 
@@ -96,13 +89,13 @@ Per-driver `DialIn` assignment in `DriverEntries`:
 | Dial-In | `car.DefaultDialIn` from the car record |
 | Bracket Class | `fixedDial` (the session-level fixed value) |
 
-**Side effect on Start Race**: `DriverRepository.IncrementEventsEntered` is called for each selected driver **immediately** when Start Race is clicked — before the race runs. This means cancelling after clicking Start Race still increments the counter.
+**Side effect on Start Race**: each selected driver's `EventsEntered` is bumped **immediately** when Start Race is clicked — before the race runs. (The retired form did this manually via `EventsEntered += 1` + `UpdateDriver`; today `MultiClassSetupService.StartEvent` calls `DriverRepository.IncrementEventsEntered`.) Cancelling after clicking Start Race still increments the counter.
 
 ### Hardcoded assumptions
 
 1. **Single class per session**: The three class radio buttons are mutually exclusive. There is no mechanism to select drivers from different classes for the same session.
 2. **Single FixedDialIn per session**: One `double?` covers all Bracket Class drivers equally.
-3. **Class filter is binary**: `RefreshDriverList()` filters drivers using `car.ClassType == "Heads Up"` (etc.). A driver whose cars span multiple classes will only appear under each class separately — they cannot participate in two classes in the same session.
+3. **Class filter is binary**: `RefreshDriverList()` filters drivers using `car.ClassType == "Heads Up"` (etc.). A driver whose cars span multiple classes will only appear under each class separately. A driver **can** be entered in more than one class; entries are de-duplicated within a class only.
 4. **EventsEntered incremented on setup, not on completion**: Stats are bumped before any racing happens. If the event is abandoned, the increment is not reversed.
 5. **Race type is session-wide**: One race type covers all drivers. There is no per-class race type.
 
@@ -132,7 +125,7 @@ public double? FixedDialIn { get; set; }
 
 Also a single value. Used only for Bracket Class events; `null` for all other class types.
 
-`DriverEntries` is `List<RaceSessionDriverEntry>`. Each entry has its own `ClassType` (copied from the car record) and `DialIn`. So the data model **does** store per-driver class information at the entry level — but neither the setup form nor the race console uses the per-entry `ClassType` to treat drivers differently.
+`DriverEntries` is `List<RaceSessionDriverEntry>`. Each entry has its own `ClassType` (copied from the car record) and `DialIn`. So the data model **does** store per-driver class information at the entry level. The live roster (`RaceController.LiveUpdate.cs`) reads the per-entry `ClassType`; `Form1`'s driver hydration does not.
 
 ### What does NOT get stored
 
@@ -151,6 +144,10 @@ Also a single value. Used only for Bracket Class events; `null` for all other cl
 ```csharp
 public class RaceSessionDriverEntry
 {
+    // Unique within a class. Standard classes may leave this as zero; the
+    // multi-car RR setup assigns one so two cars from the same driver are
+    // distinct competitors in the engine and standings.
+    public int RaceEntryId { get; set; }
     public int DriverID { get; set; }
     public string DriverName { get; set; }
     public int CarID { get; set; }
@@ -164,28 +161,17 @@ public class RaceSessionDriverEntry
 
 Each `DriverEntry` carries `ClassType` and `DialIn` — a snapshot of the car's class and dial-in at session creation. This means the data model technically supports drivers having different class values within one session.
 
-**However:** this per-entry `ClassType` is never read after session creation. The race console ignores it entirely.
-
 ---
 
 ## 5. Form1 (Race Console)
 
 ### What gets used from the session
 
-`Form1`'s constructor hydrates a `List<Driver>` from `DriverEntries`:
+`Form1`'s constructor projects `DriverEntries` into a `List<Driver>` with a LINQ `Select`, taking `Id = entry.DriverID`, `Name = entry.DriverName` and `QualTime = entry.QualifyingTime` from each entry.
 
-```csharp
-foreach (var entry in currentSession.DriverEntries)
-{
-    var d = new Driver { Id = entry.DriverID, Name = entry.DriverName };
-    d.QualTime = entry.QualifyingTime;
-    drivers.Add(d);
-}
-```
+**On this path, only `DriverID`, `DriverName`, and `QualifyingTime` are used.** `CarID`, `CarName`, `ClassType`, and `DialIn` from the entry are not read when `Form1` hydrates its driver list. Other paths do read them: `RaceController.LiveUpdate.cs` builds the live roster from `CarName`, `DialIn` and `ClassType`, and `RaceController.Resume.cs` and `RaceController.RoundFlow.Core.cs` read `CarName` and `DialIn`. The `Driver` objects passed to the engine have no class information at all.
 
-**Only `DriverID`, `DriverName`, and `QualifyingTime` are used.** `CarID`, `CarName`, `ClassType`, and `DialIn` from the entry are silently discarded. The `Driver` objects passed to the engine have no class information at all.
-
-`cmbRaceType` is set from `currentSession.RaceType`. `ClassType` is displayed in some labels for context but is not used in any race logic.
+Form1 itself makes no use of `ClassType`; the per-class tab titles in `MultiClassRaceForm` come from `session.ClassType`.
 
 ### What the user sees
 
@@ -203,13 +189,15 @@ foreach (var entry in currentSession.DriverEntries)
 
 ### Downstream (engine layer)
 
-`RaceController.GenerateBracket()` receives `List<Driver>` — no class information. All three engine types (`ProLadderEngineAdapter`, `RandomEngineAdapter`, `RoundRobinEngineAdapter`) operate on the flat driver list. `IRaceEngine` has no class parameter. There is no class-aware logic anywhere in the engine layer.
+`RaceController.GenerateBracket()` receives `List<Driver>` — no class information. All three engine types (`ProLadderEngineAdapter`, `RandomEngineAdapter`, `RoundRobinEngineAdapter`) operate on the flat driver list. `IRaceEngine` has no class parameter. Multi-Car Round Robin adds entry-scoped scheduling alongside the class-scoped controllers: `MultiCarRoundRobinScheduler.Build` turns the `MultiCarRaceEntry` field into an `EngineMatch` fixture keyed by per-entry `RaceEntryId`, so a class can hold several cars from one driver without changing `IRaceEngine`.
 
 ---
 
 ## Multi-Class Support Summary
 
 ### Can the current `RaceSession` model support multiple classes without structural changes?
+
+> **Superseded:** multi-class shipped as parallel per-class tabs under a `MultiClassEvent` parent (`Domain/MultiClassEvent.cs`, `Repositories/MultiClassEventRepository.cs`) — see `MULTI-CLASS-EVENT-SPEC.md`. The assessment below is the pre-implementation view.
 
 **No — not without changes**, though some groundwork exists.
 
@@ -256,6 +244,8 @@ The `RaceSessionDriverEntry` type already carries per-driver `ClassType` and `Di
 
 ### Least-invasive path
 
+> **Superseded:** multi-class was implemented as parallel per-class tabs in one console under a `MultiClassEvent` parent, not sequential runs. See `MULTI-CLASS-EVENT-SPEC.md`.
+
 The least disruptive approach would be **sequential class runs**: treat each class as a fully independent session (one `RaceSession` per class), run them consecutively, and save them separately. This requires no structural changes to `RaceSession`, the engine layer, or the race console. The only addition needed is a "next class" workflow on the landing page or a session-linking mechanism in the UI.
 
 A fully parallel multi-class session (all classes on screen simultaneously) would require significant structural work across all layers.
@@ -266,10 +256,10 @@ A fully parallel multi-class session (all classes on screen simultaneously) woul
 
 | Finding | File | Notes |
 |---------|------|-------|
-| Two paths to Form1 — one bypasses setup entirely | `LandingPageForm.cs` | "Quick Session" creates empty `RaceSession` with no drivers |
-| Single-class constraint hardcoded in radio buttons | `SessionSetupForm.Designer.cs` | Mutually exclusive; no multi-select possible |
-| `EventsEntered` incremented on Start Race, not on completion | `SessionSetupForm.Events.cs` | Abandoned events still count |
-| Per-driver `ClassType` stored in entry but never used | `RaceSessionDriverEntry` | Data model has the field; race console ignores it |
+| One create path: setup form, then the race console | `LandingPageForm.cs` | `btnCreateRaceSession_Click` opens `MultiClassSetupForm`, then `MultiClassRaceForm` |
+| Class configuration is per class, not per session | `MultiClassSetupService.cs` | Classes configured per `ClassConfigDto`; single-class constraint is superseded |
+| `EventsEntered` incremented on Start Race, not on completion | `MultiClassSetupService.cs` (`StartEvent`) | Abandoned events still count |
+| Per-driver `ClassType` stored in entry and read by the live roster | `RaceSessionDriverEntry` | `RaceController.LiveUpdate.cs` filters on it |
 | Form1 hydrates only `DriverID`, `DriverName`, `QualTime` | `Form1.cs` | `CarID`, `CarName`, `ClassType`, `DialIn` silently dropped |
 | Engine layer has no class concept | All `IRaceEngine` impls | `List<Driver>` is class-agnostic |
-| Stats increments have no class dimension | `Form1.WinnerButtons.cs` | Per-driver ID only |
+| Stats increments have no class dimension | `RaceConsoleService`, `MultiClassRaceService`, `MultiClassSetupService`, `RaceController.Stats` | Per-driver ID only. `IncrementWinsAndLosses`: RaceConsoleService + MultiClassRaceService + RaceController.Stats. `IncrementEventsWon`: RaceConsoleService + MultiClassRaceService. `IncrementEventsEntered`: MultiClassSetupService + RaceConsoleService |

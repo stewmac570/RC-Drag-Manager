@@ -1,5 +1,11 @@
 # RC Drag Manager — Race Flow
 
+> **Scope:** the flow below is described against the legacy **WinForms** console
+> (`Form1`). The current **WPF** console follows the same controller flow
+> (`RaceConsoleView` bound to `RaceConsoleService`); the host window builds the
+> controller, and the stats updates happen in `RaceConsoleService` rather than
+> `Form1`.
+
 ## Step-by-Step: How a Race Event Runs
 
 ### Step 1 — App Launch
@@ -9,41 +15,42 @@
 2. Hooks global exception handlers.
 3. Ensures `%APPDATA%\RC_Drag_Manager\` and `race_data.db` exist.
 4. Calls `DatabaseInitializer.InitializeDatabase()`.
-5. Opens `LandingPageForm`.
+5. Opens `LandingForm`.
 
 ---
 
 ### Step 2 — Landing Page
 
-`LandingPageForm` presents four options:
+`LandingForm` presents five options:
 
 | Button | Action |
 |--------|--------|
-| New Event | Opens `SessionSetupForm` |
-| Load Event | Opens `LoadSessionForm` → select saved session → opens `Form1` |
-| Manage Drivers | Opens `DriverManagerForm` |
+| Create Race Session | Opens `MultiClassSetupForm`, then `MultiClassRaceForm` |
+| Load Saved Event | Opens `LoadSessionForm` → select a saved event → opens `MultiClassRaceForm` |
+| Driver Lists | Opens `DriverManagerForm` |
+| Settings | Opens `SettingsForm` |
 | Exit | Closes app |
 
 ---
 
-### Step 3 — Session Setup (`SessionSetupForm`)
+### Step 3 — Event Setup (`MultiClassSetupForm`)
 
-The Race Director configures the event:
+The Race Director configures the event. Each class is configured on its own tab (one class per bracket):
 
-1. Enters event name, date, race type (Pro Ladder / Round Robin / Random), and class.
+1. Enters event name, date, race type (Pro Ladder / Round Robin / Multi-Car Round Robin / Random), and class.
 2. For Round Robin: optionally selects QMDRA variant and number of rounds.
 3. Selects drivers from the DB roster; sets qualifying times if needed.
 4. Clicks "Start Race".
 
-A `RaceSession` object is created and populated with `DriverEntries` (snapshot of selected drivers + cars + dial-ins + seeds). The session is **not yet saved to the database** at this point.
+A `RaceSession` object is created and populated with `DriverEntries` (snapshot of selected drivers + cars + dial-ins + seeds). In the WPF flow the event **is** saved to the database before the console opens: `SetupViewModel` calls `MultiClassEventRepository.SaveEvent` when the Director starts the event.
 
-`Form1` is opened with the session object and connection string.
+The host opens the console window (`MultiClassRaceForm`, one console per class) and builds a `RaceController` for each class, passing it into the console view.
 
 ---
 
 ### Step 4 — Race Console (`Form1`)
 
-`Form1` creates a `RaceController(session)` and subscribes to its events:
+`Form1` (constructor `Form1(RaceController)`) receives the controller from the host and subscribes to its events. It does not create the controller itself:
 
 | Event | UI Response |
 |-------|------------|
@@ -51,7 +58,7 @@ A `RaceSession` object is created and populated with `DriverEntries` (snapshot o
 | `NextMatchReady` | Update the "Next Up" panel and set winner button labels/tags |
 | `WinnersUpdated` | Rebuild the winners ListView |
 | `CanAdvanceChanged` | Enable/disable "Generate Next Round" button |
-| `CanPickWinnerChanged` | Enable/disable winner buttons |
+| `CanPickWinnerChanged` | Enable/disable winner buttons (currently no UI subscriber, only tests subscribe) |
 | `CanOfferBuybackChanged` | Enable "Buy Back" button + show info popup |
 | `CanStartFinalsChanged` | Re-enable "Generate Bracket" for finals transition |
 | `TournamentCompleted` | Show results popup, update driver stats in DB |
@@ -69,7 +76,7 @@ The Race Director clicks **"Generate Bracket"**. This calls `RaceController.Gene
 3. For Round Robin + QMDRA: calls `RoundRobinEngineAdapter.SetRoundsToRun(n)`.
 4. Calls `engine.LoadDrivers(drivers)`.
 5. Calls `engine.GenerateBracket()`.
-6. Gets the first round label and adds it to `_revealedRounds`.
+6. Reveals rounds: Round Robin formats pre-reveal **every** round (the full schedule is visible from the start, with `_activeRound` set to `roundOrder[0]`), while every other format reveals only the first round label.
 7. Fires `BracketRedrawn` and `NextMatchReady`.
 
 ---
@@ -96,7 +103,8 @@ When all matches in the current revealed round are complete:
 
 - "Generate Next Round" becomes enabled.
 - Director clicks it → `controller.AdvanceRound()`.
-- Next round label is added to `_revealedRounds`.
+- Round Robin: `_activeRound` moves on to the next round (all rounds are already revealed).
+- Non-RR: the next round label is added to `_revealedRounds`.
 - `BracketRedrawn` fires with the new set of visible matches.
 - Process repeats until no more rounds to reveal.
 
@@ -111,7 +119,7 @@ After all RR rounds are complete:
 3. Eligible buyback drivers are computed (all drivers **not** in top-3).
 4. If ≥2 eligible: "Buy Back" button enabled → `BuybackDriverSelectionForm` appears.
 5. Director selects which losers to include → `controller.GenerateLosersBracket(selectedDrivers)`.
-6. If < 2 eligible: auto-advance with wildcard, no LB.
+6. If < 2 eligible: no LB and no auto-advance. The finals gate is raised instead (`FinalsPendingReason = FinalsReasonBuybackSkipped`, a wildcard finalist is chosen, `CanStartFinalsChanged` fires) and the Director must click **"Generate Bracket"** to start the Finals.
 
 **Losers Bracket phase:**
 - `LosersBracketBuilder.Build()` creates `List<RandomMatch>` using rematch avoidance against `PairingHistory`.
@@ -131,7 +139,7 @@ After all RR rounds are complete:
 
 **QMDRA path:**
 - After `RoundsToRun` rounds are complete and all resolved, **all drivers** advance to finals in RR ranking order.
-- `InjectFinalsAllAdvance(rankedDrivers)` fires instead of the buyback flow.
+- All ranked drivers are queued as the finals seeding (`_pendingFinalsRanking`, reason `FinalsReasonRoundRobinAllAdvance`) instead of the buyback flow, and are injected when the Director clicks Start Finals (`InjectFinalsAllAdvance`, `RaceController.RoundFlow.Finals.cs`).
 - No LB phase in QMDRA.
 
 ---
@@ -152,9 +160,9 @@ When the Finals "F" match is resolved:
 ```
 New Session
     │
-    ├─ SessionSetupForm creates RaceSession
+    ├─ MultiClassSetupForm creates RaceSession
     │
-    ├─ Form1 opens → RaceController created
+    ├─ Console opens → RaceController built by the host
     │
     ├─ GenerateBracket() → engine created + loaded
     │
@@ -167,7 +175,7 @@ New Session
     ├─ TournamentCompleted event → stats saved
     │
     └─ User clicks Save → RaceSessionRepository.SaveSession()
-                           (new INSERT every time)
+                           (INSERT on first save, then UPDATE in place)
 ```
 
 ---
@@ -176,7 +184,7 @@ New Session
 
 ### Pro Ladder (NHRA Style)
 
-- `ProLadder.GetLadder(n)` returns a **pre-defined static template** for `n` drivers (3–24, extended to 32 via partial files `L03`–`L24`).
+- `ProLadder.GetLadder(n)` returns a **pre-defined static template** for `n` drivers (3–24, via partial files `L03`–`L24`; any other size returns an empty ladder).
 - Templates encode seed matchups for R1 and `FromMatch` references for later rounds.
 - Drivers are sorted by qualifying time (fastest = seed 1), then seeded into the template.
 - No randomness. The bracket is fully deterministic from the qualifying order.
@@ -196,8 +204,9 @@ New Session
 - The roster is shuffled before scheduling to avoid predictable BYE assignment.
 - An optional pre-rotation further randomizes R1 layout.
 - Odd field: null Driver2 = BYE. BYE receiver gets BYE points (2 pts).
-- `RoundRobinRanker.Rank()` scores: Win=4, Loss=1, BYE=2. Tiebreakers: head-to-head → opponent score (the points of the drivers you beat, byes excluded).
+- `RoundRobinRanker.Rank()` scores: Win=4, Loss=1, BYE=2. TOTAL = points + 0.1 for each opponent level on points that you beat + 0.001 × the points of every driver you beat; the table is sorted on TOTAL descending.
 - Standard mode runs min(3, n-1) rounds. QMDRA mode runs exactly `RoundsToRun` rounds (can exceed n-1, causing deliberate rematches).
+- **Multi-Car Round Robin** (multiple cars per driver) does not use the circle method: each round is built by `MultiCarRoundRobinScheduler` at car level, preferring races between cars owned by different drivers.
 
 ### Losers Bracket (post-RR)
 
@@ -209,7 +218,8 @@ New Session
 
 ### Final-4 (Finals phase)
 
-- Always a Pro Ladder bracket over 3 or 4 drivers.
+- Standard RR path: always a Pro Ladder bracket over 3 or 4 drivers.
+- QMDRA path: every ranked driver is seeded into a full-size Pro Ladder finals.
 - Finalists: Top-3 from RR ranking + 1 LB champion (or 3 drivers if `StartFinalsTop3NoBuyback`).
 - Uses `ProLadderEngineAdapter` with a 3- or 4-driver ProLadder template.
 - For 4 drivers: SF round (two semis) → Final.

@@ -9,7 +9,7 @@
 
 Both `DriverRepository` and `RaceSessionRepository` accept either a full connection string or a bare file path — they normalize internally via `NormalizeConnString()`.
 
-Schema is created and maintained by `DatabaseInitializer.InitializeDatabase(connStr)`, called once at app startup (`Program.cs`). It uses `CREATE TABLE IF NOT EXISTS` so it is safe to call on every launch.
+Schema is created and maintained by `DatabaseInitializer.InitializeDatabase(connStr)`, called once at startup by each entry point: `App.xaml.cs` in the WPF app (current UI) and `Program.cs` in the legacy WinForms app. It uses `CREATE TABLE IF NOT EXISTS` so it is safe to call on every launch.
 
 ---
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS Drivers (
 );
 ```
 
-`State` was added post-initial-release. `DatabaseInitializer` adds the column via `ALTER TABLE IF NOT EXISTS` for backward compatibility with existing databases.
+`State` was added post-initial-release; it is now part of the `CREATE TABLE IF NOT EXISTS` script.
 
 ---
 
@@ -40,14 +40,17 @@ CREATE TABLE IF NOT EXISTS Drivers (
 ```sql
 CREATE TABLE IF NOT EXISTS Cars (
     CarID           INTEGER PRIMARY KEY AUTOINCREMENT,
-    DriverId        INTEGER NOT NULL REFERENCES Drivers(Id),
-    CarName         TEXT,
-    ClassType       TEXT,
-    DefaultDialIn   REAL
+    DriverId        INTEGER NOT NULL,
+    CarName         TEXT NOT NULL,
+    ClassType       TEXT NOT NULL,
+    DefaultDialIn   REAL,
+    FOREIGN KEY (DriverId) REFERENCES Drivers(Id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS IX_Cars_DriverId ON Cars(DriverId);
 ```
 
-Cars are child records. When a driver is deleted, their cars are deleted first (application-level cascade in `DriverRepository.DeleteDriver`).
+Cars are child records. When a driver is deleted, their cars are deleted first (application-level cascade in `DriverRepository.DeleteDriver`); the schema also declares `ON DELETE CASCADE`.
 
 ---
 
@@ -68,14 +71,36 @@ The entire `RaceSession` object is serialized to JSON and stored in `SessionData
 
 ---
 
+### `MultiClassEvents`
+
+```sql
+CREATE TABLE IF NOT EXISTS MultiClassEvents (
+    Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    EventName   TEXT,
+    EventDate   TEXT,
+    ClassCount  INTEGER,
+    EventData   TEXT    -- full JSON-serialized MultiClassEvent object
+);
+```
+
+The entire `MultiClassEvent` (including its class sessions) is serialized to JSON and stored in `EventData`. The scalar columns are copies for the event list view.
+
+---
+
+## Date Columns
+
+`EventDate` is stored as text in invariant `yyyy-MM-dd HH:mm:ss` format. All reads and writes route through `DbDate` (`Repositories/DbDate.cs`) so culture-specific date separators cannot break SQLite `datetime()` ordering (issue #382).
+
+---
+
 ## Repositories
 
 ### `DatabaseInitializer` (`Repositories/DatabaseInitializer.cs`)
 
 Sole responsibility: ensure the schema exists.
 
-- Called once from `Program.cs` at startup.
-- Uses `IF NOT EXISTS` and `ALTER TABLE … ADD COLUMN IF NOT EXISTS` — safe to run every launch.
+- Called once at startup from the WPF `App.xaml.cs` (current UI) and legacy `Program.cs`.
+- Uses `CREATE TABLE IF NOT EXISTS` — safe to run every launch.
 - No instance state; all methods are static.
 
 ---
@@ -91,7 +116,8 @@ Owns all read/write for the `Drivers` and `Cars` tables.
 | `AddDriver(driver)` | INSERT driver + its cars in a transaction; sets `driver.Id` |
 | `UpdateDriver(driver)` | UPDATE driver fields; diff-syncs car list (insert new, update existing, delete removed) |
 | `DeleteDriver(id)` | DELETE cars first, then driver |
-| `AddCar(driverId, car)` | Insert a new car for a driver |
+| `AddCar(driverId, car)` | Insert a new car for a driver (overloads take an open connection or transaction for batch work) |
+| `GetCarsByDriverIds(ids)` | Batch car load used by `GetAllDrivers` |
 | `UpdateQualifyingTime(driverId, qualTime)` | Targeted qual time update |
 | `IncrementWins(driverId, delta)` | `UPDATE Drivers SET TotalWins = TotalWins + @Delta` |
 | `IncrementLosses(driverId, delta)` | Same pattern |
@@ -116,12 +142,26 @@ Owns the `RaceSessions` table.
 
 | Method | Notes |
 |--------|-------|
-| `SaveSession(session)` | INSERT new row; sets `session.Id`; full `RaceSession` serialized to JSON |
-| `GetAllSessions()` | Returns `List<RaceSessionSummary>` (no JSON deserialization — scalar columns only) |
+| `SaveSession(session)` | INSERT on first save (sets `session.Id`); UPDATE the same row in place on later saves; full `RaceSession` serialized to JSON |
+| `GetAllSessions()` | Returns `List<RaceSessionSummary>` (reads the scalar columns and `SessionData`; parse-checks the JSON per row without deserializing a full `RaceSession`) |
 | `LoadSession(id)` | SELECT `SessionData`, deserialize JSON → `RaceSession` |
+| `TryLoadSession(id)` | Load with an explicit `RaceSessionLoadResult` status; `LoadSession` delegates to it |
 | `DeleteSession(id)` | DELETE by Id |
 
-There is no `UpdateSession`. Every save is a new INSERT. Sessions are append-only; old records are not overwritten. (This means saving an in-progress event creates a new row each time.)
+There is no separate `UpdateSession`: `SaveSession` INSERTs on first save (assigning the row id) and UPDATEs the same row on later saves. Saving an in-progress event does not create duplicate rows.
+
+---
+
+### `MultiClassEventRepository` (`Repositories/MultiClassEventRepository.cs`)
+
+Owns the `MultiClassEvents` table.
+
+| Method | Notes |
+|--------|-------|
+| `SaveEvent(event)` | INSERT on first save (sets `Id`); UPDATE the same row in place on later saves; full `MultiClassEvent` serialized to JSON |
+| `GetAllEvents()` | Returns `List<MultiClassEventSummary>` for the Load Event list |
+| `LoadEvent(id)` | SELECT `EventData`, deserialize JSON → `MultiClassEvent` |
+| `DeleteEvent(id)` | DELETE by Id |
 
 ---
 
@@ -151,13 +191,16 @@ Everything in `RaceSession` that is not `[JsonIgnore]`:
 - `SavedResults` (MatchResultSave list)
 - `SavedRevealedRounds`
 - `PairingHistoryRaw` (the `int[]` list — see below)
-- All scalar fields: `EventName`, `EventDate`, `RaceType`, `ClassType`, etc.
+- `Resume` (`ResumeSnapshot` and its `SavedMatch` children)
+- `ResultsArchive` (`RaceResultsArchive` with its phase result, match and RR standings snapshots)
+- `OriginalRaceType`
+- All scalar fields: `EventName`, `EventDate`, `RaceType`, `ClassType`, `EventId`, `IsClosed`, etc.
 
 ### What Does NOT Get Serialized
 
 - `PairingHistory` — marked `[JsonIgnore]` because `HashSet<(int,int)>` contains `ValueTuple`, which `System.Text.Json` cannot serialize. Its backing store `PairingHistoryRaw` is serialized instead.
 - `MatchResult` — in-memory only; reconstructed from `SavedResults` on load.
-- Engine state (bracket structure) — **not persisted at all**. The bracket is regenerated from the session's driver list and race type when a session is resumed. **This means a loaded session does not automatically resume mid-bracket** — it restarts from the beginning.
+- Engine state (bracket structure) — persisted in `RaceSession.Resume` (`ResumeSnapshot`). `RaceController.RestoreFromSave()` rebuilds live state from it on load so an interrupted event continues mid-bracket: deterministic brackets are regenerated, while Random and Losers Bracket pairings are re-injected from the saved structure so they are not re-randomised.
 
 ---
 
@@ -178,13 +221,13 @@ public HashSet<(int, int)> PairingHistory
 }
 ```
 
-### Sessions Are Append-Only
+### Saves Update In Place
 
-`SaveSession` always INSERTs. There is no UPDATE. If a user saves mid-event and then saves again, two rows exist. `LoadSessionForm` shows all rows; the user picks the latest.
+`SaveSession` INSERTs on first save (assigning the row id) and UPDATEs the same row on later saves. Re-saving mid-event does not create duplicate rows. `MultiClassEventRepository.SaveEvent` follows the same pattern.
 
 ### Stats Increment vs Recompute
 
-`TotalWins` / `TotalLosses` are incremented live via `IncrementWinsAndLosses` when a winner is submitted. `EventsWon` can also be computed from scratch by `ComputeEventsWonFromSavedSessions` — this re-scans all JSON blobs and counts events won. This is used by `DriverStatsForm` for accuracy.
+`TotalWins` / `TotalLosses` are incremented live via `IncrementWinsAndLosses` when a winner is submitted. `EventsWon` can also be computed from scratch by `ComputeEventsWonFromSavedSessions` — this re-scans all JSON blobs and counts events won. This is used when an event closes (`RaceConsoleService` and `RaceController.Stats`) so the stored count is corrected.
 
 ### SQL Column Interpolation Risk (Issue #101 — Fixed)
 

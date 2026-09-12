@@ -9,13 +9,14 @@ asking the owner to manually click through the app. Manual app testing is the
 
 ## Standard Commands
 
-The solution targets .NET Framework 4.8 (WinForms). Build with MSBuild or Visual
-Studio — **not** `dotnet build`. Tests run under `dotnet test`.
+The solution targets .NET Framework 4.8 (WinForms legacy app + WPF app). Build
+with MSBuild or Visual Studio — **not** `dotnet build`. Tests run under
+`dotnet test`.
 
 **Build (Debug):**
 
 ```
-MSBuild.exe src/RCDragManagerProd/RCDragManagerProd.sln /t:Build /p:Configuration=Debug
+MSBuild.exe RCDragManagerProd.sln /t:Build /p:Configuration=Debug
 ```
 
 **Run the full test suite:**
@@ -24,17 +25,18 @@ MSBuild.exe src/RCDragManagerProd/RCDragManagerProd.sln /t:Build /p:Configuratio
 dotnet test src/RCDragManagerProd.Tests/RCDragManagerProd.Tests.csproj
 ```
 
-The test project uses in-memory / temp SQLite — no external setup required. On
-Windows, run MSBuild from PowerShell (not Git Bash, which mangles `/t:` `/p:`
-switches).
+The test project uses temp-file SQLite (deleted on dispose) — no external setup
+required. On Windows, run MSBuild from PowerShell (not Git Bash, which mangles
+`/t:` `/p:` switches).
 
 ### Baseline
 
-A clean run is **all green** with a small, known set of skipped tests (the
-multi-class `ValidateClassName` / `ValidateCanStart` gates). The only expected
-build noise is the `CS0618` obsolete-API warning at
-`RaceController.EngineCalls.cs` and nullable warnings in the test project. If the
-baseline is not green, fix that **before** starting a refactor (see issue #302).
+A clean run is **all green** with a small, known set of 11 skipped placeholders:
+8 `ValidateClassName*` / `ValidateCanStart*` gates plus 3
+`MultiClassLbGateTests`. The only expected build noise is the `CS0618`
+obsolete-API warning at `RaceController.EngineCalls.cs` and nullable warnings in
+the test project. If the baseline is not green, fix that **before** starting a
+refactor.
 
 ---
 
@@ -65,6 +67,7 @@ them over re-deriving inline boilerplate:
 | `TestSessionFactory` | `RaceSession` / `MultiClassEvent` builders (`ProLadder`, `RoundRobin`, `WithDriverEntries`, `MultiClassEvent`). |
 | `NoOpStandingsDialogService` | Suppress the standings dialog in headless runs. |
 | `RecordingStandingsDialogService` | Record `Show(...)` calls to assert the standings seam was (or wasn't) invoked. |
+| `RecordingSessionStore` | Double for `IRaceSessionStore`; counts `Persist()` calls to assert save behaviour. |
 
 `RaceController` accepts an `IStandingsDialogService` so dialog display can be
 doubled in tests. As more UI workflow is extracted into application services

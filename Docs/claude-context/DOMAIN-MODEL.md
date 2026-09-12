@@ -72,11 +72,11 @@ The central session object. Created at session setup, passed to `Form1` and `Rac
 | `Id` | `int` | DB-assigned integer PK after save. 0 before first save. |
 | `EventName` | `string` | Human-readable event name (e.g., "Club Race March 2026") |
 | `EventDate` | `DateTime` | Date of the event |
-| `RaceType` | `string` | `"Pro Ladder"`, `"Round Robin"`, `"Random"`, `"Losers Bracket"`, `"Finals"` — mutates during the event as phases change |
+| `RaceType` | `string` | `"Pro Ladder"`, `"Round Robin"`, `"Multi-Car Round Robin"`, `"Random"`, `"Losers Bracket"`, `"Finals"` — mutates during the event as phases change |
 | `ClassType` | `string` | Car class for this session (e.g., `"Heads Up"`) |
 | `FixedDialIn` | `double?` | If set, all drivers use this dial-in (index racing) |
 | `RoundRobinVariant` | `string` | `"Standard"` (default) or `"QMDRA"` |
-| `RoundsToRun` | `int?` | For QMDRA mode: exact number of RR rounds to run. `null` in Standard mode. |
+| `RoundsToRun` | `int?` | Number of RR rounds to run. Standard uses it as a cap (default 3); QMDRA runs exactly this many. |
 | `DriverEntries` | `List<RaceSessionDriverEntry>` | Snapshot of participating drivers + car + dial-in at session creation |
 | `PairingHistoryRaw` | `List<int[]>` | **Serialization backing store** for pairing history. Each `int[]` is `[id1, id2]`. |
 | `PairingHistory` | `HashSet<(int,int)>` | **`[JsonIgnore]`** Computed from `PairingHistoryRaw`. Normalized pairs (smaller Id first) of every driver matchup in the event. Used for rematch avoidance. |
@@ -87,8 +87,46 @@ The central session object. Created at session setup, passed to `Form1` and `Rac
 | `Drivers` | `List<Driver>` | Live driver list for the session (kept in sync with controller) |
 | `BuybackDrivers` | `List<Driver>` | Drivers selected for the Losers Bracket after RR phase |
 | `TopDriversSnapshot` | `List<Driver>` | Legacy/snapshot field |
+| `EventId` | `Guid` | Parent multi-class event id. New GUID at construction; never mutated. |
+| `OriginalRaceType` | `string` | The race type the event STARTED in. Unlike `RaceType` (which mutates to `"Losers Bracket"`/`"Finals"`) this is set once so resume can regenerate the original bracket. |
+| `Resume` | `ResumeSnapshot` | Bracket-structure + phase snapshot for resuming an interrupted event. Null on pre-feature saves or before a bracket is generated. |
+| `ResultsArchive` | `RaceResultsArchive` | Durable display/reporting history (RR standings, elimination ladders). Kept separate from `Resume` so completed classes still have their history. |
+| `IsClosed` | `bool` | True once the operator has closed the class. Distinct from a Save Progress checkpoint, which leaves it open and resumable. |
 
-**Important:** `RaceType` is mutable. It starts as the chosen race type but is overwritten as phases transition: `"Round Robin"` → `"Losers Bracket"` → `"Finals"`.
+**Important:** `RaceType` is mutable. It starts as the chosen race type but is overwritten as phases transition: `"Round Robin"` → `"Losers Bracket"` → `"Finals"`. `OriginalRaceType` keeps the starting value.
+
+---
+
+### MultiClassEvent (`Domain/MultiClassEvent.cs`)
+
+The whole event: one tournament owning its class sessions. A single-class
+event is an event with one class.
+
+| Property | Type | Notes |
+|----------|------|-------|
+| `Id` | `int` | DB-assigned integer PK after save |
+| `EventName` | `string` | |
+| `EventDate` | `DateTime` | |
+| `ClassSessions` | `List<RaceSession>` | The event's classes |
+
+---
+
+### MultiCarRaceEntry (`Domain/MultiCarRaceEntry.cs`)
+
+One car competing in a multi-car round robin class. A driver may enter more
+than one car; the entry, not the person, is the competitor.
+
+| Property | Type | Notes |
+|----------|------|-------|
+| `RaceEntryId` | `int` | Entry identity within the class |
+| `DriverId` | `int` | The registered driver |
+| `DriverName` | `string` | |
+| `CarId` | `int` | |
+| `CarName` | `string` | |
+| `QualifyingTime` | `double?` | |
+| `DialIn` | `double?` | |
+| `DisplayName` | `string` | Display form: "Driver — Car" |
+| `ToCompetitor()` | `Driver` | Mints a `Driver` whose `Id` is the `RaceEntryId`. Engine identity is the entry, not the person. |
 
 ---
 
@@ -98,6 +136,7 @@ A point-in-time snapshot of one driver's participation in a session. Stored insi
 
 | Property | Type | Notes |
 |----------|------|-------|
+| `RaceEntryId` | `int` | Unique within a class. Standard classes leave it 0; the multi-car RR setup assigns one so two cars from the same driver are distinct competitors. |
 | `DriverID` | `int` | FK to Driver |
 | `DriverName` | `string` | Name at time of session creation |
 | `CarID` | `int` | FK to Car |
@@ -211,8 +250,12 @@ Output of the RR ranking process. One entry per driver.
 | `Points` | `double` | Win=4, Loss=1, BYE=2 |
 | `Wins` | `int` | |
 | `Losses` | `int` | |
+| `HeadToHeadBonus` | `double` | 0.1 banked for each driver level on points whom this one beat. Capped at 0.3 in total, so it can never overturn a whole win/loss point. |
 | `DefeatedIds` | `int[]` | IDs of drivers beaten |
 | `OpponentStrength` | `double` | Sum of the final points of the drivers this one **beat**. Changed 2026-09-04: it used to add every opponent faced, win or lose, which meant losing to good drivers raised your score — the 5th-placed driver had the highest number on the sheet. |
+| `TotalScore` | `double` | The placing sort key: `Points + HeadToHeadBonus + (OpponentStrength × 0.001)`. Every part is shown as its own column so the order on screen is arithmetic the operator can check. |
+
+Placing is sorted on `TotalScore`, not `Points`.
 
 ---
 
@@ -222,9 +265,10 @@ Used to pass display data from controller to UI — no engine types leak into fo
 
 | Class | Purpose |
 |-------|---------|
-| `PairingRow` | One row in the bracket list: `MatchId`, `RoundLabel`, `Driver1`, `Driver2`, `IsHeader` (bold round header row) |
+| `PairingRow` | One row in the bracket list: `MatchId`, `MatchNumber` (the card label `M1`, `M2`), `RoundLabel`, `Driver1`, `Driver2`, `IsHeader` (bold round header row) |
 | `WinnerRow` | One entry in the winners list: `MatchId`, `RoundLabel`, `Winner`, `Loser` |
 | `RaceSessionSummary` | Summary row for LoadSession list: `Id`, `EventName`, `EventDate`, `ClassType`, `RaceType` |
+| `MultiClassEventSummary` | Summary row for the Load Event list: `Id`, `EventName`, `EventDate`, `ClassCount` |
 | `MatchResultSave` | Serialization form of a result — also lives in `Domain/RaceSession.cs` |
 
 ---
@@ -252,6 +296,7 @@ Sort order (from `RoundLabels.CompareKey`): RR rounds (100+) → Winners rounds 
 |-------|---------|
 | `"Pro Ladder"` | NHRA Pro Ladder mode |
 | `"Round Robin"` | RR mode initial phase |
+| `"Multi-Car Round Robin"` | RR mode where a driver may enter more than one car, each a separate competitor. `RaceTypes.IsRoundRobinFormat` treats both RR values as RR. |
 | `"Random"` | Random draw mode |
 | `"Losers Bracket"` | After RR, when LB phase starts |
 | `"Finals"` | Final bracket phase (Pro Ladder engine) |
@@ -260,7 +305,7 @@ Sort order (from `RoundLabels.CompareKey`): RR rounds (100+) → Winners rounds 
 
 | Value | Meaning |
 |-------|---------|
-| `"Standard"` | Runs up to min(3, n−1) rounds; top-3 advance + LB winner |
+| `"Standard"` | Runs up to min(RoundsToRun ?? 3, n−1) rounds; top-3 advance + LB winner |
 | `"QMDRA"` | Runs exactly `RoundsToRun` rounds; all drivers advance to finals in ranked order |
 
 ### BYE Policy
@@ -277,6 +322,9 @@ Driver (*) ────── (*) RaceSession  [via RaceSessionDriverEntry]
 RaceSession (1) ── (0..*) RandomMatch
 RaceSession (1) ── (0..*) RoundRobinMatch
 RaceSession (1) ── (0..*) MatchResultSave
+RaceSession (1) ── (0..1) ResumeSnapshot
+RaceSession (1) ── (1) RaceResultsArchive
+MultiClassEvent (1) ── (1..*) RaceSession  [ClassSessions]
 MatchResult (1) ── (0..*) (matchId → Winner/Loser)  [in-memory, not persisted directly]
 ProLadder.GetLadder(n) → List<LadderMatch>  [static templates, not stored in DB]
 ```
