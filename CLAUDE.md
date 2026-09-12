@@ -8,8 +8,9 @@ docs listed below before writing any code.
 ## Project in One Sentence
 
 A Windows desktop app (C# / .NET 4.8 / SQLite) that lets a Race Director run
-NHRA-style RC drag racing tournaments. One operator, one machine, no network,
-no auto-advancement — every step is a manual click.
+NHRA-style RC drag racing tournaments. One operator, one machine, offline,
+no auto-advancement — every step is a manual click. An optional live scoreboard
+broadcast exists, off by default (`AppSettings.LiveBroadcastEnabled`).
 
 As of **v2.0.0** the primary UI is **WPF** (`RCDragManagerProd.WPF`), a dark /
 flame-orange rebuild on top of the same engine and data layer. The original
@@ -73,7 +74,7 @@ Use MSBuild or Visual Studio only. Command-line example:
 Test project: `src/RCDragManagerProd.Tests/`
 
 Run via Visual Studio Test Explorer → Run All.
-Tests use an in-memory SQLite connection string. No external setup required.
+Tests use a throwaway temp-file SQLite database (deleted on dispose). No external setup required.
 All tests must pass before committing.
 
 ---
@@ -94,6 +95,7 @@ Layout:
   confirmation), buybacks on/off per class, and live theme switching. Both host
   windows build its rows with `EventSettingsRowBuilder`; the rules for what may
   change mid-event live in `EventSettingsService`
+  (`src/RCDragManagerProd/AppServices/EventSettingsService.cs`, not in this project)
 - `Dialogs/` — themed modal dialogs (incl. `MessageDialog`, the dark replacement
   for `MessageBox`)
 - `ViewModels/` — INotifyPropertyChanged view models + display-row types
@@ -180,11 +182,15 @@ deviation will be caught in code review.
 - **BYE = null driver.** `ByePolicy.IsBye(driver)` is the only test. Never
   check `driver == null` directly in logic code.
 
-- **`RaceSession.RaceType` mutates** during an event:
-  `"Round Robin"` → `"Losers Bracket"` → `"Finals"`. Code that reads
-  `RaceType` must handle all three values.
+- **`RaceSession.RaceType` mutates** during an event. It starts as the
+  setup-time race type (`"Pro Ladder"`, `"Random"`, `"Round Robin"`, or
+  `"Multi-Car Round Robin"`) and a classic RR event then flows
+  `"Round Robin"` → `"Losers Bracket"` → `"Finals"`. Code that reads `RaceType`
+  must handle every value. `RaceTypes.cs` holds the constants for
+  `RoundRobin`, `MultiCarRoundRobin`, `LosersBracket` and `Finals`;
+  `RaceTypes.IsRoundRobinFormat` covers both RR forms.
 
-- **`RaceController` is a sealed partial class** split across ~19 files.
+- **`RaceController` is a sealed partial class** split across 18 files.
   Adding new methods to the controller means either adding to the most
   relevant existing partial file or creating a new partial file named
   `RaceController.{Concern}.cs`.
@@ -208,11 +214,18 @@ deviation will be caught in code review.
   `MULTI-CLASS-EVENT-SPEC.md`.
 - **WPF UI rebuild** — shipped in **v2.0.0** (see the WPF UI section above). All
   screens reimplemented; WinForms UI is legacy.
+- **Multi-Car Round Robin** — shipped. One driver may enter several cars; races
+  stay pairwise, and each entry gets a `RaceEntryId` so two cars from the same
+  driver are distinct competitors. Scheduler:
+  `MultiCarRoundRobinScheduler` / `MultiCarOpeningRoundPlanner`; engine key is
+  registered in `RaceEngineFactory` beside `"round robin"`.
 - **Race-day feedback fixes** (Aug 2026 meet, tracked under #293) — shipped:
   destructive Reset removed from the console (#413), Event/Class/Race wording
   (#414), per-event Settings tab (#415), one-click dial-in editing (#416),
   add-driver modal (#417), shared TextBox clipping fix (#418), two-pane class
-  driver picker (#419), window sizing standard (#420/#421).
+  driver picker (#419), window sizing standard enforced by
+  `WindowSizingStandardTests` (#421; the startup-placement half of #420 is
+  still open).
 
 No active feature in flight. New UI work goes in `RCDragManagerProd.WPF`.
 

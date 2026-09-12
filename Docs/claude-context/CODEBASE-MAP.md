@@ -21,6 +21,10 @@ legacy WinForms UI and the WPF UI bind to these.
 | `SessionRosterService.cs` | Roster validation/sync between the console grid and the session |
 | `DriverManagerService.cs` / `DriverStatsService.cs` | Driver registry and stats screens' logic |
 | `RaceResultsPresentationBuilder.cs` / `ClassCompletionPresentationBuilder.cs` | Build result/ladder presentations from a saved session |
+| `EventSettingsService.cs` | Rules behind the per-event Settings tab: pure functions over class state deciding what may change mid-event |
+| `RaceRosterService.cs` | Roster service for the race console: add existing drivers, drop drivers from the race (driver DB untouched) |
+| `RosterAddResult.cs` | Typed result for roster additions (Success, Error, Driver, WasExisting) |
+| `EventCompletionPresentationBuilder.cs` | Builds the end-of-event board from each class's saved `RaceResultsArchive` |
 
 ---
 
@@ -28,9 +32,13 @@ legacy WinForms UI and the WPF UI bind to these.
 
 | File | Description |
 |------|-------------|
-| `Program.cs` | App entry point: initializes settings, DB, global exception handlers, opens `LandingPageForm` |
+| `Program.cs` | App entry point: initializes settings, DB, global exception handlers, opens `LandingForm` (in `LandingPageForm.cs`) |
 | `RCDragManagerProd.csproj` | Project file: .NET Framework 4.8, NuGet references, build targets |
-| `RCDragManagerProd.sln` | Solution file: references main project + Tests project |
+| `RCDragManagerProd.sln` | Solution file for the two app projects in `src/` (no Tests project); the repo-root `RCDragManagerProd.sln` adds the test project |
+| `App.config` | App configuration: supported runtime, app settings (logging, log path, live update), assembly binding redirects |
+| `app.manifest` | Application manifest: Windows compatibility / DPI settings |
+| `packages.config` | NuGet package references. A clean rebuild needs `System.Resources.Extensions` restored or the WinForms build fails with `MSB3822` (see `CLAUDE.md`) |
+| `lib/System.Resources.Extensions.dll` | Checked-in assembly referenced by `HintPath` |
 
 ---
 
@@ -55,7 +63,7 @@ legacy WinForms UI and the WPF UI bind to these.
 | `RaceController.Results.cs` | `SubmitWinner()`, `EditWinnerInActiveRound()`, `GetEligibleBuybackDrivers()` |
 | `RaceController.Persistence.cs` | `SaveSession()` — collects match results and round state into the `RaceSession` object |
 | `RaceController.Logging.cs` | `TryLogCompletedRound()` — emits RR per-round scorecard logs |
-| `RaceController.EngineCalls.cs` | `EngineGetMatches()`, `EngineSetWinner()`, `EngineHasWinner()`, etc. — thin adapters isolating engine type casts |
+| `RaceController.EngineCalls.cs` | `EngineGetMatches()`, `EngineSetWinner()`, `EngineHasWinner()`, etc. — logging + null-safe engine-call adapters |
 | `RaceController.LiveUpdate.cs` | `QueueLiveUpdate()`, `BuildLiveRaceUpdateDto()`, `BroadcastLiveSnapshot()` — optional HTTP live feed push |
 | `RaceController.DialIn.cs` | Dial-in state: `GetDriverDialIn()`, `UpdateDriverDialIn()`, lock/unlock, live-site poll timer, `DialInsChanged` event |
 | `RaceController.Resume.cs` | `RestoreFromSave()` — rebuilds engine state from a saved session (mid-event resume) |
@@ -63,8 +71,8 @@ legacy WinForms UI and the WPF UI bind to these.
 | `RaceController.SaveClose.cs` | `SaveProgress()` / close-race orchestration |
 | `RaceController.ResultSnapshots.cs` | Captures completed-result snapshots for results-only viewing |
 | `RaceController.RoundFlow.Defer.cs` | `PushCurrentMatchToEndOfRound()` — "more time" deferral |
-| `RaceController.Stats.cs` | `PersistTournamentStats()`, `PersistMatchStats()`, `PersistEventWon()`, `RecomputeEventsWon()` (legacy Form1 path; WPF uses `RaceConsoleService`) |
-| `LaneFairnessManager.cs` | Tracks lane (left/right) history per driver; `GetLane()` returns the fairer assignment |
+| `RaceController.Stats.cs` | Legacy stats helpers: `PersistMatchStats()` and `PersistEventWon()` remain the Form1 path, `PersistTournamentStats()` is unused; completion stats go through `RaceConsoleService` |
+| `LaneFairnessManager.cs` | Tracks lane (left/right) history per driver; `ShouldSwap(key, driver1Id, driver2Id)` decides whether to swap the pairing |
 | `IStandingsDialogService.cs` | Interface for showing the RR standings popup; default impl uses `ScrollableTextDialog` |
 
 ---
@@ -77,11 +85,15 @@ legacy WinForms UI and the WPF UI bind to these.
 | `Car.cs` | `Car` entity: Id/CarID alias, DriverId, CarName, ClassType, DefaultDialIn |
 | `RaceSession.cs` | `RaceSession` (full session state), `RaceSessionDriverEntry` (per-driver snapshot), `MatchResultSave` (serializable result record) |
 | `MultiClassEvent.cs` | Parent object for multi-class events: EventName, EventDate, `ClassSessions` (one `RaceSession` per class) |
+| `MultiCarRaceEntry.cs` | One car competing in a multi-car RR class; engine identity is the entry, not the person |
+| `RaceResults.cs` | `RaceResultsArchive` and its phase/match/standings snapshot types |
+| `ResumeSnapshot.cs` | Bracket-structure + phase snapshot for mid-event resume (`SavedMatch` children) |
 | `MatchResult.cs` | In-memory result store: `SetWinner`, `GetWinner`, `GetLoser`, `HasResult`, `ClearFromMatch`, `IsTournamentComplete` |
 | `ByePolicy.cs` | `IsBye(Driver d)` — true if `d == null` |
 | `RoundLabels.cs` | Round label normalization (`"R1"`, `"SF"`, `"F"`, `"LB-R1"`, `"LB-F"`, `"RR1"`, …), compare/sort keys |
+| `RaceTypes.cs` | Race-type string constants (RoundRobin, MultiCarRoundRobin, ...) + `IsRoundRobinFormat()` |
 | `ProLadder.cs` | Partial class shell (empty body) |
-| `ProLadder.Structures.cs` | `ProLadder.LadderMatch` struct: MatchId, Seed1, Seed2, FromMatch1, FromMatch2, RoundLabel |
+| `ProLadder.Structures.cs` | `ProLadder.LadderMatch` class: MatchId, Seed1, Seed2, FromMatch1, FromMatch2, RoundLabel |
 | `ProLadder.Ladders.Common.cs` | `ProLadder.GetLadder(n)` — dispatch method returning the template for field size `n` |
 
 ### Domain/Ladders/
@@ -169,16 +181,17 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 |------|-------------|
 | `RoundRobinMatch.cs` | Match data class: MatchId, RoundLabel, Driver1, Driver2 |
 | `RoundRobinEngine.cs` | Circle-method scheduler: `GenerateMatches()`, `GetMatches()`, `SetWinner()`, `GetStandings()`, `GetTopN()`, `GetTopRankedDrivers()` |
-| `RoundRobinRanker.cs` | `Rank()` — computes `DriverRankResult` list sorted by points → wins → H2H → opponent score (points of drivers beaten) |
+| `RoundRobinRanker.cs` | `Rank()` — computes a `DriverRankResult` list sorted by TotalScore desc, then DriverId (TotalScore = points + 0.1 × head-to-head + 0.001 × beaten-drivers score) |
+| `MultiCarRoundRobinScheduler.cs` | Builds the multi-car RR fixture from `MultiCarRaceEntry` lists; exhausts fresh pairings before repeating |
+| `MultiCarOpeningRoundPlanner.cs` | Seeds the opening buyback round so two car entries owned by the same driver don't meet |
 
 ### RoundRobinMode/RoundRobinScorecardLogger/
 
 | File | Description |
 |------|-------------|
-| `RoundRobinScorecardLogger.cs` | `Log()` and `BuildScorecard()` — entry points for generating and displaying standings |
-| `RoundRobinScorecardFormatter.cs` | Formats `DriverRankResult` list into a readable text table |
-| `RoundRobinScorecardDebug.cs` | Debug-level logging helpers for RR scoring |
-| `RoundRobinScorecardWriter.cs` | Writes the formatted scorecard to the Logger |
+| `RoundRobinScorecardLogger.cs` | `Log()` — entry point for generating and displaying standings |
+| `RoundRobinScorecardFormatter.cs` | Rebuilds aggregates from `RoundRobinEngineAdapter` + `MatchResult` and returns the scorecard as a string |
+| `RoundRobinScorecardDebug.cs`, `RoundRobinScorecardWriter.cs` | Empty partial-class shells (no members) |
 
 ---
 
@@ -196,27 +209,34 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 | File | Description |
 |------|-------------|
 | `ScrollableTextDialog.cs` | Reusable modal: shows a scrollable text block (used for RR standings scorecard) |
+| `RaceDialogs.cs` | Shared race-day message-box helpers (issue #258) |
+| `SettingsForm.cs` | App settings form: enable logging, log file path, enable live broadcast to the public site |
 
 ### Drivers/
 
 | File | Description |
 |------|-------------|
-| `AddDriverDialog.cs` / `.Designer.cs` | Simple modal: add a driver by name only |
+| `AddDriverDialog.cs` / `.Designer.cs` | Modal: add a driver by name, with a qualifying time that is captured and validated |
 | `AddDriverAndCarDialog.cs` / `.Designer.cs` | Combined modal: add driver + first car in one step |
 | `AddEditQualTimeDialog.cs` / `.Designer.cs` | Modal to set or edit a driver's qualifying time |
 | `EditDriverDialog.cs` / `.Designer.cs` | Modal to edit driver name and state |
-| `DriverManagerForm.cs` / `.Designer.cs` | Full driver registry: list all drivers, CRUD for drivers + cars, view stats |
+| `DriverManagerForm.cs` / `.Designer.cs` | Driver registry shell: constructor + service wiring |
+| `DriverManagerForm.Events.cs` | CRUD event handlers for the driver manager |
+| `DriverManagerForm.UI.cs` | Grid/panel updates for the driver manager |
 | `DriverStatsForm.cs` / `.Designer.cs` | View lifetime stats for a single selected driver |
 
 ### Main/
 
 | File | Description |
 |------|-------------|
-| `Form1.cs` | Race console: controller subscription, event handlers, session save, buy-back and finals wiring |
+| `Form1.cs` | Race console: controller subscription + session save |
 | `Form1.Designer.cs` | Auto-generated layout: ListViews, buttons, labels, panel sizing |
-| `Form1.Display.cs` | `RebuildPairingsView()`, `RebuildWinnersView()` — populates the bracket and winners ListViews |
-| `Form1.WinnerButtons.cs` | Sets winner button text/tags from `NextMatchReady`; disables BYE-side button |
+| `Form1.Events.cs` | Event handlers: bracket generation, buyback, finals wiring |
+| `Form1.Display.cs` | `RedrawFullBracket()`, `OnWinnersUpdated()`, `OnNextMatchReady()`, `ApplyByeButtonStyle()` — populates the bracket and winners ListViews |
+| `Form1.WinnerButtons.cs` | `HandleWinnerClick()`, `ShowWinnerPicker()`, `UpdateDriverStats()`, `BumpEventWon()` |
 | `Form1.UI.cs` | General UI helpers: enabling/disabling controls, label updates |
+| `MultiClassRaceForm.cs` / `.Designer.cs` | WinForms multi-class race form hosting one console per class (legacy) |
+| `QRCodeDialog.cs` | "Public Site QR" dialog: scannable QR for the public live scoreboard site |
 
 ### Results/
 
@@ -229,12 +249,10 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 
 | File | Description |
 |------|-------------|
-| `LandingPageForm.cs` / `.Designer.cs` | Main menu: New Event, Load Event, Manage Drivers, Exit |
-| `LoadSessionForm.cs` / `.Designer.cs` | Lists saved sessions; user picks one to resume (opens Form1 with loaded session) |
-| `SessionSetupForm.cs` | Core session setup logic: race type, class, QMDRA config, roster build, session object creation |
-| `SessionSetupForm.UI.cs` | UI helpers for session setup: dynamic control visibility |
-| `SessionSetupForm.Events.cs` | Event handlers for session setup form controls |
-| `SessionSetupForm.Designer.cs` | Auto-generated layout |
+| `LandingPageForm.cs` / `.Designer.cs` | Main menu with five buttons: "Create Race Session", "Load Saved Event", "Driver Lists", "Settings", "Exit" |
+| `LoadSessionForm.cs` / `.Designer.cs` | Lists saved sessions; user picks one to resume (opens `MultiClassRaceForm`) |
+| `MultiClassSetupForm.cs` / `.Designer.cs` | Session setup: race type, class config, roster build, session object creation |
+| `MultiClassConfigDialog.cs` / `.Designer.cs` | Per-class configuration dialog used during setup (race type, RR variant, rounds) |
 
 ---
 
@@ -253,6 +271,10 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 | `PairingRow.cs` | Bracket display row: MatchId, RoundLabel, Driver1, Driver2, IsHeader (round heading rows) |
 | `WinnerRow.cs` | Winners list row: MatchId, RoundLabel, Winner, Loser |
 | `RaceSessionSummary.cs` | Summary record for session list: Id, EventName, EventDate, ClassType, RaceType |
+| `MultiClassEventSummary.cs` | Summary row for the Load Event list (Id, EventName, EventDate, ClassCount) |
+| `RaceResultsPresentation.cs` | Results presentation model: phase/round/match cards, scoring legend, standings rows |
+| `ClassCompletionPresentation.cs` | Per-class completion presentation |
+| `EventCompletionPresentation.cs` | End-of-event board: one row per class with champion and runner-up (replaces the old ASCII block) |
 | `MatchResultSave.cs` | Serializable match result: MatchId, WinnerDriverId, LoserDriverId — also defined in Domain/RaceSession.cs |
 
 ---
@@ -269,26 +291,26 @@ One file per supported field size (3–24 drivers). Each defines a static partia
 
 ## src/RCDragManagerProd.Tests/
 
-Unit and integration tests using MSTest v2, targeting `net48`.
+Unit and integration tests using MSTest 4 (MSTest meta-package), targeting
+`net48`. Around 60 test files, one per class under test, at the project root,
+plus reusable seams in `Helpers/`.
 
 | File | Description |
 |------|-------------|
-| `Test1.cs` | Placeholder / smoke tests |
-| `ByePolicyTests.cs` | Tests for `ByePolicy.IsBye()` |
-| `ProLadderEngineAdapterTests.cs` | Tests Pro Ladder bracket generation and winner resolution |
-| `RaceEngineFactoryTests.cs` | Tests `RaceEngineFactory.Create()` for all known race type strings |
-| `RaceControllerFlowTests.cs` | End-to-end controller flow tests (Pro Ladder path) |
-| `RaceControllerRandomFlowTests.cs` | End-to-end controller tests for Random draw mode |
-| `RaceControllerQmdraFlowTests.cs` | End-to-end controller tests for QMDRA Round Robin mode |
-| `RoundRobinEngineAdapterTests.cs` | Tests the RR adapter's round generation and result submission |
-| `RoundRobinStandingsTests.cs` | Tests `RoundRobinRanker` points and tiebreaker logic |
-| `RaceSessionRepositoryTests.cs` | Tests save/load/delete against an in-memory SQLite DB |
-| `DriverRepositoryRegressionTests.cs` | Regression tests for driver CRUD and stat increments |
-| `DriverCarEditBugTests.cs` | Tests car edit/delete flows in `DriverRepository` |
-| `DriverManagerCarEditFlowTests.cs` | Integration tests for the full driver + car edit workflow |
-| `Helpers/TestDriverFactory.cs` | Factory for constructing `Driver` and `Car` test fixtures |
-| `Helpers/NoOpStandingsDialogService.cs` | `IStandingsDialogService` no-op stub for controller tests |
-| `MSTestSettings.cs` | MSTest configuration |
+| `Helpers/TestDriverFactory.cs` | Driver packs (`CreateProLadderPack`, `CreateProLadderByePack`, `CreateRoundRobinPack(n)`) |
+| `Helpers/TestSessionFactory.cs` | `RaceSession` / `MultiClassEvent` builders |
+| `Helpers/NoOpStandingsDialogService.cs` | `IStandingsDialogService` no-op stub |
+| `Helpers/RecordingStandingsDialogService.cs` | Records `Show(...)` calls |
+| `Helpers/RecordingSessionStore.cs` | `IRaceSessionStore` double counting `Persist()` calls |
+
+Notable files include `RandomEngineAdapterTests` (in `Test1.cs`),
+`RaceSessionRepositoryTests` (temp-file SQLite), `MultiClassFeatureTests`
+(multi-class gates incl. the 11 skipped placeholders), and
+`WindowSizingStandardTests` (parses WPF XAML to enforce the window sizing
+standard).
+
+Test DB fixtures use a temp-file SQLite database (deleted on dispose), never
+`:memory:`.
 
 ---
 
@@ -305,8 +327,10 @@ Scans the main project's source files and generates Markdown/JSON reports of cla
 | `Program.cs` | Entry point: orchestrates scan and export |
 
 > `src/ProjectAnalysis/` holds this tool's **generated output** (ProjectMap.json,
-> Methods.md, …). It is a point-in-time snapshot and its line numbers drift from
-> the source — regenerate before trusting it; prefer reading the code directly.
+> Methods.md, …). A second divergent copy sits at
+> `src/RCDragManager.CodeStats/ProjectAnalysis/`. Both are point-in-time
+> snapshots and their line numbers drift from the source: regenerate before
+> trusting either, and prefer reading the code directly.
 
 ---
 
@@ -322,6 +346,7 @@ marshalling).
 | `App.xaml(.cs)` | Startup: settings, theme, DB init, global exception handler, opens `LandingWindow` |
 | `Windows/` | Top-level windows: Landing, Setup, LoadSession, DriverManager, DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard |
 | `Views/RaceConsoleView.xaml(.cs)` | One class's race console; hosted standalone or one-per-tab in `MultiClassRaceWindow` |
+| `Views/EventSettingsView.xaml(.cs)` | The event settings tab (first tab of every event): class reset with typed confirmation, buybacks per class, live theme switching |
 | `Dialogs/` | Themed modal dialogs incl. `MessageDialog` (the dark `MessageBox` replacement), results/buyback/edit dialogs |
 | `ViewModels/` | INotifyPropertyChanged view models + display-row types |
 | `Resources/Theme.xaml` | Brushes (`Brush.*` bound to `C.*` colours), radii, font sizes |

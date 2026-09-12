@@ -5,6 +5,14 @@
 **Scope:** New feature — multi-class event support for Round Robin events  
 **Prerequisite reading:** ARCHITECTURE.md, DOMAIN-MODEL.md, DATA-LAYER.md, RACE-FLOW.md
 
+> **UI note (v2.0.0):** this spec describes the original WinForms implementation
+> (`UI/Forms/Main/MultiClassRaceForm.cs` hosting `Form1` per class inside a tab
+> control, setup via `MultiClassSetupForm`). That UI exists but is **legacy**.
+> The primary UI is WPF: `Windows/MultiClassRaceWindow.xaml.cs` builds one
+> `RaceController` per class and one `RaceConsoleView` per tab, and
+> `Windows/SetupWindow` opens `Dialogs/ClassConfigDialog` per class. The engine,
+> data and persistence behaviour described here is unchanged.
+
 ---
 
 ## 1. Overview
@@ -13,10 +21,24 @@ This feature adds the ability to run a single event containing multiple racing c
 
 ### 1.1 Scope Constraints
 
-- Multi-class events support **Round Robin race type only** (Standard and QMDRA variants).
-- Pro Ladder and Random Draw race types are **not** available in multi-class mode.
+- Each class chooses its own race type. The WPF class config dialog offers four: **Pro Ladder**, **Random Draw**, **Round Robin** (Standard and QMDRA variants) and **Multi-Car Round Robin**.
 - All existing single-class event functionality is unchanged.
 - The feature is a new entry point — a new button on the Landing Page — not a modification to the existing New Event flow.
+
+### 1.2 Multi-Car Round Robin
+
+Multi-Car Round Robin is the fourth per-class option: one driver may enter
+several cars in the same class. Races stay pairwise, but the competitor identity
+is the entry, not the person.
+
+- `MultiClassSetupService.BuildMultiCarRoundRobinEntries` builds one
+  `RaceSessionDriverEntry` per selected car and assigns each a `RaceEntryId`,
+  unique within the class. That id is the per-entry identity used by the engine
+  and the standings.
+- `MultiCarRoundRobinScheduler.Build` turns the `MultiCarRaceEntry` field into
+  the round-by-round fixture as `EngineMatch` rows, keyed by `RaceEntryId`.
+- Persistence and stats still credit the real driver: the controller maps an
+  entry back to its `DriverID` when results are written.
 
 ---
 
@@ -62,8 +84,8 @@ CREATE TABLE IF NOT EXISTS MultiClassEvents (
 
 - `EventName`, `EventDate`, and `ClassCount` are scalar copies for the session list view.
 - `EventData` is the source of truth — the full `MultiClassEvent` serialized to JSON.
-- Every save is an INSERT (append-only), consistent with existing `RaceSessionRepository` behaviour.
-- There is no UPDATE path (consistent with existing architecture).
+- Saves are INSERT-on-first-save, then UPDATE in place, consistent with existing `RaceSessionRepository` behaviour: `SaveEvent` inserts a row when `evt.Id <= 0`, assigns the new row id, and updates that same row on later saves.
+- `UpdateExistingEvent` runs `UPDATE MultiClassEvents ... WHERE Id = @Id` and throws if the statement does not affect exactly one row.
 
 ### 2.3 New Repository: `MultiClassEventRepository`
 
@@ -71,7 +93,7 @@ Create `Repositories/MultiClassEventRepository.cs`:
 
 | Method | Signature | Notes |
 |--------|-----------|-------|
-| `SaveEvent` | `SaveEvent(MultiClassEvent evt)` | INSERT new row; sets `evt.Id`; serializes full object to JSON |
+| `SaveEvent` | `SaveEvent(MultiClassEvent evt)` | INSERT on first save (sets `evt.Id`); UPDATE the same row in place on later saves; serializes full object to JSON |
 | `GetAllEvents` | `List<MultiClassEventSummary> GetAllEvents()` | Returns scalar summary rows — no JSON deserialization |
 | `LoadEvent` | `MultiClassEvent LoadEvent(int id)` | SELECT `EventData`, deserialize JSON → `MultiClassEvent` |
 | `DeleteEvent` | `DeleteEvent(int id)` | DELETE by Id |
@@ -110,7 +132,7 @@ Stats are written per-class as each class's Finals match resolves — not held u
 |------|------|
 | `TotalWins` | Incremented per match win, per class. Same as today — fires during `TournamentCompleted` for that class. |
 | `TotalLosses` | Same as `TotalWins`. |
-| `EventsEntered` | Incremented once per class the driver is entered in. A driver in 2 classes = +2. Incremented at session start (consistent with existing behaviour — `SessionSetupForm` already does this at Start Race). |
+| `EventsEntered` | Incremented once per class the driver is entered in. A driver in 2 classes = +2. Incremented at session start (`MultiClassSetupService.StartEvent` does this at Start Race). |
 | `EventsWon` | Incremented once per class won. A driver winning 2 classes in one event = +2. |
 
 ---
@@ -170,7 +192,7 @@ A new form: `UI/Forms/Session/MultiClassSetupForm.cs`.
 
 **"+ Add Class" button:**
 - Opens `MultiClassConfigDialog` (see §3.3) with blank fields.
-- On OK: validates the class name is not already in the list (case-insensitive). If duplicate, shows error: `"A class named '{name}' already exists in this event. Class names must be unique."` and does not add.
+- On OK: validates the class name is not already in the list (case-insensitive). If duplicate, shows error: `"A class named '{name}' already exists. Please use a different name."` and does not add.
 - Adds the new class as a row in the list.
 
 **"Remove Selected" button:**
@@ -185,7 +207,7 @@ A new form: `UI/Forms/Session/MultiClassSetupForm.cs`.
 - No minimum class count validation — one class is valid.
 - For each class: if driver count is 0, shows a warning: `"Class '{name}' has no drivers. Add at least one driver or remove the class."` Blocks start.
 - If any class has 1 driver, it is allowed — a BYE will fill the bracket.
-- Calls `DriverRepository.IncrementEventsEntered(driverId)` for each driver in each class they are entered in (consistent with existing SessionSetupForm behaviour).
+- Calls `DriverRepository.IncrementEventsEntered(driverId)` for each driver in each class they are entered in.
 - Builds the `MultiClassEvent` object and sets `DialogResult = OK`.
 
 **Building the `MultiClassEvent`:**
@@ -222,8 +244,8 @@ Collects configuration for a single class slot. Reused for both Add and Edit.
 | Field | Control | Notes |
 |-------|---------|-------|
 | Class Name | TextBox | Free-text. Required. Trimmed. |
-| RR Variant | RadioButton group | "Standard" / "QMDRA" |
-| Rounds to Run | NumericUpDown | Visible only when QMDRA selected. Min=1. |
+| RR Variant | CheckBox | "Buyback race for 4th finals spot": checked = Standard, unchecked = QMDRA |
+| Rounds to Run | NumericUpDown | Shown for every RR class, not only QMDRA. Min=1. |
 | Driver roster | CheckedListBox | All drivers from DB. Each row shows Driver Name. |
 | Dial-In (per driver) | Inline editable column or secondary dialog | See §3.4 |
 
@@ -465,14 +487,19 @@ Data sourced from each class's `RaceSummary` object (already produced by `Tourna
 
 The existing `ScrollableTextDialog` can be reused with a formatted text string.
 
-### 4.6 Save Button
+### 4.6 Saving
 
-`MultiClassRaceForm` has a **Save Event** button in its toolbar. Save is always available — no blocking conditions.
+There is no Save button and no save toast. The event is persisted automatically
+as state changes.
 
-On click:
-1. For each class controller, call `controller.SaveSession()` to flush current match results and revealed rounds back into the `RaceSession` object (same as existing `RaceController.Persistence.cs` behaviour).
-2. Call `MultiClassEventRepository.SaveEvent(_multiEvent)` — this INSERT creates a new row. `_multiEvent.Id` is updated.
-3. Show a toast or brief status label: `"Event saved."`.
+1. The WPF window (`MultiClassRaceWindow`) calls
+   `MultiClassEventRepository.SaveEvent(_multiEvent)` whenever class state
+   changes, for example on a class reset or a buybacks toggle.
+2. The race console flushes in-progress results back into the `RaceSession` as
+   matches resolve, and its Save Progress action captures a resumable checkpoint
+   without closing the event.
+3. `SaveEvent` INSERTs on the first save and UPDATEs the same row afterwards, so
+   repeated saves never create duplicate rows.
 
 ---
 
@@ -490,18 +517,24 @@ Add the following to `RaceController.cs` (or a new partial file `RaceController.
 
 ```csharp
 /// <summary>
-/// Returns true if there are unresolved matches in the currently revealed round.
-/// Used by MultiClassRaceForm to enforce tab switching rules.
+/// Returns true if there are unresolved non-BYE matches in the currently
+/// active round. In RR mode (all rounds pre-revealed) uses _activeRound so
+/// only the pace-gated round is checked, not future rounds.
+/// Used by MultiClassRaceForm to enforce tab switching.
 /// </summary>
 public bool HasPendingMatchesInCurrentRound()
 {
-    var matches = EngineGetMatches()
-        .Where(m => _revealedRounds.Contains(m.RoundLabel))
+    // Use _activeRound when set (RR pre-reveal mode); fall back to _revealedRounds.
+    var currentMatches = EngineGetMatches(_engine)
+        .Where(m => _activeRound != null
+                        ? string.Equals(m.RoundLabel, _activeRound, System.StringComparison.OrdinalIgnoreCase)
+                        : _revealedRounds.Contains(m.RoundLabel))
         .ToList();
-    return matches.Any(m => !_matchResult.HasResult(m.MatchId) && 
-                            !ByePolicy.IsBye(m.Driver1) && 
-                            !ByePolicy.IsBye(m.Driver2) == false);
-    // i.e. returns true if any non-BYE match in the current round has no result
+
+    return currentMatches.Any(m =>
+        !ByePolicy.IsBye(m.Driver1) &&
+        !ByePolicy.IsBye(m.Driver2) &&
+        !_matchResult.HasResult(m.MatchId));
 }
 
 /// <summary>
@@ -642,5 +675,5 @@ The following test cases should be added to `RCDragManagerProd.Tests`:
 | EventsEntered | +1 per class entered (at Start Race) |
 | EventsWon | +1 per class won |
 | Event completion | Combined summary shown when all classes have a champion |
-| Save | Always allowed; append-only INSERT of full `MultiClassEvent` JSON |
+| Save | Automatic on state change; INSERT on the first save, UPDATE in place after that |
 | Load | Single row in LoadSessionForm per multi-class event |
