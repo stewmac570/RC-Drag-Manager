@@ -70,6 +70,24 @@
 
                 <Border Height="1" Background="{StaticResource Brush.BorderSubtle}" Margin="0,18"/>
 
+                <!-- Backups -->
+                <TextBlock Text="Backups"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
+                <TextBlock Text="A copy of the database is made automatically on every start and kept in the Backups folder (last 10 kept)."
+                           FontSize="{StaticResource FontSize.Xs}"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                    <Button Style="{StaticResource Style.Button.Toolbar}"
+                            Content="Back up now…" Click="BtnBackupNow_Click"
+                            HorizontalAlignment="Left" Padding="14,7" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource Style.Button.Toolbar}"
+                            Content="Restore from backup…" Click="BtnRestore_Click"
+                            HorizontalAlignment="Left" Padding="14,7"/>
+                </StackPanel>
+
+                <Border Height="1" Background="{StaticResource Brush.BorderSubtle}" Margin="0,18"/>
+
                 <!-- Live broadcast -->
                 <TextBlock Text="Live broadcast"
                            FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"

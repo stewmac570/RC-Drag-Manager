@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows;
+using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Config;
 using RCDragManagerProd.Logging;
 using RCDragManagerProd.Repositories;
@@ -11,6 +12,10 @@ namespace RCDragManagerProd.WPF
     public partial class App : Application
     {
         public static string ConnectionString { get; private set; }
+
+        /// <summary>Full path of the live database file, so windows like Settings can
+        /// hand it to the backup service.</summary>
+        public static string DatabasePath { get; private set; }
 
         private const string AppDataFolder = "RC_Drag_Manager";
         private const string DbFileName = "race_data.db";
@@ -39,11 +44,23 @@ namespace RCDragManagerProd.WPF
                 Directory.CreateDirectory(dataDir);
 
                 var dbPath = Path.Combine(dataDir, DbFileName);
-                if (!File.Exists(dbPath))
+                DatabasePath = dbPath;
+
+                // Copy on startup BEFORE the database is opened, so the snapshot is
+                // consistent (issue #405). Skipped on a brand-new install: there is
+                // nothing worth backing up yet.
+                var existedBefore = File.Exists(dbPath);
+                if (!existedBefore)
                     using (new FileStream(dbPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read)) { }
 
                 ConnectionString = $"Data Source={dbPath};Version=3;";
                 Logger.Log($"[WPF] Startup | DB='{dbPath}'");
+
+                if (existedBefore)
+                {
+                    try { new DatabaseBackupService(dbPath).BackupOnStartup(); }
+                    catch (Exception ex) { Logger.Log($"[BACKUP][STARTUP] {ex}"); }
+                }
 
                 DatabaseInitializer.InitializeDatabase(ConnectionString);
                 Logger.Log("[WPF] Database ready.");
