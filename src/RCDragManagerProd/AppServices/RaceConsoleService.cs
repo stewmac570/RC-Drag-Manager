@@ -114,6 +114,7 @@ namespace RCDragManagerProd.AppServices
                     break;
             }
 
+            Checkpoint();
             return action;
         }
 
@@ -132,6 +133,7 @@ namespace RCDragManagerProd.AppServices
 
             _controller.LockDialIn();
             _controller.AdvanceRound();
+            Checkpoint();
         }
 
         /// <summary>
@@ -152,7 +154,12 @@ namespace RCDragManagerProd.AppServices
 
         /// <summary>Buybacks were offered and nobody entered: promote the wildcard
         /// finalist and open the Finals. False if no wildcard could be determined.</summary>
-        public bool SkipBuybacks() => _controller.SkipBuybacksToFinals();
+        public bool SkipBuybacks()
+        {
+            var ok = _controller.SkipBuybacksToFinals();
+            if (ok) Checkpoint();
+            return ok;
+        }
 
         /// <summary>
         /// Applies the operator's buyback selection and reports what happened: a single pick
@@ -168,10 +175,12 @@ namespace RCDragManagerProd.AppServices
             if (selected.Count == 1)
             {
                 _controller.GenerateLosersBracket(selected);
+                Checkpoint();
                 return BuybackSelectionOutcome.SingleToFinals;
             }
 
             _controller.SetBuybackDrivers(selected);
+            Checkpoint();
             return BuybackSelectionOutcome.Stored;
         }
 
@@ -208,6 +217,7 @@ namespace RCDragManagerProd.AppServices
             }
 
             _controller.SubmitWinner(matchId, engineFirstOption);
+            Checkpoint();
             return WinnerSubmission.Accept(engineFirstOption);
         }
 
@@ -239,7 +249,11 @@ namespace RCDragManagerProd.AppServices
         public bool ApplyEditResult(int matchId, bool engineFirstOption)
         {
             var ok = _controller.EditWinnerInActiveRound(matchId, engineFirstOption);
-            if (ok) _controller.PushNextMatch();
+            if (ok)
+            {
+                _controller.PushNextMatch();
+                Checkpoint();
+            }
             return ok;
         }
 
@@ -253,6 +267,28 @@ namespace RCDragManagerProd.AppServices
             RequireStore();
             _controller.SaveProgress();
             _store.Persist();
+        }
+
+        /// <summary>
+        /// Writes an automatic checkpoint after a state-changing command (issue #404):
+        /// a recorded winner, an edited result, a buyback decision, or a round/phase
+        /// transition all persist through the store so the operator never has to
+        /// remember Save Progress. Silent no-op when no store was supplied (the
+        /// commands stay usable headless), and a failed write is logged rather than
+        /// blocking the operator mid-race.
+        /// </summary>
+        private void Checkpoint()
+        {
+            if (_store == null) return;
+            try
+            {
+                SaveProgress();
+                Logger.Log("[SAVE][AUTO] Checkpoint persisted after a console action.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[SAVE][AUTO] Checkpoint failed: {ex.Message}");
+            }
         }
 
         /// <summary>
