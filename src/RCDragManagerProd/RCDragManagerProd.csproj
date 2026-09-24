@@ -228,6 +228,7 @@
     <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
     <Compile Include="Integration\LiveApiClient.cs" />
+    <Compile Include="Integration\LiveLocalFeed.cs" />
     <Compile Include="Integration\LiveRaceUpdateDto.cs" />
     <Compile Include="Repositories\DatabaseInitializer.cs" />
     <Compile Include="Repositories\DbDate.cs" />
