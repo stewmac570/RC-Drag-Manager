@@ -162,14 +162,8 @@ namespace RCDragManagerProd.Controllers
                 return null;
             }
 
-            int total = _session?.Drivers?.Count ?? 0;
-            if (total <= 0)
-                total = EngineGetMatches(_engine)
-                    .SelectMany(m => new[] { m.Driver1, m.Driver2 })
-                    .Where(d => d != null).Distinct().Count();
-
             Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
-            var ranked = rr.GetTopRankedDrivers(total);
+            var ranked = rr.GetTopRankedDrivers(NoBuybackFinalsFieldSize);
             Logger.Log($"[FINALS][ALL-ADVANCE] Seed order rebuilt after resume: {ranked?.Count ?? 0} drivers.");
             return ranked;
         }

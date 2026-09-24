@@ -412,7 +412,7 @@ namespace RCDragManagerProd.Controllers
                 // Complete when:
                 //   - revealedRounds.Count >= N
                 //   - all matches in revealed rounds are resolved
-                // Then: seed ALL drivers to finals in RR ranking order (no buyback)
+                // Then: seed the top four to finals in RR ranking order (no buyback)
                 // ---------------------------------------------------------
                 if (isQmdra)
                 {
@@ -446,13 +446,13 @@ namespace RCDragManagerProd.Controllers
                         }
                         RoundRobinScorecardLogger.Log(rr, _matchResult);
 
-                        int totalDrivers = _session?.Drivers?.Count ?? 0;
-                        if (totalDrivers <= 0) totalDrivers = EngineGetMatches(_engine).SelectMany(m => new[] { m.Driver1, m.Driver2 }).Where(d => d != null).Distinct().Count();
-
+                        // Buybacks off means the top four go straight to the Finals.
+                        // This used to seed every driver, so a no-buyback class ran
+                        // its whole field through the Finals.
                         Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
-                        var rankedAll = rr.GetTopRankedDrivers(totalDrivers);
+                        var rankedAll = rr.GetTopRankedDrivers(NoBuybackFinalsFieldSize);
 
-                        Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing ALL drivers to finals. RankedCount={rankedAll.Count}, SessionDrivers={totalDrivers}");
+                        Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing top {NoBuybackFinalsFieldSize} to finals. RankedCount={rankedAll.Count}");
                         Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
 
                         CaptureRoundRobinResultSnapshot(rr);

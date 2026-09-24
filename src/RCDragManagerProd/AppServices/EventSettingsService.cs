@@ -11,7 +11,7 @@ namespace RCDragManagerProd.AppServices
     {
         /// <summary>
         /// Buybacks are the Round-Robin "Standard" variant; turning them off is the
-        /// "QMDRA" variant, where every driver advances after a fixed number of
+        /// "QMDRA" variant, where the top four advance after a fixed number of
         /// rounds. Switching after the variant has already shaped the bracket would
         /// leave the class in a state the engine never produces, so it is blocked.
         /// </summary>
