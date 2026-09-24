@@ -57,6 +57,9 @@ namespace RCDragManagerProd.Integration
             }
 
             var payload = dto ?? new LiveRaceUpdateDto();
+            // The stream overlay on this laptop reads this file, so names work
+            // with no internet. The site send below just fails and logs offline.
+            LiveLocalFeed.Default.Update(payload);
             GetChannel(payload.EventId, payload.ClassType).EnqueueUpdate(payload);
             return Task.CompletedTask;
         }
@@ -64,6 +67,7 @@ namespace RCDragManagerProd.Integration
         public Task ResetAsync(string eventId, string classType, string eventName)
         {
             if (!AppSettings.LiveBroadcastEnabled) return Task.CompletedTask;
+            LiveLocalFeed.Default.Reset(eventId, eventName);
             GetChannel(eventId, classType).EnqueueReset(eventId, eventName);
             return Task.CompletedTask;
         }
