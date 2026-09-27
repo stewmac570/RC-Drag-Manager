@@ -76,5 +76,35 @@ CREATE TABLE IF NOT EXISTS MultiClassEvents (
             using var cmd = new SQLiteCommand(sql, cn);
             cmd.ExecuteNonQuery();
         }
+
+        /// <summary>
+        /// Opens a candidate file read-only and confirms the tables this app owns
+        /// exist, so a restore target can be checked before it replaces the live
+        /// database (#405). Returns an operator-friendly problem, or null when the
+        /// file is a valid RC Drag Manager database.
+        /// </summary>
+        public static string ValidateDatabaseFile(string filePath)
+        {
+            try
+            {
+                using (var cn = new SQLiteConnection($"Data Source={filePath};Version=3;Read Only=True;"))
+                {
+                    cn.Open();
+                    using (var cmd = new SQLiteCommand(
+                        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('Drivers', 'Cars', 'RaceSessions');",
+                        cn))
+                    {
+                        int found = Convert.ToInt32(cmd.ExecuteScalar());
+                        if (found < 3)
+                            return "That file doesn't contain an RC Drag Manager database — the expected tables are missing.";
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return "That file isn't a readable RC Drag Manager database. Details: " + ex.Message;
+            }
+        }
     }
 }
