@@ -656,6 +656,7 @@ namespace RCDragManagerProd.WPF.Views
 
             _dialInCellEditing = false;
             _controller.UpdateDriverDialIn(row.DriverId, parsed.Cleared ? (double?)null : parsed.DialIn);
+            SaveProgressQuiet();   // dial-ins are session state — checkpoint the edit (#404)
 
             // The controller raises DialInsChanged, but that fires before this edit
             // commits, so refresh once the DataGrid has finished with the cell.
@@ -704,6 +705,7 @@ namespace RCDragManagerProd.WPF.Views
             if (dlg.ShowDialog() != true) return;
 
             _controller.UpdateDriverDialIn(driverId, dlg.Cleared ? (double?)null : dlg.DialIn);
+            SaveProgressQuiet();   // dial-ins are session state — checkpoint the edit (#404)
             RefreshDriverGrid();
             RefreshWinnerButtonDialIns();
         }
