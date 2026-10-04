@@ -59,7 +59,7 @@ namespace RCDragManagerProd.Controllers
             finalists.Add(lbChampion);
             Logger.Log($"[PRO] Final-4 = {string.Join(", ", finalists.Select(d => d.Name))}");
 
-            IRaceEngine proAdapter = new ProLadderEngineAdapter();
+            IRaceEngine proAdapter = new ProLadderEngineAdapter(keepGivenSeedOrder: true);
             EngineLoadDrivers(proAdapter, finalists);
             EngineGenerateBracket(proAdapter);
             _engine = proAdapter;
@@ -163,7 +163,7 @@ namespace RCDragManagerProd.Controllers
             }
 
             Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
-            var ranked = rr.GetTopRankedDrivers(NoBuybackFinalsFieldSize);
+            var ranked = rr.GetTopRankedDrivers(NoBuybackFinalsAllRanked);
             Logger.Log($"[FINALS][ALL-ADVANCE] Seed order rebuilt after resume: {ranked?.Count ?? 0} drivers.");
             return ranked;
         }
@@ -244,7 +244,7 @@ namespace RCDragManagerProd.Controllers
             var finalists = new List<Driver>(_rrTop3);
             Logger.Log($"[PRO] Final-3 = {string.Join(", ", finalists.Select(d => d.Name))}");
 
-            IRaceEngine proAdapter = new ProLadderEngineAdapter();
+            IRaceEngine proAdapter = new ProLadderEngineAdapter(keepGivenSeedOrder: true);
             EngineLoadDrivers(proAdapter, finalists);
             EngineGenerateBracket(proAdapter);
             _engine = proAdapter;
@@ -315,7 +315,7 @@ namespace RCDragManagerProd.Controllers
             _revealedRounds.Clear();
 
             // Create Pro Ladder engine
-            var pro = new ProLadderEngineAdapter();
+            var pro = new ProLadderEngineAdapter(keepGivenSeedOrder: true);
             _engine = pro;
 
             EngineLoadDrivers(_engine, rankedDrivers);

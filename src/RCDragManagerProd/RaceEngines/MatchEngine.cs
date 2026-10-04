@@ -14,14 +14,24 @@ namespace RCDragManagerProd.RaceEngines
 
         public MatchResult Results { get; private set; } = new MatchResult();
 
-        public void Initialize(List<Driver> drivers)
+        public void Initialize(List<Driver> drivers) => Initialize(drivers, keepGivenOrder: false);
+
+        /// <summary>
+        /// Builds the ladder. With <paramref name="keepGivenOrder"/> the list is already
+        /// in seed order (a Round Robin ranking feeding the Finals) and is used as-is;
+        /// otherwise drivers are seeded on qualifying time.
+        /// </summary>
+        public void Initialize(List<Driver> drivers, bool keepGivenOrder)
         {
+            var source = drivers ?? new List<Driver>();
             // Seed order: timed first (fastest → slowest), then no-time at the bottom.
-            allDrivers = (drivers ?? new List<Driver>())
-                .OrderBy(d => d.QualTime.HasValue ? 0 : 1)
-                .ThenBy(d => d.QualTime ?? double.MaxValue)
-                .ThenBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            allDrivers = keepGivenOrder
+                ? source.ToList()
+                : source
+                    .OrderBy(d => d.QualTime.HasValue ? 0 : 1)
+                    .ThenBy(d => d.QualTime ?? double.MaxValue)
+                    .ThenBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
             for (int i = 0; i < allDrivers.Count; i++)
                 allDrivers[i].Seed = i + 1;

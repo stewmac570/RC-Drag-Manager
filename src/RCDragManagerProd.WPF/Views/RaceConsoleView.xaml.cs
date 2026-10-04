@@ -358,7 +358,7 @@ namespace RCDragManagerProd.WPF.Views
             switch (_controller.FinalsPendingReason)
             {
                 case RaceController.FinalsReasonRoundRobinAllAdvance:
-                    return "Round Robin complete.\nThe top 4 go through to the Finals. Click 'Start finals' to run the Finals.";
+                    return "Round Robin complete.\nEvery driver goes through to the Finals. Click 'Start finals' to run the Finals.";
 
                 case RaceController.FinalsReasonBuybackSkipped:
                     var wildcard = _controller.FinalsPendingWildcardName;

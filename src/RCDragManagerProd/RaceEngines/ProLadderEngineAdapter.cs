@@ -15,6 +15,20 @@ namespace RCDragManagerProd.RaceEngines
         private MatchEngine _engine = new MatchEngine();
         private List<Driver> _drivers;
         private bool _ready;
+        private readonly bool _keepGivenSeedOrder;
+
+        public ProLadderEngineAdapter() : this(keepGivenSeedOrder: false) { }
+
+        /// <summary>
+        /// <paramref name="keepGivenSeedOrder"/>: the drivers handed to LoadDrivers are
+        /// already in seed order (1st first), as when a Round Robin ranking feeds the
+        /// Finals. Without it the ladder re-seeds on qualifying time, then name, which
+        /// threw the ranking away.
+        /// </summary>
+        public ProLadderEngineAdapter(bool keepGivenSeedOrder)
+        {
+            _keepGivenSeedOrder = keepGivenSeedOrder;
+        }
 
         // ────────────────  IRaceEngine  ────────────────
         public void LoadDrivers(List<Driver> drivers)
@@ -30,7 +44,7 @@ namespace RCDragManagerProd.RaceEngines
             if (_drivers == null || _drivers.Count < 2)
                 throw new InvalidOperationException("LoadDrivers must be called with two or more drivers.");
 
-            _engine.Initialize(_drivers);   // builds the full Pro-Ladder bracket
+            _engine.Initialize(_drivers, _keepGivenSeedOrder);   // builds the full Pro-Ladder bracket
             _ready = true;
         }
 

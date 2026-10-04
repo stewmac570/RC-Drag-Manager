@@ -81,8 +81,8 @@ namespace RCDragManagerProd.Controllers
         public const string FinalsReasonBuybackSkipped = "BuybackSkipped";
 
         /// <summary>How many drivers reach the Finals when a Round Robin class runs
-        /// with buybacks off: the top four on ranking, never the whole field.</summary>
-        public const int NoBuybackFinalsFieldSize = 4;
+        /// with buybacks off: every ranked driver, seeded on ranking.</summary>
+        public const int NoBuybackFinalsAllRanked = int.MaxValue;
 
         public string FinalsPendingReason { get; private set; }
 
