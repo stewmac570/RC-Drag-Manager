@@ -36,13 +36,17 @@ namespace RCDragManagerProd.Controllers
                 .Select(e => new LiveDriverEntryDto
                 {
                     DriverId = multiCar && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID,
-                    DriverName = multiCar && !string.IsNullOrWhiteSpace(e.CarName)
-                        ? e.DriverName + " — " + e.CarName
+                    DriverName = multiCar
+                        ? MultiCarNaming.Display(MultiCarNaming.OwnerName(e.DriverName, e.CarName), e.CarName)
                         : e.DriverName,
                     DialIn = e.DialIn
                 })
                 .ToList();
         }
+
+        /// <summary>The state this class would publish to the live site and the stream
+        /// overlay right now, or null before a bracket exists.</summary>
+        public LiveRaceUpdateDto BuildLiveState() => BuildLiveRaceUpdateDto();
 
         private LiveRaceUpdateDto BuildLiveRaceUpdateDto()
         {
@@ -76,7 +80,10 @@ namespace RCDragManagerProd.Controllers
                 nextUp = leftName + " vs " + rightName;
             }
 
-            var allMatches = CollectAllRevealedMatchesAcrossPhases();
+            // The live site lists each round's races in the order they arrive here, so
+            // they go out in race order. They used to go out in match-id order, and a
+            // race pushed to the end of the round stayed where it was on the site.
+            var allMatches = InLiveRaceOrder(CollectAllRevealedMatchesAcrossPhases());
 
             var matches = allMatches
                 .Select(m =>
@@ -99,19 +106,22 @@ namespace RCDragManagerProd.Controllers
                 })
                 .ToList();
 
+            // A bye run has no loser. It used to be dropped here, so the live site's
+            // results never showed who took a bye.
             var winners = allMatches
                 .Where(m => _matchResult.HasResult(m.MatchId))
                 .Select(m => new LiveWinnerDto
                 {
                     RoundLabel = m.RoundLabel,
                     WinnerName = _matchResult.GetWinner(m.MatchId)?.Name,
-                    LoserName = _matchResult.GetLoser(m.MatchId)?.Name
+                    LoserName = _matchResult.GetLoser(m.MatchId)?.Name ?? "BYE"
                 })
-                .Where(w => w.WinnerName != null && w.LoserName != null)
+                .Where(w => w.WinnerName != null)
                 .ToList();
 
+            // Both Round Robin forms have standings; Multi-Car used to send none.
             string rrStandings = null;
-            if (string.Equals(_session.RaceType, RaceTypes.RoundRobin, StringComparison.OrdinalIgnoreCase))
+            if (RaceTypes.IsRoundRobinFormat(_session.RaceType))
             {
                 var rr = _engine as RoundRobinEngineAdapter;
                 if (rr != null)
@@ -135,8 +145,20 @@ namespace RCDragManagerProd.Controllers
                 Matches = matches,
                 Winners = winners,
                 RRStandings = rrStandings,
-                DialInLocked = _dialInLocked
+                DialInLocked = _dialInLocked,
+                PublishedAtUtc = DateTime.UtcNow.ToString("o")
             };
+        }
+
+        /// <summary>Keeps each round together, in the order rounds first appear, and puts
+        /// the races inside a round in race order (honouring "push to end of round").</summary>
+        private List<EngineMatch> InLiveRaceOrder(List<EngineMatch> matches)
+        {
+            var rounds = matches.Select(m => m.RoundLabel).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            return rounds
+                .SelectMany(r => ApplyRaceOrder(matches.Where(m =>
+                    string.Equals(m.RoundLabel, r, StringComparison.OrdinalIgnoreCase))))
+                .ToList();
         }
 
         /// <summary>

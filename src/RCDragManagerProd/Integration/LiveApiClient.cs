@@ -72,8 +72,11 @@ namespace RCDragManagerProd.Integration
             return Task.CompletedTask;
         }
 
-        private async Task SendCoreAsync(LiveRaceUpdateDto dto)
+        private async Task SendCoreAsync(LiveRaceUpdateDto dto, DateTime queuedAtUtc, int replaced)
         {
+            // Lag is measured from when the race action queued the update to when the
+            // site answered, so "the feed was behind" can be read off the log.
+            var started = DateTime.UtcNow;
             try
             {
                 var apiKey = AppSettings.ApiKey;
@@ -100,6 +103,11 @@ namespace RCDragManagerProd.Integration
                     Logger.Log($"[LIVE][SEND] eventId={dto?.EventId} class={dto?.ClassType} round={dto?.CurrentRound} matches={dto?.Matches?.Count ?? 0} POST {LiveUpdateUrl}");
                     using (var resp = await Http.SendAsync(req).ConfigureAwait(false))
                     {
+                        var now = DateTime.UtcNow;
+                        Logger.Log($"[LIVE][LAG] class={dto?.ClassType} round={dto?.CurrentRound} " +
+                                   $"queuedMs={(started - queuedAtUtc).TotalMilliseconds:0} " +
+                                   $"httpMs={(now - started).TotalMilliseconds:0} " +
+                                   $"totalMs={(now - queuedAtUtc).TotalMilliseconds:0} replacedWhileQueued={replaced}");
                         if (resp.IsSuccessStatusCode)
                         {
                             Logger.Log("[LIVE][OK] Status=" + (int)resp.StatusCode);
@@ -118,7 +126,7 @@ namespace RCDragManagerProd.Integration
             }
             catch (Exception ex)
             {
-                Logger.Log("[LIVE][FAIL] " + ex.Message);
+                Logger.Log($"[LIVE][FAIL] after {(DateTime.UtcNow - started).TotalMilliseconds:0}ms: " + ex.Message);
             }
         }
 
@@ -202,9 +210,12 @@ namespace RCDragManagerProd.Integration
                     // rather than queueing another stale send behind it.
                     var tail = _queue.Last;
                     if (tail != null && tail.Value is UpdateOp pending)
+                    {
                         pending.Dto = dto;
+                        pending.Replaced++;
+                    }
                     else
-                        _queue.AddLast(new UpdateOp { Dto = dto });
+                        _queue.AddLast(new UpdateOp { Dto = dto, QueuedAtUtc = DateTime.UtcNow });
 
                     EnsureDraining();
                 }
@@ -244,7 +255,7 @@ namespace RCDragManagerProd.Integration
                     }
 
                     if (op is UpdateOp u)
-                        await _owner.SendCoreAsync(u.Dto).ConfigureAwait(false);
+                        await _owner.SendCoreAsync(u.Dto, u.QueuedAtUtc, u.Replaced).ConfigureAwait(false);
                     else if (op is ResetOp r)
                         await _owner.ResetCoreAsync(r.EventId, r.EventName).ConfigureAwait(false);
                 }
@@ -256,6 +267,8 @@ namespace RCDragManagerProd.Integration
         private sealed class UpdateOp : LiveOp
         {
             public LiveRaceUpdateDto Dto { get; set; }
+            public DateTime QueuedAtUtc { get; set; }
+            public int Replaced { get; set; }
         }
 
         private sealed class ResetOp : LiveOp

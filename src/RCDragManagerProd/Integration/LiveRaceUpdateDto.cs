@@ -16,6 +16,10 @@ namespace RCDragManagerProd.Integration
         public List<LiveMatchDto> Matches { get; set; }
         public List<LiveWinnerDto> Winners { get; set; }
         public bool DialInLocked { get; set; }
+
+        /// <summary>When the app built this state (UTC, ISO 8601). Lets the live site and the
+        /// stream overlay log how far behind the app they are.</summary>
+        public string PublishedAtUtc { get; set; }
     }
 
     public class LiveDriverEntryDto
