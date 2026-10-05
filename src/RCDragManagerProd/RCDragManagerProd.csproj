@@ -121,6 +121,7 @@
     <Compile Include="AppServices\RaceRosterService.cs" />
     <Compile Include="AppServices\SessionRosterService.cs" />
     <Compile Include="AppServices\TrackTestingService.cs" />
+    <Compile Include="AppServices\MoneySheetService.cs" />
     <Compile Include="AppServices\RaceConsoleService.cs" />
     <Compile Include="AppServices\RaceConsoleViewModel.cs" />
     <Compile Include="AppServices\RaceConsoleViewModelBuilder.cs" />
@@ -226,6 +227,7 @@
     </Compile>
     <Compile Include="Domain\Car.cs" />
     <Compile Include="Domain\MultiCarRaceEntry.cs" />
+    <Compile Include="Domain\EventMoneySheet.cs" />
     <Compile Include="Domain\MultiClassEvent.cs" />
     <Compile Include="Repositories\CarRepository.cs" />
     <Compile Include="Config\AppSettings.cs" />
