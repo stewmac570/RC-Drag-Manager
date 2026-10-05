@@ -12,6 +12,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public DialInDialog(string driverName, double? current)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TitleText.Text = $"Dial-in — {driverName}";
             TxtDialIn.Text = current?.ToString("0.000") ?? "";
             TxtDialIn.Focus();

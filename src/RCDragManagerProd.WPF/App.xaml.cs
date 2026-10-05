@@ -56,6 +56,12 @@ namespace RCDragManagerProd.WPF
                 ConnectionString = $"Data Source={dbPath};Version=3;";
                 Logger.Log($"[WPF] Startup | DB='{dbPath}'");
 
+                // Window-size complaints are only diagnosable if we know the screen.
+                // Units are DIU: 1280x688 work area is the race-day laptop minimum.
+                var wa = SystemParameters.WorkArea;
+                Logger.Log($"[WPF][SCREEN] Primary {SystemParameters.PrimaryScreenWidth:0}x{SystemParameters.PrimaryScreenHeight:0}, " +
+                           $"work area {wa.Width:0}x{wa.Height:0} (DIU).");
+
                 if (existedBefore)
                 {
                     try { new DatabaseBackupService(dbPath).BackupOnStartup(); }

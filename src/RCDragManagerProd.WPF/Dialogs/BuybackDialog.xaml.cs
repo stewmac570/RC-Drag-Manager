@@ -16,6 +16,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public BuybackDialog(IList<Driver> eligible)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             _rows = eligible.Select(d => new BuybackRow { Driver = d, Name = d.Name }).ToList();
             IcDrivers.ItemsSource = _rows;
         }

@@ -17,7 +17,7 @@ namespace RCDragManagerProd.WPF.Windows
         public LiveScoreboardWindow()
         {
             InitializeComponent();
-            WindowSizing.RoundCorners(this);
+            WindowSizing.FitDialogToScreen(this);
             UrlText.Text = LiveScoreboardUrl;
             QrImage.Source = BuildQrImage(LiveScoreboardUrl);
         }

@@ -26,11 +26,74 @@ namespace RCDragManagerProd.WPF
     /// <see cref="FitToScreen"/>, never <see cref="RoundCorners"/> alone.</item>
     /// </list>
     ///
+    /// <para><b>Dialog tiers (race-day feedback, Oct 2026).</b> Every dialog is one of
+    /// three sizes, can be resized, and is kept on screen:</para>
+    /// <list type="bullet">
+    /// <item><b>Small</b> (<see cref="SmallDialogWidth"/> wide, height fits content) —
+    /// prompts and short forms: add/edit driver or car, dial-in, qual time, edit
+    /// result, reset class, message. Content scrolls if the screen is too short.</item>
+    /// <item><b>Medium</b> (<see cref="MediumDialogWidth"/> x
+    /// <see cref="MediumDialogHeight"/>) — a single list: buybacks, pick a result to
+    /// edit, text summary.</item>
+    /// <item><b>Large</b> (<see cref="LargeDialogWidth"/> x
+    /// <see cref="LargeDialogHeight"/>) — grids and multi-pane screens: class setup,
+    /// race roster, results, class and event completion.</item>
+    /// </list>
+    /// <para>Large dialogs call <see cref="FitToScreen"/>; small and medium call
+    /// <see cref="FitDialogToScreen"/>, which keeps them beside their owner.
+    /// DialogSizingStandardTests enforces this from the XAML.</para>
+    ///
     /// <para>WindowSizingStandardTests in the test project enforces the numbers
     /// by reading the XAML, so new windows are caught before review.</para>
     /// </summary>
     public static class WindowSizing
     {
+        public const double SmallDialogWidth = 440;
+        public const double MediumDialogWidth = 600;
+        public const double MediumDialogHeight = 560;
+        public const double LargeDialogWidth = 1040;
+        public const double LargeDialogHeight = 660;
+
+        /// <summary>
+        /// For small and medium dialogs. Caps the dialog at the screen's work area and,
+        /// once it is shown or resized, nudges it back so no edge sits off screen or under
+        /// the taskbar. Unlike <see cref="FitToScreen"/> it leaves the dialog where
+        /// WindowStartupLocation put it (usually centred on its owner).
+        /// </summary>
+        public static void FitDialogToScreen(Window w)
+        {
+            void Constrain()
+            {
+                var wa = SystemParameters.WorkArea;
+                w.MaxWidth = wa.Width;
+                w.MaxHeight = wa.Height;
+            }
+
+            void KeepOnScreen()
+            {
+                var wa = SystemParameters.WorkArea;
+                double width = w.ActualWidth, height = w.ActualHeight;
+                if (double.IsNaN(w.Left) || double.IsNaN(w.Top) || width <= 0 || height <= 0) return;
+                if (w.Left + width > wa.Right) w.Left = Math.Max(wa.Left, wa.Right - width);
+                if (w.Top + height > wa.Bottom) w.Top = Math.Max(wa.Top, wa.Bottom - height);
+                if (w.Left < wa.Left) w.Left = wa.Left;
+                if (w.Top < wa.Top) w.Top = wa.Top;
+            }
+
+            void Apply()
+            {
+                Constrain();
+                var hwnd = new WindowInteropHelper(w).Handle;
+                HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+                RoundCornersHwnd(hwnd);
+            }
+
+            if (w.IsLoaded) Apply();
+            else w.SourceInitialized += (_, __) => Apply();
+            w.Loaded += (_, __) => KeepOnScreen();
+            w.SizeChanged += (_, __) => KeepOnScreen();
+        }
+
         public static void FitToScreen(Window w)
         {
             void Apply()

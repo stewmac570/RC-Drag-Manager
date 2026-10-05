@@ -11,6 +11,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public EditResultDialog(int matchId, string roundLabel, string d1, string d2, bool bye1, bool bye2)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TitleText.Text = $"Edit result — M{matchId} ({roundLabel})";
             Btn1.Content = $"Set winner: {d1}";
             Btn2.Content = $"Set winner: {d2}";

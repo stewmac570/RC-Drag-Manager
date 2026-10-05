@@ -10,6 +10,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public SetQualTimeDialog(string driverName, double? current)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TitleText.Text = $"Qual time — {driverName}";
             TxtQualTime.Text = current?.ToString("0.000") ?? "";
             TxtQualTime.Focus();

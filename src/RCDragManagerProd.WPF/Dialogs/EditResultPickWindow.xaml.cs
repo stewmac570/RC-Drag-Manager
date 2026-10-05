@@ -12,6 +12,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public EditResultPickWindow(IList<WinnerDisplayRow> results)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             Dg.ItemsSource = results;
         }
 
