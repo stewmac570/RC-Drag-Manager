@@ -185,6 +185,65 @@ namespace RCDragManagerProd.AppServices
             }).ToList();
         }
 
+        /// <summary>
+        /// Puts one driver's car into a class, or takes it out. Used when entry money is
+        /// ticked on the money sheet, which is where drivers are entered into classes.
+        /// A Multi-Car class takes any number of a driver's cars; any other class takes
+        /// a driver once. Returns an operator-facing error, or null.
+        /// </summary>
+        public string SetEntered(ClassConfigDto cc, Driver driver, Car car, bool entered, IReadOnlyList<Driver> allDrivers)
+        {
+            if (cc == null) return "That class no longer exists.";
+            if (driver == null) return "That driver is not in the driver database.";
+            var existing = cc.DriverEntries ?? new List<RaceSessionDriverEntry>();
+            bool multiCar = string.Equals(cc.RaceType, RaceTypes.MultiCarRoundRobin, StringComparison.OrdinalIgnoreCase);
+
+            if (multiCar)
+            {
+                if (car == null || car.CarID <= 0)
+                    return $"{driver.Name} has no car. Add a car in Driver Manager to enter a multi-car class.";
+
+                var carIds = existing.Select(e => e.CarID).Where(id => id > 0).ToList();
+                if (entered && carIds.Contains(car.CarID)) return null;
+                if (!entered && !carIds.Contains(car.CarID)) return null;
+                if (entered) carIds.Add(car.CarID); else carIds.Remove(car.CarID);
+
+                // Keep any dial-in already set on the cars that stay in the class.
+                var keepDialIns = existing.Where(e => e.CarID > 0)
+                    .GroupBy(e => e.CarID).ToDictionary(g => g.Key, g => g.First().DialIn);
+                cc.DriverEntries = BuildMultiCarRoundRobinEntries(carIds, allDrivers, cc.ClassType, cc.FixedDialIn,
+                    cc.ClassType == "Dial-In" ? keepDialIns : null, cc.ClassName);
+                return null;
+            }
+
+            var mine = existing.FirstOrDefault(e => e.DriverID == driver.Id);
+            if (!entered)
+            {
+                if (mine != null && (car == null || mine.CarID == car.CarID || mine.CarID == 0))
+                    cc.DriverEntries = existing.Where(e => e.DriverID != driver.Id).ToList();
+                return null;
+            }
+
+            if (mine != null)
+                return mine.CarID == (car?.CarID ?? 0)
+                    ? null
+                    : $"{driver.Name} is already in {cc.ClassName} with {(string.IsNullOrEmpty(mine.CarName) ? "another car" : mine.CarName)}.";
+
+            var built = BuildDriverEntries(new[] { driver.Id }, allDrivers, cc.ClassType, cc.FixedDialIn, null, cc.ClassName)
+                .FirstOrDefault();
+            if (built == null) return $"{driver.Name} could not be entered.";
+            if (car != null && car.CarID > 0)
+            {
+                // Enter the car that was ticked, not just the driver's first car.
+                built.CarID = car.CarID;
+                built.CarName = car.CarName ?? "";
+                if (string.Equals(cc.ClassType, "Dial-In", StringComparison.OrdinalIgnoreCase))
+                    built.DialIn = car.DefaultDialIn;
+            }
+            cc.DriverEntries = existing.Concat(new[] { built }).ToList();
+            return null;
+        }
+
         // ── Event construction ────────────────────────────────────────────────
 
         /// <summary>

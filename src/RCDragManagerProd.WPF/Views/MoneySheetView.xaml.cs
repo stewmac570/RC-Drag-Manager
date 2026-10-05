@@ -8,17 +8,18 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Input;
 using RCDragManagerProd.AppServices;
 using RCDragManagerProd.Domain;
 using RCDragManagerProd.Repositories;
+using RCDragManagerProd.WPF.Dialogs;
 
 namespace RCDragManagerProd.WPF.Views
 {
     /// <summary>What the money sheet is being used for.</summary>
     public enum MoneySheetMode
     {
-        /// <summary>Setup screen, before racing: track fees and class entries are taken.</summary>
+        /// <summary>Setup screen, before racing. Every driver and car is listed; ticking a
+        /// class entry takes the money and puts the car into the class.</summary>
         Entries,
 
         /// <summary>Running event: entries are locked and only buybacks are taken.</summary>
@@ -39,6 +40,7 @@ namespace RCDragManagerProd.WPF.Views
         private readonly MoneySheetMode _mode;
         private readonly List<MoneySheetClass> _classes;
         private readonly ObservableCollection<MoneyRow> _rows = new ObservableCollection<MoneyRow>();
+        private ICollectionView _view;
 
         public MoneySheetView(MoneySheetService service, DriverRepository drivers, MoneySheetMode mode)
         {
@@ -52,13 +54,15 @@ namespace RCDragManagerProd.WPF.Views
             LblTitle.Text = entries ? "Entry money" : "Buybacks";
             AddBar.Visibility = entries ? Visibility.Visible : Visibility.Collapsed;
 
-            // Opens on everyone entered in the classes: at setup to take entries, and
-            // in the event so an older event without a sheet can still take buybacks.
-            _service.AddEveryoneFromClasses();
+            // In the event the sheet holds whoever paid at setup; add anyone entered
+            // since (or an older event with no sheet) so their buybacks can be taken.
+            if (!entries) _service.AddEveryoneFromClasses();
 
             BuildPrices();
             BuildColumns();
-            DgMoney.ItemsSource = _rows;
+            _view = CollectionViewSource.GetDefaultView(_rows);
+            _view.Filter = MatchesSearch;
+            DgMoney.ItemsSource = _view;
             Reload();
         }
 
@@ -125,7 +129,8 @@ namespace RCDragManagerProd.WPF.Views
 
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Driver", Binding = new Binding(nameof(MoneyRow.DriverName)), IsReadOnly = true, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Car", Binding = new Binding(nameof(MoneyRow.CarName)), IsReadOnly = true, Width = 130 });
-            DgMoney.Columns.Add(TickColumn("Track fee", nameof(MoneyRow.TrackFee), nameof(MoneyRow.TrackFeeTotal), editable: entries));
+            DgMoney.Columns.Add(TickColumn("Track fee", nameof(MoneyRow.TrackFee), nameof(MoneyRow.TrackFeeTotal),
+                editable: entries, visibilityPath: nameof(MoneyRow.TrackFeeVisibility)));
 
             for (int i = 0; i < _classes.Count; i++)
             {
@@ -137,22 +142,11 @@ namespace RCDragManagerProd.WPF.Views
             }
 
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Paid", Binding = new Binding(nameof(MoneyRow.TotalText)), IsReadOnly = true, Width = 80 });
-
-            if (entries)
-            {
-                var remove = new DataGridTemplateColumn { Header = "", Width = 80 };
-                var button = new FrameworkElementFactory(typeof(Button));
-                button.SetValue(ContentProperty, "Remove");
-                button.SetValue(StyleProperty, FindResource("Style.Button.Toolbar.Danger"));
-                button.SetBinding(VisibilityProperty, new Binding(nameof(MoneyRow.TickVisibility)));
-                button.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler(BtnRemove_Click));
-                remove.CellTemplate = new DataTemplate { VisualTree = button };
-                DgMoney.Columns.Add(remove);
-            }
         }
 
         /// <summary>A tick box for each competitor; on the total row, the column's total.</summary>
-        private static DataGridTemplateColumn TickColumn(string header, string tickPath, string totalPath, bool editable)
+        private static DataGridTemplateColumn TickColumn(string header, string tickPath, string totalPath, bool editable,
+                                                         string visibilityPath = null)
         {
             var root = new FrameworkElementFactory(typeof(Grid));
 
@@ -162,7 +156,7 @@ namespace RCDragManagerProd.WPF.Views
             tick.SetValue(IsEnabledProperty, editable);
             tick.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
             tick.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
-            tick.SetBinding(VisibilityProperty, new Binding(nameof(MoneyRow.TickVisibility)));
+            tick.SetBinding(VisibilityProperty, new Binding(visibilityPath ?? nameof(MoneyRow.TickVisibility)));
             root.AppendChild(tick);
 
             var total = new FrameworkElementFactory(typeof(TextBlock));
@@ -182,7 +176,7 @@ namespace RCDragManagerProd.WPF.Views
             };
         }
 
-        // ── Rows and totals ───────────────────────────────────────────────────
+        // ── Rows, search and totals ───────────────────────────────────────────
 
         private void Reload()
         {
@@ -191,16 +185,30 @@ namespace RCDragManagerProd.WPF.Views
             foreach (var e in _service.Sheet.Entries
                          .OrderBy(x => x.DriverName, StringComparer.OrdinalIgnoreCase)
                          .ThenBy(x => x.CarName, StringComparer.OrdinalIgnoreCase))
-                _rows.Add(new MoneyRow(e, names, _service, OnRowChanged));
+                _rows.Add(new MoneyRow(e, names, _service, OnRowChanged, ShowError));
             _rows.Add(MoneyRow.TotalRow(names, _service));
             UpdateTotals();
         }
 
+        private bool MatchesSearch(object item)
+        {
+            var row = item as MoneyRow;
+            var text = (TxtSearch?.Text ?? "").Trim();
+            if (row == null || row.Source == null || text.Length == 0) return true;
+            return (row.DriverName ?? "").IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   (row.CarName ?? "").IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e) => _view?.Refresh();
+
         private void OnRowChanged()
         {
+            LblMessage.Text = "";
             UpdateTotals();
             Save();
         }
+
+        private void ShowError(string message) => LblMessage.Text = message;
 
         private void UpdateTotals()
         {
@@ -217,51 +225,20 @@ namespace RCDragManagerProd.WPF.Views
             else if (_mode == MoneySheetMode.Buybacks) LblMessage.Text = $"Saved {DateTime.Now:HH:mm:ss}";
         }
 
-        // ── Commands ──────────────────────────────────────────────────────────
+        // ── New driver ────────────────────────────────────────────────────────
 
-        private void BtnAddAll_Click(object sender, RoutedEventArgs e)
+        private void BtnNewDriver_Click(object sender, RoutedEventArgs e)
         {
-            int added = _service.AddEveryoneFromClasses();
+            if (_drivers == null) return;
+            var dlg = new QuickAddDriverDialog { Owner = Window.GetWindow(this) };
+            if (dlg.ShowDialog() != true) return;
+
+            var car = new Car { CarName = dlg.CarName, ClassType = dlg.ClassType, DefaultDialIn = dlg.DialIn };
+            new MultiClassSetupService(_drivers).QuickAddDriver(dlg.DriverName, car);
+            _service.AddEveryoneFromDatabase(_drivers.GetAllDrivers());
             Reload();
-            Save();
-            LblMessage.Text = added == 0 ? "Everyone in the classes is already on the sheet." : $"Added {added}.";
-        }
-
-        private void BtnAdd_Click(object sender, RoutedEventArgs e) => AddByName();
-
-        private void TxtAddName_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) { AddByName(); e.Handled = true; }
-        }
-
-        private void AddByName()
-        {
-            var name = (TxtAddName.Text ?? "").Trim();
-            if (name.Length == 0) { LblMessage.Text = "Type a driver name."; return; }
-
-            var driver = (_drivers?.GetAllDrivers() ?? new List<Driver>())
-                .FirstOrDefault(d => string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
-            if (driver == null)
-            {
-                LblMessage.Text = $"No driver called '{name}'. Add them in Driver Manager first.";
-                return;
-            }
-
-            // One row per car; a driver with no car gets one row with no car.
-            var cars = (driver.Cars ?? new List<Car>()).Select(c => c.CarName ?? "").DefaultIfEmpty("").ToList();
-            var errors = cars.Select(c => _service.AddDriver(driver, c)).Where(x => x != null).ToList();
-            Reload();
-            Save();
-            TxtAddName.Text = "";
-            LblMessage.Text = errors.Count == cars.Count ? errors[0] : $"Added {driver.Name}.";
-        }
-
-        private void BtnRemove_Click(object sender, RoutedEventArgs e)
-        {
-            if (!((sender as FrameworkElement)?.DataContext is MoneyRow row) || row.Source == null) return;
-            _service.Remove(row.Source);
-            Reload();
-            Save();
+            TxtSearch.Text = dlg.DriverName;
+            LblMessage.Text = $"Added {dlg.DriverName}. Tick what they have paid.";
         }
 
         private static string Money(decimal v) => v.ToString("0.##", CultureInfo.InvariantCulture);
@@ -276,20 +253,26 @@ namespace RCDragManagerProd.WPF.Views
             private readonly List<string> _classes;
             private readonly Action _changed;
 
-            public MoneyRow(MoneySheetEntry entry, List<string> classes, MoneySheetService service, Action changed)
+            public MoneyRow(MoneySheetEntry entry, List<string> classes, MoneySheetService service, Action changed,
+                            Action<string> error)
             {
                 Source = entry;
                 _classes = classes;
                 _service = service;
                 _changed = changed;
-                Entry = new PaidFlags(entry?.EntriesPaid ?? new List<string>(), classes, Changed);
-                Buyback = new PaidFlags(entry?.BuybacksPaid ?? new List<string>(), classes, Changed);
+
+                var entriesPaid = entry?.EntriesPaid ?? new List<string>();
+                // Entry ticks go through the service: at setup a tick also puts the car
+                // into the class, and can be refused (e.g. already in with another car).
+                Entry = new PaidFlags(entriesPaid, classes, Changed,
+                    (cls, paid) => entry == null ? null : _service.SetEntryPaid(entry, cls, paid), error);
+                Buyback = new PaidFlags(entry?.BuybacksPaid ?? new List<string>(), classes, Changed, null, error);
                 EntryTotal = new ColumnTotals(i => Dollars(_service.EntriesPaidCount(_classes[i]) * _service.PriceFor(_classes[i]).Entry));
                 BuybackTotal = new ColumnTotals(i => Dollars(_service.BuybacksPaidCount(_classes[i]) * _service.PriceFor(_classes[i]).Buyback));
             }
 
             public static MoneyRow TotalRow(List<string> classes, MoneySheetService service) =>
-                new MoneyRow(null, classes, service, null);
+                new MoneyRow(null, classes, service, null, null);
 
             internal MoneySheetEntry Source { get; }
             private bool IsTotal => Source == null;
@@ -299,6 +282,10 @@ namespace RCDragManagerProd.WPF.Views
 
             public Visibility TickVisibility => IsTotal ? Visibility.Collapsed : Visibility.Visible;
             public Visibility TotalVisibility => IsTotal ? Visibility.Visible : Visibility.Collapsed;
+
+            /// <summary>The track fee is per driver: only their first car's row has the tick.</summary>
+            public Visibility TrackFeeVisibility =>
+                !IsTotal && _service.TakesTrackFee(Source) ? Visibility.Visible : Visibility.Collapsed;
 
             public bool TrackFee
             {
@@ -344,12 +331,17 @@ namespace RCDragManagerProd.WPF.Views
             private readonly List<string> _paid;
             private readonly List<string> _classes;
             private readonly Action _changed;
+            private readonly Func<string, bool, string> _set;
+            private readonly Action<string> _error;
 
-            public PaidFlags(List<string> paid, List<string> classes, Action changed)
+            public PaidFlags(List<string> paid, List<string> classes, Action changed,
+                             Func<string, bool, string> set, Action<string> error)
             {
                 _paid = paid;
                 _classes = classes;
                 _changed = changed;
+                _set = set;
+                _error = error;
             }
 
             public bool this[int index]
@@ -358,8 +350,11 @@ namespace RCDragManagerProd.WPF.Views
                 set
                 {
                     if (index < 0 || index >= _classes.Count || this[index] == value) return;
-                    MoneySheetService.SetPaid(_paid, _classes[index], value);
+                    var problem = _set != null ? _set(_classes[index], value) : null;
+                    if (_set == null) MoneySheetService.SetPaid(_paid, _classes[index], value);
+                    // Refused ticks spring back.
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
+                    if (problem != null) { _error?.Invoke(problem); return; }
                     _changed?.Invoke();
                 }
             }

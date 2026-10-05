@@ -75,13 +75,69 @@ namespace RCDragManagerProd.AppServices
                     {
                         DriverId = e.DriverID,
                         DriverName = MultiCarNaming.OwnerName(e.DriverName, car),
-                        CarName = car
+                        CarName = car,
+                        CarId = e.CarID
                     });
                     added++;
                 }
             if (added > 0) Logger.Log($"[MONEY] Added {added} row(s) from the classes.");
             return added;
         }
+
+        /// <summary>
+        /// Setup screen: one row for every car of every driver in the database (one row
+        /// with no car for a driver who has none), so money can be taken before anyone
+        /// is in a class. Returns how many rows were added.
+        /// </summary>
+        public int AddEveryoneFromDatabase(IEnumerable<Driver> drivers)
+        {
+            int added = 0;
+            foreach (var d in drivers ?? Enumerable.Empty<Driver>())
+            {
+                if (d == null || d.Id <= 0) continue;
+                var cars = (d.Cars ?? new List<Car>()).Where(c => c != null).ToList();
+                if (cars.Count == 0) cars.Add(new Car { CarName = "" });
+                foreach (var car in cars)
+                {
+                    var name = car.CarName ?? "";
+                    if (Find(d.Id, name) != null) continue;
+                    Sheet.Entries.Add(new MoneySheetEntry { DriverId = d.Id, DriverName = d.Name ?? "", CarName = name, CarId = car.CarID });
+                    added++;
+                }
+            }
+            return added;
+        }
+
+        /// <summary>
+        /// Called before an entry tick changes, with the row, the class and the new state.
+        /// On the setup screen this puts the car into the class (or takes it out); an
+        /// error string stops the tick.
+        /// </summary>
+        public Func<MoneySheetEntry, string, bool, string> EntryChanging { get; set; }
+
+        /// <summary>Ticks or unticks a class entry. Returns an operator-facing error, or null.</summary>
+        public string SetEntryPaid(MoneySheetEntry row, string className, bool paid)
+        {
+            if (IsPaid(row.EntriesPaid, className) == paid) return null;
+            var error = EntryChanging?.Invoke(row, className, paid);
+            if (error != null) return error;
+            SetPaid(row.EntriesPaid, className, paid);
+            return null;
+        }
+
+        /// <summary>The track fee is per driver, not per car: only a driver's first row takes it.</summary>
+        public bool TakesTrackFee(MoneySheetEntry row) =>
+            Sheet.Entries
+                .Where(e => e.DriverId == row.DriverId)
+                .OrderBy(e => e.CarName ?? "", StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault() == row;
+
+        /// <summary>Drops rows with nothing paid, so the saved sheet holds only the people
+        /// who paid, not the whole driver database.</summary>
+        public int DropUnpaidRows() =>
+            Sheet.Entries.RemoveAll(e => e.TrackDaysPaid == 0 &&
+                                         (e.EntriesPaid?.Count ?? 0) == 0 &&
+                                         (e.BuybacksPaid?.Count ?? 0) == 0);
 
         /// <summary>Whether this row's driver and car are entered in the named class.</summary>
         public bool IsEnteredIn(MoneySheetEntry row, string className)

@@ -66,7 +66,7 @@ namespace RCDragManagerProd.WPF.Windows
         {
             if (_vm.Classes.Count == 0)
             {
-                MessageDialog.Info(this, "Add the classes first, then take the entry money.", "Entry money");
+                MessageDialog.Info(this, "Add the classes first. They don't need drivers: ticking entries on the money sheet fills them.", "Entry money");
                 return;
             }
             new EntryMoneyDialog(_vm.CreateMoneyService(), new DriverRepository(_connectionString)) { Owner = this }.ShowDialog();

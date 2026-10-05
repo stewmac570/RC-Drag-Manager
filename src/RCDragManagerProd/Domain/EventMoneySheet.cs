@@ -38,6 +38,9 @@ namespace RCDragManagerProd.Domain
         public string DriverName { get; set; } = "";
         public string CarName { get; set; } = "";
 
+        /// <summary>The car's database id, or 0 for a driver with no car.</summary>
+        public int CarId { get; set; }
+
         /// <summary>Track fee paid: 1 when ticked, 0 when not. (A count, so a sheet
         /// saved by the first version, which counted days, still loads.)</summary>
         public int TrackDaysPaid { get; set; }

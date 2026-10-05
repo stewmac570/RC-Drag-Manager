@@ -177,7 +177,7 @@
                     BorderThickness="0,1,0,0"
                     Padding="24,14">
                 <Grid>
-                    <TextBlock Text="Add at least one class with drivers to start."
+                    <TextBlock Text="Add the classes (no drivers needed), then take the entry money to fill them."
                                FontSize="{StaticResource FontSize.Xs}"
                                Foreground="{StaticResource Brush.TextHint}"
                                VerticalAlignment="Center"/>
