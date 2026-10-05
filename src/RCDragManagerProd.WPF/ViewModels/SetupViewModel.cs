@@ -105,7 +105,8 @@ namespace RCDragManagerProd.WPF.ViewModels
         /// <summary>The money rules over the classes configured so far.</summary>
         public MoneySheetService CreateMoneyService() =>
             new MoneySheetService(MoneySheet, () => _configs
-                .Select(c => new MoneySheetClass(c.ClassName, c.DriverEntries))
+                .Select(c => new MoneySheetClass(c.ClassName, c.DriverEntries,
+                    MoneySheetService.HasBuybacks(c.RaceType, c.Variant)))
                 .ToList());
 
         /// <summary>Builds, persists, and returns the new event.</summary>

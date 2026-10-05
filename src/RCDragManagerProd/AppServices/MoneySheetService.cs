@@ -28,7 +28,8 @@ namespace RCDragManagerProd.AppServices
             _classes = () => evt.ClassSessions
                 .Select((s, i) => new MoneySheetClass(
                     string.IsNullOrWhiteSpace(s.ClassType) ? $"Class {i + 1}" : s.ClassType,
-                    s.DriverEntries))
+                    s.DriverEntries,
+                    HasBuybacks(s.OriginalRaceType ?? s.RaceType, s.RoundRobinVariant)))
                 .ToList();
             _save = () => SaveEvent(evt, repo);
         }
@@ -44,8 +45,18 @@ namespace RCDragManagerProd.AppServices
 
         public EventMoneySheet Sheet { get; }
 
+        /// <summary>The event's classes, in order.</summary>
+        public List<MoneySheetClass> Classes => _classes();
+
         /// <summary>The event's class names, in order.</summary>
         public List<string> ClassNames => _classes().Select(c => c.Name).ToList();
+
+        /// <summary>Only a Round Robin class with buybacks switched on takes buyback money.</summary>
+        public static bool HasBuybacks(string raceType, string roundRobinVariant) =>
+            RaceTypes.IsRoundRobinFormat(raceType) && EventSettingsService.BuybacksEnabledIn(roundRobinVariant);
+
+        public bool ClassHasBuybacks(string className) =>
+            _classes().Any(c => c.HasBuybacks && string.Equals(c.Name, className, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Adds a row for every driver and car entered in the classes that is not on the
@@ -128,7 +139,7 @@ namespace RCDragManagerProd.AppServices
         public decimal TotalFor(MoneySheetEntry e) =>
             e.TrackDaysPaid * Sheet.TrackFee +
             (e.EntriesPaid ?? new List<string>()).Sum(c => PriceFor(c).Entry) +
-            (e.BuybacksPaid ?? new List<string>()).Sum(c => PriceFor(c).Buyback);
+            (e.BuybacksPaid ?? new List<string>()).Where(ClassHasBuybacks).Sum(c => PriceFor(c).Buyback);
 
         public decimal Total => Sheet.Entries.Sum(TotalFor);
 
@@ -139,7 +150,8 @@ namespace RCDragManagerProd.AppServices
 
         public int EntriesPaidCount(string className) => Sheet.Entries.Count(e => IsPaid(e.EntriesPaid, className));
 
-        public int BuybacksPaidCount(string className) => Sheet.Entries.Count(e => IsPaid(e.BuybacksPaid, className));
+        public int BuybacksPaidCount(string className) =>
+            ClassHasBuybacks(className) ? Sheet.Entries.Count(e => IsPaid(e.BuybacksPaid, className)) : 0;
 
         /// <summary>A class's pot: its paid entries plus its paid buybacks, at its own prices.</summary>
         public decimal PotFor(string className)
@@ -174,13 +186,17 @@ namespace RCDragManagerProd.AppServices
     /// <summary>One class as the money sheet sees it: its name and who is entered.</summary>
     public sealed class MoneySheetClass
     {
-        public MoneySheetClass(string name, IEnumerable<RaceSessionDriverEntry> entries)
+        public MoneySheetClass(string name, IEnumerable<RaceSessionDriverEntry> entries, bool hasBuybacks = false)
         {
             Name = name ?? "";
             Entries = entries?.ToList() ?? new List<RaceSessionDriverEntry>();
+            HasBuybacks = hasBuybacks;
         }
 
         public string Name { get; }
+
+        /// <summary>True for a Round Robin class with buybacks on: it takes buyback money.</summary>
+        public bool HasBuybacks { get; }
         public List<RaceSessionDriverEntry> Entries { get; }
     }
 }

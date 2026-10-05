@@ -13,24 +13,18 @@
         </Grid.RowDefinitions>
 
         <!-- Header: title and prices -->
-        <Border Grid.Row="0" Padding="24,14"
+        <Border Grid.Row="0" Padding="24,10,24,2"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
-            <StackPanel>
-                <TextBlock x:Name="LblTitle" Text="Money"
-                           FontSize="{StaticResource FontSize.Xl}" FontWeight="Medium"
+            <DockPanel>
+                <TextBlock x:Name="LblTitle" Text="Money" DockPanel.Dock="Left" VerticalAlignment="Top"
+                           FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium" Margin="0,4,24,0"
                            Foreground="{StaticResource Brush.TextPrimary}"/>
-                <TextBlock x:Name="LblHint"
-                           FontSize="{StaticResource FontSize.Sm}" TextWrapping="Wrap"
-                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,3,0,10"/>
-                <TextBlock Text="Prices"
-                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
-                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,6"/>
                 <WrapPanel x:Name="PricePanel" Orientation="Horizontal"/>
-            </StackPanel>
+            </DockPanel>
         </Border>
 
         <!-- Add drivers (setup only) -->
-        <Border x:Name="AddBar" Grid.Row="1" Padding="24,10"
+        <Border x:Name="AddBar" Grid.Row="1" Padding="24,6"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="False">
                 <TextBlock Text="Driver name" VerticalAlignment="Center" DockPanel.Dock="Left"
@@ -44,22 +38,21 @@
             </DockPanel>
         </Border>
 
-        <DataGrid x:Name="DgMoney" Grid.Row="2" Margin="24,12"
+        <DataGrid x:Name="DgMoney" Grid.Row="2" Margin="24,8" CanUserSortColumns="False"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" HeadersVisibility="Column"/>
 
         <!-- Footer: totals -->
-        <Border Grid.Row="3" Padding="24,12"
+        <Border Grid.Row="3" Padding="24,8"
                 Background="{StaticResource Brush.Chrome}"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
-            <StackPanel>
-                <TextBlock Text="Totals"
-                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
-                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,4"/>
-                <StackPanel x:Name="TotalsPanel"/>
-                <TextBlock x:Name="LblMessage" Margin="0,6,0,0"
+            <DockPanel>
+                <TextBlock x:Name="LblMessage" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0"
                            FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"/>
-            </StackPanel>
+                <TextBlock x:Name="LblPots" VerticalAlignment="Center" TextWrapping="Wrap"
+                           FontSize="{StaticResource FontSize.Md}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextPrimary}"/>
+            </DockPanel>
         </Border>
     </Grid>
 </UserControl>

@@ -89,6 +89,23 @@ public class MoneySheetServiceTests
     }
 
     [TestMethod]
+    public void ClassWithoutBuybacks_TakesNoBuybackMoney()
+    {
+        var evt = Event();
+        evt.ClassSessions[0].RoundRobinVariant = "QMDRA";   // buybacks off
+        var svc = new MoneySheetService(evt, null);
+        svc.AddEveryoneFromClasses();
+        svc.PriceFor("DYO").Buyback = 50m;
+        var ben = svc.Sheet.Entries.First();
+        MoneySheetService.SetPaid(ben.BuybacksPaid, "DYO", true);   // e.g. ticked before buybacks were turned off
+
+        Assert.IsFalse(svc.Classes.Single().HasBuybacks);
+        Assert.AreEqual(0, svc.BuybacksPaidCount("DYO"));
+        Assert.AreEqual(0m, svc.PotFor("DYO"));
+        Assert.AreEqual(0m, svc.TotalFor(ben));
+    }
+
+    [TestMethod]
     public void SetupSheet_FillsFromConfiguredClasses_BeforeTheEventExists()
     {
         var sheet = new EventMoneySheet();
