@@ -99,6 +99,9 @@
                             <Button Style="{StaticResource Style.Button.Toolbar.Danger}"
                                     Content="Remove" Click="BtnRemoveClass_Click"
                                     IsEnabled="{Binding HasSelection}"/>
+                            <Button Style="{StaticResource Style.Button.Toolbar}"
+                                    Content="Entry money" Click="BtnEntryMoney_Click"
+                                    Margin="16,0,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -174,7 +177,7 @@
                     BorderThickness="0,1,0,0"
                     Padding="24,14">
                 <Grid>
-                    <TextBlock Text="Add at least one class with drivers to start."
+                    <TextBlock Text="Add the classes (no drivers needed), then take the entry money to fill them."
                                FontSize="{StaticResource FontSize.Xs}"
                                Foreground="{StaticResource Brush.TextHint}"
                                VerticalAlignment="Center"/>

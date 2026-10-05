@@ -11,12 +11,14 @@ namespace RCDragManagerProd.WPF.Windows
     public partial class SetupWindow : Window
     {
         private readonly SetupViewModel _vm;
+        private readonly string _connectionString;
 
         /// <summary>The created event, available to the caller after a successful Start.</summary>
         public MultiClassEvent CreatedEvent { get; private set; }
 
         public SetupWindow(string connectionString)
         {
+            _connectionString = connectionString;
             InitializeComponent();
             WindowSizing.FitToScreen(this);
             var service = new MultiClassSetupService(new DriverRepository(connectionString));
@@ -58,6 +60,16 @@ namespace RCDragManagerProd.WPF.Windows
             int idx = _vm.IndexOf(_vm.SelectedClass);
             if (idx < 0) return;
             _vm.RemoveClass(idx);
+        }
+
+        private void BtnEntryMoney_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vm.Classes.Count == 0)
+            {
+                MessageDialog.Info(this, "Add the classes first. They don't need drivers: ticking entries on the money sheet fills them.", "Entry money");
+                return;
+            }
+            new EntryMoneyDialog(_vm.CreateMoneyService(), new DriverRepository(_connectionString)) { Owner = this }.ShowDialog();
         }
 
         private void DgClasses_DoubleClick(object sender, MouseButtonEventArgs e)

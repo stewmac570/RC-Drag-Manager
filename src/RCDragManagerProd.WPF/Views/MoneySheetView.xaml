@@ -12,61 +12,46 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header: fees -->
-        <Border Grid.Row="0" Padding="24,14"
+        <!-- Header: title and prices -->
+        <Border Grid.Row="0" Padding="24,10,24,2"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
-            <StackPanel>
-                <TextBlock Text="Money"
-                           FontSize="{StaticResource FontSize.Xl}" FontWeight="Medium"
+            <DockPanel>
+                <TextBlock x:Name="LblTitle" Text="Money" DockPanel.Dock="Left" VerticalAlignment="Top"
+                           FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium" Margin="0,4,24,0"
                            Foreground="{StaticResource Brush.TextPrimary}"/>
-                <TextBlock Text="Tick what each driver has paid. Changes save as you go."
-                           FontSize="{StaticResource FontSize.Sm}"
-                           Foreground="{StaticResource Brush.TextMuted}" Margin="0,3,0,10"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Track fee per day $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,6,0"/>
-                    <TextBox x:Name="TxtTrackFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                    <TextBlock Text="Entry fee per class $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="20,0,6,0"/>
-                    <TextBox x:Name="TxtEntryFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                    <TextBlock Text="Buyback fee $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="20,0,6,0"/>
-                    <TextBox x:Name="TxtBuybackFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- Add drivers -->
-        <Border Grid.Row="1" Padding="24,10"
-                BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
-            <DockPanel LastChildFill="False">
-                <TextBlock Text="Driver name" VerticalAlignment="Center" DockPanel.Dock="Left"
-                           FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,6,0"/>
-                <TextBox x:Name="TxtAddName" DockPanel.Dock="Left" Width="200"
-                         Style="{StaticResource Style.TextBox.Compact}" KeyDown="TxtAddName_KeyDown"/>
-                <Button DockPanel.Dock="Left" Style="{StaticResource Style.Button.Toolbar}" Margin="8,0,0,0"
-                        Content="Add" Click="BtnAdd_Click"/>
-                <Button DockPanel.Dock="Right" Style="{StaticResource Style.Button.Toolbar}"
-                        Content="Add everyone in this event's classes" Click="BtnAddAll_Click"/>
+                <WrapPanel x:Name="PricePanel" Orientation="Horizontal"/>
             </DockPanel>
         </Border>
 
-        <DataGrid x:Name="DgMoney" Grid.Row="2" Margin="24,12"
+        <!-- Add drivers (setup only) -->
+        <Border x:Name="AddBar" Grid.Row="1" Padding="24,6"
+                BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="False">
+                <TextBlock Text="Search" VerticalAlignment="Center" DockPanel.Dock="Left"
+                           FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,6,0"/>
+                <TextBox x:Name="TxtSearch" DockPanel.Dock="Left" Width="220"
+                         Style="{StaticResource Style.TextBox.Compact}" TextChanged="TxtSearch_TextChanged"/>
+                <TextBlock x:Name="LblHint" DockPanel.Dock="Left" VerticalAlignment="Center" Margin="16,0,0,0"
+                           FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"
+                           Text="Ticking a class entry puts that car into the class."/>
+                <Button DockPanel.Dock="Right" Style="{StaticResource Style.Button.Toolbar}"
+                        Content="New driver" Click="BtnNewDriver_Click"/>
+            </DockPanel>
+        </Border>
+
+        <DataGrid x:Name="DgMoney" Grid.Row="2" Margin="24,8" CanUserSortColumns="False"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" HeadersVisibility="Column"/>
 
-        <!-- Footer -->
-        <Border Grid.Row="3" Padding="24,12"
+        <!-- Footer: totals -->
+        <Border Grid.Row="3" Padding="24,8"
                 Background="{StaticResource Brush.Chrome}"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
             <DockPanel>
-                <TextBlock x:Name="LblMessage" DockPanel.Dock="Left" VerticalAlignment="Center"
+                <TextBlock x:Name="LblMessage" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0"
                            FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"/>
-                <TextBlock x:Name="LblTotal" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
+                <TextBlock x:Name="LblPots" VerticalAlignment="Center" TextWrapping="Wrap"
+                           FontSize="{StaticResource FontSize.Md}" FontWeight="Medium"
                            Foreground="{StaticResource Brush.TextPrimary}"/>
             </DockPanel>
         </Border>

@@ -97,10 +97,51 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         public string ValidateCanStart() => _service.ValidateCanStart(_configs);
 
+        // ── Entry money ───────────────────────────────────────────────────────
+
+        /// <summary>Entry money taken before racing; becomes the event's money sheet.</summary>
+        public EventMoneySheet MoneySheet { get; } = new EventMoneySheet();
+
+        /// <summary>
+        /// The money rules over the classes configured so far. Money comes first: the
+        /// sheet lists every driver and car in the database, and ticking a class entry
+        /// puts that car into the class (unticking takes it out).
+        /// </summary>
+        public MoneySheetService CreateMoneyService()
+        {
+            var money = new MoneySheetService(MoneySheet, () => _configs
+                .Select(c => new MoneySheetClass(c.ClassName, c.DriverEntries,
+                    MoneySheetService.HasBuybacks(c.RaceType, c.Variant)))
+                .ToList());
+            money.AddEveryoneFromDatabase(_service.GetAllDrivers());
+            money.EntryChanging = SetEntered;
+            return money;
+        }
+
+        private string SetEntered(MoneySheetEntry row, string className, bool entered)
+        {
+            int index = _configs.FindIndex(c => string.Equals(c.ClassName, className, StringComparison.OrdinalIgnoreCase));
+            if (index < 0) return "That class no longer exists.";
+
+            var allDrivers = _service.GetAllDrivers();
+            var driver = allDrivers.FirstOrDefault(d => d.Id == row.DriverId);
+            var car = driver?.Cars?.FirstOrDefault(c => c.CarID == row.CarId && row.CarId > 0);
+
+            var error = _service.SetEntered(_configs[index], driver, car, entered, allDrivers);
+            if (error != null) return error;
+
+            Classes[index] = ToRow(_configs[index]);
+            OnPropertyChanged(nameof(CanStart));
+            return null;
+        }
+
         /// <summary>Builds, persists, and returns the new event.</summary>
         public MultiClassEvent StartEvent()
         {
             var evt = _service.StartEvent(EventName?.Trim() ?? "", EventDate.Date, _configs);
+            // Keep the people who paid, not the whole driver database.
+            new MoneySheetService(MoneySheet, () => new List<MoneySheetClass>()).DropUnpaidRows();
+            evt.MoneySheet = MoneySheet;
             _eventRepo.SaveEvent(evt);
             return evt;
         }
