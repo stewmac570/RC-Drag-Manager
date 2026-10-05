@@ -11,6 +11,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public AddEditDriverDialog(string existingName = null, string existingState = null)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TitleText.Text = existingName == null ? "Add driver" : "Edit driver";
             TxtName.Text = existingName ?? "";
             TxtState.Text = existingState ?? "";

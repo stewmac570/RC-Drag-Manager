@@ -95,6 +95,13 @@ namespace RCDragManagerProd.AppServices
             var drivers = (roster ?? Array.Empty<Driver>())
                 .Where(d => d != null)
                 .ToList();
+
+            if (MultiCarNaming.IsMultiCar(session))
+            {
+                SyncMultiCarSession(session, drivers);
+                return;
+            }
+
             var existing = (session.DriverEntries ?? new List<RaceSessionDriverEntry>())
                 .Where(e => e != null)
                 .GroupBy(e => e.DriverID)
@@ -115,6 +122,60 @@ namespace RCDragManagerProd.AppServices
             }).ToList();
 
             session.Drivers = new List<Driver>(drivers);
+        }
+
+        /// <summary>
+        /// Multi-Car Round Robin: each roster row is one car, identified by its race entry
+        /// id, not the person's database id. This used to key entries by the person's id,
+        /// so on race day (2026-10-03) adding one driver dropped the entry id from almost
+        /// every car, the scheduler saw two cars, and the class collapsed to one race.
+        ///
+        /// A car added at the console carries its owner and car in <see cref="Driver.Cars"/>
+        /// (see <see cref="RaceRosterService"/> in car-entry mode).
+        /// </summary>
+        private static void SyncMultiCarSession(RaceSession session, List<Driver> roster)
+        {
+            var existing = (session.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                .Where(e => e != null && e.RaceEntryId > 0)
+                .GroupBy(e => e.RaceEntryId)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            bool classUsesDialIns = session.FixedDialIn.HasValue ||
+                                    existing.Values.Any(e => e.DialIn.HasValue);
+
+            var entries = new List<RaceSessionDriverEntry>(roster.Count);
+            foreach (var d in roster)
+            {
+                if (!existing.TryGetValue(d.Id, out var entry))
+                {
+                    var car = d.Cars?.FirstOrDefault();
+                    double? dialIn = null;
+                    if (session.FixedDialIn.HasValue) dialIn = session.FixedDialIn;
+                    else if (classUsesDialIns) dialIn = car?.DefaultDialIn;
+
+                    var carName = car?.CarName ?? "";
+                    entry = new RaceSessionDriverEntry
+                    {
+                        RaceEntryId = d.Id,
+                        DriverID    = car != null && car.DriverId > 0 ? car.DriverId : d.Id,
+                        DriverName  = MultiCarNaming.OwnerName(d.Name, carName),
+                        CarID       = car?.CarID ?? 0,
+                        CarName     = carName,
+                        ClassType   = session.ClassType ?? "",
+                        DialIn      = dialIn
+                    };
+                }
+                else
+                {
+                    entry.DriverName = MultiCarNaming.OwnerName(entry.DriverName, entry.CarName);
+                }
+
+                entry.QualifyingTime = d.QualTime;
+                entries.Add(entry);
+            }
+
+            session.DriverEntries = entries;
+            session.Drivers = new List<Driver>(roster);
         }
 
         /// <summary>

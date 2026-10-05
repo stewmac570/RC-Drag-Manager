@@ -11,6 +11,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public AddEditCarDialog(Car existing = null)
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TitleText.Text = existing == null ? "Add car" : "Edit car";
             TxtCarName.Text = existing?.CarName ?? "";
             TxtClassType.Text = existing?.ClassType ?? "";

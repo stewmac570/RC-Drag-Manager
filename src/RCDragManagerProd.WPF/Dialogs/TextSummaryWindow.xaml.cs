@@ -8,7 +8,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public TextSummaryWindow(string title, string body)
         {
             InitializeComponent();
-            WindowSizing.RoundCorners(this);
+            WindowSizing.FitDialogToScreen(this);
             Title = title;
             LblTitle.Text = title;
             TxtBody.Text = body;

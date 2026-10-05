@@ -145,7 +145,9 @@ namespace RCDragManagerProd.WPF.ViewModels
 
             Available.Clear();
             foreach (var d in _database
-                         .Where(d => !entered.Contains(d.Id))
+                         // Car rows carry race entry ids, which mean nothing against a
+                         // database id, and a driver may enter another car anyway.
+                         .Where(d => _service.CarEntries || !entered.Contains(d.Id))
                          .Where(d => string.IsNullOrWhiteSpace(_search) ||
                                      (d.Name ?? "").IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0)
                          .OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))

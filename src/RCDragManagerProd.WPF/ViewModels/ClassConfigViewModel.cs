@@ -318,7 +318,11 @@ namespace RCDragManagerProd.WPF.ViewModels
 
             string variant = null;
             int? rounds = null;
-            if (IsRoundRobinSelected)
+            // Both Round Robin forms show the buyback box and rounds field. This used to
+            // check plain Round Robin only, so a Multi-Car class always saved with no
+            // variant, fell back to buybacks on, and ran a losers bracket (race day
+            // 2026-10-03) even with the box unticked.
+            if (IsRoundRobinSelected || IsMultiCarRoundRobinSelected)
             {
                 variant = BuybackEnabled ? "Standard" : "QMDRA";
                 if (!int.TryParse(RoundsText?.Trim(), out var n) || n <= 0)

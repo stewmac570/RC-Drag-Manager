@@ -19,6 +19,8 @@ legacy WinForms UI and the WPF UI bind to these.
 | `MultiClassSetupService.cs` | Multi-class event setup validation and construction |
 | `MultiClassRaceService.cs` | Multi-class coordination helpers (per-class completion stats) |
 | `SessionRosterService.cs` | Roster validation/sync between the console grid and the session |
+| `TrackTestingService.cs` | Track testing: clears the stream overlay's local feed and publishes a times-only "Testing" state |
+| `MoneySheetService.cs` | Event money sheet rules: fill from classes, add a driver, totals, save with the event |
 | `DriverManagerService.cs` / `DriverStatsService.cs` | Driver registry and stats screens' logic |
 | `RaceResultsPresentationBuilder.cs` / `ClassCompletionPresentationBuilder.cs` | Build result/ladder presentations from a saved session |
 | `EventSettingsService.cs` | Rules behind the per-event Settings tab: pure functions over class state deciding what may change mid-event |
@@ -86,6 +88,7 @@ legacy WinForms UI and the WPF UI bind to these.
 | `RaceSession.cs` | `RaceSession` (full session state), `RaceSessionDriverEntry` (per-driver snapshot), `MatchResultSave` (serializable result record) |
 | `MultiClassEvent.cs` | Parent object for multi-class events: EventName, EventDate, `ClassSessions` (one `RaceSession` per class) |
 | `MultiCarRaceEntry.cs` | One car competing in a multi-car RR class; engine identity is the entry, not the person |
+| `EventMoneySheet.cs` | Event money sheet: fees and one row per driver and car with what they paid; saved inside `MultiClassEvent` |
 | `RaceResults.cs` | `RaceResultsArchive` and its phase/match/standings snapshot types |
 | `ResumeSnapshot.cs` | Bracket-structure + phase snapshot for mid-event resume (`SavedMatch` children) |
 | `MatchResult.cs` | In-memory result store: `SetWinner`, `GetWinner`, `GetLoser`, `HasResult`, `ClearFromMatch`, `IsTournamentComplete` |
@@ -344,9 +347,10 @@ marshalling).
 | Path | Description |
 |------|-------------|
 | `App.xaml(.cs)` | Startup: settings, theme, DB init, global exception handler, opens `LandingWindow` |
-| `Windows/` | Top-level windows: Landing, Setup, LoadSession, DriverManager, DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard |
+| `Windows/` | Top-level windows: Landing, Setup, LoadSession, DriverManager, DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard, TrackTesting |
 | `Views/RaceConsoleView.xaml(.cs)` | One class's race console; hosted standalone or one-per-tab in `MultiClassRaceWindow` |
 | `Views/EventSettingsView.xaml(.cs)` | The event settings tab (first tab of every event): class reset with typed confirmation, buybacks per class, live theme switching |
+| `Views/MoneySheetView.xaml(.cs)` | The Money tab (last tab of every event): track days, entry and buyback ticks per class, totals |
 | `Dialogs/` | Themed modal dialogs incl. `MessageDialog` (the dark `MessageBox` replacement), results/buyback/edit dialogs |
 | `ViewModels/` | INotifyPropertyChanged view models + display-row types |
 | `Resources/Theme.xaml` | Brushes (`Brush.*` bound to `C.*` colours), radii, font sizes |

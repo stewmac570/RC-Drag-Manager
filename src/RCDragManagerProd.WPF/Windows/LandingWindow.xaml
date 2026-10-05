@@ -265,7 +265,7 @@
 
                         <Button DockPanel.Dock="Top"
                                 Style="{StaticResource Style.Button.Tool}"
-                                Margin="0,0,0,0"
+                                Margin="0,0,0,6"
                                 Click="BtnLiveScoreboard_Click">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE701;"
@@ -275,6 +275,24 @@
                                            VerticalAlignment="Center"
                                            Width="26"/>
                                 <TextBlock Text="Live scoreboard"
+                                           FontSize="{StaticResource FontSize.Md}"
+                                           Foreground="{StaticResource Brush.TextPrimary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button DockPanel.Dock="Top"
+                                Style="{StaticResource Style.Button.Tool}"
+                                Margin="0,0,0,0"
+                                Click="BtnTrackTesting_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE916;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="17"
+                                           Foreground="{StaticResource Brush.TextSecondary}"
+                                           VerticalAlignment="Center"
+                                           Width="26"/>
+                                <TextBlock Text="Track testing"
                                            FontSize="{StaticResource FontSize.Md}"
                                            Foreground="{StaticResource Brush.TextPrimary}"
                                            VerticalAlignment="Center"/>

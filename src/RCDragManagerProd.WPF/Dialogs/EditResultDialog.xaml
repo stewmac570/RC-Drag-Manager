@@ -2,11 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Edit result"
-        Width="420"
+        Width="440" MinWidth="360"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         KeyDown="Window_KeyDown"
         Background="{StaticResource Brush.Surface}"
         FontFamily="Segoe UI"
@@ -14,11 +14,12 @@
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" GlassFrameThickness="0"
-                      ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+                      ResizeBorderThickness="5" UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
     <Border Background="{StaticResource Brush.Surface}"
             BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="24,22">
             <TextBlock x:Name="TitleText"
                        FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
@@ -35,5 +36,6 @@
             <Button Style="{StaticResource Style.Button.Dialog.Secondary}"
                     Content="Cancel" Click="BtnCancel_Click" HorizontalAlignment="Right"/>
         </StackPanel>
+    </ScrollViewer>
     </Border>
 </Window>

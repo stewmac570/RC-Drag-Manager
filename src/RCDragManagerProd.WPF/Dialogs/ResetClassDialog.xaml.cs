@@ -18,6 +18,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         {
             _className = (className ?? "").Trim();
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
 
             BodyText.Text =
                 $"This clears the bracket, winners and round progress for “{_className}” " +

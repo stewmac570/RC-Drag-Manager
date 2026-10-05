@@ -13,6 +13,7 @@ namespace RCDragManagerProd.WPF.Dialogs
         public QuickAddDriverDialog()
         {
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             TxtDriverName.Focus();
         }
 

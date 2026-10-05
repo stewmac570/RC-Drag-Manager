@@ -26,6 +26,7 @@ namespace RCDragManagerProd.WPF.Dialogs
             if (tryAdd == null) throw new ArgumentNullException(nameof(tryAdd));
             _tryAdd = tryAdd;
             InitializeComponent();
+            WindowSizing.FitDialogToScreen(this);
             Loaded += (_, __) => TxtName.Focus();
         }
 

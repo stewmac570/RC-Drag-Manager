@@ -123,6 +123,14 @@ oversized layout.
 |------|---------|------|
 | Workspace | Landing, Setup, Load, Driver Manager, Race Console, Multi-Class | `1180×660`, min `980×620` |
 | Utility | Driver Stats, Settings, Live Scoreboard | width `600`; height content-sized or explicit |
+| Small dialog | Add/edit driver or car, dial-in, qual time, edit result, reset class, message | width `440`, height to content, content in a `ScrollViewer` |
+| Medium dialog | Buybacks, pick a result to edit, text summary | `600×560` |
+| Large dialog | Class setup, race roster, results, class/event completion | `1040×660` |
+
+Every dialog is resizable (`CanResizeWithGrip`, chrome `ResizeBorderThickness="5"`)
+and keeps itself on screen: large dialogs call `WindowSizing.FitToScreen`, small
+and medium call `WindowSizing.FitDialogToScreen` (stays beside its owner).
+`DialogSizingStandardTests` enforces the tiers.
 
 Workspace windows all share one footprint so navigating between them never
 resizes the window. Anything that docks a footer of buttons must call

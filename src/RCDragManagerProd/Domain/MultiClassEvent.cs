@@ -9,5 +9,9 @@ namespace RCDragManagerProd.Domain
         public string EventName { get; set; }
         public DateTime EventDate { get; set; }
         public List<RaceSession> ClassSessions { get; set; } = new List<RaceSession>();
+
+        /// <summary>Who has paid what at this event. Null on events saved before the
+        /// money sheet existed.</summary>
+        public EventMoneySheet MoneySheet { get; set; }
     }
 }

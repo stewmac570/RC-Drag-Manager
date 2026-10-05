@@ -111,6 +111,9 @@ namespace RCDragManagerProd.WPF.Windows
         private void BtnLiveScoreboard_Click(object sender, RoutedEventArgs e) =>
             new LiveScoreboardWindow { Owner = this }.ShowDialog();
 
+        private void BtnTrackTesting_Click(object sender, RoutedEventArgs e) =>
+            new TrackTestingWindow { Owner = this }.ShowDialog();
+
         private void BtnExit_Click(object sender, RoutedEventArgs e) =>
             Application.Current.Shutdown();
     }

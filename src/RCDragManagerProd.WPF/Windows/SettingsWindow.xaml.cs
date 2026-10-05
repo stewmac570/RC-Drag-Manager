@@ -19,7 +19,7 @@ namespace RCDragManagerProd.WPF.Windows
         public SettingsWindow()
         {
             InitializeComponent();
-            WindowSizing.RoundCorners(this);
+            WindowSizing.FitDialogToScreen(this);
             _originalTheme = AppSettings.Theme;
             RbDark.IsChecked = !string.Equals(_originalTheme, "Light", StringComparison.OrdinalIgnoreCase);
             RbLight.IsChecked = string.Equals(_originalTheme, "Light", StringComparison.OrdinalIgnoreCase);

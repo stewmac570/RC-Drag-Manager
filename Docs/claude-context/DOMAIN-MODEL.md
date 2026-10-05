@@ -306,7 +306,7 @@ Sort order (from `RoundLabels.CompareKey`): RR rounds (100+) → Winners rounds 
 | Value | Meaning |
 |-------|---------|
 | `"Standard"` | Runs up to min(RoundsToRun ?? 3, n−1) rounds; top-3 advance + LB winner |
-| `"QMDRA"` | Runs exactly `RoundsToRun` rounds; the top four advance to finals in ranked order (no buyback) |
+| `"QMDRA"` | Runs exactly `RoundsToRun` rounds; every driver advances to finals, seeded on ranking (1st v last). No buyback |
 
 ### BYE Policy
 

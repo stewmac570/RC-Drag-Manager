@@ -89,6 +89,9 @@ namespace RCDragManagerProd.WPF.Windows
                 Tabs.Items.Add(new TabItem { Header = header, Content = view });
             }
 
+            // Last, so the class tabs keep their positions (FirstClassTabIndex).
+            BuildMoneyTab();
+
             // Settings sits first positionally, but the operator lands on the first
             // class — opening an event is nearly always about racing it.
             if (_controllers.Count > 0) Tabs.SelectedIndex = FirstClassTabIndex;
@@ -127,6 +130,27 @@ namespace RCDragManagerProd.WPF.Windows
 
             Tabs.Items.Add(new TabItem { Header = header, Content = _settingsView });
             RefreshSettingsTab();
+        }
+
+        // ── Money tab (race-day feedback, Oct 2026) ───────────────────────────
+
+        private void BuildMoneyTab()
+        {
+            var service = new MoneySheetService(_multiEvent, _multiRepo);
+            var view = new MoneySheetView(service, new DriverRepository(_connectionString));
+
+            var header = new StackPanel { Orientation = Orientation.Horizontal };
+            header.Children.Add(new TextBlock
+            {
+                Text = "",               // Segoe MDL2 payment card
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                FontSize = 12,
+                Margin = new Thickness(0, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            header.Children.Add(new TextBlock { Text = "Money", VerticalAlignment = VerticalAlignment.Center });
+
+            Tabs.Items.Add(new TabItem { Header = header, Content = view });
         }
 
         private void RefreshSettingsTab()

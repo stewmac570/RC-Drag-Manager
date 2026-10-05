@@ -172,13 +172,19 @@ namespace RCDragManagerProd.Controllers
                     {
                         RaceEntryId = e.RaceEntryId,
                         DriverId = e.DriverID,
-                        DriverName = e.DriverName,
+                        DriverName = MultiCarNaming.OwnerName(e.DriverName, e.CarName),
                         CarId = e.CarID,
                         CarName = e.CarName,
                         QualifyingTime = e.QualifyingTime,
                         DialIn = e.DialIn
                     })
                     .ToList();
+
+                // Every car on the console must have a race entry. On race day a roster
+                // edit left most cars without one and the class silently became one race.
+                int unscheduled = (_session.DriverEntries?.Count ?? 0) - entries.Count;
+                if (unscheduled > 0)
+                    Logger.Log($"[MULTI-CAR-RR][ERROR] {unscheduled} car(s) have no race entry id and will not be scheduled. Entries={_session.DriverEntries.Count}, scheduled={entries.Count}.");
 
                 int rounds = string.Equals(_session.RoundRobinVariant, "QMDRA", StringComparison.OrdinalIgnoreCase)
                     ? (_session.RoundsToRun ?? 3)
@@ -412,7 +418,7 @@ namespace RCDragManagerProd.Controllers
                 // Complete when:
                 //   - revealedRounds.Count >= N
                 //   - all matches in revealed rounds are resolved
-                // Then: seed the top four to finals in RR ranking order (no buyback)
+                // Then: seed EVERY driver to finals in RR ranking order (no buyback)
                 // ---------------------------------------------------------
                 if (isQmdra)
                 {
@@ -446,13 +452,13 @@ namespace RCDragManagerProd.Controllers
                         }
                         RoundRobinScorecardLogger.Log(rr, _matchResult);
 
-                        // Buybacks off means the top four go straight to the Finals.
-                        // This used to seed every driver, so a no-buyback class ran
-                        // its whole field through the Finals.
+                        // Buybacks off means every driver goes to the Finals, seeded on
+                        // ranking. A short-lived change sent only the top four; race day
+                        // (2026-10-03) confirmed the rule is the whole field.
                         Logger.Log("[EngineCall] " + _engine.GetType().Name + " GetTopRankedDrivers matchId=- round=-");
-                        var rankedAll = rr.GetTopRankedDrivers(NoBuybackFinalsFieldSize);
+                        var rankedAll = rr.GetTopRankedDrivers(NoBuybackFinalsAllRanked);
 
-                        Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing top {NoBuybackFinalsFieldSize} to finals. RankedCount={rankedAll.Count}");
+                        Logger.Log($"[RR][QMDRA] COMPLETE ? Advancing ALL drivers to finals. RankedCount={rankedAll.Count}");
                         Logger.Log("[RR][QMDRA] Finals seed order: " + (rankedAll.Count == 0 ? "(none)" : string.Join(", ", rankedAll.Select(d => d.Name))));
 
                         CaptureRoundRobinResultSnapshot(rr);

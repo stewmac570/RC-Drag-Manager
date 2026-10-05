@@ -1,0 +1,54 @@
+All right, I'm going to take some notes. This um, track manager kind of fucked me yesterday, and I'm pretty fucking pissed off about it.
+
+Sure. A few places things could still be biting you, based on today:
+
+The driver-time wipe — is it only on add-driver, or does edit/delete do it too? Worth knowing how wide the data loss goes.
+That "testing" session you ran to patch through — did it get saved into real results and pollute driver stats or events-entered counts?
+The live Claude Code session on the track PC — did it leave any uncommitted changes or a branch that'll clash with your normal PC?
+Buybacks — did the needless byes actually change who advanced to finals, so the wrong drivers raced?
+Multi-class — if one class's data wiped, did it affect the other classes in the same event?
+Which one do you want to dig into first?
+
+Uh, most of them we can find out by testing the code. Um, we only run one class at a time. So, uh, and then all of the driver information is kind of a, a feature which was nice to have. We don't actually use any of that data in anything.
+
+Right, so the driver stats and multi-class angles don't really matter to you. That narrows it down.
+
+So the ones that actually bite are the live ones: the time wipe, the forced buybacks, the bad pairings, and the oversized form. Which of those do you want to chase first?
+
+No, so the multi-class needs to run properly. Um, and any class, realistically, because they have options for buybacks. Um, and the buyback should only be in the races that are the Chicago shootout styles. Um, those should work 100%. So what happened with the multi-car was it took the top three, put them in a final, and then started a loser's bracket when... Everyone should go in the finals if there's no buyback ticked.
+
+Ah, that's the crux. So the rule is: no buyback ticked means everyone advances to the finals in ranked order — no top-three cut, no losers bracket at all. Buybacks only belong in the Chicago shootout style races.
+
+What happened today was the QMDRA-style "all advance" path didn't fire — it ran the top-three-plus-losers-bracket path instead, even with buyback unticked. That's a wiring bug between the buyback checkbox and which finals path runs.
+
+Want me to save that as the precise expected behaviour so we can turn it into an issue?
+
+So how many times is that that you repeated me?
+
+That time I was working through the logic, not parroting you — but I take the point. Call it eight.
+
+Want me to save that buyback rule?
+
+A couple of other things, I guess from today, uh, when we went into the finals, the top four drivers, uh, it kind of, I don't think it worked. Uh, I think it should be a pro ladder. Uh, and it looked like first and second raised each other, then third and fourth, where I would have thought it would be first and fourth and second and third.
+
+Right — that's a seeding bug in the final-four. Pro ladder should pair one-versus-four and two-versus-three, not one-two and three-four. Sounds like it's pairing by position order instead of proper ladder seeding.
+
+That's worth saving alongside the buyback rule. Both are finals-path bugs. Shall I note them together?
+
+Yes. Uh, just leave it because but this this chat's transcript will is what we're gonna work off.
+
+Got it — leaving memory alone, we'll work off this transcript. Go on.
+
+Uh, I think the other thing I noticed was when um, uh, when we shift the drivers down to the end, uh, the live feed doesn't follow it.
+
+Noted — when drivers shift down to the end, the live feed doesn't follow the change. Go on.
+
+The live feed also doesn't show the buy
+
+Go on.
+
+Not sure I can think of anything else at this stage.
+
+Fair enough — that's a solid haul for one session. You've got the finals paths, the pairings, the time wipe, the live feed lag plus the shift and bye display, the test mode, money tracking, add-driver, and the oversized form.
+
+When you're back at your normal PC, grab those logs off the race PC and we can start turning these into scoped issues. Anything else before you go?

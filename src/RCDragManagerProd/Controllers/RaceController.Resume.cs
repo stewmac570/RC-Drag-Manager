@@ -189,7 +189,13 @@ namespace RCDragManagerProd.Controllers
                 ReplayResults(lb, snap.LosersMatches, roster);
             }
 
-            var pro = new ProLadderEngineAdapter();
+            // The Finals ladder keeps the order it is given (Round Robin ranking), so
+            // the seed order is read back from the saved ladder rather than re-derived.
+            var seeded = SeedOrderFromSavedLadder(snap.MainMatches, roster, finalists.Count);
+            if (seeded != null) finalists = seeded;
+            else Logger.Log("[RESUME][FINALS][WARN] Could not read seed order from the saved ladder; using saved match order.");
+
+            var pro = new ProLadderEngineAdapter(keepGivenSeedOrder: true);
             EngineLoadDrivers(pro, finalists);
             EngineGenerateBracket(pro);
             _engine = pro;
@@ -321,6 +327,42 @@ namespace RCDragManagerProd.Controllers
             }
 
             return map;
+        }
+
+        /// <summary>
+        /// Rebuilds a saved Pro Ladder's seed order: each template slot that takes a
+        /// seed is matched to the saved match with the same id, and the driver saved in
+        /// that slot is that seed. Returns null if any seed cannot be resolved.
+        /// </summary>
+        private static List<Driver> SeedOrderFromSavedLadder(List<SavedMatch> structure, Dictionary<int, Driver> roster, int fieldSize)
+        {
+            if (structure == null || fieldSize < 2) return null;
+            var template = ProLadder.GetLadder(fieldSize);
+            if (template == null || template.Count == 0) return null;
+
+            var savedById = structure.GroupBy(s => s.MatchId).ToDictionary(g => g.Key, g => g.First());
+            var bySeed = new Dictionary<int, Driver>();
+            foreach (var slot in template)
+            {
+                if (!savedById.TryGetValue(slot.MatchId, out var saved)) continue;
+                Place(slot.Seed1, saved.Driver1Id);
+                Place(slot.Seed2, saved.Driver2Id);
+            }
+
+            var ordered = new List<Driver>(fieldSize);
+            for (int seed = 1; seed <= fieldSize; seed++)
+            {
+                if (!bySeed.TryGetValue(seed, out var d)) return null;
+                ordered.Add(d);
+            }
+            return ordered;
+
+            void Place(int? seed, int? driverId)
+            {
+                if (seed is int s && s > 0 && s <= fieldSize && driverId is int id && id != 0
+                    && roster.TryGetValue(id, out var driver))
+                    bySeed[s] = driver;
+            }
         }
 
         private static List<Driver> DistinctDriversFrom(List<SavedMatch> structure, Dictionary<int, Driver> roster)

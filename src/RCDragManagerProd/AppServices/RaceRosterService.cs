@@ -28,6 +28,15 @@ namespace RCDragManagerProd.AppServices
             _driverRepo = driverRepo ?? throw new ArgumentNullException(nameof(driverRepo));
         }
 
+        /// <summary>
+        /// Multi-Car Round Robin mode. Each roster row is one car, and its id is the race
+        /// entry id, not the person's database id, so ids must never be compared with
+        /// database ids. A car added here gets the next free entry id, the label
+        /// "Driver — Car", and carries its owner and car in <see cref="Driver.Cars"/> for
+        /// <see cref="SessionRosterService.SyncSession"/>.
+        /// </summary>
+        public bool CarEntries { get; set; }
+
         /// <summary>Every driver in the database, for the "add an existing driver" pane.</summary>
         public List<Driver> GetDatabaseDrivers() => _driverRepo.GetAllDrivers() ?? new List<Driver>();
 
@@ -41,6 +50,8 @@ namespace RCDragManagerProd.AppServices
         {
             if (roster == null) throw new ArgumentNullException(nameof(roster));
             if (dbDriver == null) return RosterAddResult.Failed("Select a driver to add.");
+
+            if (CarEntries) return AddCarEntry(dbDriver, roster);
 
             var existing = FindInRoster(dbDriver.Id, dbDriver.Name, roster);
             if (existing != null)
@@ -69,6 +80,21 @@ namespace RCDragManagerProd.AppServices
             if (error != null) return RosterAddResult.Failed(error);
 
             var qual = _rosterService.ParseQualTime(qualTimeText);
+
+            if (CarEntries)
+            {
+                var known = GetDatabaseDrivers().FirstOrDefault(
+                    d => string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (known == null)
+                {
+                    known = new Driver { Name = name, Notes = "", State = "", Cars = new List<Car>() };
+                    _driverRepo.AddDriver(known);
+                    Logger.Log($"[SVC][RaceRoster] Created driver #{known.Id} '{name}' in the driver database.");
+                }
+                var added = AddCarEntry(known, roster);
+                if (added.Success && qual.HasValue) added.Driver.QualTime = qual;
+                return added;
+            }
 
             var onRoster = FindInRoster(0, name, roster);
             if (onRoster != null)
@@ -113,6 +139,10 @@ namespace RCDragManagerProd.AppServices
             newState = (newState ?? "").Trim();
             if (newName.Length == 0) return "Enter a driver name.";
 
+            // A car row's id is its race entry id, so looking it up in the driver
+            // database would rename whichever driver happens to own that number.
+            if (CarEntries) return "In a multi-car class, rename the driver in Driver Manager.";
+
             var clash = roster.FirstOrDefault(
                 d => d != null && d.Id != rosterDriver.Id &&
                      string.Equals(d.Name, newName, StringComparison.OrdinalIgnoreCase));
@@ -150,6 +180,47 @@ namespace RCDragManagerProd.AppServices
         /// </summary>
         public string ValidateRoster(IReadOnlyCollection<Driver> roster) =>
             (roster?.Count ?? 0) < 2 ? "A race needs at least two drivers." : null;
+
+        /// <summary>
+        /// Car-entry mode: enters the driver's next car that is not already racing, under
+        /// a fresh race entry id. A driver with no cars enters once, with no car.
+        /// </summary>
+        private RosterAddResult AddCarEntry(Driver dbDriver, IList<Driver> roster)
+        {
+            var cars = dbDriver.Cars ?? new List<Car>();
+            var racingLabels = new HashSet<string>(
+                roster.Where(d => d != null).Select(d => d.Name ?? ""), StringComparer.OrdinalIgnoreCase);
+
+            Car car = cars.FirstOrDefault(c => !racingLabels.Contains(MultiCarNaming.Display(dbDriver.Name, c.CarName)));
+            if (car == null)
+            {
+                if (cars.Count > 0)
+                    return RosterAddResult.Failed($"All of {dbDriver.Name}'s cars are already in this race.");
+                if (racingLabels.Contains(dbDriver.Name ?? ""))
+                    return RosterAddResult.Failed($"{dbDriver.Name} is already in this race.");
+                car = new Car { CarName = "" };
+            }
+
+            var entryCar = new Car
+            {
+                Id = car.Id,
+                DriverId = dbDriver.Id,
+                CarName = car.CarName ?? "",
+                ClassType = car.ClassType,
+                DefaultDialIn = car.DefaultDialIn
+            };
+            var competitor = new Driver
+            {
+                Id = roster.Where(d => d != null).Select(d => d.Id).DefaultIfEmpty(0).Max() + 1,
+                Name = MultiCarNaming.Display(dbDriver.Name, entryCar.CarName),
+                QualTime = null,
+                State = dbDriver.State,
+                Cars = new List<Car> { entryCar }
+            };
+            roster.Add(competitor);
+            Logger.Log($"[SVC][RaceRoster] Added car entry #{competitor.Id} '{competitor.Name}' (driver #{dbDriver.Id}, car #{entryCar.Id}).");
+            return RosterAddResult.Added(competitor);
+        }
 
         /// <summary>
         /// The roster entry matching a database id or, failing that, a name. Both tests

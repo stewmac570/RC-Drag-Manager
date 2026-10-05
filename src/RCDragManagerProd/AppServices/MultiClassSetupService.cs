@@ -16,6 +16,10 @@ namespace RCDragManagerProd.AppServices
     /// </summary>
     public sealed class MultiClassSetupService
     {
+        /// <summary>Rounds a Round Robin class runs when setup supplies none; matches the
+        /// class dialog's default.</summary>
+        public const int DefaultRoundRobinRounds = 3;
+
         private readonly DriverRepository _driverRepo;
 
         public MultiClassSetupService(DriverRepository driverRepo)
@@ -215,6 +219,21 @@ namespace RCDragManagerProd.AppServices
             foreach (var cc in classesList)
             {
                 bool isRR = RaceTypes.IsRoundRobinFormat(cc.RaceType);
+
+                // A Round Robin class must always leave setup with a variant and a round
+                // count. A blank variant used to fall through as buybacks-on, which is how
+                // the race-day Multi-Car class ran a losers bracket with the box unticked.
+                // Buybacks are off by default, so a missing value means off.
+                if (isRR && string.IsNullOrWhiteSpace(cc.Variant))
+                {
+                    Logger.Log($"[SVC][MultiClassSetup][WARN] RR class '{cc.ClassName}' arrived with no variant; defaulting to buybacks off (QMDRA).");
+                    cc.Variant = "QMDRA";
+                }
+                if (isRR && !(cc.RoundsToRun > 0))
+                {
+                    Logger.Log($"[SVC][MultiClassSetup][WARN] RR class '{cc.ClassName}' arrived with no round count; defaulting to {DefaultRoundRobinRounds}.");
+                    cc.RoundsToRun = DefaultRoundRobinRounds;
+                }
 
                 var session = new RaceSession
                 {

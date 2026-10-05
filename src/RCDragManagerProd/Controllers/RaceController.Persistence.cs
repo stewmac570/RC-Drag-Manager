@@ -96,7 +96,11 @@ namespace RCDragManagerProd.Controllers
                             // The controller owns identity/qualifying time. The session
                             // entry owns race metadata such as DialIn, car, class and seed,
                             // so reuse the entry instead of destructively rebuilding it.
-                            entry.DriverName = d.Name;
+                            // A Multi-Car competitor's name is "Driver — Car"; the entry
+                            // keeps the person's name, or each save adds another " — Car".
+                            entry.DriverName = IsMultiCarRoundRobin
+                                ? MultiCarNaming.OwnerName(entry.DriverName ?? d.Name, entry.CarName)
+                                : d.Name;
                             entry.QualifyingTime = d.QualTime;
                             synchronizedEntries.Add(entry);
                         }

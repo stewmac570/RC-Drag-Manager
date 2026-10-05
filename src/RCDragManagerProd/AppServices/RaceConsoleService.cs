@@ -33,6 +33,51 @@ namespace RCDragManagerProd.AppServices
         public RaceConsoleViewModel GetState() => RaceConsoleViewModelBuilder.Build(_controller);
 
         /// <summary>
+        /// Sets a competitor's dial-in for this class and remembers it as their car's
+        /// default. Dial-ins live on the class entry, so on race day (2026-10-03) a class
+        /// that had to be set up again started with none and every time was typed twice.
+        /// With the car default updated, a new class seeds from the latest times.
+        /// </summary>
+        public void SetDialIn(int competitorId, double? dialIn)
+        {
+            _controller.UpdateDriverDialIn(competitorId, dialIn);
+            if (dialIn.HasValue) RememberCarDialIn(competitorId, dialIn.Value);
+        }
+
+        private void RememberCarDialIn(int competitorId, double dialIn)
+        {
+            if (_driverRepo == null) return;
+            try
+            {
+                var session = _controller.Session;
+                bool multiCar = MultiCarNaming.IsMultiCar(session);
+                RaceSessionDriverEntry entry = null;
+                foreach (var e in session?.DriverEntries ?? new List<RaceSessionDriverEntry>())
+                {
+                    if (e == null) continue;
+                    int id = multiCar && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID;
+                    if (id == competitorId) { entry = e; break; }
+                }
+                if (entry == null || entry.DriverID <= 0 || entry.CarID <= 0) return;
+
+                var driver = _driverRepo.GetDriverById(entry.DriverID);
+                Car car = null;
+                foreach (var c in driver?.Cars ?? new List<Car>())
+                    if (c.CarID == entry.CarID) { car = c; break; }
+                if (car == null || car.DefaultDialIn == dialIn) return;
+
+                car.DefaultDialIn = dialIn;
+                _driverRepo.UpdateDriver(driver);
+                Logger.Log($"[DIALIN] Remembered {dialIn:F3} as the default for driver #{driver.Id} car #{car.CarID} '{car.CarName}'.");
+            }
+            catch (Exception ex)
+            {
+                // The class dial-in is already set; failing to remember it must not stop the race.
+                Logger.Log($"[DIALIN][WARN] Could not remember the dial-in as the car default: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Parses operator-typed dial-in text (#416). Blank clears the dial-in; anything
         /// else must be a positive number. Shared by the inline grid cell and the
         /// dial-in dialog so both accept exactly the same input.

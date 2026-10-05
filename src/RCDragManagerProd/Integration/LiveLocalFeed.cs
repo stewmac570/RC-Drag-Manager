@@ -45,6 +45,17 @@ namespace RCDragManagerProd.Integration
             }
         }
 
+        /// <summary>Empties the file, so the overlay cannot pick up names from an
+        /// earlier event (it trusts the file for 12 hours).</summary>
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _classes.Clear();
+                Write();
+            }
+        }
+
         /// <summary>Mirrors the live site's reset: by event id when one is given,
         /// otherwise by event name (a finished multi-class event).</summary>
         public void Reset(string eventId, string eventName)
