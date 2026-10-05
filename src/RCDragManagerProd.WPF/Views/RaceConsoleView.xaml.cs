@@ -67,6 +67,7 @@ namespace RCDragManagerProd.WPF.Views
             _rosterEditService = new RaceRosterService(driverRepo);
             _raceConsole = new RaceConsoleService(_controller, this, driverRepo);
             _session = _controller.Session;
+            _rosterEditService.CarEntries = MultiCarNaming.IsMultiCar(_session);
 
             LblEventTitle.Text = _raceConsole.GetState().EventTitle;
 
@@ -79,8 +80,8 @@ namespace RCDragManagerProd.WPF.Views
                     .Select(e => new Driver
                     {
                         Id = isMultiCarRoundRobin && e.RaceEntryId > 0 ? e.RaceEntryId : e.DriverID,
-                        Name = isMultiCarRoundRobin && !string.IsNullOrWhiteSpace(e.CarName)
-                            ? e.DriverName + " — " + e.CarName
+                        Name = isMultiCarRoundRobin
+                            ? MultiCarNaming.Display(MultiCarNaming.OwnerName(e.DriverName, e.CarName), e.CarName)
                             : e.DriverName,
                         QualTime = e.QualifyingTime
                     })
@@ -655,7 +656,7 @@ namespace RCDragManagerProd.WPF.Views
             }
 
             _dialInCellEditing = false;
-            _controller.UpdateDriverDialIn(row.DriverId, parsed.Cleared ? (double?)null : parsed.DialIn);
+            _raceConsole.SetDialIn(row.DriverId, parsed.Cleared ? (double?)null : parsed.DialIn);
             SaveProgressQuiet();   // dial-ins are session state — checkpoint the edit (#404)
 
             // The controller raises DialInsChanged, but that fires before this edit
@@ -704,7 +705,7 @@ namespace RCDragManagerProd.WPF.Views
             var dlg = new DialInDialog(name, current) { Owner = Host };
             if (dlg.ShowDialog() != true) return;
 
-            _controller.UpdateDriverDialIn(driverId, dlg.Cleared ? (double?)null : dlg.DialIn);
+            _raceConsole.SetDialIn(driverId, dlg.Cleared ? (double?)null : dlg.DialIn);
             SaveProgressQuiet();   // dial-ins are session state — checkpoint the edit (#404)
             RefreshDriverGrid();
             RefreshWinnerButtonDialIns();

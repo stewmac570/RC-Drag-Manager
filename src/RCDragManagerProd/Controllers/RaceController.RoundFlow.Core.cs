@@ -172,13 +172,19 @@ namespace RCDragManagerProd.Controllers
                     {
                         RaceEntryId = e.RaceEntryId,
                         DriverId = e.DriverID,
-                        DriverName = e.DriverName,
+                        DriverName = MultiCarNaming.OwnerName(e.DriverName, e.CarName),
                         CarId = e.CarID,
                         CarName = e.CarName,
                         QualifyingTime = e.QualifyingTime,
                         DialIn = e.DialIn
                     })
                     .ToList();
+
+                // Every car on the console must have a race entry. On race day a roster
+                // edit left most cars without one and the class silently became one race.
+                int unscheduled = (_session.DriverEntries?.Count ?? 0) - entries.Count;
+                if (unscheduled > 0)
+                    Logger.Log($"[MULTI-CAR-RR][ERROR] {unscheduled} car(s) have no race entry id and will not be scheduled. Entries={_session.DriverEntries.Count}, scheduled={entries.Count}.");
 
                 int rounds = string.Equals(_session.RoundRobinVariant, "QMDRA", StringComparison.OrdinalIgnoreCase)
                     ? (_session.RoundsToRun ?? 3)
