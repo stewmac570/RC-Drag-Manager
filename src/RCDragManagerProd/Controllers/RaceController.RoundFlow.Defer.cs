@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using RCDragManagerProd.Domain;
 using RCDragManagerProd.RaceEngines;
 using RCDragManagerProd.Logging;
 
@@ -41,6 +42,7 @@ namespace RCDragManagerProd.Controllers
         /// pushed back. Stable, so callers that already filtered keep their other ordering.</summary>
         internal IEnumerable<EngineMatch> ApplyRaceOrder(IEnumerable<EngineMatch> matches)
         {
+            var spacing = BuildSpacingOrder();
             return matches
                 .OrderBy(m => _deferredMatchIds.Contains(m.MatchId) ? 1 : 0)
                 .ThenBy(m =>
@@ -48,7 +50,103 @@ namespace RCDragManagerProd.Controllers
                     int i = _deferredMatchIds.IndexOf(m.MatchId);
                     return i < 0 ? 0 : i;
                 })
+                .ThenBy(m => spacing.TryGetValue(SpacingKey(m), out var rank) ? rank : int.MaxValue)
                 .ThenBy(m => m.MatchId);
+        }
+
+        // ── Driver spacing ─────────────────────────────────────────────────────
+        //
+        // Race day 2026-10-03: a driver with several cars raced two of them back to
+        // back, and a driver could run the last race of one round and the first of
+        // the next. Within each round the races are put in the order that gives every
+        // person the most races between their runs, counting the end of the previous
+        // round. A bye is a solo pass, so it counts as a run.
+        //
+        // The order depends only on who is in each race, never on results, so it is
+        // the same every time it is worked out (including after a resume) and a
+        // round's order never moves once later rounds appear.
+
+        private static string SpacingKey(EngineMatch m) =>
+            RoundLabels.Normalize(m.RoundLabel ?? string.Empty).ToUpperInvariant() + "|" + m.MatchId;
+
+        internal Dictionary<string, int> BuildSpacingOrder()
+        {
+            var ranks = new Dictionary<string, int>();
+            List<EngineMatch> all;
+            try { all = CollectAllRevealedMatchesAcrossPhases(); }
+            catch { return ranks; }
+            if (all == null || all.Count == 0) return ranks;
+
+            var rounds = all.Select(m => m.RoundLabel ?? string.Empty)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+
+            var lastRun = new Dictionary<int, int>();   // person -> position of their last race
+            int position = 0;
+
+            foreach (var round in rounds)
+            {
+                var pending = all.Where(m => string.Equals(m.RoundLabel ?? string.Empty, round, StringComparison.OrdinalIgnoreCase))
+                                 .OrderBy(m => m.MatchId)
+                                 .ToList();
+                int rank = 0;
+
+                while (pending.Count > 0)
+                {
+                    // First choice: a race where nobody raced in the previous race. Among
+                    // those, the race whose people have the most races still to place in
+                    // this round goes first: leaving a driver with four cars until last
+                    // is what forces back-to-back runs. Then the longest wait.
+                    EngineMatch best = null;
+                    bool bestRested = false;
+                    int bestGap = int.MinValue, bestLoad = int.MinValue;
+                    foreach (var m in pending)
+                    {
+                        var people = PeopleIn(m);
+                        int gap = people.Count == 0
+                            ? int.MaxValue
+                            : people.Min(p => lastRun.TryGetValue(p, out var at) ? position - at : int.MaxValue);
+                        bool rested = gap > 1;
+                        int load = people.Sum(p => pending.Count(o => !ReferenceEquals(o, m) && PeopleIn(o).Contains(p)));
+
+                        bool better = best == null ||
+                                      (rested && !bestRested) ||
+                                      (rested == bestRested && (load > bestLoad ||
+                                                                (load == bestLoad && gap > bestGap)));
+                        if (better)
+                        {
+                            best = m; bestRested = rested; bestGap = gap; bestLoad = load;
+                        }
+                    }
+
+                    ranks[SpacingKey(best)] = rank++;
+                    foreach (var p in PeopleIn(best)) lastRun[p] = position;
+                    position++;
+                    pending.Remove(best);
+                }
+            }
+            return ranks;
+        }
+
+        /// <summary>The real people in a race. In a Multi-Car class a competitor is a
+        /// car, so it is mapped to the driver who owns it.</summary>
+        private List<int> PeopleIn(EngineMatch m)
+        {
+            var people = new List<int>(2);
+            foreach (var d in new[] { m.Driver1, m.Driver2 })
+            {
+                if (ByePolicy.IsBye(d)) continue;
+                people.Add(PersonFor(d.Id));
+            }
+            return people;
+        }
+
+        private int PersonFor(int competitorId)
+        {
+            if (!IsMultiCarRoundRobin || _session?.DriverEntries == null) return competitorId;
+            var entry = _session.DriverEntries.FirstOrDefault(e => e != null && e.RaceEntryId == competitorId);
+            // Negative so an unmapped car can never collide with a real driver id.
+            return entry != null && entry.DriverID > 0 ? entry.DriverID : -competitorId;
         }
 
         /// <summary>Sends the current (next-up) match to the back of its round. No-op when
