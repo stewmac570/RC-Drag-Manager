@@ -220,6 +220,8 @@ New Session
 
 - Standard RR path: always a Pro Ladder bracket over 3 or 4 drivers.
 - QMDRA path: every ranked driver is seeded into a full-size Pro Ladder finals.
+- Finals ladders keep the order they are given (`ProLadderEngineAdapter(keepGivenSeedOrder: true)`), so seeding follows Round Robin ranking, not qualifying time. A resumed Finals reads its seed order back from the saved ladder.
+- Buybacks off (QMDRA) is the default for both Round Robin forms; setup defaults a missing variant to it.
 - Finalists: Top-3 from RR ranking + 1 LB champion (or 3 drivers if `StartFinalsTop3NoBuyback`).
 - Uses `ProLadderEngineAdapter` with a 3- or 4-driver ProLadder template.
 - For 4 drivers: SF round (two semis) → Final.
