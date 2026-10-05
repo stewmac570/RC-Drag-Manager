@@ -99,6 +99,9 @@
                             <Button Style="{StaticResource Style.Button.Toolbar.Danger}"
                                     Content="Remove" Click="BtnRemoveClass_Click"
                                     IsEnabled="{Binding HasSelection}"/>
+                            <Button Style="{StaticResource Style.Button.Toolbar}"
+                                    Content="Entry money" Click="BtnEntryMoney_Click"
+                                    Margin="16,0,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>

@@ -15,25 +15,52 @@ using RCDragManagerProd.Repositories;
 
 namespace RCDragManagerProd.WPF.Views
 {
+    /// <summary>What the money sheet is being used for.</summary>
+    public enum MoneySheetMode
+    {
+        /// <summary>Setup screen, before racing: track days and class entries are taken.</summary>
+        Entries,
+
+        /// <summary>Running event: entries are locked and only buybacks are taken.</summary>
+        Buybacks
+    }
+
     /// <summary>
-    /// The event's Money tab: one row per driver and car, a track-days column, and an
-    /// entry and buyback tick per class. All rules live in <see cref="MoneySheetService"/>.
+    /// The money sheet: one row per driver and car. On the setup screen it takes track
+    /// fees and class entries; in the running event it takes buybacks. Each class's pot
+    /// (entries plus buybacks) is shown at the bottom, with track fees kept separate.
+    /// All rules live in <see cref="MoneySheetService"/>.
     /// </summary>
     public partial class MoneySheetView : UserControl
     {
         private readonly MoneySheetService _service;
         private readonly DriverRepository _drivers;
+        private readonly MoneySheetMode _mode;
         private readonly ObservableCollection<MoneyRow> _rows = new ObservableCollection<MoneyRow>();
 
-        public MoneySheetView(MoneySheetService service, DriverRepository drivers)
+        public MoneySheetView(MoneySheetService service, DriverRepository drivers, MoneySheetMode mode)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _drivers = drivers;
+            _mode = mode;
             InitializeComponent();
+
+            bool entries = mode == MoneySheetMode.Entries;
+            LblTitle.Text = entries ? "Entry money" : "Buybacks and pots";
+            LblHint.Text = entries
+                ? "Taken before racing starts. Tick the days of track fee and the classes each driver has paid for."
+                : "Entries were taken at setup. Tick each buyback as it is paid; it goes into that class's pot.";
+            AddBar.Visibility = entries ? Visibility.Visible : Visibility.Collapsed;
+            TxtTrackFee.IsReadOnly = !entries;
+            TxtEntryFee.IsReadOnly = !entries;
 
             TxtTrackFee.Text = Money(_service.Sheet.TrackFee);
             TxtEntryFee.Text = Money(_service.Sheet.EntryFee);
             TxtBuybackFee.Text = Money(_service.Sheet.BuybackFee);
+
+            // Opens on everyone entered in the classes: at setup to take entries, and
+            // in the event so an older event without a sheet can still take buybacks.
+            _service.AddEveryoneFromClasses();
 
             BuildColumns();
             DgMoney.ItemsSource = _rows;
@@ -44,37 +71,45 @@ namespace RCDragManagerProd.WPF.Views
 
         private void BuildColumns()
         {
+            bool entries = _mode == MoneySheetMode.Entries;
+
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Driver", Binding = new Binding(nameof(MoneyRow.DriverName)), IsReadOnly = true, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Car", Binding = new Binding(nameof(MoneyRow.CarName)), IsReadOnly = true, Width = 120 });
             DgMoney.Columns.Add(new DataGridTextColumn
             {
                 Header = "Track days paid",
                 Binding = new Binding(nameof(MoneyRow.TrackDays)) { UpdateSourceTrigger = UpdateSourceTrigger.LostFocus },
+                IsReadOnly = !entries,
                 Width = 110
             });
 
             var classes = _service.ClassNames;
             for (int i = 0; i < classes.Count; i++)
             {
-                DgMoney.Columns.Add(CheckColumn($"{classes[i]} entry", $"{nameof(MoneyRow.Entry)}[{i}]"));
-                DgMoney.Columns.Add(CheckColumn($"{classes[i]} buyback", $"{nameof(MoneyRow.Buyback)}[{i}]"));
+                DgMoney.Columns.Add(CheckColumn($"{classes[i]} entry", $"{nameof(MoneyRow.Entry)}[{i}]", readOnly: !entries));
+                if (!entries)
+                    DgMoney.Columns.Add(CheckColumn($"{classes[i]} buyback", $"{nameof(MoneyRow.Buyback)}[{i}]", readOnly: false));
             }
 
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Paid", Binding = new Binding(nameof(MoneyRow.TotalText)), IsReadOnly = true, Width = 80 });
 
-            var remove = new DataGridTemplateColumn { Header = "", Width = 70 };
-            var button = new FrameworkElementFactory(typeof(Button));
-            button.SetValue(ContentProperty, "Remove");
-            button.SetValue(StyleProperty, FindResource("Style.Button.Toolbar.Danger"));
-            button.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler(BtnRemove_Click));
-            remove.CellTemplate = new DataTemplate { VisualTree = button };
-            DgMoney.Columns.Add(remove);
+            if (entries)
+            {
+                var remove = new DataGridTemplateColumn { Header = "", Width = 80 };
+                var button = new FrameworkElementFactory(typeof(Button));
+                button.SetValue(ContentProperty, "Remove");
+                button.SetValue(StyleProperty, FindResource("Style.Button.Toolbar.Danger"));
+                button.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler(BtnRemove_Click));
+                remove.CellTemplate = new DataTemplate { VisualTree = button };
+                DgMoney.Columns.Add(remove);
+            }
         }
 
-        private static DataGridCheckBoxColumn CheckColumn(string header, string path) => new DataGridCheckBoxColumn
+        private static DataGridCheckBoxColumn CheckColumn(string header, string path, bool readOnly) => new DataGridCheckBoxColumn
         {
             Header = header,
-            Binding = new Binding(path) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+            Binding = new Binding(path) { Mode = readOnly ? BindingMode.OneWay : BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+            IsReadOnly = readOnly,
             Width = DataGridLength.Auto
         };
 
@@ -88,25 +123,28 @@ namespace RCDragManagerProd.WPF.Views
                          .OrderBy(x => x.DriverName, StringComparer.OrdinalIgnoreCase)
                          .ThenBy(x => x.CarName, StringComparer.OrdinalIgnoreCase))
                 _rows.Add(new MoneyRow(e, classes, _service, OnRowChanged));
-            UpdateTotal();
+            UpdateTotals();
         }
 
         private void OnRowChanged()
         {
-            UpdateTotal();
+            UpdateTotals();
             Save();
         }
 
-        private void UpdateTotal()
+        private void UpdateTotals()
         {
             foreach (var r in _rows) r.RefreshTotal();
-            LblTotal.Text = $"Total paid: {Money(_service.Total)}";
+            var pots = _service.ClassNames.Select(c => $"{c} pot {Dollars(_service.PotFor(c))}");
+            LblPots.Text = string.Join("   ·   ", pots);
+            LblTotal.Text = $"Track fees {Dollars(_service.TrackFees)} (not in the pots)   ·   Total taken {Dollars(_service.Total)}";
         }
 
         private void Save()
         {
             var error = _service.Save();
-            LblMessage.Text = error ?? $"Saved {DateTime.Now:HH:mm:ss}";
+            if (error != null) LblMessage.Text = error;
+            else if (_mode == MoneySheetMode.Buybacks) LblMessage.Text = $"Saved {DateTime.Now:HH:mm:ss}";
         }
 
         // ── Commands ──────────────────────────────────────────────────────────
@@ -151,7 +189,7 @@ namespace RCDragManagerProd.WPF.Views
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
             if (!((sender as FrameworkElement)?.DataContext is MoneyRow row)) return;
-            _service.Remove(row.Entry_);
+            _service.Remove(row.Source);
             Reload();
             Save();
         }
@@ -178,6 +216,7 @@ namespace RCDragManagerProd.WPF.Views
         }
 
         private static string Money(decimal v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+        private static string Dollars(decimal v) => "$" + Money(v);
 
         // ── Row model ─────────────────────────────────────────────────────────
 
@@ -189,26 +228,26 @@ namespace RCDragManagerProd.WPF.Views
 
             public MoneyRow(MoneySheetEntry entry, List<string> classes, MoneySheetService service, Action changed)
             {
-                Entry_ = entry;
+                Source = entry;
                 _service = service;
                 _changed = changed;
                 Entry = new PaidFlags(entry.EntriesPaid, classes, Changed);
                 Buyback = new PaidFlags(entry.BuybacksPaid, classes, Changed);
             }
 
-            internal MoneySheetEntry Entry_ { get; }
+            internal MoneySheetEntry Source { get; }
 
-            public string DriverName => Entry_.DriverName;
-            public string CarName => Entry_.CarName;
+            public string DriverName => Source.DriverName;
+            public string CarName => Source.CarName;
 
             public int TrackDays
             {
-                get => Entry_.TrackDaysPaid;
+                get => Source.TrackDaysPaid;
                 set
                 {
                     var v = Math.Max(0, value);
-                    if (v == Entry_.TrackDaysPaid) return;
-                    Entry_.TrackDaysPaid = v;
+                    if (v == Source.TrackDaysPaid) return;
+                    Source.TrackDaysPaid = v;
                     OnPropertyChanged();
                     Changed();
                 }
@@ -217,7 +256,7 @@ namespace RCDragManagerProd.WPF.Views
             public PaidFlags Entry { get; }
             public PaidFlags Buyback { get; }
 
-            public string TotalText => "$" + _service.TotalFor(Entry_).ToString("0.##", CultureInfo.InvariantCulture);
+            public string TotalText => Dollars(_service.TotalFor(Source));
 
             public void RefreshTotal() => OnPropertyChanged(nameof(TotalText));
 

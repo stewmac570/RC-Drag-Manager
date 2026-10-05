@@ -97,10 +97,22 @@ namespace RCDragManagerProd.WPF.ViewModels
 
         public string ValidateCanStart() => _service.ValidateCanStart(_configs);
 
+        // ── Entry money ───────────────────────────────────────────────────────
+
+        /// <summary>Entry money taken before racing; becomes the event's money sheet.</summary>
+        public EventMoneySheet MoneySheet { get; } = new EventMoneySheet();
+
+        /// <summary>The money rules over the classes configured so far.</summary>
+        public MoneySheetService CreateMoneyService() =>
+            new MoneySheetService(MoneySheet, () => _configs
+                .Select(c => new MoneySheetClass(c.ClassName, c.DriverEntries))
+                .ToList());
+
         /// <summary>Builds, persists, and returns the new event.</summary>
         public MultiClassEvent StartEvent()
         {
             var evt = _service.StartEvent(EventName?.Trim() ?? "", EventDate.Date, _configs);
+            evt.MoneySheet = MoneySheet;
             _eventRepo.SaveEvent(evt);
             return evt;
         }

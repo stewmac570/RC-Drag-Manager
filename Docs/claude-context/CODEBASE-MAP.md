@@ -350,7 +350,7 @@ marshalling).
 | `Windows/` | Top-level windows: Landing, Setup, LoadSession, DriverManager, DriverStats, RaceConsole, MultiClassRace, Settings, LiveScoreboard, TrackTesting |
 | `Views/RaceConsoleView.xaml(.cs)` | One class's race console; hosted standalone or one-per-tab in `MultiClassRaceWindow` |
 | `Views/EventSettingsView.xaml(.cs)` | The event settings tab (first tab of every event): class reset with typed confirmation, buybacks per class, live theme switching |
-| `Views/MoneySheetView.xaml(.cs)` | The Money tab (last tab of every event): track days, entry and buyback ticks per class, totals |
+| `Views/MoneySheetView.xaml(.cs)` | The money sheet. Entries mode (setup, `Dialogs/EntryMoneyDialog`): track days and class entries. Buybacks mode (Money tab, last tab of every event): entries locked, buybacks taken. Shows each class's pot (entries + buybacks); track fees kept separate |
 | `Dialogs/` | Themed modal dialogs incl. `MessageDialog` (the dark `MessageBox` replacement), results/buyback/edit dialogs |
 | `ViewModels/` | INotifyPropertyChanged view models + display-row types |
 | `Resources/Theme.xaml` | Brushes (`Brush.*` bound to `C.*` colours), radii, font sizes |

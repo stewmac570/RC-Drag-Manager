@@ -137,7 +137,7 @@ namespace RCDragManagerProd.WPF.Windows
         private void BuildMoneyTab()
         {
             var service = new MoneySheetService(_multiEvent, _multiRepo);
-            var view = new MoneySheetView(service, new DriverRepository(_connectionString));
+            var view = new MoneySheetView(service, new DriverRepository(_connectionString), MoneySheetMode.Buybacks);
 
             var header = new StackPanel { Orientation = Orientation.Horizontal };
             header.Children.Add(new TextBlock

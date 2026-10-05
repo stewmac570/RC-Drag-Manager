@@ -8,47 +8,76 @@ using RCDragManagerProd.Repositories;
 namespace RCDragManagerProd.AppServices
 {
     /// <summary>
-    /// Rules for the event money sheet, so the Money tab holds no logic: filling it
-    /// from the classes, adding a driver, totals, and saving it with the event.
+    /// Rules for the event money sheet, so the money screens hold no logic.
+    ///
+    /// Entry money (track fee and class entries) is taken on the setup screen before
+    /// racing starts. Only buybacks are paid during the event. Each class's pot is its
+    /// entry fees plus its buybacks; the track fee is kept separate and is never in a pot.
     /// </summary>
     public sealed class MoneySheetService
     {
-        private readonly MultiClassEvent _event;
-        private readonly MultiClassEventRepository _repo;
+        private readonly Func<List<MoneySheetClass>> _classes;
+        private readonly Func<string> _save;
 
+        /// <summary>For a running event: classes come from the event, saves go to the database.</summary>
         public MoneySheetService(MultiClassEvent evt, MultiClassEventRepository repo)
         {
-            _event = evt ?? throw new ArgumentNullException(nameof(evt));
-            _repo = repo;
-            if (_event.MoneySheet == null) _event.MoneySheet = new EventMoneySheet();
+            if (evt == null) throw new ArgumentNullException(nameof(evt));
+            if (evt.MoneySheet == null) evt.MoneySheet = new EventMoneySheet();
+            Sheet = evt.MoneySheet;
+            _classes = () => evt.ClassSessions
+                .Select((s, i) => new MoneySheetClass(
+                    string.IsNullOrWhiteSpace(s.ClassType) ? $"Class {i + 1}" : s.ClassType,
+                    s.DriverEntries))
+                .ToList();
+            _save = () => SaveEvent(evt, repo);
         }
 
-        public EventMoneySheet Sheet => _event.MoneySheet;
+        /// <summary>For the setup screen: the event does not exist yet, so the classes
+        /// are whatever has been configured so far and nothing is saved until it starts.</summary>
+        public MoneySheetService(EventMoneySheet sheet, Func<List<MoneySheetClass>> classes)
+        {
+            Sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
+            _classes = classes ?? throw new ArgumentNullException(nameof(classes));
+            _save = () => null;
+        }
 
-        /// <summary>The event's class names, in tab order.</summary>
-        public List<string> ClassNames =>
-            _event.ClassSessions.Select((s, i) => string.IsNullOrWhiteSpace(s.ClassType) ? $"Class {i + 1}" : s.ClassType)
-                                .ToList();
+        public EventMoneySheet Sheet { get; }
+
+        /// <summary>The event's class names, in order.</summary>
+        public List<string> ClassNames => _classes().Select(c => c.Name).ToList();
 
         /// <summary>
-        /// Adds a row for every driver and car entered in the event's classes that is
-        /// not on the sheet yet. Returns how many rows were added.
+        /// Adds a row for every driver and car entered in the classes that is not on the
+        /// sheet yet. Returns how many rows were added.
         /// </summary>
         public int AddEveryoneFromClasses()
         {
             int added = 0;
-            foreach (var session in _event.ClassSessions)
-                foreach (var e in session.DriverEntries ?? new List<RaceSessionDriverEntry>())
+            foreach (var cls in _classes())
+                foreach (var e in cls.Entries ?? Enumerable.Empty<RaceSessionDriverEntry>())
                 {
                     if (e == null || e.DriverID <= 0) continue;
                     var car = e.CarName ?? "";
-                    var name = MultiCarNaming.OwnerName(e.DriverName, car);
                     if (Find(e.DriverID, car) != null) continue;
-                    Sheet.Entries.Add(new MoneySheetEntry { DriverId = e.DriverID, DriverName = name, CarName = car });
+                    Sheet.Entries.Add(new MoneySheetEntry
+                    {
+                        DriverId = e.DriverID,
+                        DriverName = MultiCarNaming.OwnerName(e.DriverName, car),
+                        CarName = car
+                    });
                     added++;
                 }
-            Logger.Log($"[MONEY] Added {added} row(s) from the event's classes.");
+            if (added > 0) Logger.Log($"[MONEY] Added {added} row(s) from the classes.");
             return added;
+        }
+
+        /// <summary>Whether this row's driver and car are entered in the named class.</summary>
+        public bool IsEnteredIn(MoneySheetEntry row, string className)
+        {
+            var cls = _classes().FirstOrDefault(c => string.Equals(c.Name, className, StringComparison.OrdinalIgnoreCase));
+            return cls?.Entries != null && cls.Entries.Any(e => e != null && e.DriverID == row.DriverId &&
+                string.Equals(e.CarName ?? "", row.CarName ?? "", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>Adds one driver and car. Returns an operator-facing error, or null.</summary>
@@ -73,6 +102,7 @@ namespace RCDragManagerProd.AppServices
         public static bool IsPaid(List<string> paid, string className) =>
             paid != null && paid.Any(c => string.Equals(c, className, StringComparison.OrdinalIgnoreCase));
 
+        /// <summary>Everything this row has paid, track fee included.</summary>
         public decimal TotalFor(MoneySheetEntry e) =>
             e.TrackDaysPaid * Sheet.TrackFee +
             (e.EntriesPaid?.Count ?? 0) * Sheet.EntryFee +
@@ -80,13 +110,23 @@ namespace RCDragManagerProd.AppServices
 
         public decimal Total => Sheet.Entries.Sum(TotalFor);
 
-        /// <summary>Saves the sheet with the event. Returns an operator-facing error, or null.</summary>
-        public string Save()
+        /// <summary>Track fees taken. Kept separate: never part of a pot.</summary>
+        public decimal TrackFees => Sheet.Entries.Sum(e => e.TrackDaysPaid) * Sheet.TrackFee;
+
+        /// <summary>A class's pot: its paid entries plus its paid buybacks.</summary>
+        public decimal PotFor(string className) =>
+            Sheet.Entries.Count(e => IsPaid(e.EntriesPaid, className)) * Sheet.EntryFee +
+            Sheet.Entries.Count(e => IsPaid(e.BuybacksPaid, className)) * Sheet.BuybackFee;
+
+        /// <summary>Saves the sheet. Returns an operator-facing error, or null.</summary>
+        public string Save() => _save();
+
+        private static string SaveEvent(MultiClassEvent evt, MultiClassEventRepository repo)
         {
-            if (_repo == null) return null;
+            if (repo == null) return null;
             try
             {
-                _repo.SaveEvent(_event);
+                repo.SaveEvent(evt);
                 return null;
             }
             catch (Exception ex)
@@ -99,5 +139,18 @@ namespace RCDragManagerProd.AppServices
         private MoneySheetEntry Find(int driverId, string carName) =>
             Sheet.Entries.FirstOrDefault(x => x.DriverId == driverId &&
                 string.Equals(x.CarName ?? "", carName ?? "", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>One class as the money sheet sees it: its name and who is entered.</summary>
+    public sealed class MoneySheetClass
+    {
+        public MoneySheetClass(string name, IEnumerable<RaceSessionDriverEntry> entries)
+        {
+            Name = name ?? "";
+            Entries = entries?.ToList() ?? new List<RaceSessionDriverEntry>();
+        }
+
+        public string Name { get; }
+        public List<RaceSessionDriverEntry> Entries { get; }
     }
 }

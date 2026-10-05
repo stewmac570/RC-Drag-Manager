@@ -40,6 +40,37 @@ public class MoneySheetServiceTests
     }
 
     [TestMethod]
+    public void Pot_IsEntriesPlusBuybacks_AndNeverTheTrackFee()
+    {
+        var svc = new MoneySheetService(Event(), null);
+        svc.Sheet.BuybackFee = 50m;
+        svc.AddEveryoneFromClasses();
+        foreach (var e in svc.Sheet.Entries)
+        {
+            e.TrackDaysPaid = 2;
+            MoneySheetService.SetPaid(e.EntriesPaid, "DYO", true);
+        }
+        MoneySheetService.SetPaid(svc.Sheet.Entries[0].BuybacksPaid, "DYO", true);
+
+        Assert.AreEqual(3 * 100m + 50m, svc.PotFor("DYO"), "Pot = 3 entries + 1 buyback.");
+        Assert.AreEqual(3 * 2 * 10m, svc.TrackFees, "Track fees are counted separately.");
+        Assert.AreEqual(svc.PotFor("DYO") + svc.TrackFees, svc.Total);
+    }
+
+    [TestMethod]
+    public void SetupSheet_FillsFromConfiguredClasses_BeforeTheEventExists()
+    {
+        var sheet = new EventMoneySheet();
+        var classes = Event().ClassSessions
+            .Select(s => new MoneySheetClass(s.ClassType, s.DriverEntries)).ToList();
+        var svc = new MoneySheetService(sheet, () => classes);
+
+        Assert.AreEqual(3, svc.AddEveryoneFromClasses());
+        Assert.IsTrue(svc.IsEnteredIn(sheet.Entries.First(e => e.CarName == "Outlaw"), "DYO"));
+        Assert.IsNull(svc.Save(), "Nothing to save before the event starts.");
+    }
+
+    [TestMethod]
     public void Sheet_SavesAndLoadsWithTheEvent()
     {
         var path = Path.Combine(Path.GetTempPath(), $"rcdm-money-{Guid.NewGuid():N}.db");
