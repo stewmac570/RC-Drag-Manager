@@ -18,7 +18,7 @@ namespace RCDragManagerProd.WPF.Views
     /// <summary>What the money sheet is being used for.</summary>
     public enum MoneySheetMode
     {
-        /// <summary>Setup screen, before racing: track days and class entries are taken.</summary>
+        /// <summary>Setup screen, before racing: track fees and class entries are taken.</summary>
         Entries,
 
         /// <summary>Running event: entries are locked and only buybacks are taken.</summary>
@@ -26,10 +26,10 @@ namespace RCDragManagerProd.WPF.Views
     }
 
     /// <summary>
-    /// The money sheet: one row per driver and car. On the setup screen it takes track
-    /// fees and class entries; in the running event it takes buybacks. Each class's pot
-    /// (entries plus buybacks) is shown at the bottom, with track fees kept separate.
-    /// All rules live in <see cref="MoneySheetService"/>.
+    /// The money sheet. Prices at the top (track fee, and an entry and buyback price per
+    /// class), tick boxes per competitor in the middle, totals at the bottom: track fees
+    /// on their own, and each class's pot (entries plus buybacks). All rules live in
+    /// <see cref="MoneySheetService"/>.
     /// </summary>
     public partial class MoneySheetView : UserControl
     {
@@ -48,23 +48,73 @@ namespace RCDragManagerProd.WPF.Views
             bool entries = mode == MoneySheetMode.Entries;
             LblTitle.Text = entries ? "Entry money" : "Buybacks and pots";
             LblHint.Text = entries
-                ? "Taken before racing starts. Tick the days of track fee and the classes each driver has paid for."
+                ? "Set the prices, then tick what each competitor has paid before racing starts."
                 : "Entries were taken at setup. Tick each buyback as it is paid; it goes into that class's pot.";
             AddBar.Visibility = entries ? Visibility.Visible : Visibility.Collapsed;
-            TxtTrackFee.IsReadOnly = !entries;
-            TxtEntryFee.IsReadOnly = !entries;
-
-            TxtTrackFee.Text = Money(_service.Sheet.TrackFee);
-            TxtEntryFee.Text = Money(_service.Sheet.EntryFee);
-            TxtBuybackFee.Text = Money(_service.Sheet.BuybackFee);
 
             // Opens on everyone entered in the classes: at setup to take entries, and
             // in the event so an older event without a sheet can still take buybacks.
             _service.AddEveryoneFromClasses();
 
+            BuildPrices();
             BuildColumns();
             DgMoney.ItemsSource = _rows;
             Reload();
+        }
+
+        // ── Prices ────────────────────────────────────────────────────────────
+
+        private void BuildPrices()
+        {
+            bool entries = _mode == MoneySheetMode.Entries;
+            var sheet = _service.Sheet;
+
+            PricePanel.Children.Add(PriceBox("Track fee", sheet.TrackFee, readOnly: !entries,
+                v => sheet.TrackFee = v));
+
+            foreach (var cls in _service.ClassNames)
+            {
+                var price = _service.PriceFor(cls);
+                PricePanel.Children.Add(PriceBox($"{cls} entry", price.Entry, readOnly: !entries, v => price.Entry = v));
+                // Buyback price stays editable in the event: it may only be agreed on the day.
+                PricePanel.Children.Add(PriceBox($"{cls} buyback", price.Buyback, readOnly: false, v => price.Buyback = v));
+            }
+        }
+
+        private FrameworkElement PriceBox(string label, decimal value, bool readOnly, Action<decimal> apply)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 22, 8) };
+            panel.Children.Add(new TextBlock
+            {
+                Text = label + " $",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 6, 0),
+                FontSize = (double)FindResource("FontSize.Sm"),
+                Foreground = (System.Windows.Media.Brush)FindResource("Brush.TextMuted")
+            });
+            var box = new TextBox
+            {
+                Text = Money(value),
+                Width = 70,
+                IsReadOnly = readOnly,
+                Style = (Style)FindResource("Style.TextBox.Compact")
+            };
+            box.LostKeyboardFocus += (_, __) =>
+            {
+                var text = (box.Text ?? "").Trim().TrimStart('$');
+                if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var v) && v >= 0)
+                {
+                    apply(v);
+                    box.Text = Money(v);
+                    OnRowChanged();
+                }
+                else
+                {
+                    LblMessage.Text = $"{label}: enter a dollar amount.";
+                }
+            };
+            panel.Children.Add(box);
+            return panel;
         }
 
         // ── Columns ───────────────────────────────────────────────────────────
@@ -75,13 +125,7 @@ namespace RCDragManagerProd.WPF.Views
 
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Driver", Binding = new Binding(nameof(MoneyRow.DriverName)), IsReadOnly = true, Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
             DgMoney.Columns.Add(new DataGridTextColumn { Header = "Car", Binding = new Binding(nameof(MoneyRow.CarName)), IsReadOnly = true, Width = 120 });
-            DgMoney.Columns.Add(new DataGridTextColumn
-            {
-                Header = "Track days paid",
-                Binding = new Binding(nameof(MoneyRow.TrackDays)) { UpdateSourceTrigger = UpdateSourceTrigger.LostFocus },
-                IsReadOnly = !entries,
-                Width = 110
-            });
+            DgMoney.Columns.Add(CheckColumn("Track fee", nameof(MoneyRow.TrackFee), readOnly: !entries));
 
             var classes = _service.ClassNames;
             for (int i = 0; i < classes.Count; i++)
@@ -113,7 +157,7 @@ namespace RCDragManagerProd.WPF.Views
             Width = DataGridLength.Auto
         };
 
-        // ── Rows ──────────────────────────────────────────────────────────────
+        // ── Rows and totals ───────────────────────────────────────────────────
 
         private void Reload()
         {
@@ -135,10 +179,30 @@ namespace RCDragManagerProd.WPF.Views
         private void UpdateTotals()
         {
             foreach (var r in _rows) r.RefreshTotal();
-            var pots = _service.ClassNames.Select(c => $"{c} pot {Dollars(_service.PotFor(c))}");
-            LblPots.Text = string.Join("   ·   ", pots);
-            LblTotal.Text = $"Track fees {Dollars(_service.TrackFees)} (not in the pots)   ·   Total taken {Dollars(_service.Total)}";
+
+            TotalsPanel.Children.Clear();
+            TotalsPanel.Children.Add(TotalLine(
+                $"Track fees: {_service.TrackFeesPaidCount} paid = {Dollars(_service.TrackFees)}  (not in any pot)"));
+            foreach (var cls in _service.ClassNames)
+            {
+                var price = _service.PriceFor(cls);
+                int entries = _service.EntriesPaidCount(cls), buybacks = _service.BuybacksPaidCount(cls);
+                TotalsPanel.Children.Add(TotalLine(
+                    $"{cls} pot: {entries} {(entries == 1 ? "entry" : "entries")} {Dollars(entries * price.Entry)}" +
+                    $" + {buybacks} {(buybacks == 1 ? "buyback" : "buybacks")} {Dollars(buybacks * price.Buyback)}" +
+                    $" = {Dollars(_service.PotFor(cls))}", strong: true));
+            }
+            TotalsPanel.Children.Add(TotalLine($"Total taken: {Dollars(_service.Total)}"));
         }
+
+        private TextBlock TotalLine(string text, bool strong = false) => new TextBlock
+        {
+            Text = text,
+            FontSize = (double)FindResource(strong ? "FontSize.Md" : "FontSize.Sm"),
+            FontWeight = strong ? FontWeights.Medium : FontWeights.Normal,
+            Foreground = (System.Windows.Media.Brush)FindResource(strong ? "Brush.TextPrimary" : "Brush.TextMuted"),
+            Margin = new Thickness(0, 1, 0, 1)
+        };
 
         private void Save()
         {
@@ -194,27 +258,6 @@ namespace RCDragManagerProd.WPF.Views
             Save();
         }
 
-        private void Fee_LostFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            var sheet = _service.Sheet;
-            sheet.TrackFee = ParseFee(TxtTrackFee, sheet.TrackFee);
-            sheet.EntryFee = ParseFee(TxtEntryFee, sheet.EntryFee);
-            sheet.BuybackFee = ParseFee(TxtBuybackFee, sheet.BuybackFee);
-            OnRowChanged();
-        }
-
-        private static decimal ParseFee(TextBox box, decimal current)
-        {
-            var text = (box.Text ?? "").Trim().TrimStart('$');
-            if (decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var v) && v >= 0)
-            {
-                box.Text = Money(v);
-                return v;
-            }
-            box.Text = Money(current);
-            return current;
-        }
-
         private static string Money(decimal v) => v.ToString("0.##", CultureInfo.InvariantCulture);
         private static string Dollars(decimal v) => "$" + Money(v);
 
@@ -240,14 +283,13 @@ namespace RCDragManagerProd.WPF.Views
             public string DriverName => Source.DriverName;
             public string CarName => Source.CarName;
 
-            public int TrackDays
+            public bool TrackFee
             {
-                get => Source.TrackDaysPaid;
+                get => MoneySheetService.TrackFeePaid(Source);
                 set
                 {
-                    var v = Math.Max(0, value);
-                    if (v == Source.TrackDaysPaid) return;
-                    Source.TrackDaysPaid = v;
+                    if (value == TrackFee) return;
+                    MoneySheetService.SetTrackFeePaid(Source, value);
                     OnPropertyChanged();
                     Changed();
                 }

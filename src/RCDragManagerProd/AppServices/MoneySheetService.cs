@@ -102,21 +102,51 @@ namespace RCDragManagerProd.AppServices
         public static bool IsPaid(List<string> paid, string className) =>
             paid != null && paid.Any(c => string.Equals(c, className, StringComparison.OrdinalIgnoreCase));
 
+        // ── Prices ────────────────────────────────────────────────────────────
+
+        /// <summary>The class's own prices, created from the sheet defaults the first
+        /// time the class is priced.</summary>
+        public MoneySheetClassPrice PriceFor(string className)
+        {
+            var price = Sheet.ClassPrices.FirstOrDefault(p =>
+                string.Equals(p.ClassName, className, StringComparison.OrdinalIgnoreCase));
+            if (price == null)
+            {
+                price = new MoneySheetClassPrice { ClassName = className, Entry = Sheet.EntryFee, Buyback = Sheet.BuybackFee };
+                Sheet.ClassPrices.Add(price);
+            }
+            return price;
+        }
+
+        public static bool TrackFeePaid(MoneySheetEntry e) => e.TrackDaysPaid > 0;
+
+        public static void SetTrackFeePaid(MoneySheetEntry e, bool paid) => e.TrackDaysPaid = paid ? 1 : 0;
+
+        // ── Totals ────────────────────────────────────────────────────────────
+
         /// <summary>Everything this row has paid, track fee included.</summary>
         public decimal TotalFor(MoneySheetEntry e) =>
             e.TrackDaysPaid * Sheet.TrackFee +
-            (e.EntriesPaid?.Count ?? 0) * Sheet.EntryFee +
-            (e.BuybacksPaid?.Count ?? 0) * Sheet.BuybackFee;
+            (e.EntriesPaid ?? new List<string>()).Sum(c => PriceFor(c).Entry) +
+            (e.BuybacksPaid ?? new List<string>()).Sum(c => PriceFor(c).Buyback);
 
         public decimal Total => Sheet.Entries.Sum(TotalFor);
 
         /// <summary>Track fees taken. Kept separate: never part of a pot.</summary>
         public decimal TrackFees => Sheet.Entries.Sum(e => e.TrackDaysPaid) * Sheet.TrackFee;
 
-        /// <summary>A class's pot: its paid entries plus its paid buybacks.</summary>
-        public decimal PotFor(string className) =>
-            Sheet.Entries.Count(e => IsPaid(e.EntriesPaid, className)) * Sheet.EntryFee +
-            Sheet.Entries.Count(e => IsPaid(e.BuybacksPaid, className)) * Sheet.BuybackFee;
+        public int TrackFeesPaidCount => Sheet.Entries.Count(TrackFeePaid);
+
+        public int EntriesPaidCount(string className) => Sheet.Entries.Count(e => IsPaid(e.EntriesPaid, className));
+
+        public int BuybacksPaidCount(string className) => Sheet.Entries.Count(e => IsPaid(e.BuybacksPaid, className));
+
+        /// <summary>A class's pot: its paid entries plus its paid buybacks, at its own prices.</summary>
+        public decimal PotFor(string className)
+        {
+            var price = PriceFor(className);
+            return EntriesPaidCount(className) * price.Entry + BuybacksPaidCount(className) * price.Buyback;
+        }
 
         /// <summary>Saves the sheet. Returns an operator-facing error, or null.</summary>
         public string Save() => _save();

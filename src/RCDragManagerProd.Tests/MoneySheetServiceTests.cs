@@ -58,6 +58,37 @@ public class MoneySheetServiceTests
     }
 
     [TestMethod]
+    public void EachClass_HasItsOwnPrices()
+    {
+        var evt = Event();
+        evt.ClassSessions.Add(new RaceSession
+        {
+            EventName = "QA Money", EventDate = new DateTime(2026, 10, 5),
+            RaceType = RaceTypes.RoundRobin, ClassType = "Outlaw",
+            DriverEntries = new List<RaceSessionDriverEntry>
+            {
+                new RaceSessionDriverEntry { DriverID = 4, DriverName = "Chris", CarName = "Outlaw" }
+            }
+        });
+        var svc = new MoneySheetService(evt, null);
+        svc.AddEveryoneFromClasses();
+        svc.PriceFor("DYO").Entry = 100m;
+        svc.PriceFor("Outlaw").Entry = 60m;
+        svc.PriceFor("Outlaw").Buyback = 30m;
+
+        var chris = svc.Sheet.Entries.Single(e => e.CarName == "Outlaw");
+        MoneySheetService.SetTrackFeePaid(chris, true);
+        MoneySheetService.SetPaid(chris.EntriesPaid, "DYO", true);
+        MoneySheetService.SetPaid(chris.EntriesPaid, "Outlaw", true);
+        MoneySheetService.SetPaid(chris.BuybacksPaid, "Outlaw", true);
+
+        Assert.AreEqual(100m, svc.PotFor("DYO"));
+        Assert.AreEqual(60m + 30m, svc.PotFor("Outlaw"));
+        Assert.AreEqual(10m + 100m + 60m + 30m, svc.TotalFor(chris));
+        Assert.AreEqual(1, svc.TrackFeesPaidCount);
+    }
+
+    [TestMethod]
     public void SetupSheet_FillsFromConfiguredClasses_BeforeTheEventExists()
     {
         var sheet = new EventMoneySheet();

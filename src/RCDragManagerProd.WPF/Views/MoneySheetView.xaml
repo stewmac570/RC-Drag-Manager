@@ -12,34 +12,24 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header: fees -->
+        <!-- Header: title and prices -->
         <Border Grid.Row="0" Padding="24,14"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
             <StackPanel>
                 <TextBlock x:Name="LblTitle" Text="Money"
                            FontSize="{StaticResource FontSize.Xl}" FontWeight="Medium"
                            Foreground="{StaticResource Brush.TextPrimary}"/>
-                <TextBlock x:Name="LblHint" Text="Tick what each driver has paid."
-                           FontSize="{StaticResource FontSize.Sm}"
+                <TextBlock x:Name="LblHint"
+                           FontSize="{StaticResource FontSize.Sm}" TextWrapping="Wrap"
                            Foreground="{StaticResource Brush.TextMuted}" Margin="0,3,0,10"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Track fee per day $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,6,0"/>
-                    <TextBox x:Name="TxtTrackFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                    <TextBlock Text="Entry fee per class $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="20,0,6,0"/>
-                    <TextBox x:Name="TxtEntryFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                    <TextBlock Text="Buyback fee $" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}" Margin="20,0,6,0"/>
-                    <TextBox x:Name="TxtBuybackFee" Style="{StaticResource Style.TextBox.Compact}" Width="70"
-                             LostKeyboardFocus="Fee_LostFocus"/>
-                </StackPanel>
+                <TextBlock Text="Prices"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,6"/>
+                <WrapPanel x:Name="PricePanel" Orientation="Horizontal"/>
             </StackPanel>
         </Border>
 
-        <!-- Add drivers -->
+        <!-- Add drivers (setup only) -->
         <Border x:Name="AddBar" Grid.Row="1" Padding="24,10"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,0,0,1">
             <DockPanel LastChildFill="False">
@@ -58,20 +48,17 @@
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" HeadersVisibility="Column"/>
 
-        <!-- Footer -->
+        <!-- Footer: totals -->
         <Border Grid.Row="3" Padding="24,12"
                 Background="{StaticResource Brush.Chrome}"
                 BorderBrush="{StaticResource Brush.BorderSubtle}" BorderThickness="0,1,0,0">
             <StackPanel>
-                <TextBlock x:Name="LblPots" TextWrapping="Wrap"
-                           FontSize="{StaticResource FontSize.Lg}" FontWeight="Medium"
-                           Foreground="{StaticResource Brush.TextPrimary}"/>
-                <DockPanel Margin="0,4,0,0">
-                    <TextBlock x:Name="LblMessage" DockPanel.Dock="Left" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"/>
-                    <TextBlock x:Name="LblTotal" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
-                               FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"/>
-                </DockPanel>
+                <TextBlock Text="Totals"
+                           FontSize="{StaticResource FontSize.Xs}" FontWeight="Medium"
+                           Foreground="{StaticResource Brush.TextHint}" Margin="0,0,0,4"/>
+                <StackPanel x:Name="TotalsPanel"/>
+                <TextBlock x:Name="LblMessage" Margin="0,6,0,0"
+                           FontSize="{StaticResource FontSize.Sm}" Foreground="{StaticResource Brush.TextMuted}"/>
             </StackPanel>
         </Border>
     </Grid>
