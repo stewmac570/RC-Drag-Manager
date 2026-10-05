@@ -120,6 +120,7 @@
     <Compile Include="AppServices\RosterAddResult.cs" />
     <Compile Include="AppServices\RaceRosterService.cs" />
     <Compile Include="AppServices\SessionRosterService.cs" />
+    <Compile Include="AppServices\TrackTestingService.cs" />
     <Compile Include="AppServices\RaceConsoleService.cs" />
     <Compile Include="AppServices\RaceConsoleViewModel.cs" />
     <Compile Include="AppServices\RaceConsoleViewModelBuilder.cs" />
